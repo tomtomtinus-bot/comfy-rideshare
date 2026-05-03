@@ -173,6 +173,13 @@ const ClientDashboard = () => {
                       <span className="text-brass-gold mx-2">→</span>
                       {r.dropoff_address} ({r.dropoff_city})
                     </p>
+                    {(r.cargo_length_m || r.cargo_weight_t) && (
+                      <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
+                        Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
+                        {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
+                        {r.escort_type_required ? ` · ${r.escort_type_required}` : ""}
+                      </p>
+                    )}
                     {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
                   </div>
                   <div className="col-span-6 md:col-span-2">
