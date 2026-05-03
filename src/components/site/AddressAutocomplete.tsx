@@ -40,23 +40,22 @@ interface OverpassElement {
   tags?: Record<string, string>;
 }
 
-// Overpass: alle grensovergangen (barrier=border_control of crossing) in NL/BE/DE/LU/FR
+// Overpass: alle grensovergangen in NL en BE
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 const OVERPASS_QUERY = `
-[out:json][timeout:25];
+[out:json][timeout:60];
 (
   area["ISO3166-1"="NL"][admin_level=2];
   area["ISO3166-1"="BE"][admin_level=2];
-  area["ISO3166-1"="DE"][admin_level=2];
-  area["ISO3166-1"="LU"][admin_level=2];
-  area["ISO3166-1"="FR"][admin_level=2];
-)->.searchArea;
+)->.a;
 (
-  node["barrier"="border_control"](area.searchArea);
-  way["barrier"="border_control"](area.searchArea);
-  node["highway"="border_control"](area.searchArea);
+  node["barrier"="border_control"](area.a);
+  way["barrier"="border_control"](area.a);
+  node["highway"="border_control"](area.a);
+  way["highway"="border_control"](area.a);
+  node["amenity"="border_control"](area.a);
 );
-out center tags 500;
+out center tags;
 `;
 
 let bordersCache: AddressResult[] | null = null;
