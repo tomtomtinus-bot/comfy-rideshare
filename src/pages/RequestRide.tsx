@@ -8,22 +8,19 @@ import { distanceKm, travelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 
 const schema = z.object({
-  pickup_postcode: z.string().trim().min(4).max(12),
   pickup_address: z.string().trim().min(2).max(200),
-  dropoff_postcode: z.string().trim().min(4).max(12),
   dropoff_address: z.string().trim().min(2).max(200),
   scheduled_at: z.string().min(1),
-  num_escorts: z.coerce.number().int().min(1).max(5),
+  num_escorts: z.coerce.number().int().min(1).max(15),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.coerce.number().min(0).max(120),
   cargo_width_m: z.coerce.number().min(0).max(15),
   cargo_height_m: z.coerce.number().min(0).max(8),
   cargo_weight_t: z.coerce.number().min(0).max(500),
   permit_number: z.string().trim().min(3).max(60),
-  time_window_start: z.string().min(1),
-  time_window_end: z.string().min(1),
 });
 
 interface MatchedEscort {
