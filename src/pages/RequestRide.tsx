@@ -230,7 +230,7 @@ const RequestRideInner = () => {
                 <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <Input label="Vergunningnummer" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+                <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
                   <input
