@@ -222,6 +222,7 @@ const ClientDashboard = () => {
                       <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
                         Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
                         {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
+                        {r.client_reference ? ` · ref ${r.client_reference}` : ""}
                         {r.escort_type_required ? ` · ${r.escort_type_required}` : ""}
                       </p>
                     )}
