@@ -9,6 +9,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 
+const ESCORT_TYPES = ["vooroprijden", "achteroprijden", "voor+achterop", "kruispuntbegeleiding"] as const;
+
 const schema = z.object({
   pickup_address: z.string().trim().min(3).max(200),
   pickup_city: z.string().min(1),
@@ -17,6 +19,14 @@ const schema = z.object({
   scheduled_at: z.string().min(1),
   num_escorts: z.coerce.number().int().min(1).max(5),
   notes: z.string().trim().max(500).optional(),
+  cargo_length_m: z.coerce.number().min(0).max(120),
+  cargo_width_m: z.coerce.number().min(0).max(15),
+  cargo_height_m: z.coerce.number().min(0).max(8),
+  cargo_weight_t: z.coerce.number().min(0).max(500),
+  permit_number: z.string().trim().min(3).max(60),
+  time_window_start: z.string().min(1),
+  time_window_end: z.string().min(1),
+  escort_type_required: z.enum(ESCORT_TYPES),
 });
 
 interface MatchedEscort {
