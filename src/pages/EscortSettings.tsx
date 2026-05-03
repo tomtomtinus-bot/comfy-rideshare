@@ -341,6 +341,49 @@ const Inner = () => {
               </section>
 
               <section>
+                <Label>Toeslagen</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
+                  Bijv. <em>België toeslag</em>, <em>Brandstoftoeslag</em>, <em>Nachttoeslag</em>. Worden getoond op je profiel.
+                </p>
+                <div className="space-y-2">
+                  {surcharges.map((s, i) => (
+                    <div key={i} className="flex gap-2">
+                      <input
+                        value={s.label}
+                        onChange={(e) =>
+                          setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                        }
+                        placeholder="Omschrijving (bv. België toeslag)"
+                        className="flex-1 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                      />
+                      <input
+                        value={s.amount}
+                        onChange={(e) =>
+                          setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)))
+                        }
+                        placeholder="Bedrag (€ 0,15/km)"
+                        className="w-44 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSurcharges((arr) => arr.filter((_, j) => j !== i))}
+                        className="px-3 py-2 text-[10px] uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setSurcharges((arr) => [...arr, { label: "", amount: "" }])}
+                    className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
+                  >
+                    + Toeslag toevoegen
+                  </button>
+                </div>
+              </section>
+
+              <section>
                 <Label>Agenda · 4 weken vooruit</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
                   Klik op een dag om je <strong>niet-beschikbaar</strong> te markeren. Geplande ritten zijn vast.
