@@ -146,6 +146,7 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m) : null,
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
+        client_reference: form.client_reference || null,
         time_window_start: new Date(form.scheduled_at).toISOString(),
         time_window_end: null,
       })
