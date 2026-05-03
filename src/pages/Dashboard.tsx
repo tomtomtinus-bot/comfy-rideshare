@@ -50,6 +50,10 @@ const StatusBadge = ({ status }: { status: string }) => {
     in_progress: "Onderweg",
     completed: "Voltooid",
     cancelled: "Geannuleerd",
+    invited: "Uitgenodigd",
+    accepted: "Geaccepteerd",
+    declined: "Geweigerd",
+    expired: "Verlopen",
   };
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-gold">
@@ -57,6 +61,11 @@ const StatusBadge = ({ status }: { status: string }) => {
       {map[status] ?? status}
     </span>
   );
+};
+
+const minutesLeft = (deadline: string) => {
+  const ms = new Date(deadline).getTime() - Date.now();
+  return Math.max(0, Math.floor(ms / 60000));
 };
 
 const ClientDashboard = () => {
