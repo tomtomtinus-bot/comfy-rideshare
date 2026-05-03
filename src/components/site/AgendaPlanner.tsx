@@ -10,14 +10,14 @@ interface Ride {
 }
 
 const DAYS_AHEAD = 7;
-const SLOT_START_H = 6; // 06:00
-const SLOT_END_H = 22; // 22:00 (exclusive)
+const SLOT_START_H = 0; // 00:00 — volledige 24-uurs agenda
+const SLOT_END_H = 24; // 24:00
 const SLOTS_PER_DAY = (SLOT_END_H - SLOT_START_H) * 2;
 
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const hhmm = (mins: number) =>
-  `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+  `${String(Math.floor(mins / 60) % 24).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
 
 const slotIndex = (d: Date) => {
   const h = d.getHours();
@@ -30,13 +30,19 @@ interface Props {
   rides: Ride[];
 }
 
+interface Anchor {
+  date: string;
+  idx: number;
+  mode: "add" | "remove";
+}
+
 export const AgendaPlanner = ({ escortId, rides }: Props) => {
-  // key: `${dateKey}|${slotIdx}` -> blocked
   const [blocked, setBlocked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [dragMode, setDragMode] = useState<"add" | "remove" | null>(null);
+  const [anchor, setAnchor] = useState<Anchor | null>(null);
+  const [hoverIdx, setHoverIdx] = useState<{ date: string; idx: number } | null>(null);
 
   const days = useMemo(() => {
     const today = new Date();
@@ -48,13 +54,11 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
     });
   }, []);
 
-  // Map ride slots: dateKey|slotIdx -> ride
   const rideSlots = useMemo(() => {
     const m = new Map<string, Ride>();
     rides.forEach((r) => {
       const start = new Date(r.scheduled_at);
       const dKey = ymd(start);
-      // Block ~3h (6 slots) for the ride visualization
       const startIdx = Math.max(0, slotIndex(start));
       for (let i = 0; i < 6; i++) {
         const idx = startIdx + i;
@@ -75,9 +79,9 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         .gte("date", startDate)
         .lte("date", endDate);
       const set = new Set<string>();
-      (data ?? []).forEach((r: any) => {
+      (data ?? []).forEach((r: { date: string | null; start_time: string }) => {
         if (!r.date) return;
-        const [h, m] = (r.start_time as string).split(":").map(Number);
+        const [h, m] = r.start_time.split(":").map(Number);
         const idx = (h - SLOT_START_H) * 2 + Math.floor(m / 30);
         if (idx >= 0 && idx < SLOTS_PER_DAY) set.add(`${r.date}|${idx}`);
       });
@@ -86,32 +90,58 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
     })();
   }, [escortId, days]);
 
-  const toggleSlot = (key: string, mode: "add" | "remove") => {
-    if (rideSlots.has(key)) return;
+  const applyRange = (date: string, fromIdx: number, toIdx: number, mode: "add" | "remove") => {
+    const lo = Math.min(fromIdx, toIdx);
+    const hi = Math.max(fromIdx, toIdx);
     setBlocked((s) => {
       const next = new Set(s);
-      if (mode === "add") next.add(key);
-      else next.delete(key);
+      for (let i = lo; i <= hi; i++) {
+        const key = `${date}|${i}`;
+        if (rideSlots.has(key)) continue;
+        if (mode === "add") next.add(key);
+        else next.delete(key);
+      }
       return next;
     });
     setDirty(true);
   };
 
-  const onMouseDown = (key: string) => {
+  const handleSlotClick = (date: string, idx: number) => {
+    const key = `${date}|${idx}`;
     if (rideSlots.has(key)) return;
-    const mode = blocked.has(key) ? "remove" : "add";
-    setDragMode(mode);
-    toggleSlot(key, mode);
-  };
-  const onMouseEnter = (key: string) => {
-    if (!dragMode) return;
-    toggleSlot(key, dragMode);
+
+    if (!anchor) {
+      // Eerste klik — markeer alvast dit slot en zet anker
+      const mode: "add" | "remove" = blocked.has(key) ? "remove" : "add";
+      applyRange(date, idx, idx, mode);
+      setAnchor({ date, idx, mode });
+      return;
+    }
+
+    if (anchor.date !== date) {
+      // Andere dag — start nieuw anker
+      const mode: "add" | "remove" = blocked.has(key) ? "remove" : "add";
+      applyRange(date, idx, idx, mode);
+      setAnchor({ date, idx, mode });
+      return;
+    }
+
+    // Tweede klik op zelfde dag — vul bereik door
+    applyRange(date, anchor.idx, idx, anchor.mode);
+    setAnchor(null);
+    setHoverIdx(null);
   };
 
+  // Esc om anker te annuleren
   useEffect(() => {
-    const up = () => setDragMode(null);
-    window.addEventListener("mouseup", up);
-    return () => window.removeEventListener("mouseup", up);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setAnchor(null);
+        setHoverIdx(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const save = async () => {
@@ -136,10 +166,9 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
           date,
           weekday: new Date(date).getDay(),
           start_time: hhmm(startMin),
-          end_time: hhmm(endMin),
+          end_time: hhmm(endMin === 1440 ? 1440 - 1 : endMin),
         };
       });
-      // Chunk to avoid huge payloads
       for (let i = 0; i < rows.length; i += 200) {
         const chunk = rows.slice(i, i + 200);
         const { error } = await supabase.from("escort_availability").insert(chunk);
@@ -156,21 +185,20 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
 
   if (loading) return <p className="text-sm text-brass-deep/50">Agenda laden…</p>;
 
-  // Hour labels (every 2 slots)
-  const hourCols: { label: string; col: number }[] = [];
-  for (let h = SLOT_START_H; h < SLOT_END_H; h++) {
-    hourCols.push({ label: `${String(h).padStart(2, "0")}`, col: (h - SLOT_START_H) * 2 });
-  }
-
   return (
     <div className="bg-card shadow-etched p-6">
       <div className="flex items-end justify-between flex-wrap gap-4 mb-4">
         <div>
           <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">Agenda</p>
-          <h2 className="font-display text-2xl text-brass-deep italic">7 dagen · per half uur</h2>
+          <h2 className="font-display text-2xl text-brass-deep italic">7 dagen · 24u · per half uur</h2>
           <p className="text-[11px] text-brass-deep/60 mt-1">
-            Klik of sleep om je <strong>niet-beschikbaar</strong> te markeren. Geplande ritten zijn vast.
+            Klik het <strong>eerste half uur</strong> en daarna het <strong>laatste half uur</strong> — alles ertussen wordt automatisch doorgetrokken. Druk op <kbd className="px-1 bg-parchment border border-brass-deep/20">Esc</kbd> om te annuleren.
           </p>
+          {anchor && (
+            <p className="text-[11px] text-brass-gold mt-1 font-semibold">
+              ↪ Begin gezet op {hhmm(SLOT_START_H * 60 + anchor.idx * 30)} ({new Date(anchor.date).toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" })}). Klik einduur…
+            </p>
+          )}
         </div>
         <button
           onClick={save}
@@ -182,7 +210,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
       </div>
 
       <div className="overflow-x-auto select-none">
-        <div className="min-w-[720px]">
+        <div className="min-w-[1200px]">
           {/* Hour header */}
           <div
             className="grid text-[9px] text-brass-deep/50 mb-1 tabular-nums"
@@ -191,7 +219,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
             <div />
             {Array.from({ length: SLOTS_PER_DAY }).map((_, i) => (
               <div key={i} className="text-center">
-                {i % 2 === 0 ? hourCols.find((h) => h.col === i)?.label : ""}
+                {i % 2 === 0 ? String(SLOT_START_H + i / 2).padStart(2, "0") : ""}
               </div>
             ))}
           </div>
@@ -212,20 +240,33 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                   const ride = rideSlots.get(key);
                   const isBlocked = blocked.has(key);
                   const hourBoundary = i % 2 === 0;
+                  const isAnchor = anchor && anchor.date === dKey && anchor.idx === i;
+                  const inPreview =
+                    anchor &&
+                    anchor.date === dKey &&
+                    hoverIdx &&
+                    hoverIdx.date === dKey &&
+                    i >= Math.min(anchor.idx, hoverIdx.idx) &&
+                    i <= Math.max(anchor.idx, hoverIdx.idx);
                   return (
                     <button
                       key={key}
                       type="button"
-                      onMouseDown={() => onMouseDown(key)}
-                      onMouseEnter={() => onMouseEnter(key)}
-                      onClick={(e) => e.preventDefault()}
+                      onClick={() => handleSlotClick(dKey, i)}
+                      onMouseEnter={() => anchor && setHoverIdx({ date: dKey, idx: i })}
                       className={`h-6 transition-colors ${
                         ride
                           ? "bg-brass-gold/40 cursor-default"
                           : isBlocked
                           ? "bg-brass-deep hover:bg-brass-deep/90"
+                          : inPreview
+                          ? anchor?.mode === "add"
+                            ? "bg-brass-deep/40"
+                            : "bg-brass-gold/30"
                           : "bg-parchment hover:bg-brass-gold/20"
-                      } ${hourBoundary ? "border-l border-brass-deep/15" : ""}`}
+                      } ${hourBoundary ? "border-l border-brass-deep/15" : ""} ${
+                        isAnchor ? "ring-2 ring-brass-gold ring-inset z-10" : ""
+                      }`}
                       title={
                         ride
                           ? `Rit ${ride.pickup_city} → ${ride.dropoff_city}`
