@@ -32,6 +32,10 @@ interface AssignmentRow {
   actual_cost: number | null;
   hours_submitted_at: string | null;
   hours_notes: string | null;
+  status: "invited" | "accepted" | "declined" | "expired" | "cancelled";
+  invited_at: string;
+  responds_by: string;
+  responded_at: string | null;
 }
 
 const fmtDate = (d: string) =>
