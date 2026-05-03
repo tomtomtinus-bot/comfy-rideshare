@@ -182,7 +182,7 @@ const ClientDashboard = () => {
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
-            onClick={exportXlsx}
+            onClick={() => setExportOpen((v) => !v)}
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
           >
