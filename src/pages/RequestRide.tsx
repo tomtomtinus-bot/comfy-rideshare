@@ -347,7 +347,7 @@ const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boo
 );
 
 const Input = ({
-  label, value, onChange, type = "text", placeholder, step,
+  label, value, onChange, type = "text", placeholder, step, inputMode,
 }: {
   label: string;
   value: string;
@@ -355,11 +355,12 @@ const Input = ({
   type?: string;
   placeholder?: string;
   step?: string;
+  inputMode?: "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url" | "none";
 }) => (
   <div>
     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
     <input
-      type={type} value={value} placeholder={placeholder} step={step}
+      type={type} value={value} placeholder={placeholder} step={step} inputMode={inputMode}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
