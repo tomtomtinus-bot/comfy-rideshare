@@ -180,24 +180,37 @@ const ClientDashboard = () => {
                       Werkelijk
                     </p>
                     <p className="font-semibold tabular-nums text-brass-gold">
-                      {allSubmitted ? `€${totalActual.toFixed(2)}` : "—"}
+                      {allSubmitted ? `€${(totalActual + Number(r.app_fee ?? 0)).toFixed(2)}` : "—"}
                     </p>
+                    <p className="text-[10px] text-brass-deep/50 mt-1">incl. €{Number(r.app_fee ?? 0).toFixed(2)} fee</p>
                   </div>
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {ass.map((a) => (
-                    <div key={a.id} className="flex items-center justify-between text-sm">
-                      <span className="font-medium">
-                        Begeleider <span className="text-brass-deep">#{a.anon}</span>
-                      </span>
-                      <span className="text-brass-deep/60 tabular-nums">
-                        {a.actual_hours
-                          ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
-                          : `~${a.estimated_hours}u (gepland)`}
-                      </span>
-                    </div>
-                  ))}
+                  {ass.map((a) => {
+                    const statusLabel: Record<string, string> = {
+                      invited: "uitgenodigd",
+                      accepted: "geaccepteerd",
+                      declined: "geweigerd",
+                      expired: "verlopen",
+                      cancelled: "geannuleerd",
+                    };
+                    return (
+                      <div key={a.id} className="flex items-center justify-between text-sm">
+                        <span className="font-medium">
+                          Begeleider <span className="text-brass-deep">#{a.anon}</span>
+                          <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                            {statusLabel[a.status] ?? a.status}
+                          </span>
+                        </span>
+                        <span className="text-brass-deep/60 tabular-nums">
+                          {a.actual_hours
+                            ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
+                            : `~${a.estimated_hours}u (gepland)`}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </li>
             );
