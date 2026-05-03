@@ -438,6 +438,12 @@ const EscortDashboard = () => {
                     <p className="text-sm text-brass-deep/55 mt-2">
                       Reistijd vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
                     </p>
+                    {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
+                      <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
+                        Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
+                        {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
+                      </p>
+                    )}
                   </div>
                   <div className="col-span-6 md:col-span-2">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Schatting</p>
