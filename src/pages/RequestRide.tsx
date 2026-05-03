@@ -20,7 +20,7 @@ const schema = z.object({
   cargo_width_m: z.coerce.number().min(0).max(15),
   cargo_height_m: z.coerce.number().min(0).max(8),
   cargo_weight_t: z.coerce.number().min(0).max(500),
-  permit_number: z.string().trim().min(3).max(60),
+  permit_number: z.string().trim().max(60).optional(),
 });
 
 interface MatchedEscort {
