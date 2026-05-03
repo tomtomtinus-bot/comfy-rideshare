@@ -16,10 +16,10 @@ const schema = z.object({
   scheduled_at: z.string().min(1),
   num_escorts: z.coerce.number().int().min(1).max(15),
   notes: z.string().trim().max(500).optional(),
-  cargo_length_m: z.coerce.number().min(0).max(120).optional().or(z.literal("").transform(() => undefined)),
-  cargo_width_m: z.coerce.number().min(0).max(15).optional().or(z.literal("").transform(() => undefined)),
-  cargo_height_m: z.coerce.number().min(0).max(8).optional().or(z.literal("").transform(() => undefined)),
-  cargo_weight_t: z.coerce.number().min(0).max(500).optional().or(z.literal("").transform(() => undefined)),
+  cargo_length_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(120).optional()),
+  cargo_width_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(15).optional()),
+  cargo_height_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(8).optional()),
+  cargo_weight_t: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(500).optional()),
   permit_number: z.string().trim().max(60).optional(),
 });
 
