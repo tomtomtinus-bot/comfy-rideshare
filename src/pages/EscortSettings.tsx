@@ -21,6 +21,8 @@ const WEEKDAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"] as const;
 
 const schema = z.object({
   baseCity: z.string().min(1),
+  baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
+  basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
