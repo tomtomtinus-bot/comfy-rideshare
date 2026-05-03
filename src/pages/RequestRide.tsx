@@ -66,6 +66,7 @@ const RequestRideInner = () => {
     cargo_height_m: "",
     cargo_weight_t: "",
     permit_number: "",
+    client_reference: "",
   });
 
   const onPickPickup = (r: AddressResult) => {
