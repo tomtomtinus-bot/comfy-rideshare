@@ -10,6 +10,7 @@ import { RequireAuth } from "@/components/site/RequireAuth";
 
 interface RideRow {
   id: string;
+  client_id: string;
   pickup_address: string;
   pickup_city: string;
   dropoff_address: string;
@@ -18,6 +19,7 @@ interface RideRow {
   num_escorts: number;
   status: string;
   notes: string | null;
+  app_fee: number;
 }
 
 interface AssignmentRow {
