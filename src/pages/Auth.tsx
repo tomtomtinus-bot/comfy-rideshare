@@ -8,9 +8,6 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CITIES, geocode } from "@/lib/geo";
 
-const CATEGORIES = ["cat-1", "cat-2", "cat-3"] as const;
-const ESCORT_TYPES = ["vooroprijden", "achteroprijden", "voor+achterop", "kruispuntbegeleiding"] as const;
-
 const signupSchema = z.object({
   email: z.string().trim().email("Ongeldig e-mailadres").max(255),
   password: z.string().min(8, "Minimaal 8 tekens").max(72),
@@ -18,12 +15,6 @@ const signupSchema = z.object({
   phone: z.string().trim().min(6).max(30),
   role: z.enum(["opdrachtgever", "begeleider"]),
   baseCity: z.string().optional(),
-  hourlyRate: z.coerce.number().min(15).max(200).optional(),
-  vehicleType: z.string().trim().max(120).optional(),
-  certNumber: z.string().trim().max(60).optional(),
-  certExpiresOn: z.string().optional(),
-  vcaNumber: z.string().trim().max(60).optional(),
-  insurancePolicy: z.string().trim().max(120).optional(),
 });
 
 const loginSchema = z.object({
