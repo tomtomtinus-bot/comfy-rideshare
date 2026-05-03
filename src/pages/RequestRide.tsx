@@ -351,18 +351,19 @@ const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boo
 );
 
 const Input = ({
-  label, value, onChange, type = "text", placeholder,
+  label, value, onChange, type = "text", placeholder, step,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
+  step?: string;
 }) => (
   <div>
     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
     <input
-      type={type} value={value} placeholder={placeholder}
+      type={type} value={value} placeholder={placeholder} step={step}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
