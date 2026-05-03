@@ -141,7 +141,6 @@ const RequestRideInner = () => {
         permit_number: form.permit_number,
         time_window_start: new Date(form.time_window_start).toISOString(),
         time_window_end: new Date(form.time_window_end).toISOString(),
-        escort_type_required: form.escort_type_required,
       })
       .select()
       .single();
