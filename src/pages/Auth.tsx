@@ -74,6 +74,11 @@ const Auth = () => {
       role,
       baseCity: fd.get("baseCity"),
       hourlyRate: fd.get("hourlyRate"),
+      vehicleType: fd.get("vehicleType"),
+      certNumber: fd.get("certNumber"),
+      certExpiresOn: fd.get("certExpiresOn"),
+      vcaNumber: fd.get("vcaNumber"),
+      insurancePolicy: fd.get("insurancePolicy"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -91,16 +96,36 @@ const Auth = () => {
       meta.base_city = geo.city;
       meta.base_lat = geo.lat;
       meta.base_lng = geo.lng;
-      meta.hourly_rate = d.hourlyRate ?? 35;
+      meta.hourly_rate = d.hourlyRate ?? 55;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: d.email,
       password: d.password,
       options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: meta },
     });
+    if (error) {
+      setBusy(false);
+      return toast.error(error.message);
+    }
+
+    // Vul convoi-specifieke begeleidervelden bij na auto-aangemaakt escort_profile
+    if (d.role === "begeleider" && signUpData.user) {
+      await supabase
+        .from("escort_profiles")
+        .update({
+          categories,
+          escort_types: escortTypes,
+          vehicle_type: d.vehicleType || "Bestelwagen",
+          cert_number: d.certNumber || null,
+          cert_expires_on: d.certExpiresOn || null,
+          vca_number: d.vcaNumber || null,
+          insurance_policy: d.insurancePolicy || null,
+        })
+        .eq("id", signUpData.user.id);
+    }
+
     setBusy(false);
-    if (error) return toast.error(error.message);
     toast.success("Account aangemaakt");
     navigate("/dashboard");
   };
