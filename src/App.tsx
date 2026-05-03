@@ -9,6 +9,7 @@ import Auth from "./pages/Auth.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import EscortSettings from "./pages/EscortSettings.tsx";
+import Invoices from "./pages/Invoices.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
