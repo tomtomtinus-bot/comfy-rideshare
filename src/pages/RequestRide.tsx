@@ -138,6 +138,14 @@ const RequestRideInner = () => {
         notes: form.notes || null,
         status: "open",
         app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
+        cargo_length_m: form.cargo_length_m,
+        cargo_width_m: form.cargo_width_m,
+        cargo_height_m: form.cargo_height_m,
+        cargo_weight_t: form.cargo_weight_t,
+        permit_number: form.permit_number,
+        time_window_start: new Date(form.time_window_start).toISOString(),
+        time_window_end: new Date(form.time_window_end).toISOString(),
+        escort_type_required: form.escort_type_required,
       })
       .select()
       .single();
