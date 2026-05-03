@@ -105,6 +105,7 @@ const Inner = () => {
         setProfile(p);
         setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
+        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({ label: String(s.label ?? ""), amount: String(s.amount ?? "") })));
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
