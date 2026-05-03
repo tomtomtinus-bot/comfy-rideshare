@@ -31,23 +31,98 @@ interface NominatimItem {
   };
 }
 
-// Veelgebruikte grensovergangen tussen NL/BE/DE/LU
-const BORDER_CROSSINGS: AddressResult[] = [
-  { display: "Grensovergang Hazeldonk (NL/BE) — A16/E19", address: "Hazeldonk", city: "Breda", country: "Nederland/België", lat: 51.4347, lng: 4.7619 },
-  { display: "Grensovergang Wuustwezel — Zundert (NL/BE)", address: "N263", city: "Zundert", country: "Nederland/België", lat: 51.4644, lng: 4.6519 },
-  { display: "Grensovergang Putte (NL/BE) — A4/E19", address: "Putte", city: "Putte", country: "Nederland/België", lat: 51.3736, lng: 4.3792 },
-  { display: "Grensovergang Sas van Gent — Zelzate (NL/BE)", address: "N252", city: "Sas van Gent", country: "Nederland/België", lat: 51.2244, lng: 3.8047 },
-  { display: "Grensovergang Maastricht — Lanaken (NL/BE)", address: "Tongerseweg", city: "Maastricht", country: "Nederland/België", lat: 50.8479, lng: 5.6517 },
-  { display: "Grensovergang Eijsden — Visé (NL/BE) — A2/E25", address: "Eijsden", city: "Eijsden", country: "Nederland/België", lat: 50.7658, lng: 5.7036 },
-  { display: "Grensovergang Bergh / Emmerich (NL/DE) — A12/A3", address: "'s-Heerenberg", city: "'s-Heerenberg", country: "Nederland/Duitsland", lat: 51.8769, lng: 6.2389 },
-  { display: "Grensovergang Oldenzaal / Bad Bentheim (NL/DE) — A1/A30", address: "De Lutte", city: "Oldenzaal", country: "Nederland/Duitsland", lat: 52.3667, lng: 7.0167 },
-  { display: "Grensovergang Venlo / Kaldenkirchen (NL/DE) — A67/A40", address: "Venlo", city: "Venlo", country: "Nederland/Duitsland", lat: 51.3461, lng: 6.2289 },
-  { display: "Grensovergang Heerlen / Aachen (NL/DE) — A76/A4", address: "Bocholtz", city: "Heerlen", country: "Nederland/Duitsland", lat: 50.8161, lng: 6.0331 },
-  { display: "Grensovergang Nieuweschans / Bunde (NL/DE) — A7", address: "Nieuweschans", city: "Bad Nieuweschans", country: "Nederland/Duitsland", lat: 53.1842, lng: 7.2147 },
-  { display: "Grensovergang Coevorden / Laar (NL/DE)", address: "Coevorden", city: "Coevorden", country: "Nederland/Duitsland", lat: 52.6556, lng: 6.7728 },
-  { display: "Grensovergang Eynatten / Lichtenbusch (BE/DE) — A3/E40", address: "Eynatten", city: "Raeren", country: "België/Duitsland", lat: 50.6958, lng: 6.1264 },
-  { display: "Grensovergang Sterpenich / Wasserbillig (BE/LU) — E25/E411", address: "Sterpenich", city: "Aarlen", country: "België/Luxemburg", lat: 49.6686, lng: 5.9139 },
-];
+interface OverpassElement {
+  type: string;
+  id: number;
+  lat?: number;
+  lon?: number;
+  center?: { lat: number; lon: number };
+  tags?: Record<string, string>;
+}
+
+// Overpass: alle grensovergangen (barrier=border_control of crossing) in NL/BE/DE/LU/FR
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_QUERY = `
+[out:json][timeout:25];
+(
+  area["ISO3166-1"="NL"][admin_level=2];
+  area["ISO3166-1"="BE"][admin_level=2];
+  area["ISO3166-1"="DE"][admin_level=2];
+  area["ISO3166-1"="LU"][admin_level=2];
+  area["ISO3166-1"="FR"][admin_level=2];
+)->.searchArea;
+(
+  node["barrier"="border_control"](area.searchArea);
+  way["barrier"="border_control"](area.searchArea);
+  node["highway"="border_control"](area.searchArea);
+);
+out center tags 500;
+`;
+
+let bordersCache: AddressResult[] | null = null;
+let bordersLoading: Promise<AddressResult[]> | null = null;
+
+async function loadAllBorders(): Promise<AddressResult[]> {
+  if (bordersCache) return bordersCache;
+  if (bordersLoading) return bordersLoading;
+  bordersLoading = (async () => {
+    try {
+      const res = await fetch(OVERPASS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(OVERPASS_QUERY),
+      });
+      const data = await res.json();
+      const items: AddressResult[] = (data.elements as OverpassElement[])
+        .map((el) => {
+          const lat = el.lat ?? el.center?.lat;
+          const lon = el.lon ?? el.center?.lon;
+          if (lat == null || lon == null) return null;
+          const tags = el.tags ?? {};
+          const name =
+            tags.name ||
+            tags["name:nl"] ||
+            tags["name:de"] ||
+            tags["name:fr"] ||
+            tags.ref ||
+            "Grensovergang";
+          const route = tags.ref || tags.highway_ref || "";
+          const op = tags.operator || "";
+          const display = [
+            "🌍 " + name,
+            route && `(${route})`,
+            op && `· ${op}`,
+          ].filter(Boolean).join(" ");
+          return {
+            display,
+            address: name,
+            city: name,
+            country: "Grensovergang",
+            lat,
+            lng: lon,
+          } as AddressResult;
+        })
+        .filter((x): x is AddressResult => x !== null);
+      // Dedupe by display+coords
+      const seen = new Set<string>();
+      const unique = items.filter((it) => {
+        const k = `${it.display}|${it.lat.toFixed(3)}|${it.lng.toFixed(3)}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      unique.sort((a, b) => a.display.localeCompare(b.display));
+      bordersCache = unique;
+      return unique;
+    } catch {
+      bordersCache = [];
+      return [];
+    } finally {
+      bordersLoading = null;
+    }
+  })();
+  return bordersLoading;
+}
 
 export const AddressAutocomplete = ({
   label,
@@ -64,8 +139,11 @@ export const AddressAutocomplete = ({
 }) => {
   const [results, setResults] = useState<NominatimItem[]>([]);
   const [borderHits, setBorderHits] = useState<AddressResult[]>([]);
+  const [allBorders, setAllBorders] = useState<AddressResult[]>([]);
+  const [borderFilter, setBorderFilter] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [bordersBusy, setBordersBusy] = useState(false);
   const [showBorders, setShowBorders] = useState(false);
   const timer = useRef<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -81,6 +159,15 @@ export const AddressAutocomplete = ({
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  const ensureBordersLoaded = async () => {
+    if (allBorders.length) return allBorders;
+    setBordersBusy(true);
+    const data = await loadAllBorders();
+    setAllBorders(data);
+    setBordersBusy(false);
+    return data;
+  };
+
   const handleChange = (v: string) => {
     onChange(v);
     if (timer.current) window.clearTimeout(timer.current);
@@ -89,16 +176,15 @@ export const AddressAutocomplete = ({
       setBorderHits([]);
       return;
     }
-    // Lokale grensovergang-filter (instant)
     const q = v.toLowerCase();
-    setBorderHits(
-      BORDER_CROSSINGS.filter(
-        (b) =>
-          b.display.toLowerCase().includes(q) ||
-          b.city.toLowerCase().includes(q) ||
-          (q.includes("grens") || q.includes("border") || q.includes("übergang")),
-      ).slice(0, 6),
-    );
+    // Trigger laden + filter
+    ensureBordersLoaded().then((all) => {
+      setBorderHits(
+        all
+          .filter((b) => b.display.toLowerCase().includes(q) || b.city.toLowerCase().includes(q))
+          .slice(0, 8),
+      );
+    });
 
     if (v.trim().length < 3) return;
 
@@ -143,19 +229,27 @@ export const AddressAutocomplete = ({
     setShowBorders(false);
   };
 
+  const filteredBorders = borderFilter.trim().length
+    ? allBorders.filter((b) =>
+        b.display.toLowerCase().includes(borderFilter.toLowerCase()) ||
+        b.city.toLowerCase().includes(borderFilter.toLowerCase()),
+      )
+    : allBorders;
+
   return (
     <div className="relative" ref={wrapRef}>
       <div className="flex items-end justify-between gap-2">
         <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
         <button
           type="button"
-          onClick={() => {
-            setShowBorders((s) => !s);
+          onClick={async () => {
             setOpen(false);
+            setShowBorders((s) => !s);
+            await ensureBordersLoaded();
           }}
           className="text-[10px] uppercase tracking-widest text-brass-gold font-bold hover:underline"
         >
-          🌍 Grensovergang
+          🌍 Alle grensovergangen
         </button>
       </div>
       <input
@@ -167,24 +261,41 @@ export const AddressAutocomplete = ({
         autoComplete="off"
       />
       <p className="text-[10px] text-brass-deep/50 mt-1 min-h-[14px]">
-        {busy ? "Adres zoeken…" : "Selecteer een adres of grensovergang uit de lijst"}
+        {busy ? "Adres zoeken…" : bordersBusy ? "Grensovergangen laden…" : "Selecteer een adres of grensovergang uit de lijst"}
       </p>
 
       {showBorders && (
-        <ul className="absolute z-30 left-0 right-0 bg-card border border-brass-gold/40 shadow-lg max-h-72 overflow-auto">
-          <li className="px-4 py-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold bg-parchment border-b border-brass-deep/10">
-            Grensovergangen
-          </li>
-          {BORDER_CROSSINGS.map((b, i) => (
-            <li
-              key={i}
-              onClick={() => pickBorder(b)}
-              className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
-            >
-              {b.display}
-            </li>
-          ))}
-        </ul>
+        <div className="absolute z-30 left-0 right-0 bg-card border border-brass-gold/40 shadow-lg max-h-80 overflow-hidden flex flex-col">
+          <div className="px-3 py-2 bg-parchment border-b border-brass-deep/10 sticky top-0">
+            <input
+              autoFocus
+              value={borderFilter}
+              onChange={(e) => setBorderFilter(e.target.value)}
+              placeholder={`Filter ${allBorders.length || ""} grensovergangen…`}
+              className="w-full bg-card border border-brass-deep/15 px-3 py-1.5 text-sm focus:outline-none focus:border-brass-gold"
+            />
+          </div>
+          <ul className="overflow-auto">
+            {bordersBusy && !allBorders.length && (
+              <li className="px-4 py-3 text-sm text-brass-deep/60">Grensovergangen laden uit OpenStreetMap…</li>
+            )}
+            {!bordersBusy && filteredBorders.length === 0 && allBorders.length > 0 && (
+              <li className="px-4 py-3 text-sm text-brass-deep/60">Geen resultaten voor "{borderFilter}"</li>
+            )}
+            {filteredBorders.slice(0, 200).map((b, i) => (
+              <li
+                key={i}
+                onClick={() => pickBorder(b)}
+                className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
+              >
+                {b.display}
+              </li>
+            ))}
+            {filteredBorders.length > 200 && (
+              <li className="px-4 py-2 text-[10px] text-brass-deep/50 italic">+{filteredBorders.length - 200} meer — verfijn de zoekterm</li>
+            )}
+          </ul>
+        </div>
       )}
 
       {open && (results.length > 0 || borderHits.length > 0) && (
@@ -200,7 +311,7 @@ export const AddressAutocomplete = ({
                   onClick={() => pickBorder(b)}
                   className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10"
                 >
-                  🌍 {b.display}
+                  {b.display}
                 </li>
               ))}
             </>
