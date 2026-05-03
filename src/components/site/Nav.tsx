@@ -1,5 +1,6 @@
 import { Compass } from "lucide-react";
 import { Link } from "react-router-dom";
+import { RoleSwitch } from "@/components/site/RoleSwitch";
 
 export const Nav = () => {
   return (
@@ -16,11 +17,9 @@ export const Nav = () => {
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link to="/#ritten" className="hover:text-brass-gold transition-colors">Ritten</Link>
           <Link to="/begeleiders" className="hover:text-brass-gold transition-colors">Begeleiders</Link>
-          <Link to="/#protocol" className="hover:text-brass-gold transition-colors">Protocol</Link>
+          <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">Aanvragen</Link>
         </div>
-        <button className="px-5 md:px-6 py-2.5 bg-brass-deep text-parchment text-xs md:text-sm uppercase tracking-widest hover:bg-brass-gold transition-colors duration-300">
-          Bied rit aan
-        </button>
+        <RoleSwitch />
       </div>
     </nav>
   );
