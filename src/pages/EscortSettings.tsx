@@ -126,6 +126,8 @@ const Inner = () => {
         base_city: geo.city,
         base_lat: geo.lat,
         base_lng: geo.lng,
+        base_address: parsed.data.baseAddress,
+        base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
         vehicle_type: parsed.data.vehicleType,
         vehicle_has_height_pole: hp,
