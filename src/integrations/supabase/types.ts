@@ -14,16 +14,239 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      escort_profiles: {
+        Row: {
+          anonymous_id: string
+          available: boolean
+          base_city: string
+          base_lat: number
+          base_lng: number
+          countries: string[]
+          created_at: string
+          hourly_rate: number
+          id: string
+          languages: string[]
+          rating: number
+          rides_completed: number
+          surcharges: Json
+          updated_at: string
+        }
+        Insert: {
+          anonymous_id?: string
+          available?: boolean
+          base_city: string
+          base_lat: number
+          base_lng: number
+          countries?: string[]
+          created_at?: string
+          hourly_rate?: number
+          id: string
+          languages?: string[]
+          rating?: number
+          rides_completed?: number
+          surcharges?: Json
+          updated_at?: string
+        }
+        Update: {
+          anonymous_id?: string
+          available?: boolean
+          base_city?: string
+          base_lat?: number
+          base_lng?: number
+          countries?: string[]
+          created_at?: string
+          hourly_rate?: number
+          id?: string
+          languages?: string[]
+          rating?: number
+          rides_completed?: number
+          surcharges?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ride_assignments: {
+        Row: {
+          actual_cost: number | null
+          actual_hours: number | null
+          created_at: string
+          departed_base_at: string | null
+          escort_id: string
+          estimated_cost: number | null
+          estimated_hours: number | null
+          hours_notes: string | null
+          hours_submitted_at: string | null
+          id: string
+          returned_base_at: string | null
+          ride_id: string
+          travel_back_home_min: number
+          travel_to_pickup_min: number
+        }
+        Insert: {
+          actual_cost?: number | null
+          actual_hours?: number | null
+          created_at?: string
+          departed_base_at?: string | null
+          escort_id: string
+          estimated_cost?: number | null
+          estimated_hours?: number | null
+          hours_notes?: string | null
+          hours_submitted_at?: string | null
+          id?: string
+          returned_base_at?: string | null
+          ride_id: string
+          travel_back_home_min?: number
+          travel_to_pickup_min?: number
+        }
+        Update: {
+          actual_cost?: number | null
+          actual_hours?: number | null
+          created_at?: string
+          departed_base_at?: string | null
+          escort_id?: string
+          estimated_cost?: number | null
+          estimated_hours?: number | null
+          hours_notes?: string | null
+          hours_submitted_at?: string | null
+          id?: string
+          returned_base_at?: string | null
+          ride_id?: string
+          travel_back_home_min?: number
+          travel_to_pickup_min?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_assignments_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rides: {
+        Row: {
+          client_id: string
+          created_at: string
+          dropoff_address: string
+          dropoff_city: string
+          dropoff_lat: number
+          dropoff_lng: number
+          id: string
+          notes: string | null
+          num_escorts: number
+          pickup_address: string
+          pickup_city: string
+          pickup_lat: number
+          pickup_lng: number
+          scheduled_at: string
+          status: Database["public"]["Enums"]["ride_status"]
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          dropoff_address: string
+          dropoff_city: string
+          dropoff_lat: number
+          dropoff_lng: number
+          id?: string
+          notes?: string | null
+          num_escorts?: number
+          pickup_address: string
+          pickup_city: string
+          pickup_lat: number
+          pickup_lng: number
+          scheduled_at: string
+          status?: Database["public"]["Enums"]["ride_status"]
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          dropoff_address?: string
+          dropoff_city?: string
+          dropoff_lat?: number
+          dropoff_lng?: number
+          id?: string
+          notes?: string | null
+          num_escorts?: number
+          pickup_address?: string
+          pickup_city?: string
+          pickup_lat?: number
+          pickup_lng?: number
+          scheduled_at?: string
+          status?: Database["public"]["Enums"]["ride_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "opdrachtgever" | "begeleider" | "admin"
+      ride_status:
+        | "open"
+        | "matched"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +373,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["opdrachtgever", "begeleider", "admin"],
+      ride_status: ["open", "matched", "in_progress", "completed", "cancelled"],
+    },
   },
 } as const
