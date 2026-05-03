@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import EscortSettings from "./pages/EscortSettings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
