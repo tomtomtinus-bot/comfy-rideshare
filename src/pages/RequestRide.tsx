@@ -71,14 +71,13 @@ const RequestRideInner = () => {
       .filter((e) => e.countries.includes(pickupGeo.country) && e.countries.includes(dropoffGeo.country))
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
-        const dHome = distanceKm({ lat: e.base_lng, lng: e.base_lat } as never, dropoffGeo);
-        const distanceFromDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
+        const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
         return {
           ...e,
           distanceToPickup: dPickup,
-          distanceFromDropoff,
+          distanceFromDropoff: dDropoff,
           travelToPickupMin: travelMinutes(dPickup),
-          travelBackHomeMin: travelMinutes(distanceFromDropoff),
+          travelBackHomeMin: travelMinutes(dDropoff),
         };
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
