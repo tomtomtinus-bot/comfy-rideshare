@@ -197,6 +197,42 @@ const ClientDashboard = () => {
         </div>
       </header>
 
+      {exportOpen && (
+        <div className="bg-card shadow-etched p-6 flex flex-wrap items-end gap-4">
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Van</label>
+            <input
+              type="date"
+              value={exportFrom}
+              onChange={(e) => setExportFrom(e.target.value)}
+              className="border border-brass-deep/30 px-3 py-2 text-sm bg-background"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Tot</label>
+            <input
+              type="date"
+              value={exportTo}
+              onChange={(e) => setExportTo(e.target.value)}
+              className="border border-brass-deep/30 px-3 py-2 text-sm bg-background"
+            />
+          </div>
+          <button
+            onClick={() => { setExportFrom(""); setExportTo(""); }}
+            className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep"
+          >
+            Wissen
+          </button>
+          <button
+            onClick={exportXlsx}
+            className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
+          >
+            Exporteren
+          </button>
+          <p className="text-xs text-brass-deep/50 ml-auto">Laat leeg voor alle ritten</p>
+        </div>
+      )}
+
       {loading ? (
         <p className="text-sm text-brass-deep/50">Laden…</p>
       ) : rides.length === 0 ? (
