@@ -20,6 +20,12 @@ interface RideRow {
   status: string;
   notes: string | null;
   app_fee: number;
+  cargo_length_m?: number | null;
+  cargo_width_m?: number | null;
+  cargo_height_m?: number | null;
+  cargo_weight_t?: number | null;
+  permit_number?: string | null;
+  escort_type_required?: string | null;
 }
 
 interface AssignmentRow {
