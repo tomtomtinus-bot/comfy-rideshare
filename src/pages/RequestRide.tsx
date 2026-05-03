@@ -224,10 +224,10 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Input label="Lengte (m)" type="number" step="0.01" value={String(form.cargo_length_m)} onChange={(v) => setForm({ ...form, cargo_length_m: +v })} />
-                <Input label="Breedte (m)" type="number" step="0.01" value={String(form.cargo_width_m)} onChange={(v) => setForm({ ...form, cargo_width_m: +v })} />
-                <Input label="Hoogte (m)" type="number" step="0.01" value={String(form.cargo_height_m)} onChange={(v) => setForm({ ...form, cargo_height_m: +v })} />
-                <Input label="Gewicht (ton)" type="number" step="1" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
+                <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
+                <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
+                <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
+                <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
