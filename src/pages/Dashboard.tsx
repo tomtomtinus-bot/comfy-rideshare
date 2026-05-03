@@ -82,6 +82,9 @@ const ClientDashboard = () => {
   const [rides, setRides] = useState<RideRow[]>([]);
   const [assignments, setAssignments] = useState<Record<string, (AssignmentRow & { anon: string; rate: number })[]>>({});
   const [loading, setLoading] = useState(true);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -125,8 +128,17 @@ const ClientDashboard = () => {
   }, [user]);
 
   const exportXlsx = () => {
-    if (rides.length === 0) return toast.error("Geen ritten om te exporteren");
-    const rows = rides.map((r) => {
+    let filtered = rides;
+    if (exportFrom) {
+      const f = new Date(exportFrom).getTime();
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= f);
+    }
+    if (exportTo) {
+      const t = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= t);
+    }
+    if (filtered.length === 0) return toast.error("Geen ritten in dit tijdsbestek");
+    const rows = filtered.map((r) => {
       const ass = assignments[r.id] ?? [];
       const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
       const totalEst = ass.reduce((s, a) => s + Number(a.estimated_cost ?? 0), 0);
@@ -153,8 +165,10 @@ const ClientDashboard = () => {
     ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Ritten");
-    XLSX.writeFile(wb, `rittenadministratie-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const range = exportFrom || exportTo ? `-${exportFrom || "begin"}_tot_${exportTo || "eind"}` : "";
+    XLSX.writeFile(wb, `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`);
     toast.success("Excel-bestand gedownload");
+    setExportOpen(false);
   };
 
   return (
@@ -168,7 +182,7 @@ const ClientDashboard = () => {
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
-            onClick={exportXlsx}
+            onClick={() => setExportOpen((v) => !v)}
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
           >
@@ -182,6 +196,42 @@ const ClientDashboard = () => {
           </Link>
         </div>
       </header>
+
+      {exportOpen && (
+        <div className="bg-card shadow-etched p-6 flex flex-wrap items-end gap-4">
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Van</label>
+            <input
+              type="date"
+              value={exportFrom}
+              onChange={(e) => setExportFrom(e.target.value)}
+              className="border border-brass-deep/30 px-3 py-2 text-sm bg-background"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Tot</label>
+            <input
+              type="date"
+              value={exportTo}
+              onChange={(e) => setExportTo(e.target.value)}
+              className="border border-brass-deep/30 px-3 py-2 text-sm bg-background"
+            />
+          </div>
+          <button
+            onClick={() => { setExportFrom(""); setExportTo(""); }}
+            className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep"
+          >
+            Wissen
+          </button>
+          <button
+            onClick={exportXlsx}
+            className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
+          >
+            Exporteren
+          </button>
+          <p className="text-xs text-brass-deep/50 ml-auto">Laat leeg voor alle ritten</p>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-sm text-brass-deep/50">Laden…</p>
