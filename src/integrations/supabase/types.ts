@@ -21,15 +21,25 @@ export type Database = {
           base_city: string
           base_lat: number
           base_lng: number
+          categories: string[]
+          cert_expires_on: string | null
+          cert_number: string | null
           countries: string[]
           created_at: string
+          escort_types: string[]
           hourly_rate: number
           id: string
+          insurance_policy: string | null
           languages: string[]
           rating: number
           rides_completed: number
           surcharges: Json
           updated_at: string
+          vca_number: string | null
+          vehicle_has_height_pole: boolean
+          vehicle_has_konvooi_sign: boolean
+          vehicle_has_lightbar: boolean
+          vehicle_type: string
         }
         Insert: {
           anonymous_id?: string
@@ -37,15 +47,25 @@ export type Database = {
           base_city: string
           base_lat: number
           base_lng: number
+          categories?: string[]
+          cert_expires_on?: string | null
+          cert_number?: string | null
           countries?: string[]
           created_at?: string
+          escort_types?: string[]
           hourly_rate?: number
           id: string
+          insurance_policy?: string | null
           languages?: string[]
           rating?: number
           rides_completed?: number
           surcharges?: Json
           updated_at?: string
+          vca_number?: string | null
+          vehicle_has_height_pole?: boolean
+          vehicle_has_konvooi_sign?: boolean
+          vehicle_has_lightbar?: boolean
+          vehicle_type?: string
         }
         Update: {
           anonymous_id?: string
@@ -53,15 +73,25 @@ export type Database = {
           base_city?: string
           base_lat?: number
           base_lng?: number
+          categories?: string[]
+          cert_expires_on?: string | null
+          cert_number?: string | null
           countries?: string[]
           created_at?: string
+          escort_types?: string[]
           hourly_rate?: number
           id?: string
+          insurance_policy?: string | null
           languages?: string[]
           rating?: number
           rides_completed?: number
           surcharges?: Json
           updated_at?: string
+          vca_number?: string | null
+          vehicle_has_height_pole?: boolean
+          vehicle_has_konvooi_sign?: boolean
+          vehicle_has_lightbar?: boolean
+          vehicle_type?: string
         }
         Relationships: []
       }
@@ -166,59 +196,83 @@ export type Database = {
       rides: {
         Row: {
           app_fee: number
+          cargo_height_m: number | null
+          cargo_length_m: number | null
+          cargo_weight_t: number | null
+          cargo_width_m: number | null
           client_id: string
           created_at: string
           dropoff_address: string
           dropoff_city: string
           dropoff_lat: number
           dropoff_lng: number
+          escort_type_required: string
           id: string
           notes: string | null
           num_escorts: number
+          permit_number: string | null
           pickup_address: string
           pickup_city: string
           pickup_lat: number
           pickup_lng: number
           scheduled_at: string
           status: Database["public"]["Enums"]["ride_status"]
+          time_window_end: string | null
+          time_window_start: string | null
           updated_at: string
         }
         Insert: {
           app_fee?: number
+          cargo_height_m?: number | null
+          cargo_length_m?: number | null
+          cargo_weight_t?: number | null
+          cargo_width_m?: number | null
           client_id: string
           created_at?: string
           dropoff_address: string
           dropoff_city: string
           dropoff_lat: number
           dropoff_lng: number
+          escort_type_required?: string
           id?: string
           notes?: string | null
           num_escorts?: number
+          permit_number?: string | null
           pickup_address: string
           pickup_city: string
           pickup_lat: number
           pickup_lng: number
           scheduled_at: string
           status?: Database["public"]["Enums"]["ride_status"]
+          time_window_end?: string | null
+          time_window_start?: string | null
           updated_at?: string
         }
         Update: {
           app_fee?: number
+          cargo_height_m?: number | null
+          cargo_length_m?: number | null
+          cargo_weight_t?: number | null
+          cargo_width_m?: number | null
           client_id?: string
           created_at?: string
           dropoff_address?: string
           dropoff_city?: string
           dropoff_lat?: number
           dropoff_lng?: number
+          escort_type_required?: string
           id?: string
           notes?: string | null
           num_escorts?: number
+          permit_number?: string | null
           pickup_address?: string
           pickup_city?: string
           pickup_lat?: number
           pickup_lng?: number
           scheduled_at?: string
           status?: Database["public"]["Enums"]["ride_status"]
+          time_window_end?: string | null
+          time_window_start?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -8,6 +8,9 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CITIES, geocode } from "@/lib/geo";
 
+const CATEGORIES = ["cat-1", "cat-2", "cat-3"] as const;
+const ESCORT_TYPES = ["vooroprijden", "achteroprijden", "voor+achterop", "kruispuntbegeleiding"] as const;
+
 const signupSchema = z.object({
   email: z.string().trim().email("Ongeldig e-mailadres").max(255),
   password: z.string().min(8, "Minimaal 8 tekens").max(72),
@@ -15,7 +18,12 @@ const signupSchema = z.object({
   phone: z.string().trim().min(6).max(30),
   role: z.enum(["opdrachtgever", "begeleider"]),
   baseCity: z.string().optional(),
-  hourlyRate: z.coerce.number().min(15).max(150).optional(),
+  hourlyRate: z.coerce.number().min(15).max(200).optional(),
+  vehicleType: z.string().trim().max(120).optional(),
+  certNumber: z.string().trim().max(60).optional(),
+  certExpiresOn: z.string().optional(),
+  vcaNumber: z.string().trim().max(60).optional(),
+  insurancePolicy: z.string().trim().max(120).optional(),
 });
 
 const loginSchema = z.object({
@@ -28,7 +36,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
+  const [categories, setCategories] = useState<string[]>(["cat-1"]);
+  const [escortTypes, setEscortTypes] = useState<string[]>(["vooroprijden"]);
   const [busy, setBusy] = useState(false);
+
+  const toggleVal = (arr: string[], v: string) =>
+    arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
@@ -61,6 +74,11 @@ const Auth = () => {
       role,
       baseCity: fd.get("baseCity"),
       hourlyRate: fd.get("hourlyRate"),
+      vehicleType: fd.get("vehicleType"),
+      certNumber: fd.get("certNumber"),
+      certExpiresOn: fd.get("certExpiresOn"),
+      vcaNumber: fd.get("vcaNumber"),
+      insurancePolicy: fd.get("insurancePolicy"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -78,16 +96,36 @@ const Auth = () => {
       meta.base_city = geo.city;
       meta.base_lat = geo.lat;
       meta.base_lng = geo.lng;
-      meta.hourly_rate = d.hourlyRate ?? 35;
+      meta.hourly_rate = d.hourlyRate ?? 55;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: d.email,
       password: d.password,
       options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: meta },
     });
+    if (error) {
+      setBusy(false);
+      return toast.error(error.message);
+    }
+
+    // Vul convoi-specifieke begeleidervelden bij na auto-aangemaakt escort_profile
+    if (d.role === "begeleider" && signUpData.user) {
+      await supabase
+        .from("escort_profiles")
+        .update({
+          categories,
+          escort_types: escortTypes,
+          vehicle_type: d.vehicleType || "Bestelwagen",
+          cert_number: d.certNumber || null,
+          cert_expires_on: d.certExpiresOn || null,
+          vca_number: d.vcaNumber || null,
+          insurance_policy: d.insurancePolicy || null,
+        })
+        .eq("id", signUpData.user.id);
+    }
+
     setBusy(false);
-    if (error) return toast.error(error.message);
     toast.success("Account aangemaakt");
     navigate("/dashboard");
   };
@@ -149,7 +187,59 @@ const Auth = () => {
                     ))}
                   </select>
                 </div>
-                <Field name="hourlyRate" type="number" label="Uurtarief (€)" defaultValue="35" />
+                <Field name="hourlyRate" type="number" label="Uurtarief (€)" defaultValue="55" />
+                <Field name="vehicleType" label="Pilotvoertuig (type & kenmerk)" defaultValue="VW Crafter geel · zwaailichtbalk" />
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    Categorieën uitzonderlijk vervoer
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {CATEGORIES.map((c) => {
+                      const on = categories.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setCategories((s) => toggleVal(s, c))}
+                          className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
+                            on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    Type begeleiding
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {ESCORT_TYPES.map((t) => {
+                      const on = escortTypes.includes(t);
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setEscortTypes((s) => toggleVal(s, t))}
+                          className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
+                            on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Field name="certNumber" label="Certificaat verkeersregelaar (nr.)" />
+                <Field name="certExpiresOn" type="date" label="Certificaat geldig tot" />
+                <Field name="vcaNumber" label="VCA-diploma nr." />
+                <Field name="insurancePolicy" label="Aansprakelijkheidsverzekering (polisnr.)" />
               </>
             )}
 

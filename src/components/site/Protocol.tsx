@@ -1,27 +1,27 @@
 const steps = [
   {
     n: "01",
-    title: "Oriëntatie",
+    title: "Aanvraag",
     body:
-      "Geef uw vervoersbehoefte, bestemming en specifieke medische of emotionele ondersteuning aan. Precisie begint bij accurate informatie.",
+      "Geef afmetingen, gewicht, route, vergunningnummer en tijdvenster door. Het systeem berekent het verplichte aantal begeleiders.",
   },
   {
     n: "02",
-    title: "Kalibratie",
+    title: "Matching",
     body:
-      "Wij koppelen u aan een begeleider wiens discipline en voertuigprofiel exact aansluiten op uw route en temperament.",
+      "Wij vinden de dichtstbijzijnde begeleiders met het juiste certificaat, pilotvoertuig en categorie voor uw transport.",
   },
   {
     n: "03",
-    title: "Vertrek",
+    title: "Bevestiging",
     body:
-      "Uw begeleider arriveert exact op het afgesproken punt. Wij voorzien in real-time coördinatie zodat de rit een vast gegeven is.",
+      "De begeleider heeft 30 minuten om de opdracht te aanvaarden. U ontvangt automatisch bevestiging zodra dat gebeurt.",
   },
   {
     n: "04",
-    title: "Aankomst",
+    title: "Uitvoering & afrekening",
     body:
-      "De missie is pas voltooid wanneer u veilig bij uw bestemming bent. Alle logs worden definitief gemaakt en geverifieerd.",
+      "Na afloop registreert de begeleider de uren vanaf vertrek standplaats tot terugkeer. U ziet direct de definitieve kosten.",
   },
 ];
 
@@ -31,10 +31,10 @@ export const Protocol = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-12 lg:gap-16">
         <div className="col-span-12 lg:col-span-4">
           <h2 className="font-display text-4xl md:text-5xl text-brass-deep italic leading-tight">
-            De methodologie van zekere doorgang.
+            Van vergunning tot bestemming.
           </h2>
           <p className="mt-6 text-brass-deep/60 max-w-sm">
-            Vier stappen die elke rit voorspelbaar, veilig en menselijk maken.
+            Vier stappen van aanvraag tot afrekening, met certificering op elk niveau.
           </p>
         </div>
         <div className="col-span-12 lg:col-span-8">
