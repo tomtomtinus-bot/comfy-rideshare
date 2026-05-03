@@ -98,14 +98,6 @@ const InvoicesInner = () => {
                 Facturen worden automatisch elke maandagochtend aangemaakt op basis van ingediende uren van de afgelopen week.
               </p>
             </div>
-            {isEscort && (
-              <button
-                onClick={generateNow}
-                className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
-              >
-                Nu factureren
-              </button>
-            )}
           </header>
 
           {loading ? (
