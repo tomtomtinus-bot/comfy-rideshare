@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { AgendaPlanner } from "@/components/site/AgendaPlanner";
 
 interface RideRow {
   id: string;
