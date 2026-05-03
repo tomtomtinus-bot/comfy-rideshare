@@ -56,7 +56,8 @@ export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; ln
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-// Geschatte reistijd in minuten op basis van 70 km/u gemiddelde
+// Geschatte reistijd, afgerond per kwartier (15 min) op basis van 70 km/u
 export function travelMinutes(km: number): number {
-  return Math.round((km / 70) * 60);
+  const min = (km / 70) * 60;
+  return Math.max(15, Math.ceil(min / 15) * 15);
 }
