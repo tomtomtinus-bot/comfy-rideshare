@@ -144,8 +144,8 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m,
         cargo_weight_t: form.cargo_weight_t,
         permit_number: form.permit_number,
-        time_window_start: new Date(form.time_window_start).toISOString(),
-        time_window_end: new Date(form.time_window_end).toISOString(),
+        time_window_start: new Date(form.scheduled_at).toISOString(),
+        time_window_end: null,
       })
       .select()
       .single();
