@@ -17,6 +17,7 @@ export const Nav = () => {
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link to="/#ritten" className="hover:text-brass-gold transition-colors">Transporten</Link>
           <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">Aanvragen</Link>
+          <Link to="/facturen" className="hover:text-brass-gold transition-colors">Facturen</Link>
         </div>
         <RoleSwitch />
       </div>
