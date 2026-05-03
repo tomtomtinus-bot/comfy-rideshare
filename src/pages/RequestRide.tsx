@@ -102,6 +102,7 @@ const RequestRideInner = () => {
     const rideMin = travelMinutes(rideKm);
 
     setBusy(true);
+    const APP_FEE_PER_ESCORT = 2.5;
     const { data: ride, error } = await supabase
       .from("rides")
       .insert({
@@ -117,7 +118,8 @@ const RequestRideInner = () => {
         scheduled_at: new Date(form.scheduled_at).toISOString(),
         num_escorts: form.num_escorts,
         notes: form.notes || null,
-        status: "matched",
+        status: "open",
+        app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
       })
       .select()
       .single();
