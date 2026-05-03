@@ -289,47 +289,6 @@ const RequestRideInner = () => {
   );
 };
 
-const RoutePoint = ({
-  title, postcode, setPostcode, onResolve, busy, geo, address, setAddress,
-}: {
-  title: string;
-  postcode: string;
-  setPostcode: (v: string) => void;
-  onResolve: () => void;
-  busy: boolean;
-  geo: GeoPoint | null;
-  address: string;
-  setAddress: (v: string) => void;
-}) => (
-  <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{title}</p>
-    <div className="space-y-3">
-      <div>
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Postcode</label>
-        <input
-          value={postcode}
-          onChange={(e) => setPostcode(e.target.value)}
-          onBlur={onResolve}
-          placeholder="3011 AA / 2000 / 47051"
-          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-        />
-        <p className="text-[10px] text-brass-deep/50 mt-1 min-h-[14px]">
-          {busy ? "Locatie ophalen…" : geo ? `${geo.city}, ${geo.country}` : "Plaats wordt automatisch bepaald"}
-        </p>
-      </div>
-      <div>
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Straat + huisnummer</label>
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Bijv. Hafenstraße 12"
-          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-        />
-      </div>
-    </div>
-  </div>
-);
-
 const Matches = ({
   matches, numWanted, hourlyRideMin, onBook, busy,
 }: {
