@@ -219,11 +219,6 @@ const RequestRideInner = () => {
                   )}
                 </div>
               </div>
-              {pickupGeo && dropoffGeo && (
-                <p className="mt-4 text-xs text-brass-deep/60 tabular-nums">
-                  Afstand: <strong>{distanceKm(pickupGeo, dropoffGeo).toFixed(0)} km</strong> · geschatte rijtijd: <strong>{travelMinutes(distanceKm(pickupGeo, dropoffGeo))} min</strong>
-                </p>
-              )}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
