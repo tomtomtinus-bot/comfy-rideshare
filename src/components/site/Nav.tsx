@@ -18,10 +18,6 @@ export const Nav = () => {
           <Link to="/begeleiders" className="hover:text-brass-gold transition-colors">Begeleiders</Link>
           <Link to="/#protocol" className="hover:text-brass-gold transition-colors">Protocol</Link>
         </div>
-        <button className="px-5 md:px-6 py-2.5 bg-brass-deep text-parchment text-xs md:text-sm uppercase tracking-widest hover:bg-brass-gold transition-colors duration-300">
-          Bied rit aan
-        </button>
-      </div>
-    </nav>
+        <RoleSwitch />
   );
 };
