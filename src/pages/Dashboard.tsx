@@ -233,10 +233,18 @@ const EscortDashboard = () => {
     (AssignmentRow & {
       ride: RideRow;
       hourly_rate: number;
+      client_anon: string;
     })[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+
+  // Tick every 30s for the countdown timer
+  useEffect(() => {
+    const i = setInterval(() => setTick((t) => t + 1), 30000);
+    return () => clearInterval(i);
+  }, []);
 
   const load = async () => {
     if (!user) return;
@@ -249,6 +257,13 @@ const EscortDashboard = () => {
 
     const rideIds = list.map((x) => x.ride_id);
     const { data: rides } = await supabase.from("rides").select("*").in("id", rideIds);
+    const clientIds = [...new Set((rides ?? []).map((r) => r.client_id))];
+    const { data: clients } = await supabase
+      .from("profiles")
+      .select("id, anonymous_id")
+      .in("id", clientIds);
+    const clientMap = new Map((clients ?? []).map((c) => [c.id, c.anonymous_id]));
+
     const { data: me } = await supabase
       .from("escort_profiles")
       .select("hourly_rate")
@@ -257,9 +272,22 @@ const EscortDashboard = () => {
 
     const rideMap = new Map((rides ?? []).map((r) => [r.id, r]));
     const merged = list
-      .map((x) => ({ ...x, ride: rideMap.get(x.ride_id) as RideRow, hourly_rate: Number(me?.hourly_rate ?? 0) }))
+      .map((x) => {
+        const ride = rideMap.get(x.ride_id) as RideRow | undefined;
+        return {
+          ...x,
+          ride: ride as RideRow,
+          hourly_rate: Number(me?.hourly_rate ?? 0),
+          client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
+        };
+      })
       .filter((x) => x.ride)
-      .sort((a, b) => new Date(b.ride.scheduled_at).getTime() - new Date(a.ride.scheduled_at).getTime());
+      .sort((a, b) => {
+        // Show invited first, then by date
+        if (a.status === "invited" && b.status !== "invited") return -1;
+        if (b.status === "invited" && a.status !== "invited") return 1;
+        return new Date(b.ride.scheduled_at).getTime() - new Date(a.ride.scheduled_at).getTime();
+      });
 
     setItems(merged);
     setLoading(false);
@@ -267,8 +295,47 @@ const EscortDashboard = () => {
 
   useEffect(() => {
     load();
+    if (!user) return;
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+    // Realtime: new invitations
+    const channel = supabase
+      .channel(`escort-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "ride_assignments", filter: `escort_id=eq.${user.id}` },
+        () => {
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Nieuwe rituitnodiging", {
+              body: "U heeft 30 minuten om te accepteren.",
+            });
+          }
+          toast.info("Nieuwe rituitnodiging ontvangen");
+          load();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const respond = async (id: string, accept: boolean) => {
+    const { error } = await supabase
+      .from("ride_assignments")
+      .update({
+        status: accept ? "accepted" : "declined",
+        responded_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(accept ? "Rit geaccepteerd" : "Rit geweigerd");
+    load();
+  };
+  void tick;
 
   const submitHours = async (id: string, e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
