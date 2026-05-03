@@ -124,6 +124,39 @@ const ClientDashboard = () => {
     })();
   }, [user]);
 
+  const exportXlsx = () => {
+    if (rides.length === 0) return toast.error("Geen ritten om te exporteren");
+    const rows = rides.map((r) => {
+      const ass = assignments[r.id] ?? [];
+      const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
+      const totalEst = ass.reduce((s, a) => s + Number(a.estimated_cost ?? 0), 0);
+      const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
+      const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
+      return {
+        "Datum": fmtDate(r.scheduled_at),
+        "Rit ID": r.id.slice(0, 8),
+        "Referentie": r.client_reference ?? "",
+        "Vergunning": r.permit_number ?? "",
+        "Vertrek": `${r.pickup_address} (${r.pickup_city})`,
+        "Bestemming": `${r.dropoff_address} (${r.dropoff_city})`,
+        "Aantal begeleiders": r.num_escorts,
+        "Begeleiders": escortIds,
+        "Status": r.status,
+        "Geschatte kosten (€)": +totalEst.toFixed(2),
+        "Werkelijke kosten (€)": allSubmitted ? +totalActual.toFixed(2) : null,
+        "Servicekosten (€)": Number(r.app_fee ?? 0),
+        "Totaal incl. fee (€)": allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
+        "Opmerkingen": r.notes ?? "",
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ritten");
+    XLSX.writeFile(wb, `rittenadministratie-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success("Excel-bestand gedownload");
+  };
+
   return (
     <div className="space-y-12">
       <header className="flex items-end justify-between flex-wrap gap-4">
@@ -133,12 +166,21 @@ const ClientDashboard = () => {
           </p>
           <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn ritten</h1>
         </div>
-        <Link
-          to="/aanvragen"
-          className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
-        >
-          Nieuwe rit aanvragen
-        </Link>
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={exportXlsx}
+            disabled={rides.length === 0}
+            className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
+          >
+            Download Excel
+          </button>
+          <Link
+            to="/aanvragen"
+            className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
+          >
+            Nieuwe rit aanvragen
+          </Link>
+        </div>
       </header>
 
       {loading ? (
