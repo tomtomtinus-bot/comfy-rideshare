@@ -9,8 +9,6 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 
-const ESCORT_TYPES = ["vooroprijden", "achteroprijden", "voor+achterop", "kruispuntbegeleiding"] as const;
-
 const schema = z.object({
   pickup_address: z.string().trim().min(3).max(200),
   pickup_city: z.string().min(1),
@@ -26,7 +24,6 @@ const schema = z.object({
   permit_number: z.string().trim().min(3).max(60),
   time_window_start: z.string().min(1),
   time_window_end: z.string().min(1),
-  escort_type_required: z.enum(ESCORT_TYPES),
 });
 
 interface MatchedEscort {
@@ -65,7 +62,6 @@ const RequestRideInner = () => {
     permit_number: "",
     time_window_start: "",
     time_window_end: "",
-    escort_type_required: "vooroprijden" as typeof ESCORT_TYPES[number],
   });
 
   const findMatches = async (e: React.FormEvent) => {
@@ -145,7 +141,6 @@ const RequestRideInner = () => {
         permit_number: form.permit_number,
         time_window_start: new Date(form.time_window_start).toISOString(),
         time_window_end: new Date(form.time_window_end).toISOString(),
-        escort_type_required: form.escort_type_required,
       })
       .select()
       .single();
@@ -206,23 +201,6 @@ const RequestRideInner = () => {
             <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
             <Input label="Vergunningnummer (RDW/wegbeheerder)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Type begeleiding</label>
-              <select
-                value={form.escort_type_required}
-                onChange={(e) => setForm({ ...form, escort_type_required: e.target.value as typeof ESCORT_TYPES[number] })}
-                className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-              >
-                {ESCORT_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster & aantal begeleiders</p>
-            </div>
-            <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
-            <div>
               <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
               <input
                 type="number"
@@ -233,6 +211,12 @@ const RequestRideInner = () => {
                 className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
               />
             </div>
+
+            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster</p>
+            </div>
+            <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+            <div className="hidden md:block" />
             <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
             <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
 
