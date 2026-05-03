@@ -27,6 +27,7 @@ interface RideRow {
   cargo_height_m?: number | null;
   cargo_weight_t?: number | null;
   permit_number?: string | null;
+  client_reference?: string | null;
   escort_type_required?: string | null;
 }
 
