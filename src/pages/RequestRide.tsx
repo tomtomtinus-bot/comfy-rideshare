@@ -245,7 +245,8 @@ const Matches = ({
       </h2>
       <p className="text-sm text-brass-deep/60 mb-6">
         Selecteer er {numWanted}. Reistijd is een schatting. Begeleider wordt betaald
-        van vertrek standplaats tot terugkeer thuis.
+        van vertrek standplaats tot terugkeer thuis. <strong>Servicekosten: €2,50 per begeleider</strong> (€{(2.5 * numWanted).toFixed(2)} totaal).
+        U bent voor de begeleider zichtbaar als anonieme code; de begeleider heeft 30 minuten om te accepteren.
       </p>
 
       <ul className="space-y-px bg-brass-deep/10">
