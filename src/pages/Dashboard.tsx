@@ -400,11 +400,19 @@ const EscortDashboard = () => {
 
   return (
     <div className="space-y-12">
-      <header>
-        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-          Begeleider
-        </p>
-        <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn opdrachten</h1>
+      <header className="flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
+            Begeleider
+          </p>
+          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn opdrachten</h1>
+        </div>
+        <Link
+          to="/profiel"
+          className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
+        >
+          Mijn profiel
+        </Link>
       </header>
 
       {loading ? (
