@@ -46,37 +46,6 @@ interface GeoPoint {
   lng: number;
 }
 
-function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
-  const c = postcode.replace(/\s+/g, "");
-  if (/^\d{4}\s?[A-Za-z]{2}$/.test(c)) return "nl";
-  if (/^\d{4}$/.test(c)) return "be";
-  if (/^\d{5}$/.test(c)) return "de";
-  return "nl";
-}
-const COUNTRY_NAMES: Record<string, string> = {
-  nl: "Nederland", be: "België", de: "Duitsland", fr: "Frankrijk",
-};
-
-async function lookupPostcode(postcode: string): Promise<GeoPoint | null> {
-  const country = detectCountry(postcode);
-  const clean = postcode.replace(/\s+/g, "").toUpperCase();
-  try {
-    const res = await fetch(`https://api.zippopotam.us/${country}/${clean}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const place = data.places?.[0];
-    if (!place) return null;
-    return {
-      city: place["place name"],
-      country: COUNTRY_NAMES[country],
-      lat: parseFloat(place.latitude),
-      lng: parseFloat(place.longitude),
-    };
-  } catch {
-    return null;
-  }
-}
-
 const RequestRideInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -85,13 +54,9 @@ const RequestRideInner = () => {
 
   const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
   const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
-  const [pickupBusy, setPickupBusy] = useState(false);
-  const [dropoffBusy, setDropoffBusy] = useState(false);
 
   const [form, setForm] = useState({
-    pickup_postcode: "",
     pickup_address: "",
-    dropoff_postcode: "",
     dropoff_address: "",
     scheduled_at: "",
     num_escorts: 1,
@@ -101,25 +66,15 @@ const RequestRideInner = () => {
     cargo_height_m: 4.2,
     cargo_weight_t: 60,
     permit_number: "",
-    time_window_start: "",
-    time_window_end: "",
   });
 
-  const resolvePickup = async () => {
-    if (!form.pickup_postcode) return;
-    setPickupBusy(true);
-    const g = await lookupPostcode(form.pickup_postcode);
-    setPickupBusy(false);
-    if (!g) return toast.error("Vertrek-postcode niet gevonden");
-    setPickupGeo(g);
+  const onPickPickup = (r: AddressResult) => {
+    setForm((f) => ({ ...f, pickup_address: r.display }));
+    setPickupGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
-  const resolveDropoff = async () => {
-    if (!form.dropoff_postcode) return;
-    setDropoffBusy(true);
-    const g = await lookupPostcode(form.dropoff_postcode);
-    setDropoffBusy(false);
-    if (!g) return toast.error("Bestemmings-postcode niet gevonden");
-    setDropoffGeo(g);
+  const onPickDropoff = (r: AddressResult) => {
+    setForm((f) => ({ ...f, dropoff_address: r.display }));
+    setDropoffGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
 
   const findMatches = async (e: React.FormEvent) => {
