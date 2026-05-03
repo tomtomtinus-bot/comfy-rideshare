@@ -12,8 +12,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["'IBM Plex Sans'", "system-ui", "sans-serif"],
-        display: ["'Instrument Serif'", "Georgia", "serif"],
+        sans: ["'Inter Tight'", "'Inter'", "system-ui", "sans-serif"],
+        display: ["'Saira Condensed'", "'Inter Tight'", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
