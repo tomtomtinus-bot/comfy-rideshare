@@ -20,7 +20,7 @@ const schema = z.object({
   cargo_width_m: z.coerce.number().min(0).max(15),
   cargo_height_m: z.coerce.number().min(0).max(8),
   cargo_weight_t: z.coerce.number().min(0).max(500),
-  permit_number: z.string().trim().min(3).max(60),
+  permit_number: z.string().trim().max(60).optional(),
 });
 
 interface MatchedEscort {
@@ -219,11 +219,6 @@ const RequestRideInner = () => {
                   )}
                 </div>
               </div>
-              {pickupGeo && dropoffGeo && (
-                <p className="mt-4 text-xs text-brass-deep/60 tabular-nums">
-                  Afstand: <strong>{distanceKm(pickupGeo, dropoffGeo).toFixed(0)} km</strong> · geschatte rijtijd: <strong>{travelMinutes(distanceKm(pickupGeo, dropoffGeo))} min</strong>
-                </p>
-              )}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
@@ -235,7 +230,7 @@ const RequestRideInner = () => {
                 <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <Input label="Vergunningnummer" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+                <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
                   <input
