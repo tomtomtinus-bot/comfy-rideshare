@@ -61,10 +61,10 @@ const RequestRideInner = () => {
     scheduled_at: "",
     num_escorts: 1,
     notes: "",
-    cargo_length_m: 25,
-    cargo_width_m: 4,
-    cargo_height_m: 4.2,
-    cargo_weight_t: 60,
+    cargo_length_m: "25",
+    cargo_width_m: "4",
+    cargo_height_m: "4.2",
+    cargo_weight_t: "60",
     permit_number: "",
   });
 
