@@ -222,7 +222,7 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span></p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
                 <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
