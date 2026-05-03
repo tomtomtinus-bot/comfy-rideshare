@@ -62,7 +62,6 @@ const RequestRideInner = () => {
     permit_number: "",
     time_window_start: "",
     time_window_end: "",
-    escort_type_required: "vooroprijden" as typeof ESCORT_TYPES[number],
   });
 
   const findMatches = async (e: React.FormEvent) => {
