@@ -34,7 +34,7 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const parsed = loginSchema.safeParse({ email: fd.get("email"), password: fd.get("password") });
+    const parsed = loginSchema.safeParse({ email: String(fd.get("email") ?? ""), password: String(fd.get("password") ?? "") });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
