@@ -52,12 +52,20 @@ const RequestRideInner = () => {
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
   const [form, setForm] = useState({
     pickup_address: "",
-    pickup_city: "Utrecht",
+    pickup_city: "Rotterdam",
     dropoff_address: "",
     dropoff_city: "Amsterdam",
     scheduled_at: "",
     num_escorts: 1,
     notes: "",
+    cargo_length_m: 25,
+    cargo_width_m: 4,
+    cargo_height_m: 4.2,
+    cargo_weight_t: 60,
+    permit_number: "",
+    time_window_start: "",
+    time_window_end: "",
+    escort_type_required: "vooroprijden" as typeof ESCORT_TYPES[number],
   });
 
   const findMatches = async (e: React.FormEvent) => {
