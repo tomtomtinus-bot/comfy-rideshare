@@ -82,6 +82,9 @@ const ClientDashboard = () => {
   const [rides, setRides] = useState<RideRow[]>([]);
   const [assignments, setAssignments] = useState<Record<string, (AssignmentRow & { anon: string; rate: number })[]>>({});
   const [loading, setLoading] = useState(true);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportFrom, setExportFrom] = useState("");
+  const [exportTo, setExportTo] = useState("");
 
   useEffect(() => {
     (async () => {
