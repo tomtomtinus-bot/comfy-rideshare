@@ -192,26 +192,32 @@ const RequestRideInner = () => {
             <section>
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <RoutePoint
-                  title="A · Vertrek"
-                  postcode={form.pickup_postcode}
-                  setPostcode={(v) => setForm({ ...form, pickup_postcode: v })}
-                  onResolve={resolvePickup}
-                  busy={pickupBusy}
-                  geo={pickupGeo}
-                  address={form.pickup_address}
-                  setAddress={(v) => setForm({ ...form, pickup_address: v })}
-                />
-                <RoutePoint
-                  title="B · Bestemming"
-                  postcode={form.dropoff_postcode}
-                  setPostcode={(v) => setForm({ ...form, dropoff_postcode: v })}
-                  onResolve={resolveDropoff}
-                  busy={dropoffBusy}
-                  geo={dropoffGeo}
-                  address={form.dropoff_address}
-                  setAddress={(v) => setForm({ ...form, dropoff_address: v })}
-                />
+                <div className="bg-parchment/40 p-4 border border-brass-deep/10">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">A · Vertrek</p>
+                  <AddressAutocomplete
+                    label="Adres of stad"
+                    value={form.pickup_address}
+                    onChange={(v) => setForm({ ...form, pickup_address: v })}
+                    onSelect={onPickPickup}
+                    placeholder="Bv. Hafenstraße 12, Duisburg"
+                  />
+                  {pickupGeo && (
+                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
+                  )}
+                </div>
+                <div className="bg-parchment/40 p-4 border border-brass-deep/10">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">B · Bestemming</p>
+                  <AddressAutocomplete
+                    label="Adres of stad"
+                    value={form.dropoff_address}
+                    onChange={(v) => setForm({ ...form, dropoff_address: v })}
+                    onSelect={onPickDropoff}
+                    placeholder="Bv. Havenweg 8, Rotterdam"
+                  />
+                  {dropoffGeo && (
+                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
+                  )}
+                </div>
               </div>
               {pickupGeo && dropoffGeo && (
                 <p className="mt-4 text-xs text-brass-deep/60 tabular-nums">
@@ -231,11 +237,11 @@ const RequestRideInner = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label="Vergunningnummer" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
                   <input
-                    type="number" min={1} max={5}
+                    type="number" min={1} max={15}
                     value={form.num_escorts}
-                    onChange={(e) => setForm({ ...form, num_escorts: +e.target.value })}
+                    onChange={(e) => setForm({ ...form, num_escorts: Math.min(15, Math.max(1, +e.target.value || 1)) })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   />
                 </div>
@@ -243,11 +249,9 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Tijdvenster</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Starttijd</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
-                <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
-                <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
               </div>
             </section>
 
