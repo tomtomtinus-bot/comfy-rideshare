@@ -16,10 +16,10 @@ const schema = z.object({
   scheduled_at: z.string().min(1),
   num_escorts: z.coerce.number().int().min(1).max(15),
   notes: z.string().trim().max(500).optional(),
-  cargo_length_m: z.coerce.number().min(0).max(120),
-  cargo_width_m: z.coerce.number().min(0).max(15),
-  cargo_height_m: z.coerce.number().min(0).max(8),
-  cargo_weight_t: z.coerce.number().min(0).max(500),
+  cargo_length_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(120).optional()),
+  cargo_width_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(15).optional()),
+  cargo_height_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(8).optional()),
+  cargo_weight_t: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(500).optional()),
   permit_number: z.string().trim().max(60).optional(),
 });
 
@@ -61,10 +61,10 @@ const RequestRideInner = () => {
     scheduled_at: "",
     num_escorts: 1,
     notes: "",
-    cargo_length_m: "25",
-    cargo_width_m: "4",
-    cargo_height_m: "4.2",
-    cargo_weight_t: "60",
+    cargo_length_m: "",
+    cargo_width_m: "",
+    cargo_height_m: "",
+    cargo_weight_t: "",
     permit_number: "",
   });
 
@@ -139,10 +139,10 @@ const RequestRideInner = () => {
         notes: form.notes || null,
         status: "open",
         app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
-        cargo_length_m: parseFloat(form.cargo_length_m) || 0,
-        cargo_width_m: parseFloat(form.cargo_width_m) || 0,
-        cargo_height_m: parseFloat(form.cargo_height_m) || 0,
-        cargo_weight_t: parseFloat(form.cargo_weight_t) || 0,
+        cargo_length_m: form.cargo_length_m ? parseFloat(form.cargo_length_m) : null,
+        cargo_width_m: form.cargo_width_m ? parseFloat(form.cargo_width_m) : null,
+        cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m) : null,
+        cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
         time_window_start: new Date(form.scheduled_at).toISOString(),
         time_window_end: null,
@@ -222,7 +222,7 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span></p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
                 <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />

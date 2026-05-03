@@ -9,6 +9,7 @@ import Auth from "./pages/Auth.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import EscortSettings from "./pages/EscortSettings.tsx";
+import Invoices from "./pages/Invoices.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/aanvragen" element={<RequestRide />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profiel" element={<EscortSettings />} />
+            <Route path="/facturen" element={<Invoices />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
