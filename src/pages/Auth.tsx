@@ -187,7 +187,59 @@ const Auth = () => {
                     ))}
                   </select>
                 </div>
-                <Field name="hourlyRate" type="number" label="Uurtarief (€)" defaultValue="35" />
+                <Field name="hourlyRate" type="number" label="Uurtarief (€)" defaultValue="55" />
+                <Field name="vehicleType" label="Pilotvoertuig (type & kenmerk)" defaultValue="VW Crafter geel · zwaailichtbalk" />
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    Categorieën uitzonderlijk vervoer
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {CATEGORIES.map((c) => {
+                      const on = categories.includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setCategories((s) => toggleVal(s, c))}
+                          className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
+                            on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    Type begeleiding
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {ESCORT_TYPES.map((t) => {
+                      const on = escortTypes.includes(t);
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setEscortTypes((s) => toggleVal(s, t))}
+                          className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
+                            on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Field name="certNumber" label="Certificaat verkeersregelaar (nr.)" />
+                <Field name="certExpiresOn" type="date" label="Certificaat geldig tot" />
+                <Field name="vcaNumber" label="VCA-diploma nr." />
+                <Field name="insurancePolicy" label="Aansprakelijkheidsverzekering (polisnr.)" />
               </>
             )}
 
