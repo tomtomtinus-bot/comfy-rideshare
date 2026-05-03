@@ -468,6 +468,8 @@ const EscortDashboard = () => {
                       >
                         Uren invullen
                       </button>
+                    ) : (
+                      <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                     )}
                   </div>
                 </div>
