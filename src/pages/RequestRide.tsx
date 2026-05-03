@@ -4,16 +4,16 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { CITIES, geocode, distanceKm, travelMinutes } from "@/lib/geo";
+import { distanceKm, travelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 
 const schema = z.object({
-  pickup_address: z.string().trim().min(3).max(200),
-  pickup_city: z.string().min(1),
-  dropoff_address: z.string().trim().min(3).max(200),
-  dropoff_city: z.string().min(1),
+  pickup_postcode: z.string().trim().min(4).max(12),
+  pickup_address: z.string().trim().min(2).max(200),
+  dropoff_postcode: z.string().trim().min(4).max(12),
+  dropoff_address: z.string().trim().min(2).max(200),
   scheduled_at: z.string().min(1),
   num_escorts: z.coerce.number().int().min(1).max(5),
   notes: z.string().trim().max(500).optional(),
@@ -42,16 +42,60 @@ interface MatchedEscort {
   travelBackHomeMin: number;
 }
 
+interface GeoPoint {
+  city: string;
+  country: string;
+  lat: number;
+  lng: number;
+}
+
+function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
+  const c = postcode.replace(/\s+/g, "");
+  if (/^\d{4}\s?[A-Za-z]{2}$/.test(c)) return "nl";
+  if (/^\d{4}$/.test(c)) return "be";
+  if (/^\d{5}$/.test(c)) return "de";
+  return "nl";
+}
+const COUNTRY_NAMES: Record<string, string> = {
+  nl: "Nederland", be: "België", de: "Duitsland", fr: "Frankrijk",
+};
+
+async function lookupPostcode(postcode: string): Promise<GeoPoint | null> {
+  const country = detectCountry(postcode);
+  const clean = postcode.replace(/\s+/g, "").toUpperCase();
+  try {
+    const res = await fetch(`https://api.zippopotam.us/${country}/${clean}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const place = data.places?.[0];
+    if (!place) return null;
+    return {
+      city: place["place name"],
+      country: COUNTRY_NAMES[country],
+      lat: parseFloat(place.latitude),
+      lng: parseFloat(place.longitude),
+    };
+  } catch {
+    return null;
+  }
+}
+
 const RequestRideInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
+
+  const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
+  const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
+  const [pickupBusy, setPickupBusy] = useState(false);
+  const [dropoffBusy, setDropoffBusy] = useState(false);
+
   const [form, setForm] = useState({
+    pickup_postcode: "",
     pickup_address: "",
-    pickup_city: "Rotterdam",
+    dropoff_postcode: "",
     dropoff_address: "",
-    dropoff_city: "Amsterdam",
     scheduled_at: "",
     num_escorts: 1,
     notes: "",
@@ -64,14 +108,28 @@ const RequestRideInner = () => {
     time_window_end: "",
   });
 
+  const resolvePickup = async () => {
+    if (!form.pickup_postcode) return;
+    setPickupBusy(true);
+    const g = await lookupPostcode(form.pickup_postcode);
+    setPickupBusy(false);
+    if (!g) return toast.error("Vertrek-postcode niet gevonden");
+    setPickupGeo(g);
+  };
+  const resolveDropoff = async () => {
+    if (!form.dropoff_postcode) return;
+    setDropoffBusy(true);
+    const g = await lookupPostcode(form.dropoff_postcode);
+    setDropoffBusy(false);
+    if (!g) return toast.error("Bestemmings-postcode niet gevonden");
+    setDropoffGeo(g);
+  };
+
   const findMatches = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-
-    const pickupGeo = geocode(form.pickup_city);
-    const dropoffGeo = geocode(form.dropoff_city);
-    if (!pickupGeo || !dropoffGeo) return toast.error("Stad niet herkend");
+    if (!pickupGeo || !dropoffGeo) return toast.error("Postcodes nog niet bevestigd");
 
     setBusy(true);
     const { data, error } = await supabase
@@ -97,21 +155,16 @@ const RequestRideInner = () => {
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
       .slice(0, 3);
 
-    if (ranked.length === 0) {
-      toast.error("Geen beschikbare begeleiders gevonden voor deze regio");
-      return;
-    }
+    if (ranked.length === 0) return toast.error("Geen beschikbare begeleiders gevonden");
     setMatches(ranked);
   };
 
   const bookEscorts = async (selected: MatchedEscort[]) => {
-    if (!user) return;
+    if (!user || !pickupGeo || !dropoffGeo) return;
     if (selected.length !== form.num_escorts) {
       return toast.error(`Selecteer precies ${form.num_escorts} begeleider(s)`);
     }
 
-    const pickupGeo = geocode(form.pickup_city)!;
-    const dropoffGeo = geocode(form.dropoff_city)!;
     const rideKm = distanceKm(pickupGeo, dropoffGeo);
     const rideMin = travelMinutes(rideKm);
 
@@ -180,47 +233,73 @@ const RequestRideInner = () => {
             Nieuwe konvooi-aanvraag
           </p>
           <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            Vraag begeleiding aan voor uw transport.
+            Van A naar B — vraag begeleiding aan.
           </h1>
 
-          <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Route</p>
-            </div>
-            <Input label="Vertrekadres" value={form.pickup_address} onChange={(v) => setForm({ ...form, pickup_address: v })} placeholder="Bijv. Maasvlakte Plaza 1" />
-            <Select label="Vertrekstad" value={form.pickup_city} onChange={(v) => setForm({ ...form, pickup_city: v })} />
-            <Input label="Bestemmingsadres" value={form.dropoff_address} onChange={(v) => setForm({ ...form, dropoff_address: v })} placeholder="Bijv. Hafenstraße 12, Duisburg" />
-            <Select label="Bestemmingsstad" value={form.dropoff_city} onChange={(v) => setForm({ ...form, dropoff_city: v })} />
+          <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
+            <section>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <RoutePoint
+                  title="A · Vertrek"
+                  postcode={form.pickup_postcode}
+                  setPostcode={(v) => setForm({ ...form, pickup_postcode: v })}
+                  onResolve={resolvePickup}
+                  busy={pickupBusy}
+                  geo={pickupGeo}
+                  address={form.pickup_address}
+                  setAddress={(v) => setForm({ ...form, pickup_address: v })}
+                />
+                <RoutePoint
+                  title="B · Bestemming"
+                  postcode={form.dropoff_postcode}
+                  setPostcode={(v) => setForm({ ...form, dropoff_postcode: v })}
+                  onResolve={resolveDropoff}
+                  busy={dropoffBusy}
+                  geo={dropoffGeo}
+                  address={form.dropoff_address}
+                  setAddress={(v) => setForm({ ...form, dropoff_address: v })}
+                />
+              </div>
+              {pickupGeo && dropoffGeo && (
+                <p className="mt-4 text-xs text-brass-deep/60 tabular-nums">
+                  Afstand: <strong>{distanceKm(pickupGeo, dropoffGeo).toFixed(0)} km</strong> · geschatte rijtijd: <strong>{travelMinutes(distanceKm(pickupGeo, dropoffGeo))} min</strong>
+                </p>
+              )}
+            </section>
 
-            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Lading & vergunning</p>
-            </div>
-            <Input label="Lengte (m)" type="number" value={String(form.cargo_length_m)} onChange={(v) => setForm({ ...form, cargo_length_m: +v })} />
-            <Input label="Breedte (m)" type="number" value={String(form.cargo_width_m)} onChange={(v) => setForm({ ...form, cargo_width_m: +v })} />
-            <Input label="Hoogte (m)" type="number" value={String(form.cargo_height_m)} onChange={(v) => setForm({ ...form, cargo_height_m: +v })} />
-            <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
-            <Input label="Vergunningnummer (RDW/wegbeheerder)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+            <section className="border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Input label="Lengte (m)" type="number" value={String(form.cargo_length_m)} onChange={(v) => setForm({ ...form, cargo_length_m: +v })} />
+                <Input label="Breedte (m)" type="number" value={String(form.cargo_width_m)} onChange={(v) => setForm({ ...form, cargo_width_m: +v })} />
+                <Input label="Hoogte (m)" type="number" value={String(form.cargo_height_m)} onChange={(v) => setForm({ ...form, cargo_height_m: +v })} />
+                <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <Input label="Vergunningnummer" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
+                  <input
+                    type="number" min={1} max={5}
+                    value={form.num_escorts}
+                    onChange={(e) => setForm({ ...form, num_escorts: +e.target.value })}
+                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Tijdvenster</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+                <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
+                <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
+              </div>
+            </section>
+
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
-              <input
-                type="number"
-                min={1}
-                max={5}
-                value={form.num_escorts}
-                onChange={(e) => setForm({ ...form, num_escorts: +e.target.value })}
-                className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-              />
-            </div>
-
-            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster</p>
-            </div>
-            <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
-            <div className="hidden md:block" />
-            <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
-            <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
-
-            <div className="md:col-span-2">
               <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Opmerkingen (optioneel)</label>
               <textarea
                 value={form.notes}
@@ -229,19 +308,20 @@ const RequestRideInner = () => {
                 className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
               />
             </div>
+
             <button
-              disabled={busy}
-              className="md:col-span-2 mt-2 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
+              disabled={busy || !pickupGeo || !dropoffGeo}
+              className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
               {busy ? "Zoeken…" : "Zoek dichtstbijzijnde begeleiders"}
             </button>
           </form>
 
-          {matches && (
+          {matches && pickupGeo && dropoffGeo && (
             <Matches
               matches={matches}
               numWanted={form.num_escorts}
-              hourlyRideMin={travelMinutes(distanceKm(geocode(form.pickup_city)!, geocode(form.dropoff_city)!))}
+              hourlyRideMin={travelMinutes(distanceKm(pickupGeo, dropoffGeo))}
               onBook={bookEscorts}
               busy={busy}
             />
@@ -253,12 +333,49 @@ const RequestRideInner = () => {
   );
 };
 
+const RoutePoint = ({
+  title, postcode, setPostcode, onResolve, busy, geo, address, setAddress,
+}: {
+  title: string;
+  postcode: string;
+  setPostcode: (v: string) => void;
+  onResolve: () => void;
+  busy: boolean;
+  geo: GeoPoint | null;
+  address: string;
+  setAddress: (v: string) => void;
+}) => (
+  <div className="bg-parchment/40 p-4 border border-brass-deep/10">
+    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{title}</p>
+    <div className="space-y-3">
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Postcode</label>
+        <input
+          value={postcode}
+          onChange={(e) => setPostcode(e.target.value)}
+          onBlur={onResolve}
+          placeholder="3011 AA / 2000 / 47051"
+          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+        />
+        <p className="text-[10px] text-brass-deep/50 mt-1 min-h-[14px]">
+          {busy ? "Locatie ophalen…" : geo ? `${geo.city}, ${geo.country}` : "Plaats wordt automatisch bepaald"}
+        </p>
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Straat + huisnummer</label>
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Bijv. Hafenstraße 12"
+          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+        />
+      </div>
+    </div>
+  </div>
+);
+
 const Matches = ({
-  matches,
-  numWanted,
-  hourlyRideMin,
-  onBook,
-  busy,
+  matches, numWanted, hourlyRideMin, onBook, busy,
 }: {
   matches: MatchedEscort[];
   numWanted: number;
@@ -274,16 +391,10 @@ const Matches = ({
   };
   return (
     <section className="mt-12">
-      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-        Voorgestelde begeleiders
-      </p>
-      <h2 className="font-display text-3xl text-brass-deep italic mb-2">
-        Dichtstbijzijnde anonieme begeleiders
-      </h2>
+      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
+      <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted}. Reistijd is een schatting. Begeleider wordt betaald
-        van vertrek standplaats tot terugkeer thuis. <strong>Servicekosten: €2,50 per begeleider</strong> (€{(2.5 * numWanted).toFixed(2)} totaal).
-        U bent voor de begeleider zichtbaar als anonieme code; de begeleider heeft 30 minuten om te accepteren.
+        Selecteer er {numWanted}. <strong>Servicekosten: €2,50 per begeleider</strong> (€{(2.5 * numWanted).toFixed(2)} totaal).
       </p>
 
       <ul className="space-y-px bg-brass-deep/10">
@@ -293,36 +404,17 @@ const Matches = ({
           const hours = +(totalMin / 60).toFixed(2);
           const cost = (hours * m.hourly_rate).toFixed(2);
           return (
-            <li
-              key={m.id}
-              onClick={() => toggle(m.id)}
-              className={`bg-card p-6 cursor-pointer transition-all ${
-                isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"
-              }`}
-            >
+            <li key={m.id} onClick={() => toggle(m.id)}
+              className={`bg-card p-6 cursor-pointer transition-all ${isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"}`}>
               <div className="grid grid-cols-12 gap-4 items-center">
                 <div className="col-span-12 md:col-span-3">
-                  <p className="font-display text-2xl text-brass-deep tabular-nums">
-                    #{m.anonymous_id}
-                  </p>
+                  <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
                   <p className="text-xs text-brass-deep/55 mt-1">★ {m.rating} · {m.rides_completed} ritten</p>
                 </div>
-                <div className="col-span-6 md:col-span-2 text-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Naar A</p>
-                  <p className="font-medium tabular-nums">{m.travelToPickupMin} min</p>
-                </div>
-                <div className="col-span-6 md:col-span-2 text-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Terug van B</p>
-                  <p className="font-medium tabular-nums">{m.travelBackHomeMin} min</p>
-                </div>
-                <div className="col-span-6 md:col-span-2 text-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Tarief</p>
-                  <p className="font-medium tabular-nums">€{m.hourly_rate}/u</p>
-                </div>
-                <div className="col-span-6 md:col-span-2 text-sm">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Schatting</p>
-                  <p className="font-semibold tabular-nums">€{cost}</p>
-                </div>
+                <Cell label="Naar A" value={`${m.travelToPickupMin} min`} />
+                <Cell label="Terug van B" value={`${m.travelBackHomeMin} min`} />
+                <Cell label="Tarief" value={`€${m.hourly_rate}/u`} />
+                <Cell label="Schatting" value={`€${cost}`} bold />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
                 </div>
@@ -332,25 +424,24 @@ const Matches = ({
         })}
       </ul>
 
-      <button
-        onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
+      <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
         disabled={busy || selected.length !== numWanted}
-        className="mt-8 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
-      >
-        {busy
-          ? "Boeken…"
-          : `Boek ${selected.length}/${numWanted} begeleider(s)`}
+        className="mt-8 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
+        {busy ? "Boeken…" : `Boek ${selected.length}/${numWanted} begeleider(s)`}
       </button>
     </section>
   );
 };
 
+const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
+  <div className="col-span-6 md:col-span-2 text-sm">
+    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
+    <p className={`tabular-nums ${bold ? "font-semibold" : "font-medium"}`}>{value}</p>
+  </div>
+);
+
 const Input = ({
-  label,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
+  label, value, onChange, type = "text", placeholder,
 }: {
   label: string;
   value: string;
@@ -359,43 +450,12 @@ const Input = ({
   placeholder?: string;
 }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-      {label}
-    </label>
+    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
     <input
-      type={type}
-      value={value}
-      placeholder={placeholder}
+      type={type} value={value} placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
-  </div>
-);
-
-const Select = ({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) => (
-  <div>
-    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-      {label}
-    </label>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-    >
-      {CITIES.map((c) => (
-        <option key={c.city} value={c.city}>
-          {c.city}, {c.country}
-        </option>
-      ))}
-    </select>
   </div>
 );
 
