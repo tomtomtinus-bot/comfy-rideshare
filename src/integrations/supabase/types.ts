@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      escort_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          escort_id: string
+          id: string
+          start_time: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          escort_id: string
+          id?: string
+          start_time: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          escort_id?: string
+          id?: string
+          start_time?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
       escort_profiles: {
         Row: {
           anonymous_id: string
@@ -24,6 +51,7 @@ export type Database = {
           categories: string[]
           cert_expires_on: string | null
           cert_number: string | null
+          certificate_files: string[]
           countries: string[]
           created_at: string
           escort_types: string[]
@@ -50,6 +78,7 @@ export type Database = {
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
+          certificate_files?: string[]
           countries?: string[]
           created_at?: string
           escort_types?: string[]
@@ -76,6 +105,7 @@ export type Database = {
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
+          certificate_files?: string[]
           countries?: string[]
           created_at?: string
           escort_types?: string[]
