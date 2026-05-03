@@ -69,12 +69,7 @@ const InvoicesInner = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const generateNow = async () => {
-    const { data, error } = await supabase.rpc("generate_weekly_invoices" as never);
-    if (error) return toast.error(error.message);
-    toast.success(`${data ?? 0} factuur/facturen aangemaakt`);
-    load();
-  };
+  // Weekly invoices are generated automatically by a scheduled job.
 
   const markPaid = async (id: string) => {
     const { error } = await supabase
