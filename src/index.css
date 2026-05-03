@@ -4,68 +4,75 @@
 
 @layer base {
   :root {
-    /* Brass & Parchment palette */
-    --background: 50 33% 98%;
-    --foreground: 60 5% 11%;
+    /* Industrial logistics palette — Steel Navy & Safety Amber */
+    --background: 210 20% 97%;
+    --foreground: 215 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 60 5% 11%;
+    --card-foreground: 215 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 60 5% 11%;
+    --popover-foreground: 215 30% 12%;
 
-    --primary: 47 16% 27%;            /* brass-deep */
-    --primary-foreground: 50 33% 98%;
+    --primary: 215 45% 18%;            /* steel navy */
+    --primary-foreground: 210 20% 97%;
 
-    --secondary: 48 16% 89%;          /* patina */
-    --secondary-foreground: 47 16% 27%;
+    --secondary: 215 16% 92%;          /* cool steel tint */
+    --secondary-foreground: 215 45% 18%;
 
-    --muted: 48 16% 89%;
-    --muted-foreground: 47 10% 40%;
+    --muted: 215 16% 94%;
+    --muted-foreground: 215 14% 38%;
 
-    --accent: 38 44% 45%;             /* brass-gold */
-    --accent-foreground: 50 33% 98%;
+    --accent: 36 96% 48%;              /* safety amber */
+    --accent-foreground: 215 45% 12%;
 
-    --destructive: 0 70% 45%;
-    --destructive-foreground: 50 33% 98%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 210 20% 97%;
 
-    --border: 47 16% 27% / 0.12;
-    --input: 47 16% 27% / 0.15;
-    --ring: 38 44% 45%;
+    --border: 215 30% 12% / 0.10;
+    --input: 215 30% 12% / 0.14;
+    --ring: 36 96% 48%;
 
-    --radius: 0.25rem;
+    --radius: 0.125rem;
 
-    /* Custom semantic */
-    --brass-deep: 47 16% 27%;
-    --brass-gold: 38 44% 45%;
-    --parchment: 50 33% 98%;
-    --patina: 48 16% 89%;
-    --ink: 60 5% 11%;
+    /* Legacy token names mapped to the new industrial palette
+       so existing components keep working without rewrites. */
+    --brass-deep: 215 45% 18%;         /* steel navy */
+    --brass-gold: 36 96% 48%;          /* safety amber */
+    --parchment: 210 20% 97%;          /* off-white */
+    --patina: 215 16% 92%;             /* cool steel */
+    --ink: 215 30% 12%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(var(--parchment)) 0%, hsl(var(--patina) / 0.5) 100%);
-    --shadow-etched: 0 1px 0 hsl(var(--brass-deep) / 0.08), 0 0 0 1px hsl(var(--brass-deep) / 0.06);
-    --shadow-elevated: 0 20px 60px -20px hsl(var(--brass-deep) / 0.18);
+    --gradient-hero: linear-gradient(135deg, hsl(var(--parchment)) 0%, hsl(var(--patina)) 100%);
+    --shadow-etched: 0 1px 0 hsl(var(--brass-deep) / 0.06), 0 0 0 1px hsl(var(--brass-deep) / 0.08);
+    --shadow-elevated: 0 24px 60px -24px hsl(var(--brass-deep) / 0.28);
     --transition-smooth: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dark {
-    --background: 60 5% 8%;
-    --foreground: 50 33% 95%;
-    --card: 60 5% 10%;
-    --card-foreground: 50 33% 95%;
-    --popover: 60 5% 10%;
-    --popover-foreground: 50 33% 95%;
-    --primary: 38 44% 55%;
-    --primary-foreground: 60 5% 8%;
-    --secondary: 60 5% 16%;
-    --secondary-foreground: 50 33% 95%;
-    --muted: 60 5% 16%;
-    --muted-foreground: 50 10% 65%;
-    --accent: 38 44% 55%;
-    --accent-foreground: 60 5% 8%;
-    --border: 50 33% 95% / 0.1;
-    --input: 50 33% 95% / 0.15;
-    --ring: 38 44% 55%;
+    --background: 215 35% 8%;
+    --foreground: 210 20% 96%;
+    --card: 215 30% 11%;
+    --card-foreground: 210 20% 96%;
+    --popover: 215 30% 11%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 36 96% 52%;
+    --primary-foreground: 215 35% 8%;
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 215 25% 16%;
+    --muted-foreground: 215 14% 65%;
+    --accent: 36 96% 52%;
+    --accent-foreground: 215 35% 8%;
+    --border: 210 20% 96% / 0.10;
+    --input: 210 20% 96% / 0.14;
+    --ring: 36 96% 52%;
+
+    --brass-deep: 210 20% 96%;
+    --brass-gold: 36 96% 52%;
+    --parchment: 215 35% 8%;
+    --patina: 215 25% 14%;
+    --ink: 210 20% 96%;
   }
 }
 
@@ -76,15 +83,23 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Inter Tight', 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, .font-display {
+    letter-spacing: -0.01em;
   }
 
   .font-serif-display {
-    font-family: 'Instrument Serif', Georgia, serif;
+    font-family: 'Saira Condensed', 'Inter Tight', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 }
+
