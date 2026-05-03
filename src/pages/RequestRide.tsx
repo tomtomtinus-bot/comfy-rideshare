@@ -8,22 +8,19 @@ import { distanceKm, travelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 
 const schema = z.object({
-  pickup_postcode: z.string().trim().min(4).max(12),
   pickup_address: z.string().trim().min(2).max(200),
-  dropoff_postcode: z.string().trim().min(4).max(12),
   dropoff_address: z.string().trim().min(2).max(200),
   scheduled_at: z.string().min(1),
-  num_escorts: z.coerce.number().int().min(1).max(5),
+  num_escorts: z.coerce.number().int().min(1).max(15),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.coerce.number().min(0).max(120),
   cargo_width_m: z.coerce.number().min(0).max(15),
   cargo_height_m: z.coerce.number().min(0).max(8),
   cargo_weight_t: z.coerce.number().min(0).max(500),
   permit_number: z.string().trim().min(3).max(60),
-  time_window_start: z.string().min(1),
-  time_window_end: z.string().min(1),
 });
 
 interface MatchedEscort {
@@ -49,37 +46,6 @@ interface GeoPoint {
   lng: number;
 }
 
-function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
-  const c = postcode.replace(/\s+/g, "");
-  if (/^\d{4}\s?[A-Za-z]{2}$/.test(c)) return "nl";
-  if (/^\d{4}$/.test(c)) return "be";
-  if (/^\d{5}$/.test(c)) return "de";
-  return "nl";
-}
-const COUNTRY_NAMES: Record<string, string> = {
-  nl: "Nederland", be: "België", de: "Duitsland", fr: "Frankrijk",
-};
-
-async function lookupPostcode(postcode: string): Promise<GeoPoint | null> {
-  const country = detectCountry(postcode);
-  const clean = postcode.replace(/\s+/g, "").toUpperCase();
-  try {
-    const res = await fetch(`https://api.zippopotam.us/${country}/${clean}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const place = data.places?.[0];
-    if (!place) return null;
-    return {
-      city: place["place name"],
-      country: COUNTRY_NAMES[country],
-      lat: parseFloat(place.latitude),
-      lng: parseFloat(place.longitude),
-    };
-  } catch {
-    return null;
-  }
-}
-
 const RequestRideInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -88,13 +54,9 @@ const RequestRideInner = () => {
 
   const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
   const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
-  const [pickupBusy, setPickupBusy] = useState(false);
-  const [dropoffBusy, setDropoffBusy] = useState(false);
 
   const [form, setForm] = useState({
-    pickup_postcode: "",
     pickup_address: "",
-    dropoff_postcode: "",
     dropoff_address: "",
     scheduled_at: "",
     num_escorts: 1,
@@ -104,25 +66,15 @@ const RequestRideInner = () => {
     cargo_height_m: 4.2,
     cargo_weight_t: 60,
     permit_number: "",
-    time_window_start: "",
-    time_window_end: "",
   });
 
-  const resolvePickup = async () => {
-    if (!form.pickup_postcode) return;
-    setPickupBusy(true);
-    const g = await lookupPostcode(form.pickup_postcode);
-    setPickupBusy(false);
-    if (!g) return toast.error("Vertrek-postcode niet gevonden");
-    setPickupGeo(g);
+  const onPickPickup = (r: AddressResult) => {
+    setForm((f) => ({ ...f, pickup_address: r.display }));
+    setPickupGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
-  const resolveDropoff = async () => {
-    if (!form.dropoff_postcode) return;
-    setDropoffBusy(true);
-    const g = await lookupPostcode(form.dropoff_postcode);
-    setDropoffBusy(false);
-    if (!g) return toast.error("Bestemmings-postcode niet gevonden");
-    setDropoffGeo(g);
+  const onPickDropoff = (r: AddressResult) => {
+    setForm((f) => ({ ...f, dropoff_address: r.display }));
+    setDropoffGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
 
   const findMatches = async (e: React.FormEvent) => {
@@ -192,8 +144,8 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m,
         cargo_weight_t: form.cargo_weight_t,
         permit_number: form.permit_number,
-        time_window_start: new Date(form.time_window_start).toISOString(),
-        time_window_end: new Date(form.time_window_end).toISOString(),
+        time_window_start: new Date(form.scheduled_at).toISOString(),
+        time_window_end: null,
       })
       .select()
       .single();
@@ -240,26 +192,32 @@ const RequestRideInner = () => {
             <section>
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <RoutePoint
-                  title="A · Vertrek"
-                  postcode={form.pickup_postcode}
-                  setPostcode={(v) => setForm({ ...form, pickup_postcode: v })}
-                  onResolve={resolvePickup}
-                  busy={pickupBusy}
-                  geo={pickupGeo}
-                  address={form.pickup_address}
-                  setAddress={(v) => setForm({ ...form, pickup_address: v })}
-                />
-                <RoutePoint
-                  title="B · Bestemming"
-                  postcode={form.dropoff_postcode}
-                  setPostcode={(v) => setForm({ ...form, dropoff_postcode: v })}
-                  onResolve={resolveDropoff}
-                  busy={dropoffBusy}
-                  geo={dropoffGeo}
-                  address={form.dropoff_address}
-                  setAddress={(v) => setForm({ ...form, dropoff_address: v })}
-                />
+                <div className="bg-parchment/40 p-4 border border-brass-deep/10">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">A · Vertrek</p>
+                  <AddressAutocomplete
+                    label="Adres of stad"
+                    value={form.pickup_address}
+                    onChange={(v) => setForm({ ...form, pickup_address: v })}
+                    onSelect={onPickPickup}
+                    placeholder="Bv. Hafenstraße 12, Duisburg"
+                  />
+                  {pickupGeo && (
+                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
+                  )}
+                </div>
+                <div className="bg-parchment/40 p-4 border border-brass-deep/10">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">B · Bestemming</p>
+                  <AddressAutocomplete
+                    label="Adres of stad"
+                    value={form.dropoff_address}
+                    onChange={(v) => setForm({ ...form, dropoff_address: v })}
+                    onSelect={onPickDropoff}
+                    placeholder="Bv. Havenweg 8, Rotterdam"
+                  />
+                  {dropoffGeo && (
+                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
+                  )}
+                </div>
               </div>
               {pickupGeo && dropoffGeo && (
                 <p className="mt-4 text-xs text-brass-deep/60 tabular-nums">
@@ -279,11 +237,11 @@ const RequestRideInner = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label="Vergunningnummer" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
                   <input
-                    type="number" min={1} max={5}
+                    type="number" min={1} max={15}
                     value={form.num_escorts}
-                    onChange={(e) => setForm({ ...form, num_escorts: +e.target.value })}
+                    onChange={(e) => setForm({ ...form, num_escorts: Math.min(15, Math.max(1, +e.target.value || 1)) })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   />
                 </div>
@@ -291,11 +249,9 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Tijdvenster</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Starttijd</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
-                <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
-                <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
               </div>
             </section>
 
@@ -332,47 +288,6 @@ const RequestRideInner = () => {
     </div>
   );
 };
-
-const RoutePoint = ({
-  title, postcode, setPostcode, onResolve, busy, geo, address, setAddress,
-}: {
-  title: string;
-  postcode: string;
-  setPostcode: (v: string) => void;
-  onResolve: () => void;
-  busy: boolean;
-  geo: GeoPoint | null;
-  address: string;
-  setAddress: (v: string) => void;
-}) => (
-  <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{title}</p>
-    <div className="space-y-3">
-      <div>
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Postcode</label>
-        <input
-          value={postcode}
-          onChange={(e) => setPostcode(e.target.value)}
-          onBlur={onResolve}
-          placeholder="3011 AA / 2000 / 47051"
-          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-        />
-        <p className="text-[10px] text-brass-deep/50 mt-1 min-h-[14px]">
-          {busy ? "Locatie ophalen…" : geo ? `${geo.city}, ${geo.country}` : "Plaats wordt automatisch bepaald"}
-        </p>
-      </div>
-      <div>
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Straat + huisnummer</label>
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Bijv. Hafenstraße 12"
-          className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-        />
-      </div>
-    </div>
-  </div>
-);
 
 const Matches = ({
   matches, numWanted, hourlyRideMin, onBook, busy,
