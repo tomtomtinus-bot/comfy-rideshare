@@ -21,6 +21,7 @@ const schema = z.object({
   cargo_height_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(8).optional()),
   cargo_weight_t: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(500).optional()),
   permit_number: z.string().trim().max(60).optional(),
+  client_reference: z.string().trim().max(80).optional(),
 });
 
 interface MatchedEscort {
