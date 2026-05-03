@@ -34,7 +34,7 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const parsed = loginSchema.safeParse({ email: fd.get("email"), password: fd.get("password") });
+    const parsed = loginSchema.safeParse({ email: String(fd.get("email") ?? ""), password: String(fd.get("password") ?? "") });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -52,13 +52,17 @@ const Auth = () => {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const get = (k: string) => {
+      const v = fd.get(k);
+      return typeof v === "string" ? v : undefined;
+    };
     const parsed = signupSchema.safeParse({
-      email: fd.get("email"),
-      password: fd.get("password"),
-      fullName: fd.get("fullName"),
-      phone: fd.get("phone"),
+      email: get("email"),
+      password: get("password"),
+      fullName: get("fullName"),
+      phone: get("phone"),
       role,
-      baseCity: fd.get("baseCity"),
+      baseCity: get("baseCity"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
