@@ -404,12 +404,18 @@ const EscortDashboard = () => {
         <ul className="space-y-px bg-brass-deep/10">
           {items.map((a) => {
             const submitted = !!a.hours_submitted_at;
+            const isInvited = a.status === "invited";
+            const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
+            const expired = isInvited && minsLeft === 0;
+            const accepted = a.status === "accepted";
             return (
-              <li key={a.id} className="bg-card p-6 md:p-8">
+              <li key={a.id} className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""}`}>
                 <div className="grid grid-cols-12 gap-4 items-start">
                   <div className="col-span-12 md:col-span-3">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
                     <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
+                    <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
+                    <div className="mt-2"><StatusBadge status={a.status} /></div>
                   </div>
                   <div className="col-span-12 md:col-span-5">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
@@ -427,11 +433,35 @@ const EscortDashboard = () => {
                     </p>
                   </div>
                   <div className="col-span-6 md:col-span-2 text-right">
-                    {submitted ? (
+                    {isInvited && !expired ? (
+                      <div className="space-y-2">
+                        <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                          Nog {minsLeft} min
+                        </p>
+                        <div className="flex gap-1 justify-end">
+                          <button
+                            onClick={() => respond(a.id, true)}
+                            className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                          >
+                            Accepteer
+                          </button>
+                          <button
+                            onClick={() => respond(a.id, false)}
+                            className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
+                          >
+                            Weiger
+                          </button>
+                        </div>
+                      </div>
+                    ) : expired ? (
+                      <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
+                        Verlopen
+                      </span>
+                    ) : submitted ? (
                       <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold">
                         ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
                       </span>
-                    ) : (
+                    ) : accepted ? (
                       <button
                         onClick={() => setOpenId(openId === a.id ? null : a.id)}
                         className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
