@@ -128,8 +128,17 @@ const ClientDashboard = () => {
   }, [user]);
 
   const exportXlsx = () => {
-    if (rides.length === 0) return toast.error("Geen ritten om te exporteren");
-    const rows = rides.map((r) => {
+    let filtered = rides;
+    if (exportFrom) {
+      const f = new Date(exportFrom).getTime();
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= f);
+    }
+    if (exportTo) {
+      const t = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= t);
+    }
+    if (filtered.length === 0) return toast.error("Geen ritten in dit tijdsbestek");
+    const rows = filtered.map((r) => {
       const ass = assignments[r.id] ?? [];
       const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
       const totalEst = ass.reduce((s, a) => s + Number(a.estimated_cost ?? 0), 0);
@@ -156,8 +165,10 @@ const ClientDashboard = () => {
     ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Ritten");
-    XLSX.writeFile(wb, `rittenadministratie-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const range = exportFrom || exportTo ? `-${exportFrom || "begin"}_tot_${exportTo || "eind"}` : "";
+    XLSX.writeFile(wb, `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`);
     toast.success("Excel-bestand gedownload");
+    setExportOpen(false);
   };
 
   return (
