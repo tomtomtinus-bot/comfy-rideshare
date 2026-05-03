@@ -190,23 +190,31 @@ const Inner = () => {
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : (
             <form onSubmit={save} className="bg-card shadow-etched p-8 md:p-10 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Standplaats</Label>
-                  <select
-                    name="baseCity"
-                    defaultValue={profile?.base_city}
-                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  >
-                    {CITIES.map((c) => (
-                      <option key={c.city} value={c.city}>
-                        {c.city}, {c.country}
-                      </option>
-                    ))}
-                  </select>
+              <div>
+                <p className="text-[11px] text-brass-deep/60 mb-3">
+                  Vul je <strong>exacte standplaats</strong> in. Opdrachtgevers zien alleen de plaats/regio; het volledige adres wordt enkel gebruikt om aan- en afrijtijden te berekenen.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input name="baseAddress" label="Straat + huisnummer" defaultValue={profile?.base_address ?? ""} />
+                  <Input name="basePostcode" label="Postcode" defaultValue={profile?.base_postcode ?? ""} />
+                  <div>
+                    <Label>Plaats</Label>
+                    <select
+                      name="baseCity"
+                      defaultValue={profile?.base_city}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    >
+                      {CITIES.map((c) => (
+                        <option key={c.city} value={c.city}>
+                          {c.city}, {c.country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
                 </div>
-                <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
               </div>
+
 
               <Input
                 name="vehicleType"
