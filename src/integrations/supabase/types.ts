@@ -17,27 +17,30 @@ export type Database = {
       escort_availability: {
         Row: {
           created_at: string
+          date: string | null
           end_time: string
           escort_id: string
           id: string
           start_time: string
-          weekday: number
+          weekday: number | null
         }
         Insert: {
           created_at?: string
+          date?: string | null
           end_time: string
           escort_id: string
           id?: string
           start_time: string
-          weekday: number
+          weekday?: number | null
         }
         Update: {
           created_at?: string
+          date?: string | null
           end_time?: string
           escort_id?: string
           id?: string
           start_time?: string
-          weekday?: number
+          weekday?: number | null
         }
         Relationships: []
       }
