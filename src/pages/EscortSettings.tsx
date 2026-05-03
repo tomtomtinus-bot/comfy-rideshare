@@ -75,6 +75,7 @@ const Inner = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
+  const [surcharges, setSurcharges] = useState<{ label: string; amount: string }[]>([]);
 
   // Postcode autodetect
   const [postcode, setPostcode] = useState("");
