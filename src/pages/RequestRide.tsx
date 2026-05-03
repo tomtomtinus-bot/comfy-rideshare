@@ -21,6 +21,7 @@ const schema = z.object({
   cargo_height_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(8).optional()),
   cargo_weight_t: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(500).optional()),
   permit_number: z.string().trim().max(60).optional(),
+  client_reference: z.string().trim().max(80).optional(),
 });
 
 interface MatchedEscort {
@@ -66,6 +67,7 @@ const RequestRideInner = () => {
     cargo_height_m: "",
     cargo_weight_t: "",
     permit_number: "",
+    client_reference: "",
   });
 
   const onPickPickup = (r: AddressResult) => {
@@ -144,6 +146,7 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m) : null,
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
+        client_reference: form.client_reference || null,
         time_window_start: new Date(form.scheduled_at).toISOString(),
         time_window_end: null,
       })
@@ -229,8 +232,9 @@ const RequestRideInner = () => {
                 <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
                 <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+                <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
                   <input

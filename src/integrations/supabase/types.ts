@@ -342,6 +342,7 @@ export type Database = {
           cargo_weight_t: number | null
           cargo_width_m: number | null
           client_id: string
+          client_reference: string | null
           created_at: string
           dropoff_address: string
           dropoff_city: string
@@ -369,6 +370,7 @@ export type Database = {
           cargo_weight_t?: number | null
           cargo_width_m?: number | null
           client_id: string
+          client_reference?: string | null
           created_at?: string
           dropoff_address: string
           dropoff_city: string
@@ -396,6 +398,7 @@ export type Database = {
           cargo_weight_t?: number | null
           cargo_width_m?: number | null
           client_id?: string
+          client_reference?: string | null
           created_at?: string
           dropoff_address?: string
           dropoff_city?: string
