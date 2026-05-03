@@ -134,6 +134,95 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          amount: number
+          description: string | null
+          hourly_rate: number
+          hours: number
+          id: string
+          invoice_id: string
+          ride_assignment_id: string
+          ride_date: string
+          ride_id: string
+        }
+        Insert: {
+          amount: number
+          description?: string | null
+          hourly_rate: number
+          hours: number
+          id?: string
+          invoice_id: string
+          ride_assignment_id: string
+          ride_date: string
+          ride_id: string
+        }
+        Update: {
+          amount?: number
+          description?: string | null
+          hourly_rate?: number
+          hours?: number
+          id?: string
+          invoice_id?: string
+          ride_assignment_id?: string
+          ride_date?: string
+          ride_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          client_id: string
+          created_at: string
+          escort_id: string
+          id: string
+          invoice_number: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          status: Database["public"]["Enums"]["invoice_status"]
+          total_amount: number
+          total_hours: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          escort_id: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          total_amount?: number
+          total_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          escort_id?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+          total_amount?: number
+          total_hours?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           anonymous_id: string | null
@@ -174,6 +263,8 @@ export type Database = {
           hours_submitted_at: string | null
           id: string
           invited_at: string
+          invoice_id: string | null
+          invoiced_at: string | null
           responded_at: string | null
           responds_by: string
           returned_base_at: string | null
@@ -194,6 +285,8 @@ export type Database = {
           hours_submitted_at?: string | null
           id?: string
           invited_at?: string
+          invoice_id?: string | null
+          invoiced_at?: string | null
           responded_at?: string | null
           responds_by?: string
           returned_base_at?: string | null
@@ -214,6 +307,8 @@ export type Database = {
           hours_submitted_at?: string | null
           id?: string
           invited_at?: string
+          invoice_id?: string | null
+          invoiced_at?: string | null
           responded_at?: string | null
           responds_by?: string
           returned_base_at?: string | null
@@ -223,6 +318,13 @@ export type Database = {
           travel_to_pickup_min?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "ride_assignments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ride_assignments_ride_id_fkey"
             columns: ["ride_id"]
@@ -342,6 +444,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_weekly_invoices: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -358,6 +461,7 @@ export type Database = {
         | "declined"
         | "expired"
         | "cancelled"
+      invoice_status: "draft" | "sent" | "paid" | "cancelled"
       ride_status:
         | "open"
         | "matched"
@@ -499,6 +603,7 @@ export const Constants = {
         "expired",
         "cancelled",
       ],
+      invoice_status: ["draft", "sent", "paid", "cancelled"],
       ride_status: ["open", "matched", "in_progress", "completed", "cancelled"],
     },
   },
