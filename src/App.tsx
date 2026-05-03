@@ -21,8 +21,6 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/begeleiders" element={<Escorts />} />
-            <Route path="/begeleiders/:id" element={<EscortProfile />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/aanvragen" element={<RequestRide />} />
             <Route path="/dashboard" element={<Dashboard />} />
