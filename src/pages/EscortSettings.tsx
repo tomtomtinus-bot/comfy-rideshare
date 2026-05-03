@@ -223,6 +223,7 @@ const Inner = () => {
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
+        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim() })) as any,
       })
       .eq("id", user.id);
 
