@@ -213,20 +213,10 @@ const RequestRideInner = () => {
             </div>
 
             <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster & aantal begeleiders</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster</p>
             </div>
             <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
-            <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
-              <input
-                type="number"
-                min={1}
-                max={5}
-                value={form.num_escorts}
-                onChange={(e) => setForm({ ...form, num_escorts: +e.target.value })}
-                className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-              />
-            </div>
+            <div className="hidden md:block" />
             <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
             <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
 
