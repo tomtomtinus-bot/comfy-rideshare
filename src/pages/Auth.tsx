@@ -36,7 +36,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
+  const [categories, setCategories] = useState<string[]>(["cat-1"]);
+  const [escortTypes, setEscortTypes] = useState<string[]>(["vooroprijden"]);
   const [busy, setBusy] = useState(false);
+
+  const toggleVal = (arr: string[], v: string) =>
+    arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
