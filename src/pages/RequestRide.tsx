@@ -182,22 +182,48 @@ const RequestRideInner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-            Nieuwe rit
+            Nieuwe konvooi-aanvraag
           </p>
           <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            Vraag een begeleide rit aan.
+            Vraag begeleiding aan voor uw transport.
           </h1>
 
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input label="Ophaaladres" value={form.pickup_address} onChange={(v) => setForm({ ...form, pickup_address: v })} placeholder="Bijv. Prinsengracht 12" />
-            <Select label="Ophaalstad" value={form.pickup_city} onChange={(v) => setForm({ ...form, pickup_city: v })} />
-            <Input label="Bestemming" value={form.dropoff_address} onChange={(v) => setForm({ ...form, dropoff_address: v })} placeholder="Bijv. VU Medisch Centrum" />
-            <Select label="Bestemming stad" value={form.dropoff_city} onChange={(v) => setForm({ ...form, dropoff_city: v })} />
-            <Input label="Datum & tijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+            <div className="md:col-span-2">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Route</p>
+            </div>
+            <Input label="Vertrekadres" value={form.pickup_address} onChange={(v) => setForm({ ...form, pickup_address: v })} placeholder="Bijv. Maasvlakte Plaza 1" />
+            <Select label="Vertrekstad" value={form.pickup_city} onChange={(v) => setForm({ ...form, pickup_city: v })} />
+            <Input label="Bestemmingsadres" value={form.dropoff_address} onChange={(v) => setForm({ ...form, dropoff_address: v })} placeholder="Bijv. Hafenstraße 12, Duisburg" />
+            <Select label="Bestemmingsstad" value={form.dropoff_city} onChange={(v) => setForm({ ...form, dropoff_city: v })} />
+
+            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Lading & vergunning</p>
+            </div>
+            <Input label="Lengte (m)" type="number" value={String(form.cargo_length_m)} onChange={(v) => setForm({ ...form, cargo_length_m: +v })} />
+            <Input label="Breedte (m)" type="number" value={String(form.cargo_width_m)} onChange={(v) => setForm({ ...form, cargo_width_m: +v })} />
+            <Input label="Hoogte (m)" type="number" value={String(form.cargo_height_m)} onChange={(v) => setForm({ ...form, cargo_height_m: +v })} />
+            <Input label="Gewicht (ton)" type="number" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
+            <Input label="Vergunningnummer (RDW/wegbeheerder)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                Aantal begeleiders
-              </label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Type begeleiding</label>
+              <select
+                value={form.escort_type_required}
+                onChange={(e) => setForm({ ...form, escort_type_required: e.target.value as typeof ESCORT_TYPES[number] })}
+                className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+              >
+                {ESCORT_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="md:col-span-2 border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Tijdvenster & aantal begeleiders</p>
+            </div>
+            <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+            <div>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
               <input
                 type="number"
                 min={1}
@@ -207,10 +233,11 @@ const RequestRideInner = () => {
                 className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
               />
             </div>
+            <Input label="Tijdvenster vanaf" type="datetime-local" value={form.time_window_start} onChange={(v) => setForm({ ...form, time_window_start: v })} />
+            <Input label="Tijdvenster tot" type="datetime-local" value={form.time_window_end} onChange={(v) => setForm({ ...form, time_window_end: v })} />
+
             <div className="md:col-span-2">
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                Opmerkingen (optioneel)
-              </label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Opmerkingen (optioneel)</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
