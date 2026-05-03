@@ -99,7 +99,7 @@ const RequestRideInner = () => {
         };
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
-      .slice(0, form.num_escorts * 3);
+      .slice(0, 3);
 
     if (ranked.length === 0) {
       toast.error("Geen beschikbare begeleiders gevonden voor deze regio");
