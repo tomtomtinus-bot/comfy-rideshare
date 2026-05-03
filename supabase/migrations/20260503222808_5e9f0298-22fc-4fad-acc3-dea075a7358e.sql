@@ -1,0 +1,1 @@
+ALTER TABLE public.rides ADD COLUMN client_reference TEXT;
