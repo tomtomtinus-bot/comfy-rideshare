@@ -104,6 +104,8 @@ const Inner = () => {
     const fd = new FormData(e.currentTarget);
     const parsed = schema.safeParse({
       baseCity: fd.get("baseCity"),
+      baseAddress: fd.get("baseAddress"),
+      basePostcode: fd.get("basePostcode"),
       hourlyRate: fd.get("hourlyRate"),
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
