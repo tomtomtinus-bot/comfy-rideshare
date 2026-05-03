@@ -67,6 +67,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          anonymous_id: string | null
           created_at: string
           full_name: string | null
           id: string
@@ -74,6 +75,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anonymous_id?: string | null
           created_at?: string
           full_name?: string | null
           id: string
@@ -81,6 +83,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anonymous_id?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
@@ -101,8 +104,12 @@ export type Database = {
           hours_notes: string | null
           hours_submitted_at: string | null
           id: string
+          invited_at: string
+          responded_at: string | null
+          responds_by: string
           returned_base_at: string | null
           ride_id: string
+          status: Database["public"]["Enums"]["assignment_status"]
           travel_back_home_min: number
           travel_to_pickup_min: number
         }
@@ -117,8 +124,12 @@ export type Database = {
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
+          invited_at?: string
+          responded_at?: string | null
+          responds_by?: string
           returned_base_at?: string | null
           ride_id: string
+          status?: Database["public"]["Enums"]["assignment_status"]
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -133,8 +144,12 @@ export type Database = {
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
+          invited_at?: string
+          responded_at?: string | null
+          responds_by?: string
           returned_base_at?: string | null
           ride_id?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -150,6 +165,7 @@ export type Database = {
       }
       rides: {
         Row: {
+          app_fee: number
           client_id: string
           created_at: string
           dropoff_address: string
@@ -168,6 +184,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          app_fee?: number
           client_id: string
           created_at?: string
           dropoff_address: string
@@ -186,6 +203,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          app_fee?: number
           client_id?: string
           created_at?: string
           dropoff_address?: string
@@ -241,6 +259,12 @@ export type Database = {
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
+      assignment_status:
+        | "invited"
+        | "accepted"
+        | "declined"
+        | "expired"
+        | "cancelled"
       ride_status:
         | "open"
         | "matched"
@@ -375,6 +399,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["opdrachtgever", "begeleider", "admin"],
+      assignment_status: [
+        "invited",
+        "accepted",
+        "declined",
+        "expired",
+        "cancelled",
+      ],
       ride_status: ["open", "matched", "in_progress", "completed", "cancelled"],
     },
   },
