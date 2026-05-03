@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { CITIES, geocode } from "@/lib/geo";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland" },
@@ -17,25 +16,55 @@ const COUNTRY_CERTS = [
   { id: "fr", label: "Frankrijk" },
 ] as const;
 
-const WEEKDAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"] as const;
-
 const schema = z.object({
-  baseCity: z.string().min(1),
   baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
   basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
+  baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
   certExpiresOn: z.string().optional().or(z.literal("")),
-  vcaNumber: z.string().trim().max(60).optional().or(z.literal("")),
   insurancePolicy: z.string().trim().max(120).optional().or(z.literal("")),
 });
 
-interface AvailSlot {
-  id?: string;
-  weekday: number;
-  start_time: string;
-  end_time: string;
+interface RideItem {
+  id: string;
+  scheduled_at: string;
+  pickup_city: string;
+  dropoff_city: string;
+}
+
+const ymd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const niceDay = (d: Date) =>
+  d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+
+// Simple postcode geocoder using free zippopotam API
+async function lookupPostcode(postcode: string, country: "nl" | "be" | "de" | "fr" = "nl") {
+  const clean = postcode.replace(/\s+/g, "").toUpperCase();
+  try {
+    const res = await fetch(`https://api.zippopotam.us/${country}/${clean}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const place = data.places?.[0];
+    if (!place) return null;
+    return {
+      city: place["place name"] as string,
+      lat: parseFloat(place.latitude),
+      lng: parseFloat(place.longitude),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
+  const c = postcode.replace(/\s+/g, "");
+  if (/^\d{4}[A-Za-z]{2}$/.test(c)) return "nl";
+  if (/^\d{4}$/.test(c)) return "be";
+  if (/^\d{5}$/.test(c)) return "de";
+  return "nl";
 }
 
 const Inner = () => {
@@ -44,37 +73,80 @@ const Inner = () => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
-  const [available, setAvailable] = useState(true);
   const [profile, setProfile] = useState<any>(null);
-  const [hp, setHp] = useState(true);
-  const [lb, setLb] = useState(true);
-  const [ks, setKs] = useState(true);
   const [files, setFiles] = useState<string[]>([]);
-  const [slots, setSlots] = useState<AvailSlot[]>([]);
+
+  // Postcode autodetect
+  const [postcode, setPostcode] = useState("");
+  const [city, setCity] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [lookupBusy, setLookupBusy] = useState(false);
+
+  // Agenda
+  const [unavailable, setUnavailable] = useState<Set<string>>(new Set()); // YYYY-MM-DD
+  const [rides, setRides] = useState<Record<string, RideItem>>({});
 
   useEffect(() => {
     (async () => {
       if (!user) return;
-      const [{ data: p }, { data: av }] = await Promise.all([
+
+      const [{ data: p }, { data: av }, { data: assigns }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("escort_availability").select("*").eq("escort_id", user.id).order("weekday"),
+        supabase.from("escort_availability").select("*").eq("escort_id", user.id),
+        supabase
+          .from("ride_assignments")
+          .select("status, ride_id, rides(id, scheduled_at, pickup_city, dropoff_city)")
+          .eq("escort_id", user.id)
+          .in("status", ["accepted", "invited"]),
       ]);
+
       if (p) {
         setProfile(p);
-        setCategories((p as any).categories ?? []);
-        setAvailable(p.available);
-        setHp(p.vehicle_has_height_pole);
-        setLb(p.vehicle_has_lightbar);
-        setKs(p.vehicle_has_konvooi_sign);
+        setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
+        setPostcode((p as any).base_postcode ?? "");
+        setCity(p.base_city ?? "");
+        if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
-      if (av) setSlots(av.map((a: any) => ({ id: a.id, weekday: a.weekday, start_time: a.start_time.slice(0,5), end_time: a.end_time.slice(0,5) })));
+
+      if (av) {
+        const dates = new Set<string>();
+        av.forEach((a: any) => {
+          if (a.date) dates.add(a.date);
+        });
+        setUnavailable(dates);
+      }
+
+      if (assigns) {
+        const map: Record<string, RideItem> = {};
+        assigns.forEach((a: any) => {
+          if (a.rides) {
+            const k = ymd(new Date(a.rides.scheduled_at));
+            map[k] = a.rides;
+          }
+        });
+        setRides(map);
+      }
+
       setLoading(false);
     })();
   }, [user]);
 
   const toggle = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+
+  const onPostcodeBlur = async () => {
+    if (!postcode || postcode.length < 4) return;
+    setLookupBusy(true);
+    const c = await lookupPostcode(postcode, detectCountry(postcode));
+    setLookupBusy(false);
+    if (c) {
+      setCity(c.city);
+      setCoords({ lat: c.lat, lng: c.lng });
+    } else {
+      toast.error("Postcode niet gevonden");
+    }
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.length) return;
@@ -93,65 +165,75 @@ const Inner = () => {
     setFiles((s) => s.filter((p) => p !== path));
   };
 
-  const addSlot = () => setSlots((s) => [...s, { weekday: 0, start_time: "08:00", end_time: "17:00" }]);
-  const updateSlot = (i: number, patch: Partial<AvailSlot>) =>
-    setSlots((s) => s.map((sl, idx) => (idx === i ? { ...sl, ...patch } : sl)));
-  const removeSlot = (i: number) => setSlots((s) => s.filter((_, idx) => idx !== i));
+  const toggleDay = (key: string) => {
+    if (rides[key]) return; // ritten zijn niet bewerkbaar
+    setUnavailable((s) => {
+      const next = new Set(s);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const days = useMemo(() => {
+    const arr: Date[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 28; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      arr.push(d);
+    }
+    return arr;
+  }, []);
 
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
     const fd = new FormData(e.currentTarget);
     const parsed = schema.safeParse({
-      baseCity: fd.get("baseCity"),
       baseAddress: fd.get("baseAddress"),
-      basePostcode: fd.get("basePostcode"),
+      basePostcode: postcode,
+      baseCity: city,
       hourlyRate: fd.get("hourlyRate"),
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
       certExpiresOn: fd.get("certExpiresOn") ?? "",
-      vcaNumber: fd.get("vcaNumber") ?? "",
       insurancePolicy: fd.get("insurancePolicy") ?? "",
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!coords) return toast.error("Locatie niet bepaald — controleer postcode");
     if (categories.length === 0) return toast.error("Kies minimaal één land/certificering");
-
-    const geo = geocode(parsed.data.baseCity);
-    if (!geo) return toast.error("Standplaats niet herkend");
 
     setBusy(true);
     const { error } = await supabase
       .from("escort_profiles")
       .update({
-        base_city: geo.city,
-        base_lat: geo.lat,
-        base_lng: geo.lng,
+        base_city: parsed.data.baseCity,
+        base_lat: coords.lat,
+        base_lng: coords.lng,
         base_address: parsed.data.baseAddress,
         base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
         vehicle_type: parsed.data.vehicleType,
-        vehicle_has_height_pole: hp,
-        vehicle_has_lightbar: lb,
-        vehicle_has_konvooi_sign: ks,
         cert_number: parsed.data.certNumber || null,
         cert_expires_on: parsed.data.certExpiresOn || null,
-        vca_number: parsed.data.vcaNumber || null,
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
-        available,
       })
       .eq("id", user.id);
 
-    // Replace availability
+    // Replace availability (date-based blocked days)
     await supabase.from("escort_availability").delete().eq("escort_id", user.id);
-    if (slots.length > 0) {
+    if (unavailable.size > 0) {
       await supabase.from("escort_availability").insert(
-        slots.map((s) => ({
+        Array.from(unavailable).map((d) => ({
           escort_id: user.id,
-          weekday: s.weekday,
-          start_time: s.start_time,
-          end_time: s.end_time,
+          date: d,
+          weekday: new Date(d).getDay(),
+          start_time: "00:00",
+          end_time: "23:59",
         }))
       );
     }
@@ -189,49 +271,35 @@ const Inner = () => {
           {loading ? (
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : (
-            <form onSubmit={save} className="bg-card shadow-etched p-8 md:p-10 space-y-6">
-              <div>
-                <p className="text-[11px] text-brass-deep/60 mb-3">
+            <form onSubmit={save} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
+              <section className="space-y-3">
+                <p className="text-[11px] text-brass-deep/60">
                   Vul je <strong>exacte standplaats</strong> in. Opdrachtgevers zien alleen de plaats/regio; het volledige adres wordt enkel gebruikt om aan- en afrijtijden te berekenen.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input name="baseAddress" label="Straat + huisnummer" defaultValue={profile?.base_address ?? ""} />
-                  <Input name="basePostcode" label="Postcode" defaultValue={profile?.base_postcode ?? ""} />
                   <div>
-                    <Label>Plaats</Label>
-                    <select
-                      name="baseCity"
-                      defaultValue={profile?.base_city}
+                    <Label>Postcode</Label>
+                    <input
+                      value={postcode}
+                      onChange={(e) => setPostcode(e.target.value)}
+                      onBlur={onPostcodeBlur}
                       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                    >
-                      {CITIES.map((c) => (
-                        <option key={c.city} value={c.city}>
-                          {c.city}, {c.country}
-                        </option>
-                      ))}
-                    </select>
+                    />
+                    <p className="text-[10px] text-brass-deep/50 mt-1">
+                      {lookupBusy ? "Locatie ophalen…" : city ? `Plaats: ${city}` : "Plaats wordt automatisch bepaald"}
+                    </p>
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  <Input
+                    name="vehicleType"
+                    label="Pilotvoertuig (type & kenmerk)"
+                    defaultValue={profile?.vehicle_type ?? ""}
+                  />
                 </div>
-              </div>
+              </section>
 
-
-              <Input
-                name="vehicleType"
-                label="Pilotvoertuig (type & kenmerk)"
-                defaultValue={profile?.vehicle_type ?? ""}
-              />
-
-              <div>
-                <Label>Voertuiguitrusting</Label>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Toggle on={hp} onClick={() => setHp(!hp)}>Hoogtepaal</Toggle>
-                  <Toggle on={lb} onClick={() => setLb(!lb)}>Zwaailichtbalk</Toggle>
-                  <Toggle on={ks} onClick={() => setKs(!ks)}>Konvooibord</Toggle>
-                </div>
-              </div>
-
-              <div>
+              <section>
                 <Label>Landen gecertificeerd</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {COUNTRY_CERTS.map((c) => (
@@ -240,16 +308,15 @@ const Inner = () => {
                     </Toggle>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input name="certNumber" label="Certificaat verkeersregelaar (nr.)" defaultValue={profile?.cert_number ?? ""} />
                 <Input name="certExpiresOn" type="date" label="Certificaat geldig tot" defaultValue={profile?.cert_expires_on ?? ""} />
-                <Input name="vcaNumber" label="VCA-diploma nr." defaultValue={profile?.vca_number ?? ""} />
                 <Input name="insurancePolicy" label="Aansprakelijkheidsverzekering (polisnr.)" defaultValue={profile?.insurance_policy ?? ""} />
-              </div>
+              </section>
 
-              <div>
+              <section>
                 <Label>Certificaten (uploads)</Label>
                 <div className="mt-2 space-y-2">
                   {files.map((p) => (
@@ -268,54 +335,61 @@ const Inner = () => {
                   />
                   <p className="text-[10px] text-brass-deep/50">PDF/JPG/PNG · max 10 MB</p>
                 </div>
-              </div>
+              </section>
 
-              <div>
-                <Label>Wekelijkse beschikbaarheid</Label>
-                <div className="mt-2 space-y-2">
-                  {slots.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <select
-                        value={s.weekday}
-                        onChange={(e) => updateSlot(i, { weekday: Number(e.target.value) })}
-                        className="bg-parchment border border-brass-deep/15 px-2 py-2 text-xs"
-                      >
-                        {WEEKDAYS.map((d, idx) => (
-                          <option key={idx} value={idx}>{d}</option>
-                        ))}
-                      </select>
-                      <input
-                        type="time"
-                        value={s.start_time}
-                        onChange={(e) => updateSlot(i, { start_time: e.target.value })}
-                        className="bg-parchment border border-brass-deep/15 px-2 py-2 text-xs"
-                      />
-                      <span className="text-brass-deep/50">–</span>
-                      <input
-                        type="time"
-                        value={s.end_time}
-                        onChange={(e) => updateSlot(i, { end_time: e.target.value })}
-                        className="bg-parchment border border-brass-deep/15 px-2 py-2 text-xs"
-                      />
-                      <button type="button" onClick={() => removeSlot(i)} className="ml-auto text-brass-deep/60 hover:text-brass-deep text-xs uppercase tracking-widest">
-                        ✕
-                      </button>
-                    </div>
+              <section>
+                <Label>Agenda · 4 weken vooruit</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
+                  Klik op een dag om je <strong>niet-beschikbaar</strong> te markeren. Geplande ritten zijn vast.
+                </p>
+                <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-widest text-brass-deep/50 mb-1">
+                  {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((d) => (
+                    <div key={d}>{d}</div>
                   ))}
-                  <button type="button" onClick={addSlot} className="text-xs uppercase tracking-widest font-semibold text-brass-deep border border-brass-deep/30 px-3 py-2 hover:bg-brass-deep hover:text-parchment transition-colors">
-                    + Tijdvak toevoegen
-                  </button>
                 </div>
-              </div>
-
-              <div>
-                <Label>Beschikbaarheid</Label>
-                <div className="mt-2">
-                  <Toggle on={available} onClick={() => setAvailable(!available)}>
-                    {available ? "Beschikbaar voor opdrachten" : "Niet beschikbaar"}
-                  </Toggle>
+                <div className="grid grid-cols-7 gap-1">
+                  {(() => {
+                    const first = days[0];
+                    const offset = (first.getDay() + 6) % 7; // make Monday=0
+                    return Array.from({ length: offset }).map((_, i) => <div key={"e" + i} />);
+                  })()}
+                  {days.map((d) => {
+                    const key = ymd(d);
+                    const ride = rides[key];
+                    const blocked = unavailable.has(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleDay(key)}
+                        className={`aspect-square p-1 border text-left text-[10px] flex flex-col justify-between transition-colors ${
+                          ride
+                            ? "bg-brass-gold/20 border-brass-gold text-brass-deep cursor-default"
+                            : blocked
+                            ? "bg-brass-deep text-parchment border-brass-deep"
+                            : "bg-parchment border-brass-deep/15 text-brass-deep/70 hover:border-brass-deep"
+                        }`}
+                      >
+                        <span className="font-bold">{d.getDate()}</span>
+                        {ride ? (
+                          <span className="truncate text-[9px] leading-tight">
+                            {ride.pickup_city}→{ride.dropoff_city}
+                          </span>
+                        ) : blocked ? (
+                          <span className="text-[9px] uppercase tracking-wider">Vrij</span>
+                        ) : (
+                          <span className="text-[9px] text-brass-deep/40">{niceDay(d).split(" ")[0]}</span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
+                <div className="flex gap-4 mt-3 text-[10px] text-brass-deep/60">
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-parchment border border-brass-deep/15" />Beschikbaar</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-brass-deep" />Niet beschikbaar</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-brass-gold/30 border border-brass-gold" />Rit gepland</span>
+                </div>
+              </section>
 
               <button
                 disabled={busy}
