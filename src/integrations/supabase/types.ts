@@ -45,9 +45,11 @@ export type Database = {
         Row: {
           anonymous_id: string
           available: boolean
+          base_address: string | null
           base_city: string
           base_lat: number
           base_lng: number
+          base_postcode: string | null
           categories: string[]
           cert_expires_on: string | null
           cert_number: string | null
@@ -72,9 +74,11 @@ export type Database = {
         Insert: {
           anonymous_id?: string
           available?: boolean
+          base_address?: string | null
           base_city: string
           base_lat: number
           base_lng: number
+          base_postcode?: string | null
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
@@ -99,9 +103,11 @@ export type Database = {
         Update: {
           anonymous_id?: string
           available?: boolean
+          base_address?: string | null
           base_city?: string
           base_lat?: number
           base_lng?: number
+          base_postcode?: string | null
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
