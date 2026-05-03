@@ -61,10 +61,10 @@ const RequestRideInner = () => {
     scheduled_at: "",
     num_escorts: 1,
     notes: "",
-    cargo_length_m: 25,
-    cargo_width_m: 4,
-    cargo_height_m: 4.2,
-    cargo_weight_t: 60,
+    cargo_length_m: "25",
+    cargo_width_m: "4",
+    cargo_height_m: "4.2",
+    cargo_weight_t: "60",
     permit_number: "",
   });
 
@@ -139,11 +139,11 @@ const RequestRideInner = () => {
         notes: form.notes || null,
         status: "open",
         app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
-        cargo_length_m: form.cargo_length_m,
-        cargo_width_m: form.cargo_width_m,
-        cargo_height_m: form.cargo_height_m,
-        cargo_weight_t: form.cargo_weight_t,
-        permit_number: form.permit_number,
+        cargo_length_m: parseFloat(form.cargo_length_m) || 0,
+        cargo_width_m: parseFloat(form.cargo_width_m) || 0,
+        cargo_height_m: parseFloat(form.cargo_height_m) || 0,
+        cargo_weight_t: parseFloat(form.cargo_weight_t) || 0,
+        permit_number: form.permit_number || null,
         time_window_start: new Date(form.scheduled_at).toISOString(),
         time_window_end: null,
       })
@@ -224,10 +224,10 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Input label="Lengte (m)" type="number" step="0.01" value={String(form.cargo_length_m)} onChange={(v) => setForm({ ...form, cargo_length_m: +v })} />
-                <Input label="Breedte (m)" type="number" step="0.01" value={String(form.cargo_width_m)} onChange={(v) => setForm({ ...form, cargo_width_m: +v })} />
-                <Input label="Hoogte (m)" type="number" step="0.01" value={String(form.cargo_height_m)} onChange={(v) => setForm({ ...form, cargo_height_m: +v })} />
-                <Input label="Gewicht (ton)" type="number" step="1" value={String(form.cargo_weight_t)} onChange={(v) => setForm({ ...form, cargo_weight_t: +v })} />
+                <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
+                <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
+                <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
+                <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
@@ -347,7 +347,7 @@ const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boo
 );
 
 const Input = ({
-  label, value, onChange, type = "text", placeholder, step,
+  label, value, onChange, type = "text", placeholder, step, inputMode,
 }: {
   label: string;
   value: string;
@@ -355,11 +355,12 @@ const Input = ({
   type?: string;
   placeholder?: string;
   step?: string;
+  inputMode?: "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url" | "none";
 }) => (
   <div>
     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
     <input
-      type={type} value={value} placeholder={placeholder} step={step}
+      type={type} value={value} placeholder={placeholder} step={step} inputMode={inputMode}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
