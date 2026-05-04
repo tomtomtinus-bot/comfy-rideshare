@@ -97,7 +97,7 @@ const Inner = () => {
     (async () => {
       if (!user) return;
 
-      const [{ data: p }, { data: av }, { data: assigns }] = await Promise.all([
+      const [{ data: p }, { data: av }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("escort_availability").select("*").eq("escort_id", user.id),
         supabase
@@ -105,7 +105,14 @@ const Inner = () => {
           .select("status, ride_id, rides(id, scheduled_at, pickup_city, dropoff_city)")
           .eq("escort_id", user.id)
           .in("status", ["accepted", "invited"]),
+        supabase
+          .from("weekly_fuel_prices")
+          .select("week_start, eur_per_liter")
+          .order("week_start", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
+      if (fp) setCurrentFuel(fp as any);
 
       if (p) {
         setProfile(p);
