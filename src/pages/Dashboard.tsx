@@ -675,7 +675,10 @@ const EscortDashboard = () => {
                       const sched = new Date(a.ride.scheduled_at);
                       const pad = (n: number) => String(n).padStart(2, "0");
                       const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
-                      const defTime = `${pad(sched.getHours())}:${pad(sched.getMinutes())}`;
+                      const roundedMin = Math.round(sched.getMinutes() / 15) * 15;
+                      const rh = roundedMin === 60 ? sched.getHours() + 1 : sched.getHours();
+                      const rm = roundedMin === 60 ? 0 : roundedMin;
+                      const defTime = `${pad(rh % 24)}:${pad(rm)}`;
                       return (
                         <>
                           <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
