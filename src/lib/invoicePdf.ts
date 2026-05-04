@@ -262,9 +262,10 @@ export interface PlatformInvoicePdfData extends BasePdfOpts {
   total_amount: number;
 }
 
-export const downloadPlatformInvoicePdf = (data: PlatformInvoicePdfData) => {
+export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) => {
   const doc = new jsPDF();
-  drawShell(doc, data);
+  const logo = await loadLogoDataUrl();
+  drawShell(doc, data, logo);
 
   const subtotal = data.total_amount;
   const vat = subtotal * 0.21;
