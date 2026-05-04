@@ -2,6 +2,7 @@ import { Compass, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { RoleSwitch } from "@/components/site/RoleSwitch";
+import { DemoSwitcher } from "@/components/site/DemoSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Nav = () => {
@@ -35,6 +36,7 @@ export const Nav = () => {
           <Link to="/facturen" className="hover:text-brass-gold transition-colors">Facturen</Link>
         </div>
         <div className="flex items-center gap-3">
+          <DemoSwitcher />
           <RoleSwitch />
           <button
             type="button"
