@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +76,18 @@ const RequestRideInner = () => {
   const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
   const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
 
+  const [permits, setPermits] = useState<{ id: string; permit_number: string; carrier: string | null; valid_to: string | null }[]>([]);
+  const [selectedPermitId, setSelectedPermitId] = useState<string>("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("permits")
+      .select("id, permit_number, carrier, valid_to")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setPermits((data ?? []) as any));
+  }, [user]);
+
   const [form, setForm] = useState({
     pickup_address: "",
     dropoff_address: "",
@@ -90,6 +102,13 @@ const RequestRideInner = () => {
     permit_number: "",
     client_reference: "",
   });
+
+  // Auto-fill velden vanuit gekozen ontheffing
+  useEffect(() => {
+    if (!selectedPermitId) return;
+    const p = permits.find((x) => x.id === selectedPermitId);
+    if (p) setForm((f) => ({ ...f, permit_number: p.permit_number }));
+  }, [selectedPermitId, permits]);
 
   const onPickPickup = (r: AddressResult) => {
     setForm((f) => ({ ...f, pickup_address: r.display }));
@@ -181,6 +200,7 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m) : null,
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
+        permit_id: selectedPermitId || null,
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
         time_window_end: null,
