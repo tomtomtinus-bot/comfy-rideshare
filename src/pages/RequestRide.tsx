@@ -133,7 +133,7 @@ const RequestRideInner = () => {
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, rating, rides_completed, countries, available")
+      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, rating, rides_completed, countries, available")
       .eq("available", true);
     setBusy(false);
     if (error) return toast.error(error.message);
