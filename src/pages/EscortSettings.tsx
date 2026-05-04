@@ -76,6 +76,12 @@ const Inner = () => {
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
   const [surcharges, setSurcharges] = useState<{ label: string; amount: string; unit: "per_uur" | "percent" }[]>([]);
+  const [fuel, setFuel] = useState<{
+    enabled: boolean;
+    kind: "per_uur" | "percent";
+    tiers: { from: string; to: string; value: string }[];
+  }>({ enabled: false, kind: "per_uur", tiers: [{ from: "0", to: "1.60", value: "0" }] });
+  const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
   // Postcode autodetect
   const [postcode, setPostcode] = useState("");
@@ -91,7 +97,7 @@ const Inner = () => {
     (async () => {
       if (!user) return;
 
-      const [{ data: p }, { data: av }, { data: assigns }] = await Promise.all([
+      const [{ data: p }, { data: av }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("escort_availability").select("*").eq("escort_id", user.id),
         supabase
@@ -99,7 +105,14 @@ const Inner = () => {
           .select("status, ride_id, rides(id, scheduled_at, pickup_city, dropoff_city)")
           .eq("escort_id", user.id)
           .in("status", ["accepted", "invited"]),
+        supabase
+          .from("weekly_fuel_prices")
+          .select("week_start, eur_per_liter")
+          .order("week_start", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
+      if (fp) setCurrentFuel(fp as any);
 
       if (p) {
         setProfile(p);
@@ -110,6 +123,18 @@ const Inner = () => {
           amount: String(s.amount ?? ""),
           unit: s.unit === "percent" ? "percent" : "per_uur",
         })));
+        const fs = (p as any).fuel_surcharge ?? {};
+        setFuel({
+          enabled: !!fs.enabled,
+          kind: fs.kind === "percent" ? "percent" : "per_uur",
+          tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
+            ? fs.tiers.map((t: any) => ({
+                from: String(t.from ?? "0"),
+                to: t.to == null ? "" : String(t.to),
+                value: String(t.value ?? "0"),
+              }))
+            : [{ from: "0", to: "1.60", value: "0" }],
+        });
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
@@ -227,7 +252,18 @@ const Inner = () => {
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
-        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
+        surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
+        fuel_surcharge: {
+          enabled: fuel.enabled,
+          kind: fuel.kind,
+          tiers: fuel.tiers
+            .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
+            .map((t) => ({
+              from: Number(t.from) || 0,
+              to: t.to === "" ? null : Number(t.to),
+              value: Number(t.value) || 0,
+            })),
+        } as any,
       })
       .eq("id", user.id);
 
@@ -324,6 +360,55 @@ const Inner = () => {
               </section>
 
               <section>
+                <Label>Brandstoftoeslag (staffel)</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
+                  Wordt automatisch berekend op basis van de gemiddelde Nederlandse dieselprijs (CBS) van de gefactureerde week.
+                  {currentFuel && (
+                    <> Huidige weekprijs: <strong>€{Number(currentFuel.eur_per_liter).toFixed(3)}/l</strong> (week {currentFuel.week_start}).</>
+                  )}
+                </p>
+                <label className="flex items-center gap-2 mb-3 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={fuel.enabled}
+                    onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
+                  />
+                  Brandstoftoeslag toepassen op mijn facturen
+                </label>
+                {fuel.enabled && (
+                  <>
+                    <div className="flex gap-2 mb-2 text-sm">
+                      <span className="text-brass-deep/60">Toeslag-eenheid:</span>
+                      <label className="flex items-center gap-1">
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> € per uur
+                      </label>
+                      <label className="flex items-center gap-1">
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> % van uurtarief
+                      </label>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+                        <div className="col-span-4">Dieselprijs vanaf (€/l)</div>
+                        <div className="col-span-4">tot (€/l, leeg = ∞)</div>
+                        <div className="col-span-3">{fuel.kind === "percent" ? "% uurtarief" : "€ / uur"}</div>
+                      </div>
+                      {fuel.tiers.map((t, i) => (
+                        <div key={i} className="grid grid-cols-12 gap-2">
+                          <input value={t.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15">×</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
+                        + Drempel toevoegen
+                      </button>
+                    </div>
+                  </>
+                )}
+              </section>
+
+              <section>
                 <Label>Certificaten (uploads)</Label>
                 <div className="mt-2 space-y-2">
                   {files.map((p) => (
@@ -347,7 +432,7 @@ const Inner = () => {
               <section>
                 <Label>Toeslagen</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Bijv. <em>België toeslag</em>, <em>Brandstoftoeslag</em>, <em>Nachttoeslag</em>. Toeslagen worden <strong>per uur</strong> berekend; brandstof mag ook als percentage van het uurtarief.
+                  Bijv. <em>België toeslag</em>, <em>Nachttoeslag</em>. Worden <strong>per uur</strong> berekend. (Brandstof staat hierboven.)
                 </p>
                 <div className="space-y-2">
                   {surcharges.map((s, i) => {

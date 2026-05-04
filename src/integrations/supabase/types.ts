@@ -60,6 +60,7 @@ export type Database = {
           countries: string[]
           created_at: string
           escort_types: string[]
+          fuel_surcharge: Json
           hourly_rate: number
           id: string
           insurance_policy: string | null
@@ -89,6 +90,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           escort_types?: string[]
+          fuel_surcharge?: Json
           hourly_rate?: number
           id: string
           insurance_policy?: string | null
@@ -118,6 +120,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           escort_types?: string[]
+          fuel_surcharge?: Json
           hourly_rate?: number
           id?: string
           insurance_policy?: string | null
@@ -439,6 +442,30 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_fuel_prices: {
+        Row: {
+          eur_per_liter: number
+          fetched_at: string
+          id: string
+          source: string
+          week_start: string
+        }
+        Insert: {
+          eur_per_liter: number
+          fetched_at?: string
+          id?: string
+          source?: string
+          week_start: string
+        }
+        Update: {
+          eur_per_liter?: number
+          fetched_at?: string
+          id?: string
+          source?: string
+          week_start?: string
         }
         Relationships: []
       }
