@@ -25,6 +25,16 @@ const schema = z.object({
   client_reference: z.string().trim().max(80).optional(),
 });
 
+const QUARTER_TIMES: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+  return out;
+})();
+
 interface MatchedEscort {
   id: string;
   anonymous_id: string;
