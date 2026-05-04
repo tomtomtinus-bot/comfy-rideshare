@@ -194,7 +194,7 @@ const RequestRideInner = () => {
         num_escorts: form.num_escorts,
         notes: form.notes || null,
         status: "open",
-        app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
+        app_fee: 0,
         cargo_length_m: form.cargo_length_m ? parseFloat(form.cargo_length_m.replace(",", ".")) : null,
         cargo_width_m: form.cargo_width_m ? parseFloat(form.cargo_width_m.replace(",", ".")) : null,
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m.replace(",", ".")) : null,
