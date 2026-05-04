@@ -43,21 +43,33 @@ const niceDay = (d: Date) =>
 
 // Simple postcode geocoder using free zippopotam API
 async function lookupPostcode(postcode: string, country: "nl" | "be" | "de" | "fr" = "nl") {
-  const clean = postcode.replace(/\s+/g, "").toUpperCase();
-  try {
-    const res = await fetch(`https://api.zippopotam.us/${country}/${clean}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const place = data.places?.[0];
-    if (!place) return null;
-    return {
-      city: place["place name"] as string,
-      lat: parseFloat(place.latitude),
-      lng: parseFloat(place.longitude),
-    };
-  } catch {
-    return null;
+  const raw = postcode.replace(/\s+/g, "").toUpperCase();
+  // Zippopotam verwacht voor NL alleen de 4 cijfers (geen letters)
+  const candidates: string[] = [];
+  if (country === "nl") {
+    const digits = raw.match(/^\d{4}/)?.[0];
+    if (digits) candidates.push(digits);
+    candidates.push(raw);
+  } else {
+    candidates.push(raw);
   }
+  for (const code of candidates) {
+    try {
+      const res = await fetch(`https://api.zippopotam.us/${country}/${code}`);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const place = data.places?.[0];
+      if (!place) continue;
+      return {
+        city: place["place name"] as string,
+        lat: parseFloat(place.latitude),
+        lng: parseFloat(place.longitude),
+      };
+    } catch {
+      // try next
+    }
+  }
+  return null;
 }
 
 function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
