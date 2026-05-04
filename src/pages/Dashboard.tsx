@@ -113,6 +113,7 @@ const ClientDashboard = () => {
         .from("rides")
         .select("*")
         .eq("client_id", user.id)
+        .is("platform_invoice_id", null)
         .order("scheduled_at", { ascending: false });
 
       const list = rs ?? [];
