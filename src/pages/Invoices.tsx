@@ -156,7 +156,72 @@ const InvoicesInner = () => {
     load();
   };
 
-  return (
+  const fetchClientParty = async (id: string): Promise<BillingParty> => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number")
+      .eq("id", id)
+      .maybeSingle();
+    return (data ?? {}) as BillingParty;
+  };
+
+  const fetchEscortParty = async (id: string): Promise<BillingParty> => {
+    const [{ data: prof }, { data: ep }] = await Promise.all([
+      supabase.from("profiles").select("full_name").eq("id", id).maybeSingle(),
+      supabase
+        .from("escort_profiles")
+        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder")
+        .eq("id", id)
+        .maybeSingle(),
+    ]);
+    return { ...(prof ?? {}), ...(ep ?? {}) } as BillingParty;
+  };
+
+  const PLATFORM_PARTY: BillingParty = {
+    company_name: "Lowloads B.V.",
+    billing_address: "Mediavaert 1",
+    billing_postcode: "1114 BC",
+    billing_city: "Amsterdam-Duivendrecht",
+    billing_country: "Nederland",
+    kvk_number: "00000000",
+    vat_number: "NL000000000B01",
+    billing_email: "facturatie@lowloads.app",
+  };
+
+  const downloadEscortPdf = async (inv: Invoice) => {
+    try {
+      const [from, to] = await Promise.all([fetchEscortParty(inv.escort_id), fetchClientParty(inv.client_id)]);
+      downloadEscortInvoicePdf({
+        invoice_number: inv.invoice_number,
+        created_at: inv.created_at,
+        period_start: inv.period_start,
+        period_end: inv.period_end,
+        from,
+        to,
+        rows: items[inv.id] ?? [],
+      });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const downloadPlatformPdf = async (inv: PlatformInvoice) => {
+    try {
+      const to = await fetchClientParty(inv.client_id);
+      downloadPlatformInvoicePdf({
+        invoice_number: inv.invoice_number,
+        created_at: inv.created_at,
+        period_start: inv.period_start,
+        period_end: inv.period_end,
+        from: PLATFORM_PARTY,
+        to,
+        rows: platformItems[inv.id] ?? [],
+        total_amount: inv.total_amount,
+      });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
