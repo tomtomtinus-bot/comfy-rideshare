@@ -720,7 +720,7 @@ const EscortDashboard = () => {
                       />
                     </div>
                     <p className="md:col-span-2 text-xs text-brass-deep/55">
-                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.
+                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
                     </p>
                     <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                       Versturen
