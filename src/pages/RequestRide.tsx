@@ -262,12 +262,31 @@ const RequestRideInner = () => {
                 <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
-                  <input
-                    type="number" min={1}
-                    value={form.num_escorts}
-                    onChange={(e) => setForm({ ...form, num_escorts: Math.max(1, +e.target.value || 1) })}
-                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  />
+                  <div className="mt-1 flex items-stretch border border-brass-deep/15 bg-parchment">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, num_escorts: Math.max(1, form.num_escorts - 1) })}
+                      className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
+                      aria-label="Minder begeleiders"
+                    >−</button>
+                    <input
+                      type="number"
+                      min={1}
+                      inputMode="numeric"
+                      value={form.num_escorts}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value, 10);
+                        setForm({ ...form, num_escorts: Number.isNaN(v) ? 1 : Math.max(1, v) });
+                      }}
+                      className="flex-1 w-full bg-transparent px-2 py-3 text-sm text-center focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, num_escorts: form.num_escorts + 1 })}
+                      className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
+                      aria-label="Meer begeleiders"
+                    >+</button>
+                  </div>
                 </div>
               </div>
             </section>
