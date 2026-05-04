@@ -2,13 +2,12 @@
 // Leest een RDW ontheffing-PDF uit en extraheert metadata + routes met waypoints.
 // Pattern-based, geen AI. Werkt met de standaard RDW layout (versie 1.0.0.x).
 
-// Use legacy build for broader browser compatibility (iOS Safari, older Chromium)
-// @ts-ignore - legacy build has no types export
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import * as pdfjsLib from "pdfjs-dist";
+// Vite worker import
 // @ts-ignore
-import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
-(pdfjsLib as any).GlobalWorkerOptions.workerSrc = workerSrc;
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 export interface PermitWaypoint {
   wegbeheerder?: string;
@@ -53,8 +52,7 @@ async function readPdfItems(file: ArrayBuffer): Promise<PageItem[]> {
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
-    const arr = Array.from((content.items ?? []) as any[]);
-    for (const it of arr) {
+    for (const it of content.items as any[]) {
       const tr = it.transform; // [a, b, c, d, e, f] => x = e, y = f
       const str = (it.str ?? "").toString();
       if (!str.trim()) continue;
