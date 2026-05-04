@@ -1,4 +1,8 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+
 export const Hero = () => {
+  const { user } = useAuth();
   return (
     <section className="relative pt-20 md:pt-32 pb-20 md:pb-24 px-6 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-12 items-end">
