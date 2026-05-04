@@ -145,6 +145,24 @@ const ClientDashboard = () => {
           });
         });
         setAssignments(grouped);
+
+        const acceptedAssignmentIds = (ass ?? [])
+          .filter((a: any) => a.status === "accepted" || a.hours_submitted_at)
+          .map((a: any) => a.id as string);
+        if (acceptedAssignmentIds.length) {
+          const results = await Promise.all(
+            acceptedAssignmentIds.map(async (id) => {
+              const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+              const row = (data as any[])?.[0];
+              return [id, row?.name as string | undefined] as const;
+            }),
+          );
+          const next: Record<string, string> = {};
+          results.forEach(([id, name]) => {
+            if (name) next[id] = name;
+          });
+          setEscortNames(next);
+        }
       }
       setLoading(false);
     })();
