@@ -93,8 +93,19 @@ const RequestRideInner = () => {
     setBusy(false);
     if (error) return toast.error(error.message);
 
+    // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
+    const expandCountries = (c: string): string[] => {
+      const map: Record<string, string> = { NL: "Nederland", BE: "België", DE: "Duitsland", FR: "Frankrijk" };
+      return c.split("/").map((p) => map[p.trim()] ?? p.trim());
+    };
+    const pickupCountries = expandCountries(pickupGeo.country);
+    const dropoffCountries = expandCountries(dropoffGeo.country);
+
     const ranked: MatchedEscort[] = (data ?? [])
-      .filter((e) => e.countries.includes(pickupGeo.country) && e.countries.includes(dropoffGeo.country))
+      .filter((e) =>
+        pickupCountries.some((c) => e.countries.includes(c)) &&
+        dropoffCountries.some((c) => e.countries.includes(c))
+      )
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
