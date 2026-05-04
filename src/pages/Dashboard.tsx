@@ -542,24 +542,36 @@ const EscortDashboard = () => {
                     <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
                     <div className="mt-2"><StatusBadge status={a.status} /></div>
                   </div>
-                  <div className="col-span-12 md:col-span-5">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                    <p className="font-medium">
-                      {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                    </p>
-                    <p className="text-sm text-brass-deep/55 mt-2">
-                      Reistijd vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
-                    </p>
-                    {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                      <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
-                        Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                        {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
-                      </p>
+                  <div className="col-span-12 md:col-span-7">
+                    {isInvited ? (
+                      <>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
+                        <p className="font-medium">
+                          Vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                        </p>
+                        {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
+                          <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
+                            Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
+                        <p className="font-medium">
+                          {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
+                        </p>
+                        <p className="text-sm text-brass-deep/55 mt-2">
+                          Reistijd vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                        </p>
+                        {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
+                          <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
+                            Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
+                            {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
+                          </p>
+                        )}
+                      </>
                     )}
-                  </div>
-                  <div className="col-span-6 md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Geschatte uren</p>
-                    <p className="font-semibold tabular-nums">{a.estimated_hours}u</p>
                   </div>
                   <div className="col-span-6 md:col-span-2 text-right">
                     {isInvited && !expired ? (
