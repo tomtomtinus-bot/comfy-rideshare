@@ -262,6 +262,7 @@ const Inner = () => {
         base_address: parsed.data.baseAddress,
         base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
+        hourly_rate_be: parsed.data.hourlyRateBe,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         cert_number: parsed.data.certNumber || null,
