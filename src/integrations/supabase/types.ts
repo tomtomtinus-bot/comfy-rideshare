@@ -48,28 +48,39 @@ export type Database = {
         Row: {
           anonymous_id: string
           available: boolean
+          bank_account_holder: string | null
           base_address: string | null
           base_city: string
           base_lat: number
           base_lng: number
           base_postcode: string | null
+          billing_address: string | null
+          billing_city: string | null
+          billing_contact_name: string | null
+          billing_country: string | null
+          billing_email: string | null
+          billing_postcode: string | null
           categories: string[]
           cert_expires_on: string | null
           cert_number: string | null
           certificate_files: string[]
+          company_name: string | null
           countries: string[]
           created_at: string
           escort_types: string[]
           fuel_surcharge: Json
           hourly_rate: number
+          iban: string | null
           id: string
           insurance_policy: string | null
+          kvk_number: string | null
           languages: string[]
           min_billable_hours: number
           rating: number
           rides_completed: number
           surcharges: Json
           updated_at: string
+          vat_number: string | null
           vca_number: string | null
           vehicle_has_height_pole: boolean
           vehicle_has_konvooi_sign: boolean
@@ -79,28 +90,39 @@ export type Database = {
         Insert: {
           anonymous_id?: string
           available?: boolean
+          bank_account_holder?: string | null
           base_address?: string | null
           base_city: string
           base_lat: number
           base_lng: number
           base_postcode?: string | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_contact_name?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
+          billing_postcode?: string | null
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
           certificate_files?: string[]
+          company_name?: string | null
           countries?: string[]
           created_at?: string
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
+          iban?: string | null
           id: string
           insurance_policy?: string | null
+          kvk_number?: string | null
           languages?: string[]
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
           surcharges?: Json
           updated_at?: string
+          vat_number?: string | null
           vca_number?: string | null
           vehicle_has_height_pole?: boolean
           vehicle_has_konvooi_sign?: boolean
@@ -110,28 +132,39 @@ export type Database = {
         Update: {
           anonymous_id?: string
           available?: boolean
+          bank_account_holder?: string | null
           base_address?: string | null
           base_city?: string
           base_lat?: number
           base_lng?: number
           base_postcode?: string | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_contact_name?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
+          billing_postcode?: string | null
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
           certificate_files?: string[]
+          company_name?: string | null
           countries?: string[]
           created_at?: string
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
+          iban?: string | null
           id?: string
           insurance_policy?: string | null
+          kvk_number?: string | null
           languages?: string[]
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
           surcharges?: Json
           updated_at?: string
+          vat_number?: string | null
           vca_number?: string | null
           vehicle_has_height_pole?: boolean
           vehicle_has_konvooi_sign?: boolean
@@ -348,33 +381,60 @@ export type Database = {
       profiles: {
         Row: {
           anonymous_id: string | null
+          billing_address: string | null
+          billing_city: string | null
+          billing_contact_name: string | null
+          billing_country: string | null
+          billing_email: string | null
           billing_frequency: string
+          billing_postcode: string | null
+          company_name: string | null
           created_at: string
           full_name: string | null
           id: string
+          kvk_number: string | null
           last_platform_invoice_at: string | null
           phone: string | null
           updated_at: string
+          vat_number: string | null
         }
         Insert: {
           anonymous_id?: string | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_contact_name?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
           billing_frequency?: string
+          billing_postcode?: string | null
+          company_name?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
           updated_at?: string
+          vat_number?: string | null
         }
         Update: {
           anonymous_id?: string | null
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_contact_name?: string | null
+          billing_country?: string | null
+          billing_email?: string | null
           billing_frequency?: string
+          billing_postcode?: string | null
+          company_name?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
           updated_at?: string
+          vat_number?: string | null
         }
         Relationships: []
       }
