@@ -48,6 +48,15 @@ interface GeoPoint {
   lng: number;
 }
 
+const fmtHours = (min: number) => {
+  const total = Math.ceil(min / 15) * 15;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}u`;
+  return `${h}u ${m}m`;
+};
+
 const RequestRideInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -339,8 +348,8 @@ const Matches = ({
                   <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
                   <p className="text-xs text-brass-deep/55 mt-1">★ {m.rating} · {m.rides_completed} ritten</p>
                 </div>
-                <Cell label="Aanrijden" value={`${m.travelToPickupMin} min`} />
-                <Cell label="Afrijden" value={`${m.travelBackHomeMin} min`} />
+                <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
+                <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
                 <Cell label="Tarief" value={`€${m.hourly_rate}/u`} />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />

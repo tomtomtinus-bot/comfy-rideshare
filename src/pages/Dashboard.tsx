@@ -10,6 +10,15 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { AgendaPlanner } from "@/components/site/AgendaPlanner";
 
+const fmtHours = (min: number) => {
+  const total = Math.ceil(min / 15) * 15;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}u`;
+  return `${h}u ${m}m`;
+};
+
 interface RideRow {
   id: string;
   client_id: string;
@@ -569,7 +578,7 @@ const EscortDashboard = () => {
                       <>
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
                         <p className="font-medium">
-                          Vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                          Vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
                         </p>
                         {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
                           <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
@@ -584,7 +593,7 @@ const EscortDashboard = () => {
                           {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
                         </p>
                         <p className="text-sm text-brass-deep/55 mt-2">
-                          Reistijd vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                          Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
                         </p>
                         {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
                           <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
@@ -648,8 +657,8 @@ const EscortDashboard = () => {
                         {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
                       </div>
                       <div>
-                        <strong>Reistijd vanaf standplaats:</strong> {Math.ceil(a.travel_to_pickup_min / 15) * 15} min ·{" "}
-                        <strong>terug:</strong> {Math.ceil(a.travel_back_home_min / 15) * 15} min (afgerond op kwartier)
+                        <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
+                        <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
                       </div>
                     </div>
                     {(() => {
