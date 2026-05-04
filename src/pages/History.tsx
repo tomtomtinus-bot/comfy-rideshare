@@ -231,6 +231,7 @@ const HistoryInner = () => {
                             <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
                             <p className="text-xs text-brass-deep/55 mt-1">
                               {role === "begeleider" ? "Opdrachtgever" : "Begeleider"} {r.counterpart}
+                              {r.counterpart_name ? ` · ${r.counterpart_name}` : ""}
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-6">
