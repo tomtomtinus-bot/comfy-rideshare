@@ -94,6 +94,7 @@ const HistoryInner = () => {
               amount: Number(a.actual_cost ?? 0),
               counterpart: `#${clientMap.get(r.client_id) ?? "—"}`,
               invoice_number: a.invoice_id ? invMap.get(a.invoice_id) ?? null : null,
+              assignment_ids: [a.id],
             } as HistoryRide;
           })
           .filter(Boolean) as HistoryRide[];
