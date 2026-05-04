@@ -75,7 +75,7 @@ const Inner = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
-  const [surcharges, setSurcharges] = useState<{ label: string; amount: string }[]>([]);
+  const [surcharges, setSurcharges] = useState<{ label: string; amount: string; unit: "per_uur" | "percent" }[]>([]);
 
   // Postcode autodetect
   const [postcode, setPostcode] = useState("");
@@ -105,7 +105,11 @@ const Inner = () => {
         setProfile(p);
         setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
-        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({ label: String(s.label ?? ""), amount: String(s.amount ?? "") })));
+        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
+          label: String(s.label ?? ""),
+          amount: String(s.amount ?? ""),
+          unit: s.unit === "percent" ? "percent" : "per_uur",
+        })));
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
@@ -223,7 +227,7 @@ const Inner = () => {
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
-        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim() })) as any,
+        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
       })
       .eq("id", user.id);
 
@@ -343,39 +347,54 @@ const Inner = () => {
               <section>
                 <Label>Toeslagen</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Bijv. <em>België toeslag</em>, <em>Brandstoftoeslag</em>, <em>Nachttoeslag</em>. Worden getoond op je profiel.
+                  Bijv. <em>België toeslag</em>, <em>Brandstoftoeslag</em>, <em>Nachttoeslag</em>. Toeslagen worden <strong>per uur</strong> berekend; brandstof mag ook als percentage van het uurtarief.
                 </p>
                 <div className="space-y-2">
-                  {surcharges.map((s, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input
-                        value={s.label}
-                        onChange={(e) =>
-                          setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
-                        }
-                        placeholder="Omschrijving (bv. België toeslag)"
-                        className="flex-1 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
-                      />
-                      <input
-                        value={s.amount}
-                        onChange={(e) =>
-                          setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)))
-                        }
-                        placeholder="Bedrag (€ 0,15/km)"
-                        className="w-44 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setSurcharges((arr) => arr.filter((_, j) => j !== i))}
-                        className="px-3 py-2 text-[10px] uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                  {surcharges.map((s, i) => {
+                    const isFuel = /brandstof|fuel/i.test(s.label);
+                    return (
+                      <div key={i} className="flex gap-2">
+                        <input
+                          value={s.label}
+                          onChange={(e) =>
+                            setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                          }
+                          placeholder="Omschrijving (bv. België toeslag)"
+                          className="flex-1 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                        />
+                        <input
+                          value={s.amount}
+                          onChange={(e) =>
+                            setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)))
+                          }
+                          placeholder={s.unit === "percent" ? "bv. 10" : "bv. 5"}
+                          className="w-28 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold"
+                        />
+                        <select
+                          value={s.unit}
+                          onChange={(e) =>
+                            setSurcharges((arr) => arr.map((x, j) => (j === i ? { ...x, unit: e.target.value as "per_uur" | "percent" } : x)))
+                          }
+                          disabled={!isFuel && s.unit !== "percent"}
+                          title={!isFuel ? "Alleen brandstoftoeslag mag in %" : ""}
+                          className="w-32 bg-parchment border border-brass-deep/15 px-2 py-2 text-sm focus:outline-none focus:border-brass-gold disabled:opacity-60"
+                        >
+                          <option value="per_uur">€ / uur</option>
+                          {isFuel && <option value="percent">% van uurtarief</option>}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => setSurcharges((arr) => arr.filter((_, j) => j !== i))}
+                          className="px-3 py-2 text-[10px] uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
                   <button
                     type="button"
-                    onClick={() => setSurcharges((arr) => [...arr, { label: "", amount: "" }])}
+                    onClick={() => setSurcharges((arr) => [...arr, { label: "", amount: "", unit: "per_uur" }])}
                     className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
                   >
                     + Toeslag toevoegen
