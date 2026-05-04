@@ -198,21 +198,21 @@ const BillingDetailsInner = () => {
                   Bedrijf
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <Field label="Bedrijfsnaam" name="company_name" autoComplete="organization" />
-                  <Field
-                    label="Contactpersoon facturen"
-                    name="billing_contact_name"
-                    autoComplete="name"
-                  />
-                  <Field
-                    label="Factuur-e-mailadres"
-                    name="billing_email"
-                    type="email"
-                    autoComplete="email"
-                  />
+                  {renderField({ label: "Bedrijfsnaam", name: "company_name", autoComplete: "organization" })}
+                  {renderField({
+                    label: "Contactpersoon facturen",
+                    name: "billing_contact_name",
+                    autoComplete: "name",
+                  })}
+                  {renderField({
+                    label: "Factuur-e-mailadres",
+                    name: "billing_email",
+                    type: "email",
+                    autoComplete: "email",
+                  })}
                   <div />
-                  <Field label="KvK-nummer" name="kvk_number" placeholder="12345678" />
-                  <Field label="Btw-nummer" name="vat_number" placeholder="NL000000000B01" />
+                  {renderField({ label: "KvK-nummer", name: "kvk_number", placeholder: "12345678" })}
+                  {renderField({ label: "Btw-nummer", name: "vat_number", placeholder: "NL000000000B01" })}
                 </div>
               </section>
 
@@ -222,15 +222,15 @@ const BillingDetailsInner = () => {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <Field
-                      label="Straat + huisnummer"
-                      name="billing_address"
-                      autoComplete="street-address"
-                    />
+                    {renderField({
+                      label: "Straat + huisnummer",
+                      name: "billing_address",
+                      autoComplete: "street-address",
+                    })}
                   </div>
-                  <Field label="Postcode" name="billing_postcode" autoComplete="postal-code" />
-                  <Field label="Plaats" name="billing_city" autoComplete="address-level2" />
-                  <Field label="Land" name="billing_country" autoComplete="country-name" />
+                  {renderField({ label: "Postcode", name: "billing_postcode", autoComplete: "postal-code" })}
+                  {renderField({ label: "Plaats", name: "billing_city", autoComplete: "address-level2" })}
+                  {renderField({ label: "Land", name: "billing_country", autoComplete: "country-name" })}
                 </div>
               </section>
 
@@ -240,8 +240,8 @@ const BillingDetailsInner = () => {
                     Uitbetaling
                   </h2>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <Field label="IBAN" name="iban" placeholder="NL00BANK0123456789" />
-                    <Field label="Rekeninghouder" name="bank_account_holder" />
+                    {renderField({ label: "IBAN", name: "iban", placeholder: "NL00BANK0123456789" })}
+                    {renderField({ label: "Rekeninghouder", name: "bank_account_holder" })}
                   </div>
                 </section>
               )}
