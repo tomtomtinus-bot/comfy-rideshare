@@ -15,7 +15,7 @@ export const Nav = () => {
   const links: { to: string; label: string; show: boolean }[] = [
     { to: "/", label: "Home", show: true },
     { to: "/dashboard", label: "Dashboard", show: !!user },
-    { to: "/aanvragen", label: "Rit aanvragen", show: true },
+    { to: "/aanvragen", label: "Rit aanvragen", show: role !== "begeleider" },
     { to: "/profiel", label: "Profiel", show: !!user && role === "begeleider" },
     { to: "/facturen", label: "Facturen", show: !!user },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
@@ -38,7 +38,9 @@ export const Nav = () => {
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link to="/#ritten" className="hover:text-brass-gold transition-colors">Transporten</Link>
-          <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">Aanvragen</Link>
+          {role !== "begeleider" && (
+            <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">Aanvragen</Link>
+          )}
           <Link to="/facturen" className="hover:text-brass-gold transition-colors">Facturen</Link>
         </div>
         <div className="flex items-center gap-3">
