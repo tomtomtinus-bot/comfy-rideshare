@@ -65,6 +65,7 @@ export type Database = {
           id: string
           insurance_policy: string | null
           languages: string[]
+          min_billable_hours: number
           rating: number
           rides_completed: number
           surcharges: Json
@@ -95,6 +96,7 @@ export type Database = {
           id: string
           insurance_policy?: string | null
           languages?: string[]
+          min_billable_hours?: number
           rating?: number
           rides_completed?: number
           surcharges?: Json
@@ -125,6 +127,7 @@ export type Database = {
           id?: string
           insurance_policy?: string | null
           languages?: string[]
+          min_billable_hours?: number
           rating?: number
           rides_completed?: number
           surcharges?: Json

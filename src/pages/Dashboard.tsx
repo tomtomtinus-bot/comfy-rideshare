@@ -338,6 +338,7 @@ const EscortDashboard = () => {
     (AssignmentRow & {
       ride: RideRow;
       hourly_rate: number;
+      min_billable_hours: number;
       client_anon: string;
     })[]
   >([]);
@@ -371,7 +372,7 @@ const EscortDashboard = () => {
 
     const { data: me } = await supabase
       .from("escort_profiles")
-      .select("hourly_rate")
+      .select("hourly_rate, min_billable_hours")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -383,6 +384,7 @@ const EscortDashboard = () => {
           ...x,
           ride: ride as RideRow,
           hourly_rate: Number(me?.hourly_rate ?? 0),
+          min_billable_hours: Number((me as any)?.min_billable_hours ?? 0),
           client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
         };
       })
@@ -474,7 +476,10 @@ const EscortDashboard = () => {
     const start = new Date(rideStart.getTime() - travelTo * 60_000);
     const end = new Date(rideEnd.getTime() + travelBack * 60_000);
 
-    const hours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
+    const rawHours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
+    // Minimumtarief op urenbasis toepassen
+    const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
+    const hours = +billableHours.toFixed(2);
     const cost = +(hours * item.hourly_rate).toFixed(2);
 
     const { error } = await supabase
@@ -715,7 +720,7 @@ const EscortDashboard = () => {
                       />
                     </div>
                     <p className="md:col-span-2 text-xs text-brass-deep/55">
-                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.
+                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
                     </p>
                     <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                       Versturen

@@ -21,6 +21,7 @@ const schema = z.object({
   basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  minBillableHours: z.coerce.number().min(0).max(24).multipleOf(0.25),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
   certExpiresOn: z.string().optional().or(z.literal("")),
@@ -246,6 +247,7 @@ const Inner = () => {
         base_address: parsed.data.baseAddress,
         base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
+        min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         cert_number: parsed.data.certNumber || null,
         cert_expires_on: parsed.data.certExpiresOn || null,
@@ -334,6 +336,7 @@ const Inner = () => {
                     </p>
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"
                     label="Pilotvoertuig (type & kenmerk)"
