@@ -176,7 +176,7 @@ const RequestRideInner = () => {
     const rideMin = travelMinutes(rideKm);
 
     setBusy(true);
-    const APP_FEE_PER_ESCORT = 2.5;
+    
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const { data: ride, error } = await supabase
       .from("rides")
@@ -194,7 +194,7 @@ const RequestRideInner = () => {
         num_escorts: form.num_escorts,
         notes: form.notes || null,
         status: "open",
-        app_fee: +(APP_FEE_PER_ESCORT * form.num_escorts).toFixed(2),
+        app_fee: 0,
         cargo_length_m: form.cargo_length_m ? parseFloat(form.cargo_length_m.replace(",", ".")) : null,
         cargo_width_m: form.cargo_width_m ? parseFloat(form.cargo_width_m.replace(",", ".")) : null,
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m.replace(",", ".")) : null,
@@ -423,7 +423,7 @@ const Matches = ({
       <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
       <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted}. <strong>Servicekosten: €2,50 per begeleider</strong> (€{(2.5 * numWanted).toFixed(2)} totaal).
+        Selecteer er {numWanted}. <strong>Servicekosten: 3% van het ritbedrag</strong> (wekelijks gefactureerd).
       </p>
 
       <ul className="space-y-px bg-brass-deep/10">
