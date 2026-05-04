@@ -10,6 +10,15 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { AgendaPlanner } from "@/components/site/AgendaPlanner";
 
+const fmtHours = (min: number) => {
+  const total = Math.ceil(min / 15) * 15;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}u`;
+  return `${h}u ${m}m`;
+};
+
 interface RideRow {
   id: string;
   client_id: string;
