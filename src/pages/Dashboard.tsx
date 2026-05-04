@@ -463,6 +463,25 @@ const EscortDashboard = () => {
 
     setItems(merged);
     setLoading(false);
+
+    // Resolve real names for accepted assignments only
+    const acceptedIds = merged
+      .filter((m) => m.status === "accepted" || m.hours_submitted_at)
+      .map((m) => m.id);
+    if (acceptedIds.length) {
+      const results = await Promise.all(
+        acceptedIds.map(async (id) => {
+          const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+          const row = (data as any[])?.[0];
+          return [id, row?.name as string | undefined] as const;
+        }),
+      );
+      const next: Record<string, string> = {};
+      results.forEach(([id, name]) => {
+        if (name) next[id] = name;
+      });
+      setCounterpartyNames(next);
+    }
   };
 
   useEffect(() => {
