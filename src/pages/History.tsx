@@ -152,6 +152,31 @@ const HistoryInner = () => {
     })();
   }, [user, role]);
 
+  // Resolve real counterparty names (history rows are post-acceptance)
+  useEffect(() => {
+    (async () => {
+      const ids = rides.flatMap((r) => r.assignment_ids).filter(Boolean);
+      if (!ids.length) return;
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+          const row = (data as any[])?.[0];
+          return [id, row?.name as string | undefined] as const;
+        }),
+      );
+      const nameById = new Map(results.filter(([, n]) => !!n) as [string, string][]);
+      setRides((prev) =>
+        prev.map((r) => {
+          const names = r.assignment_ids
+            .map((id) => nameById.get(id))
+            .filter(Boolean) as string[];
+          return names.length ? { ...r, counterpart_name: [...new Set(names)].join(", ") } : r;
+        }),
+      );
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rides.length]);
+
   const grouped = useMemo(() => {
     const map = new Map<string, { label: string; items: HistoryRide[]; total: number }>();
     for (const r of rides) {
