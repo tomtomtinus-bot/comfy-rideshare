@@ -391,6 +391,7 @@ const EscortDashboard = () => {
     (AssignmentRow & {
       ride: RideRow;
       hourly_rate: number;
+      is_be_ride: boolean;
       min_billable_hours: number;
       client_anon: string;
     })[]
