@@ -428,6 +428,12 @@ const InvoicesInner = () => {
                       >
                         {isOpen ? "Verberg regels" : "Toon regels"}
                       </button>
+                      <button
+                        onClick={() => downloadEscortPdf(inv)}
+                        className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
+                      >
+                        Download PDF
+                      </button>
                       {!isEscort && inv.status !== "paid" && (
                         <button
                           onClick={() => markPaid(inv.id)}
