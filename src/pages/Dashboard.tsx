@@ -593,200 +593,230 @@ const EscortDashboard = () => {
         <div className="bg-card shadow-etched p-12 text-center">
           <p className="text-brass-deep/60">U heeft nog geen toegewezen ritten.</p>
         </div>
-      ) : (
-        <ul className="space-y-px bg-brass-deep/10">
-          {items.map((a) => {
-            const submitted = !!a.hours_submitted_at;
-            const isInvited = a.status === "invited";
-            const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
-            const expired = isInvited && minsLeft === 0;
-            const accepted = a.status === "accepted";
-            return (
-              <li key={a.id} className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""}`}>
-                <div className="grid grid-cols-12 gap-4 items-start">
-                  <div className="col-span-12 md:col-span-3">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                    <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
-                    <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
-                    <div className="mt-2"><StatusBadge status={a.status} /></div>
-                  </div>
-                  <div className="col-span-12 md:col-span-7">
-                    {isInvited ? (
-                      <>
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
-                        <p className="font-medium">
-                          Vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                        </p>
-                        {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                          <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
-                            Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                        <p className="font-medium">
-                          {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                        </p>
-                        <p className="text-sm text-brass-deep/55 mt-2">
-                          Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                        </p>
-                        {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                          <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
-                            Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                            {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div className="col-span-6 md:col-span-2 text-right">
-                    {isInvited && !expired ? (
-                      <div className="space-y-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                          Nog {minsLeft} min
-                        </p>
-                        <div className="flex gap-1 justify-end">
-                          <button
-                            onClick={() => respond(a.id, true)}
-                            className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                          >
-                            Accepteer
-                          </button>
-                          <button
-                            onClick={() => respond(a.id, false)}
-                            className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
-                          >
-                            Weiger
-                          </button>
-                        </div>
-                      </div>
-                    ) : expired ? (
-                      <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
-                        Verlopen
-                      </span>
-                    ) : submitted ? (
-                      <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold">
-                        ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
-                      </span>
-                    ) : accepted ? (
-                      <button
-                        onClick={() => setOpenId(openId === a.id ? null : a.id)}
-                        className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                      >
-                        Uren invullen
-                      </button>
-                    ) : (
-                      <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
-                    )}
-                  </div>
-                </div>
+      ) : (() => {
+        const categorize = (a: typeof items[number]) => {
+          if (a.hours_submitted_at) return "afgerond";
+          if (a.status === "accepted") return "geaccepteerd";
+          if (a.status === "invited") return "openstaand";
+          return "afgerond"; // declined / expired / cancelled bij historie
+        };
+        const buckets = {
+          openstaand: items.filter((a) => categorize(a) === "openstaand"),
+          geaccepteerd: items.filter((a) => categorize(a) === "geaccepteerd"),
+          afgerond: items.filter((a) => categorize(a) === "afgerond"),
+        };
 
-                {openId === a.id && (
-                  <form
-                    onSubmit={(e) => submitHours(a.id, e)}
-                    className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
-                  >
-                    <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
-                      <div>
-                        <strong>Geplande boekingstijd:</strong>{" "}
-                        {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
-                      </div>
-                      <div>
-                        <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
-                        <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
+        const renderItem = (a: typeof items[number]) => {
+          const submitted = !!a.hours_submitted_at;
+          const isInvited = a.status === "invited";
+          const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
+          const expired = isInvited && minsLeft === 0;
+          const accepted = a.status === "accepted";
+          return (
+            <li key={a.id} className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""}`}>
+              <div className="grid grid-cols-12 gap-4 items-start">
+                <div className="col-span-12 md:col-span-3">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
+                  <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
+                  <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
+                  <div className="mt-2"><StatusBadge status={a.status} /></div>
+                </div>
+                <div className="col-span-12 md:col-span-7">
+                  {isInvited ? (
+                    <>
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
+                      <p className="font-medium">
+                        Vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
+                      </p>
+                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
+                        <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
+                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
+                      <p className="font-medium">
+                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
+                      </p>
+                      <p className="text-sm text-brass-deep/55 mt-2">
+                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
+                      </p>
+                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
+                        <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
+                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
+                          {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="col-span-6 md:col-span-2 text-right">
+                  {isInvited && !expired ? (
+                    <div className="space-y-2">
+                      <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                        Nog {minsLeft} min
+                      </p>
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => respond(a.id, true)}
+                          className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                        >
+                          Accepteer
+                        </button>
+                        <button
+                          onClick={() => respond(a.id, false)}
+                          className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
+                        >
+                          Weiger
+                        </button>
                       </div>
                     </div>
-                    {(() => {
-                      const sched = new Date(a.ride.scheduled_at);
-                      const pad = (n: number) => String(n).padStart(2, "0");
-                      const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
-                      const roundedMin = Math.round(sched.getMinutes() / 15) * 15;
-                      const rh = roundedMin === 60 ? sched.getHours() + 1 : sched.getHours();
-                      const rm = roundedMin === 60 ? 0 : roundedMin;
-                      const defTime = `${pad(rh % 24)}:${pad(rm)}`;
-                      return (
-                        <>
-                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                            Starttijd rit (op pickup)
-                          </div>
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
-                            <input
-                              name="ride_start_date"
-                              type="date"
-                              defaultValue={defDate}
-                              required
-                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
-                            <select
-                              name="ride_start_time"
-                              defaultValue={defTime}
-                              required
-                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                            >
-                              {QUARTER_TIMES.map((t) => (
-                                <option key={t} value={t}>{t}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
-                            Eindtijd rit (op dropoff)
-                          </div>
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
-                            <input
-                              name="ride_end_date"
-                              type="date"
-                              defaultValue={defDate}
-                              required
-                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
-                            <select
-                              name="ride_end_time"
-                              defaultValue=""
-                              required
-                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                            >
-                              <option value="" disabled>Kies tijd…</option>
-                              {QUARTER_TIMES.map((t) => (
-                                <option key={t} value={t}>{t}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </>
-                      );
-                    })()}
-                    <div className="md:col-span-2">
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Toelichting (optioneel)
-                      </label>
-                      <textarea
-                        name="hours_notes"
-                        rows={2}
-                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                      />
-                    </div>
-                    <p className="md:col-span-2 text-xs text-brass-deep/55">
-                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
-                    </p>
-                    <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
-                      Versturen
+                  ) : expired ? (
+                    <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
+                      Verlopen
+                    </span>
+                  ) : submitted ? (
+                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold">
+                      ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
+                    </span>
+                  ) : accepted ? (
+                    <button
+                      onClick={() => setOpenId(openId === a.id ? null : a.id)}
+                      className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                    >
+                      Uren invullen
                     </button>
-                  </form>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  ) : (
+                    <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
+                  )}
+                </div>
+              </div>
+
+              {openId === a.id && (
+                <form
+                  onSubmit={(e) => submitHours(a.id, e)}
+                  className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
+                    <div>
+                      <strong>Geplande boekingstijd:</strong>{" "}
+                      {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                    </div>
+                    <div>
+                      <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
+                      <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
+                    </div>
+                  </div>
+                  {(() => {
+                    const sched = new Date(a.ride.scheduled_at);
+                    const pad = (n: number) => String(n).padStart(2, "0");
+                    const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
+                    const roundedMin = Math.round(sched.getMinutes() / 15) * 15;
+                    const rh = roundedMin === 60 ? sched.getHours() + 1 : sched.getHours();
+                    const rm = roundedMin === 60 ? 0 : roundedMin;
+                    const defTime = `${pad(rh % 24)}:${pad(rm)}`;
+                    return (
+                      <>
+                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                          Starttijd rit (op pickup)
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <input
+                            name="ride_start_date"
+                            type="date"
+                            defaultValue={defDate}
+                            required
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <select
+                            name="ride_start_time"
+                            defaultValue={defTime}
+                            required
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          >
+                            {QUARTER_TIMES.map((t) => (
+                              <option key={t} value={t}>{t}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
+                          Eindtijd rit (op dropoff)
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <input
+                            name="ride_end_date"
+                            type="date"
+                            defaultValue={defDate}
+                            required
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <select
+                            name="ride_end_time"
+                            defaultValue=""
+                            required
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          >
+                            <option value="" disabled>Kies tijd…</option>
+                            {QUARTER_TIMES.map((t) => (
+                              <option key={t} value={t}>{t}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    );
+                  })()}
+                  <div className="md:col-span-2">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                      Toelichting (optioneel)
+                    </label>
+                    <textarea
+                      name="hours_notes"
+                      rows={2}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                  </div>
+                  <p className="md:col-span-2 text-xs text-brass-deep/55">
+                    Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
+                  </p>
+                  <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
+                    Versturen
+                  </button>
+                </form>
+              )}
+            </li>
+          );
+        };
+
+        const renderList = (list: typeof items) =>
+          list.length === 0 ? (
+            <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>
+          ) : (
+            <ul className="space-y-px bg-brass-deep/10">{list.map(renderItem)}</ul>
+          );
+
+        return (
+          <Tabs defaultValue="openstaand" className="w-full">
+            <TabsList className="grid grid-cols-3 w-full md:w-auto md:inline-flex">
+              <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
+              <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
+              <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand)}</TabsContent>
+            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd)}</TabsContent>
+            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond)}</TabsContent>
+          </Tabs>
+        );
+      })()}
     </div>
   );
 };
