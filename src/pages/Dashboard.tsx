@@ -446,14 +446,17 @@ const EscortDashboard = () => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const parsed = hoursSchema.safeParse({
-      ride_start_at: fd.get("ride_start_at"),
-      ride_end_at: fd.get("ride_end_at"),
+      ride_start_date: fd.get("ride_start_date"),
+      ride_start_time: fd.get("ride_start_time"),
+      ride_end_date: fd.get("ride_end_date"),
+      ride_end_time: fd.get("ride_end_time"),
       hours_notes: fd.get("hours_notes"),
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
 
-    const rideStart = new Date(parsed.data.ride_start_at);
-    const rideEnd = new Date(parsed.data.ride_end_at);
+    const rideStart = new Date(`${parsed.data.ride_start_date}T${parsed.data.ride_start_time}`);
+    const rideEnd = new Date(`${parsed.data.ride_end_date}T${parsed.data.ride_end_time}`);
+    if (isNaN(rideStart.getTime()) || isNaN(rideEnd.getTime())) return toast.error("Ongeldige datum of tijd");
     if (rideEnd <= rideStart) return toast.error("Eindtijd rit moet na starttijd liggen");
 
     const item = items.find((i) => i.id === id);
