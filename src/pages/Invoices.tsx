@@ -283,7 +283,7 @@ const InvoicesInner = () => {
                 <div className="bg-card shadow-etched p-6 flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factureringsfrequentie</p>
-                    <p className="text-sm text-brass-deep/70">App-fee is 3% van de afgeronde ritbedragen, automatisch wekelijks gefactureerd.</p>
+                    <p className="text-sm text-brass-deep/70">App-fee is 1% van de afgeronde ritbedragen, automatisch wekelijks gefactureerd.</p>
                   </div>
                   <div className="flex gap-2">
                     {(["weekly", "monthly"] as const).map((f) => (
