@@ -477,12 +477,15 @@ const Matches = ({
   onBook: (selected: MatchedEscort[]) => void;
   busy: boolean;
 }) => {
-  const [selected, setSelected] = useState<string[]>(matches.slice(0, numWanted).map((m) => m.id));
+  const initialSelected = matches.filter((m) => !m.conflict).slice(0, numWanted).map((m) => m.id);
+  const [selected, setSelected] = useState<string[]>(initialSelected);
   const toggle = (id: string) => {
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : s.length < numWanted ? [...s, id] : s
     );
   };
+  const fmtDT = (iso: string) => new Date(iso).toLocaleString("nl-NL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  const anySelectedConflict = matches.some((m) => selected.includes(m.id) && m.conflict);
   return (
     <section className="mt-12">
       <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
@@ -495,9 +498,13 @@ const Matches = ({
         {matches.map((m) => {
           const isSelected = selected.includes(m.id);
           const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
+          const conflict = m.conflict;
           return (
             <li key={m.id} onClick={() => toggle(m.id)}
-              className={`bg-card p-6 cursor-pointer transition-all ${isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"}`}>
+              className={`bg-card p-6 cursor-pointer transition-all ${
+                conflict ? "ring-2 ring-inset ring-destructive/60" :
+                isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"
+              }`}>
               <div className="grid grid-cols-12 gap-4 items-center">
                 <div className="col-span-12 md:col-span-3">
                   <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
@@ -508,20 +515,38 @@ const Matches = ({
                 <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
                 <Cell label="Totaal bezet" value={fmtHours(totalMin)} bold />
                 <div className="col-span-12 md:col-span-1 text-right">
-                  <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
+                  <span className={`size-5 inline-block rounded-full ${
+                    conflict ? "bg-destructive" : isSelected ? "bg-brass-gold" : "bg-patina"
+                  }`} />
                 </div>
                 <div className="col-span-12 text-[11px] text-brass-deep/55">
                   Tarief {m.is_be_ride ? "BE" : "NL"}: €{m.effective_rate}/u · leegrijden 100 km/u, rit 70 km/u
                 </div>
+                {conflict && (
+                  <div className="col-span-12 mt-2 bg-destructive/10 border border-destructive/40 px-3 py-2">
+                    <p className="text-xs font-bold text-destructive uppercase tracking-widest">⚠ Bezetting overlapt</p>
+                    <p className="text-[12px] text-brass-deep mt-1">
+                      Deze begeleider heeft al een aanvraag die overlapt met jouw bezetting{" "}
+                      <strong>{fmtDT(conflict.rideStart)} – {fmtDT(conflict.rideEnd)}</strong>.
+                      Overlap: <strong>{fmtDT(conflict.overlapStart)} – {fmtDT(conflict.overlapEnd)}</strong>.
+                    </p>
+                  </div>
+                )}
               </div>
             </li>
           );
         })}
       </ul>
 
+      {anySelectedConflict && (
+        <p className="mt-4 text-sm text-destructive font-semibold">
+          ⚠ Eén of meer geselecteerde begeleiders zijn al bezet. Deselecteer hen om te kunnen boeken.
+        </p>
+      )}
+
       <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
-        disabled={busy || selected.length !== numWanted}
-        className="mt-8 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
+        disabled={busy || selected.length !== numWanted || anySelectedConflict}
+        className="mt-4 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
         {busy ? "Boeken…" : `Boek ${selected.length}/${numWanted} begeleider(s)`}
       </button>
     </section>
