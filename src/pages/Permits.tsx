@@ -80,7 +80,13 @@ export default function Permits() {
         return;
       }
 
-      const path = `${user.id}/${Date.now()}-${file.name}`;
+      const safeName = file.name
+        .normalize("NFKD")
+        .replace(/[^\w.\-]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(-120);
+      const path = `${user.id}/${Date.now()}-${safeName || "ontheffing.pdf"}`;
       const { error: upErr } = await supabase.storage.from("permits").upload(path, file, {
         contentType: "application/pdf",
         upsert: false,
