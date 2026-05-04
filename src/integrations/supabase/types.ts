@@ -548,6 +548,8 @@ export type Database = {
           escort_id: string
           estimated_cost: number | null
           estimated_hours: number | null
+          extra_costs: Json
+          extra_costs_total: number
           hours_notes: string | null
           hours_submitted_at: string | null
           id: string
@@ -572,6 +574,8 @@ export type Database = {
           escort_id: string
           estimated_cost?: number | null
           estimated_hours?: number | null
+          extra_costs?: Json
+          extra_costs_total?: number
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
@@ -596,6 +600,8 @@ export type Database = {
           escort_id?: string
           estimated_cost?: number | null
           estimated_hours?: number | null
+          extra_costs?: Json
+          extra_costs_total?: number
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
