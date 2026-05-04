@@ -371,7 +371,7 @@ const EscortDashboard = () => {
 
     const { data: me } = await supabase
       .from("escort_profiles")
-      .select("hourly_rate")
+      .select("hourly_rate, min_billable_hours")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -383,6 +383,7 @@ const EscortDashboard = () => {
           ...x,
           ride: ride as RideRow,
           hourly_rate: Number(me?.hourly_rate ?? 0),
+          min_billable_hours: Number((me as any)?.min_billable_hours ?? 0),
           client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
         };
       })
