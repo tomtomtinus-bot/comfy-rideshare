@@ -15,7 +15,7 @@ export const Nav = () => {
   const links: { to: string; label: string; show: boolean }[] = [
     { to: "/", label: "Home", show: true },
     { to: "/dashboard", label: "Dashboard", show: !!user },
-    { to: "/aanvragen", label: "Rit aanvragen", show: true },
+    { to: "/aanvragen", label: "Rit aanvragen", show: role !== "begeleider" },
     { to: "/profiel", label: "Profiel", show: !!user && role === "begeleider" },
     { to: "/facturen", label: "Facturen", show: !!user },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
