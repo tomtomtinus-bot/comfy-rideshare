@@ -47,11 +47,13 @@ interface Invoice {
 interface Item {
   id: string;
   invoice_id: string;
+  ride_id: string | null;
   ride_date: string;
   hours: number;
   hourly_rate: number;
   amount: number;
   description: string | null;
+  reference?: string | null;
 }
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "medium" });
