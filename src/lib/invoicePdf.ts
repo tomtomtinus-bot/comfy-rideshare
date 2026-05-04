@@ -284,7 +284,7 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
       `App-fee rit ${r.route ?? ""}`.trim(),
       r.reference ?? "",
       String(r.num_escorts),
-      "1%",
+      "1,5%",
       fmtMoney(r.amount),
     ]),
     theme: "plain",

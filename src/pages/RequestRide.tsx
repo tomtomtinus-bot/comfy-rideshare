@@ -491,7 +491,7 @@ const Matches = ({
       <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
       <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted}. <strong>Servicekosten: 1% van het ritbedrag</strong> (wekelijks gefactureerd).
+        Selecteer er {numWanted}. <strong>Servicekosten: 1,5% van het ritbedrag</strong> (wekelijks gefactureerd).
       </p>
 
       <ul className="space-y-px bg-brass-deep/10">
