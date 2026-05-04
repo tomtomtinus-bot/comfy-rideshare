@@ -262,28 +262,117 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          num_escorts: number
+          platform_invoice_id: string
+          ride_date: string
+          ride_id: string
+          route: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          num_escorts: number
+          platform_invoice_id: string
+          ride_date: string
+          ride_id: string
+          route?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          num_escorts?: number
+          platform_invoice_id?: string
+          ride_date?: string
+          ride_id?: string
+          route?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_invoice_items_platform_invoice_id_fkey"
+            columns: ["platform_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "platform_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_invoices: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          invoice_number: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          status: string
+          total_amount: number
+          total_escorts: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          status?: string
+          total_amount?: number
+          total_escorts?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          status?: string
+          total_amount?: number
+          total_escorts?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           anonymous_id: string | null
+          billing_frequency: string
           created_at: string
           full_name: string | null
           id: string
+          last_platform_invoice_at: string | null
           phone: string | null
           updated_at: string
         }
         Insert: {
           anonymous_id?: string | null
+          billing_frequency?: string
           created_at?: string
           full_name?: string | null
           id: string
+          last_platform_invoice_at?: string | null
           phone?: string | null
           updated_at?: string
         }
         Update: {
           anonymous_id?: string | null
+          billing_frequency?: string
           created_at?: string
           full_name?: string | null
           id?: string
+          last_platform_invoice_at?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -402,6 +491,7 @@ export type Database = {
           pickup_city: string
           pickup_lat: number
           pickup_lng: number
+          platform_invoice_id: string | null
           scheduled_at: string
           status: Database["public"]["Enums"]["ride_status"]
           time_window_end: string | null
@@ -430,6 +520,7 @@ export type Database = {
           pickup_city: string
           pickup_lat: number
           pickup_lng: number
+          platform_invoice_id?: string | null
           scheduled_at: string
           status?: Database["public"]["Enums"]["ride_status"]
           time_window_end?: string | null
@@ -458,6 +549,7 @@ export type Database = {
           pickup_city?: string
           pickup_lat?: number
           pickup_lng?: number
+          platform_invoice_id?: string | null
           scheduled_at?: string
           status?: Database["public"]["Enums"]["ride_status"]
           time_window_end?: string | null
@@ -516,6 +608,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       has_role: {
         Args: {
