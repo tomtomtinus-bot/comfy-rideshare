@@ -82,7 +82,7 @@ const EscortProfile = () => {
                     <span className="text-xl text-brass-deep/50">/uur</span>
                   </p>
                   <p className="mt-2 text-[11px] text-brass-deep/50 leading-relaxed">
-                    Vanaf vertrek standplaats tot terugkeer. Servicekosten: 3% van het ritbedrag (wekelijks).
+                    Vanaf vertrek standplaats tot terugkeer. Servicekosten: 1% van het ritbedrag (wekelijks).
                   </p>
                   <Link
                     to="/aanvragen"
