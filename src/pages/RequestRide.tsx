@@ -13,8 +13,9 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 const schema = z.object({
   pickup_address: z.string().trim().min(2).max(200),
   dropoff_address: z.string().trim().min(2).max(200),
-  scheduled_at: z.string().min(1),
-  num_escorts: z.coerce.number().int().min(1).max(15),
+  scheduled_date: z.string().min(1, "Datum vereist"),
+  scheduled_time: z.string().min(1, "Tijd vereist"),
+  num_escorts: z.coerce.number().int().min(1),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(120).optional()),
   cargo_width_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(15).optional()),
