@@ -53,7 +53,8 @@ async function readPdfItems(file: ArrayBuffer): Promise<PageItem[]> {
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
-    for (const it of content.items as any[]) {
+    const arr = Array.from((content.items ?? []) as any[]);
+    for (const it of arr) {
       const tr = it.transform; // [a, b, c, d, e, f] => x = e, y = f
       const str = (it.str ?? "").toString();
       if (!str.trim()) continue;
