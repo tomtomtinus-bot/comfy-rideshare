@@ -21,6 +21,7 @@ const schema = z.object({
   basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  minBillableHours: z.coerce.number().min(0).max(24).multipleOf(0.25),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
   certExpiresOn: z.string().optional().or(z.literal("")),
