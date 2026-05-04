@@ -444,18 +444,23 @@ const EscortDashboard = () => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const parsed = hoursSchema.safeParse({
-      departed_base_at: fd.get("departed_base_at"),
-      returned_base_at: fd.get("returned_base_at"),
+      ride_start_at: fd.get("ride_start_at"),
+      ride_end_at: fd.get("ride_end_at"),
       hours_notes: fd.get("hours_notes"),
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
 
-    const start = new Date(parsed.data.departed_base_at);
-    const end = new Date(parsed.data.returned_base_at);
-    if (end <= start) return toast.error("Eindtijd moet na starttijd liggen");
+    const rideStart = new Date(parsed.data.ride_start_at);
+    const rideEnd = new Date(parsed.data.ride_end_at);
+    if (rideEnd <= rideStart) return toast.error("Eindtijd rit moet na starttijd liggen");
 
     const item = items.find((i) => i.id === id);
     if (!item) return;
+
+    // Vertrek standplaats = starttijd rit − reistijd heen
+    // Terug standplaats = eindtijd rit + reistijd terug
+    const start = new Date(rideStart.getTime() - item.travel_to_pickup_min * 60_000);
+    const end = new Date(rideEnd.getTime() + item.travel_back_home_min * 60_000);
 
     const hours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
     const cost = +(hours * item.hourly_rate).toFixed(2);
