@@ -311,7 +311,7 @@ const ClientDashboard = () => {
                             {r.client_reference ? ` · ref ${r.client_reference}` : ""}
                           </p>
                         )}
-                        {r.notes && null}
+                        
                         {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
                       </div>
                       <div className="col-span-12 md:col-span-4">
