@@ -86,6 +86,8 @@ const RequestRideInner = () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     if (!pickupGeo || !dropoffGeo) return toast.error("Postcodes nog niet bevestigd");
+    const [hh, mm] = form.scheduled_time.split(":").map(Number);
+    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error("Starttijd moet op het kwartier vallen (00, 15, 30, 45)");
 
     setBusy(true);
     const { data, error } = await supabase
