@@ -432,7 +432,7 @@ const Inner = () => {
               <section>
                 <Label>Toeslagen</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Bijv. <em>België toeslag</em>, <em>Brandstoftoeslag</em>, <em>Nachttoeslag</em>. Toeslagen worden <strong>per uur</strong> berekend; brandstof mag ook als percentage van het uurtarief.
+                  Bijv. <em>België toeslag</em>, <em>Nachttoeslag</em>. Worden <strong>per uur</strong> berekend. (Brandstof staat hierboven.)
                 </p>
                 <div className="space-y-2">
                   {surcharges.map((s, i) => {
