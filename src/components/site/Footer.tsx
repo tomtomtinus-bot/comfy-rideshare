@@ -1,10 +1,19 @@
+import logo from "@/assets/pilotcrew-logo.png";
+
 export const Footer = () => {
   return (
     <footer id="contact" className="bg-brass-deep py-16 md:py-20 px-6 md:px-8 text-parchment/60">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
         <div className="max-w-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="size-6 bg-brass-gold rounded-full" />
+            <img
+              src={logo}
+              alt="Pilotcrew"
+              width={24}
+              height={24}
+              loading="lazy"
+              className="size-6 object-contain brightness-0 invert"
+            />
             <span className="font-display text-xl tracking-tight text-parchment italic">
               Pilotcrew
             </span>
