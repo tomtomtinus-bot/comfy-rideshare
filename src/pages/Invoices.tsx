@@ -153,32 +153,86 @@ const InvoicesInner = () => {
                       )}
                     </div>
 
-                    {isOpen && (
-                      <div className="mt-6 pt-6 border-t border-brass-deep/10">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
-                              <th className="text-left py-2">Datum</th>
-                              <th className="text-left py-2">Omschrijving</th>
-                              <th className="text-right py-2">Uren</th>
-                              <th className="text-right py-2">Tarief</th>
-                              <th className="text-right py-2">Bedrag</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rows.map((r) => (
-                              <tr key={r.id} className="border-t border-brass-deep/5">
-                                <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
-                                <td className="py-2">{r.description}</td>
-                                <td className="py-2 text-right tabular-nums">{Number(r.hours).toFixed(2)}</td>
-                                <td className="py-2 text-right tabular-nums">{fmtMoney(r.hourly_rate)}</td>
-                                <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(r.amount)}</td>
+                    {isOpen && (() => {
+                      const isFuel = (r: Item) =>
+                        /brandstof|fuel/i.test(r.description ?? "");
+                      const rideRows = rows.filter((r) => !isFuel(r));
+                      const fuelRows = rows.filter((r) => isFuel(r));
+                      const ridesSubtotal = rideRows.reduce((s, r) => s + Number(r.amount), 0);
+                      const fuelSubtotal = fuelRows.reduce((s, r) => s + Number(r.amount), 0);
+                      const subtotal = ridesSubtotal + fuelSubtotal;
+                      const vat = subtotal * 0.21;
+                      const total = subtotal + vat;
+                      return (
+                        <div className="mt-6 pt-6 border-t border-brass-deep/10">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
+                                <th className="text-left py-2">Datum</th>
+                                <th className="text-left py-2">Omschrijving</th>
+                                <th className="text-right py-2">Uren</th>
+                                <th className="text-right py-2">Tarief</th>
+                                <th className="text-right py-2">Bedrag</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
+                            </thead>
+                            <tbody>
+                              {rideRows.map((r) => (
+                                <tr key={r.id} className="border-t border-brass-deep/5">
+                                  <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                                  <td className="py-2">{r.description}</td>
+                                  <td className="py-2 text-right tabular-nums">{Number(r.hours).toFixed(2)}</td>
+                                  <td className="py-2 text-right tabular-nums">{fmtMoney(r.hourly_rate)}</td>
+                                  <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(r.amount)}</td>
+                                </tr>
+                              ))}
+                              <tr className="border-t-2 border-brass-deep/20">
+                                <td colSpan={4} className="py-3 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                  Subtotaal ritten
+                                </td>
+                                <td className="py-3 text-right tabular-nums font-semibold">{fmtMoney(ridesSubtotal)}</td>
+                              </tr>
+
+                              {fuelRows.length > 0 && fuelRows.map((r) => (
+                                <tr key={r.id} className="border-t border-brass-deep/5">
+                                  <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                                  <td className="py-2">{r.description}</td>
+                                  <td className="py-2 text-right tabular-nums">{Number(r.hours).toFixed(2)}</td>
+                                  <td className="py-2 text-right tabular-nums">{fmtMoney(r.hourly_rate)}</td>
+                                  <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(r.amount)}</td>
+                                </tr>
+                              ))}
+                              {fuelRows.length > 0 && (
+                                <tr className="border-t border-brass-deep/10">
+                                  <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                    Brandstoftoeslag
+                                  </td>
+                                  <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(fuelSubtotal)}</td>
+                                </tr>
+                              )}
+
+                              <tr className="border-t border-brass-deep/10">
+                                <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                  Subtotaal excl. btw
+                                </td>
+                                <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(subtotal)}</td>
+                              </tr>
+                              <tr>
+                                <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                  Btw 21%
+                                </td>
+                                <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
+                              </tr>
+                              <tr className="border-t-2 border-brass-deep/30">
+                                <td colSpan={4} className="py-3 text-right text-xs uppercase tracking-widest font-bold text-brass-deep">
+                                  Eindbedrag
+                                </td>
+                                <td className="py-3 text-right tabular-nums font-bold text-brass-gold text-base">{fmtMoney(total)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
                   </li>
                 );
               })}
