@@ -283,6 +283,22 @@ const RequestRideInner = () => {
                   )}
                 </div>
               </div>
+              {pickupGeo && dropoffGeo && (() => {
+                const km = distanceKm(pickupGeo, dropoffGeo);
+                const min = travelMinutes(km);
+                return (
+                  <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                      Geschatte ritduur
+                    </p>
+                    <p className="text-sm text-brass-deep">
+                      <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
+                      <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
+                      <span className="text-brass-deep/55">(70 km/u beladen, leegrijden 100 km/u)</span>
+                    </p>
+                  </div>
+                );
+              })()}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
