@@ -457,10 +457,14 @@ const EscortDashboard = () => {
     const item = items.find((i) => i.id === id);
     if (!item) return;
 
+    // Reistijd afronden naar boven op kwartieren
+    const ceilQuarter = (min: number) => Math.ceil(min / 15) * 15;
+    const travelTo = ceilQuarter(item.travel_to_pickup_min);
+    const travelBack = ceilQuarter(item.travel_back_home_min);
     // Vertrek standplaats = starttijd rit − reistijd heen
     // Terug standplaats = eindtijd rit + reistijd terug
-    const start = new Date(rideStart.getTime() - item.travel_to_pickup_min * 60_000);
-    const end = new Date(rideEnd.getTime() + item.travel_back_home_min * 60_000);
+    const start = new Date(rideStart.getTime() - travelTo * 60_000);
+    const end = new Date(rideEnd.getTime() + travelBack * 60_000);
 
     const hours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
     const cost = +(hours * item.hourly_rate).toFixed(2);
