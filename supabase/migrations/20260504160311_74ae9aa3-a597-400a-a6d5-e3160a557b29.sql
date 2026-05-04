@@ -1,0 +1,2 @@
+ALTER TABLE public.escort_profiles
+ADD COLUMN IF NOT EXISTS hourly_rate_be NUMERIC NOT NULL DEFAULT 35.00;

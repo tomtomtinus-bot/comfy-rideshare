@@ -42,6 +42,9 @@ interface MatchedEscort {
   base_lat: number;
   base_lng: number;
   hourly_rate: number;
+  hourly_rate_be: number;
+  effective_rate: number;
+  is_be_ride: boolean;
   rating: number;
   rides_completed: number;
   countries: string[];
@@ -130,7 +133,7 @@ const RequestRideInner = () => {
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, rating, rides_completed, countries, available")
+      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, rating, rides_completed, countries, available")
       .eq("available", true);
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -151,12 +154,15 @@ const RequestRideInner = () => {
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
+        const isBe = pickupGeo.country.includes("BE") || dropoffGeo.country.includes("BE");
         return {
           ...e,
           distanceToPickup: dPickup,
           distanceFromDropoff: dDropoff,
           travelToPickupMin: travelMinutes(dPickup),
           travelBackHomeMin: travelMinutes(dDropoff),
+          is_be_ride: isBe,
+          effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
         };
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
@@ -222,7 +228,7 @@ const RequestRideInner = () => {
         travel_to_pickup_min: e.travelToPickupMin,
         travel_back_home_min: e.travelBackHomeMin,
         estimated_hours: hours,
-        estimated_cost: +(hours * e.hourly_rate).toFixed(2),
+        estimated_cost: +(hours * e.effective_rate).toFixed(2),
       };
     });
 
@@ -439,7 +445,7 @@ const Matches = ({
                 </div>
                 <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
                 <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
-                <Cell label="Tarief" value={`€${m.hourly_rate}/u`} />
+                <Cell label={m.is_be_ride ? "Tarief BE" : "Tarief NL"} value={`€${m.effective_rate}/u`} />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
                 </div>

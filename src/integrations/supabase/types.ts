@@ -70,6 +70,7 @@ export type Database = {
           escort_types: string[]
           fuel_surcharge: Json
           hourly_rate: number
+          hourly_rate_be: number
           iban: string | null
           id: string
           insurance_policy: string | null
@@ -112,6 +113,7 @@ export type Database = {
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
+          hourly_rate_be?: number
           iban?: string | null
           id: string
           insurance_policy?: string | null
@@ -154,6 +156,7 @@ export type Database = {
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
+          hourly_rate_be?: number
           iban?: string | null
           id?: string
           insurance_policy?: string | null

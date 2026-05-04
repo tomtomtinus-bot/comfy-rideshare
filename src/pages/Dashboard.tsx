@@ -391,6 +391,7 @@ const EscortDashboard = () => {
     (AssignmentRow & {
       ride: RideRow;
       hourly_rate: number;
+      is_be_ride: boolean;
       min_billable_hours: number;
       client_anon: string;
     })[]
@@ -426,7 +427,7 @@ const EscortDashboard = () => {
 
     const { data: me } = await supabase
       .from("escort_profiles")
-      .select("hourly_rate, min_billable_hours")
+      .select("hourly_rate, hourly_rate_be, min_billable_hours")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -434,10 +435,19 @@ const EscortDashboard = () => {
     const merged = list
       .map((x) => {
         const ride = rideMap.get(x.ride_id) as RideRow | undefined;
+        const isBe = ride
+          ? /belgi|brussel|antwerp|gent|luik|liege|brugge|charleroi|namur|namen|leuven|mechelen|hasselt|kortrijk/i.test(
+              `${ride.pickup_city ?? ""} ${ride.dropoff_city ?? ""} ${ride.pickup_address ?? ""} ${ride.dropoff_address ?? ""}`,
+            )
+          : false;
+        const rate = isBe
+          ? Number((me as any)?.hourly_rate_be ?? me?.hourly_rate ?? 0)
+          : Number(me?.hourly_rate ?? 0);
         return {
           ...x,
           ride: ride as RideRow,
-          hourly_rate: Number(me?.hourly_rate ?? 0),
+          hourly_rate: rate,
+          is_be_ride: isBe,
           min_billable_hours: Number((me as any)?.min_billable_hours ?? 0),
           client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
         };
@@ -801,7 +811,7 @@ const EscortDashboard = () => {
                     />
                   </div>
                   <p className="md:col-span-2 text-xs text-brass-deep/55">
-                    Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
+                    Tarief {a.is_be_ride ? "België" : "Nederland"}: €{a.hourly_rate}/uur{a.is_be_ride ? " (grensoverschrijdend → BE-tarief op alle uren)" : ""} · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
                   </p>
                   <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                     Versturen
