@@ -176,7 +176,7 @@ const RequestRideInner = () => {
     const rideMin = travelMinutes(rideKm);
 
     setBusy(true);
-    const APP_FEE_PER_ESCORT = 2.5;
+    
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const { data: ride, error } = await supabase
       .from("rides")
