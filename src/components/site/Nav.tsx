@@ -43,8 +43,7 @@ export const Nav = () => {
             aria-expanded={open}
             className="md:hidden inline-flex items-center justify-center size-10 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
           >
-            {open ? <Menu className="size-5" /> : <Menu className="size-5" />}
-            {open ? <X className="size-5 -ml-5" /> : null}
+            {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>
