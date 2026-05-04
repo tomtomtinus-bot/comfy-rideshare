@@ -124,10 +124,11 @@ const HistoryInner = () => {
         const escMap = new Map((escs ?? []).map((e: any) => [e.id, e.anonymous_id]));
         const invMap = new Map((invs ?? []).map((i: any) => [i.id, i.invoice_number]));
 
-        const byRide: Record<string, { total: number; anon: string[] }> = {};
+        const byRide: Record<string, { total: number; anon: string[]; assignment_ids: string[] }> = {};
         (ass ?? []).forEach((a: any) => {
-          (byRide[a.ride_id] ||= { total: 0, anon: [] });
+          (byRide[a.ride_id] ||= { total: 0, anon: [], assignment_ids: [] });
           byRide[a.ride_id].total += Number(a.actual_cost ?? 0);
+          byRide[a.ride_id].assignment_ids.push(a.id);
           const an = escMap.get(a.escort_id);
           if (an) byRide[a.ride_id].anon.push(`#${an}`);
         });
@@ -142,6 +143,7 @@ const HistoryInner = () => {
           amount: (byRide[r.id]?.total ?? 0) + Number(r.app_fee ?? 0),
           counterpart: byRide[r.id]?.anon.join(", ") || "—",
           invoice_number: invMap.get(r.platform_invoice_id) ?? null,
+          assignment_ids: byRide[r.id]?.assignment_ids ?? [],
         }));
         setRides(out);
       }
