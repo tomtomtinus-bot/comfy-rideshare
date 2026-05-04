@@ -273,7 +273,7 @@ const ClientDashboard = () => {
                         Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
                         {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
                         {r.client_reference ? ` · ref ${r.client_reference}` : ""}
-                        {r.escort_type_required ? ` · ${r.escort_type_required}` : ""}
+                        
                       </p>
                     )}
                     {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
@@ -309,7 +309,7 @@ const ClientDashboard = () => {
                         <span className="text-brass-deep/60 tabular-nums">
                           {a.actual_hours
                             ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
-                            : `~${a.estimated_hours}u (gepland)`}
+                            : "—"}
                         </span>
                       </div>
                     );
