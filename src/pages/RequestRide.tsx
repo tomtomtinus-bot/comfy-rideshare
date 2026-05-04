@@ -137,6 +137,7 @@ const RequestRideInner = () => {
 
     setBusy(true);
     const APP_FEE_PER_ESCORT = 2.5;
+    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const { data: ride, error } = await supabase
       .from("rides")
       .insert({
@@ -149,7 +150,7 @@ const RequestRideInner = () => {
         dropoff_city: dropoffGeo.city,
         dropoff_lat: dropoffGeo.lat,
         dropoff_lng: dropoffGeo.lng,
-        scheduled_at: new Date(form.scheduled_at).toISOString(),
+        scheduled_at: scheduledISO,
         num_escorts: form.num_escorts,
         notes: form.notes || null,
         status: "open",
@@ -160,7 +161,7 @@ const RequestRideInner = () => {
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
         client_reference: form.client_reference || null,
-        time_window_start: new Date(form.scheduled_at).toISOString(),
+        time_window_start: scheduledISO,
         time_window_end: null,
       })
       .select()
