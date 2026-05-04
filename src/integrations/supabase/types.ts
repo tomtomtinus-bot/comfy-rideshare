@@ -229,6 +229,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          ride_assignment_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          ride_assignment_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          ride_assignment_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           anonymous_id: string | null
@@ -271,6 +304,8 @@ export type Database = {
           invited_at: string
           invoice_id: string | null
           invoiced_at: string | null
+          reminder_10h_sent_at: string | null
+          reminder_8h_sent_at: string | null
           responded_at: string | null
           responds_by: string
           returned_base_at: string | null
@@ -293,6 +328,8 @@ export type Database = {
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
+          reminder_10h_sent_at?: string | null
+          reminder_8h_sent_at?: string | null
           responded_at?: string | null
           responds_by?: string
           returned_base_at?: string | null
@@ -315,6 +352,8 @@ export type Database = {
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
+          reminder_10h_sent_at?: string | null
+          reminder_8h_sent_at?: string | null
           responded_at?: string | null
           responds_by?: string
           returned_base_at?: string | null
