@@ -111,7 +111,7 @@ const HistoryInner = () => {
         const invoiceIds = [...new Set(list.map((r: any) => r.platform_invoice_id).filter(Boolean))];
         const [{ data: ass }, { data: invs }] = await Promise.all([
           rideIds.length
-            ? supabase.from("ride_assignments").select("ride_id, escort_id, actual_cost").in("ride_id", rideIds)
+            ? supabase.from("ride_assignments").select("id, ride_id, escort_id, actual_cost").in("ride_id", rideIds)
             : Promise.resolve({ data: [] as any[] }),
           invoiceIds.length
             ? supabase.from("platform_invoices").select("id, invoice_number").in("id", invoiceIds)
