@@ -434,10 +434,19 @@ const EscortDashboard = () => {
     const merged = list
       .map((x) => {
         const ride = rideMap.get(x.ride_id) as RideRow | undefined;
+        const isBe = ride
+          ? /belgi|brussel|antwerp|gent|luik|liege|brugge|charleroi|namur|namen|leuven|mechelen|hasselt|kortrijk/i.test(
+              `${ride.pickup_city ?? ""} ${ride.dropoff_city ?? ""} ${ride.pickup_address ?? ""} ${ride.dropoff_address ?? ""}`,
+            )
+          : false;
+        const rate = isBe
+          ? Number((me as any)?.hourly_rate_be ?? me?.hourly_rate ?? 0)
+          : Number(me?.hourly_rate ?? 0);
         return {
           ...x,
           ride: ride as RideRow,
-          hourly_rate: Number(me?.hourly_rate ?? 0),
+          hourly_rate: rate,
+          is_be_ride: isBe,
           min_billable_hours: Number((me as any)?.min_billable_hours ?? 0),
           client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
         };
