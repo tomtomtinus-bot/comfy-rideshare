@@ -359,6 +359,9 @@ const ClientDashboard = () => {
                           <div key={a.id} className="flex items-center justify-between text-sm">
                             <span className="font-medium">
                               Begeleider <span className="text-brass-deep">#{a.anon}</span>
+                              {escortNames[a.id] ? (
+                                <span className="ml-2 text-brass-deep/70">· {escortNames[a.id]}</span>
+                              ) : null}
                               <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
                                 {statusLabel[a.status] ?? a.status}
                               </span>
