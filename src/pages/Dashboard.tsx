@@ -405,7 +405,8 @@ const EscortDashboard = () => {
     const { data: a } = await supabase
       .from("ride_assignments")
       .select("*")
-      .eq("escort_id", user.id);
+      .eq("escort_id", user.id)
+      .is("invoiced_at", null);
     const list = a ?? [];
 
     const rideIds = list.map((x) => x.ride_id);
