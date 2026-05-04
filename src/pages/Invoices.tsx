@@ -446,12 +446,8 @@ const InvoicesInner = () => {
                 );
               })}
             </ul>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    );
+  }
 };
 
 const Invoices = () => (
