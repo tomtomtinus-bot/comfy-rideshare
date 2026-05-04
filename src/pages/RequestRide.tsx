@@ -13,8 +13,9 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 const schema = z.object({
   pickup_address: z.string().trim().min(2).max(200),
   dropoff_address: z.string().trim().min(2).max(200),
-  scheduled_at: z.string().min(1),
-  num_escorts: z.coerce.number().int().min(1).max(15),
+  scheduled_date: z.string().min(1, "Datum vereist"),
+  scheduled_time: z.string().min(1, "Tijd vereist"),
+  num_escorts: z.coerce.number().int().min(1),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(120).optional()),
   cargo_width_m: z.preprocess((v) => v === "" || v == null ? undefined : Number(v), z.number().min(0).max(15).optional()),
@@ -59,7 +60,8 @@ const RequestRideInner = () => {
   const [form, setForm] = useState({
     pickup_address: "",
     dropoff_address: "",
-    scheduled_at: "",
+    scheduled_date: "",
+    scheduled_time: "",
     num_escorts: 1,
     notes: "",
     cargo_length_m: "",
@@ -84,6 +86,8 @@ const RequestRideInner = () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     if (!pickupGeo || !dropoffGeo) return toast.error("Postcodes nog niet bevestigd");
+    const [hh, mm] = form.scheduled_time.split(":").map(Number);
+    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error("Starttijd moet op het kwartier vallen (00, 15, 30, 45)");
 
     setBusy(true);
     const { data, error } = await supabase
@@ -135,6 +139,7 @@ const RequestRideInner = () => {
 
     setBusy(true);
     const APP_FEE_PER_ESCORT = 2.5;
+    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const { data: ride, error } = await supabase
       .from("rides")
       .insert({
@@ -147,7 +152,7 @@ const RequestRideInner = () => {
         dropoff_city: dropoffGeo.city,
         dropoff_lat: dropoffGeo.lat,
         dropoff_lng: dropoffGeo.lng,
-        scheduled_at: new Date(form.scheduled_at).toISOString(),
+        scheduled_at: scheduledISO,
         num_escorts: form.num_escorts,
         notes: form.notes || null,
         status: "open",
@@ -158,7 +163,7 @@ const RequestRideInner = () => {
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
         client_reference: form.client_reference || null,
-        time_window_start: new Date(form.scheduled_at).toISOString(),
+        time_window_start: scheduledISO,
         time_window_end: null,
       })
       .select()
@@ -247,11 +252,11 @@ const RequestRideInner = () => {
                 <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
                   <input
-                    type="number" min={1} max={15}
+                    type="number" min={1}
                     value={form.num_escorts}
-                    onChange={(e) => setForm({ ...form, num_escorts: Math.min(15, Math.max(1, +e.target.value || 1)) })}
+                    onChange={(e) => setForm({ ...form, num_escorts: Math.max(1, +e.target.value || 1) })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   />
                 </div>
@@ -259,9 +264,10 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Starttijd</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label="Geplande starttijd (per kwartier)" type="datetime-local" step="900" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+                <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label="Tijd (per kwartier)" type="time" step="900" value={form.scheduled_time} onChange={(v) => setForm({ ...form, scheduled_time: v })} />
               </div>
             </section>
 
