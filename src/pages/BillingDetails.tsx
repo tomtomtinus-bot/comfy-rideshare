@@ -116,7 +116,7 @@ const BillingDetailsInner = () => {
     Object.keys(payload).forEach((k) => {
       if (payload[k] === "") payload[k] = null;
     });
-    const { error } = await supabase.from(table).update(payload).eq("id", user.id);
+    const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Facturatiegegevens opgeslagen");
