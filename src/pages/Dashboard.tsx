@@ -9,6 +9,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { AgendaPlanner } from "@/components/site/AgendaPlanner";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const fmtHours = (min: number) => {
   const total = Math.ceil(min / 15) * 15;
