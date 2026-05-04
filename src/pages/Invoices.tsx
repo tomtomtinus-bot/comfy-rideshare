@@ -24,10 +24,12 @@ interface PlatformInvoice {
 interface PlatformItem {
   id: string;
   platform_invoice_id: string;
+  ride_id: string | null;
   ride_date: string;
   route: string | null;
   num_escorts: number;
   amount: number;
+  reference?: string | null;
 }
 
 interface Invoice {
@@ -47,11 +49,13 @@ interface Invoice {
 interface Item {
   id: string;
   invoice_id: string;
+  ride_id: string | null;
   ride_date: string;
   hours: number;
   hourly_rate: number;
   amount: number;
   description: string | null;
+  reference?: string | null;
 }
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "medium" });
@@ -85,8 +89,19 @@ const InvoicesInner = () => {
         .from("invoice_items")
         .select("*")
         .in("invoice_id", list.map((i) => i.id));
+      const itList = (it ?? []) as Item[];
+      const rideIds = [...new Set(itList.map((r) => r.ride_id).filter(Boolean) as string[])];
+      const refMap = new Map<string, string | null>();
+      if (rideIds.length) {
+        const { data: rs } = await supabase
+          .from("rides")
+          .select("id, client_reference")
+          .in("id", rideIds);
+        (rs ?? []).forEach((r: { id: string; client_reference: string | null }) => refMap.set(r.id, r.client_reference));
+      }
       const grouped: Record<string, Item[]> = {};
-      (it ?? []).forEach((row: Item) => {
+      itList.forEach((row) => {
+        row.reference = row.ride_id ? refMap.get(row.ride_id) ?? null : null;
         (grouped[row.invoice_id] ||= []).push(row);
       });
       setItems(grouped);
@@ -104,8 +119,19 @@ const InvoicesInner = () => {
           .from("platform_invoice_items")
           .select("*")
           .in("platform_invoice_id", platList.map((i) => i.id));
+        const pitList = (pit ?? []) as PlatformItem[];
+        const pRideIds = [...new Set(pitList.map((r) => r.ride_id).filter(Boolean) as string[])];
+        const pRefMap = new Map<string, string | null>();
+        if (pRideIds.length) {
+          const { data: rs } = await supabase
+            .from("rides")
+            .select("id, client_reference")
+            .in("id", pRideIds);
+          (rs ?? []).forEach((r: { id: string; client_reference: string | null }) => pRefMap.set(r.id, r.client_reference));
+        }
         const pg: Record<string, PlatformItem[]> = {};
-        (pit ?? []).forEach((row: PlatformItem) => {
+        pitList.forEach((row) => {
+          row.reference = row.ride_id ? pRefMap.get(row.ride_id) ?? null : null;
           (pg[row.platform_invoice_id] ||= []).push(row);
         });
         setPlatformItems(pg);
