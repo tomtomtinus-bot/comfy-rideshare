@@ -475,7 +475,10 @@ const EscortDashboard = () => {
     const start = new Date(rideStart.getTime() - travelTo * 60_000);
     const end = new Date(rideEnd.getTime() + travelBack * 60_000);
 
-    const hours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
+    const rawHours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
+    // Minimumtarief op urenbasis toepassen
+    const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
+    const hours = +billableHours.toFixed(2);
     const cost = +(hours * item.hourly_rate).toFixed(2);
 
     const { error } = await supabase
