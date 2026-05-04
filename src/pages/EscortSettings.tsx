@@ -240,6 +240,7 @@ const Inner = () => {
       basePostcode: postcode,
       baseCity: city,
       hourlyRate: fd.get("hourlyRate"),
+      minBillableHours: fd.get("minBillableHours") ?? 0,
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
       certExpiresOn: fd.get("certExpiresOn") ?? "",
