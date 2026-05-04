@@ -1,7 +1,27 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logoUrl from "@/assets/pilotcrew-logo.png";
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
+
+let logoDataUrlCache: string | null = null;
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  if (logoDataUrlCache) return logoDataUrlCache;
+  try {
+    const res = await fetch(logoUrl);
+    const blob = await res.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    logoDataUrlCache = dataUrl;
+    return dataUrl;
+  } catch {
+    return null;
+  }
+};
 const fmtMoney = (n: number) =>
   `€ ${Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -51,24 +71,40 @@ const recipientBlock = (p: BillingParty) =>
   ].filter(Boolean);
 
 // --- shared header in Paashuis-style ---
-const drawShell = (doc: jsPDF, opts: BasePdfOpts) => {
+const drawShell = (doc: jsPDF, opts: BasePdfOpts, logoDataUrl: string | null) => {
   const pageW = doc.internal.pageSize.getWidth();
   const left = 18;
   const right = pageW - 18;
 
-  // Sender logo / name (top-left, large display)
+  // Sender logo + name (top-left)
+  let nameX = left;
+  if (logoDataUrl) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", left, 14, 16, 16);
+      nameX = left + 20;
+    } catch {
+      // ignore
+    }
+  }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(24);
+  doc.setFontSize(20);
   doc.setTextColor(20);
-  doc.text((opts.from.company_name || opts.from.full_name || "").toUpperCase(), left, 28);
+  doc.text("PILOTCREW", nameX, 25);
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(120);
+  doc.text("Verstuurd via pilotcrew.app", nameX, 30);
 
   // Sender details (top-right, small)
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(40);
-  let y = 22;
+  let y = 18;
+  doc.setFont("helvetica", "bold");
+  doc.text((opts.from.company_name || opts.from.full_name || "").toString(), right, y, { align: "right" });
+  y += 5;
+  doc.setFont("helvetica", "normal");
   const senderLines = senderBlock(opts.from).map(([t]) => t);
-  // also include company name as first line on the right? In template only address shown right.
   senderLines.forEach((line) => {
     doc.text(line, right, y, { align: "right" });
     y += 4.5;
@@ -166,9 +202,10 @@ export interface EscortInvoicePdfData extends BasePdfOpts {
   }>;
 }
 
-export const downloadEscortInvoicePdf = (data: EscortInvoicePdfData) => {
+export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
   const doc = new jsPDF();
-  drawShell(doc, data);
+  const logo = await loadLogoDataUrl();
+  drawShell(doc, data, logo);
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
   const vat = subtotal * 0.21;
@@ -225,9 +262,10 @@ export interface PlatformInvoicePdfData extends BasePdfOpts {
   total_amount: number;
 }
 
-export const downloadPlatformInvoicePdf = (data: PlatformInvoicePdfData) => {
+export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) => {
   const doc = new jsPDF();
-  drawShell(doc, data);
+  const logo = await loadLogoDataUrl();
+  drawShell(doc, data, logo);
 
   const subtotal = data.total_amount;
   const vat = subtotal * 0.21;
