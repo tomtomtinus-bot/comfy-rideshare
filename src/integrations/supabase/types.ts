@@ -782,6 +782,13 @@ export type Database = {
     Functions: {
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
+      get_counterparty_name: {
+        Args: { _assignment_id: string }
+        Returns: {
+          name: string
+          role: string
+        }[]
+      }
       get_escort_busy_windows: {
         Args: { _escort_id: string; _from: string; _to: string }
         Returns: {
