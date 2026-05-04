@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +76,18 @@ const RequestRideInner = () => {
   const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
   const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
 
+  const [permits, setPermits] = useState<{ id: string; permit_number: string; carrier: string | null; valid_to: string | null }[]>([]);
+  const [selectedPermitId, setSelectedPermitId] = useState<string>("");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("permits")
+      .select("id, permit_number, carrier, valid_to")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setPermits((data ?? []) as any));
+  }, [user]);
+
   const [form, setForm] = useState({
     pickup_address: "",
     dropoff_address: "",
@@ -90,6 +102,13 @@ const RequestRideInner = () => {
     permit_number: "",
     client_reference: "",
   });
+
+  // Auto-fill velden vanuit gekozen ontheffing
+  useEffect(() => {
+    if (!selectedPermitId) return;
+    const p = permits.find((x) => x.id === selectedPermitId);
+    if (p) setForm((f) => ({ ...f, permit_number: p.permit_number }));
+  }, [selectedPermitId, permits]);
 
   const onPickPickup = (r: AddressResult) => {
     setForm((f) => ({ ...f, pickup_address: r.display }));
@@ -181,6 +200,7 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m) : null,
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t) : null,
         permit_number: form.permit_number || null,
+        permit_id: selectedPermitId || null,
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
         time_window_end: null,
@@ -267,8 +287,36 @@ const RequestRideInner = () => {
                 <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
                 <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
+              <div className="mt-4">
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">RDW Ontheffing</label>
+                <div className="mt-1 flex flex-col sm:flex-row gap-2">
+                  <select
+                    value={selectedPermitId}
+                    onChange={(e) => setSelectedPermitId(e.target.value)}
+                    className="flex-1 bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                  >
+                    <option value="">— Geen ontheffing kiezen —</option>
+                    {permits.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.permit_number}{p.carrier ? ` · ${p.carrier}` : ""}{p.valid_to ? ` (t/m ${new Date(p.valid_to).toLocaleDateString("nl-NL")})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  <Link
+                    to="/ontheffingen"
+                    className="px-4 py-3 text-xs uppercase tracking-widest font-semibold text-brass-deep border border-brass-deep/20 hover:bg-brass-deep hover:text-parchment text-center"
+                  >
+                    + Nieuwe uploaden
+                  </Link>
+                </div>
+                {selectedPermitId && (
+                  <p className="text-[11px] text-brass-deep/60 mt-1">
+                    De begeleider ziet de routebeschrijving uit deze ontheffing.
+                  </p>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
+                <Input label="Vergunningnummer (handmatig)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Auto ingevuld bij ontheffing" />
                 <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
