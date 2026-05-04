@@ -625,23 +625,34 @@ const EscortDashboard = () => {
                     onSubmit={(e) => submitHours(a.id, e)}
                     className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
                   >
+                    <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
+                      <div>
+                        <strong>Geplande boekingstijd:</strong>{" "}
+                        {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                      </div>
+                      <div>
+                        <strong>Reistijd vanaf standplaats:</strong> {a.travel_to_pickup_min} min ·{" "}
+                        <strong>terug:</strong> {a.travel_back_home_min} min (vast)
+                      </div>
+                    </div>
                     <div>
                       <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Vertrek standplaats
+                        Starttijd rit (op pickup)
                       </label>
                       <input
-                        name="departed_base_at"
+                        name="ride_start_at"
                         type="datetime-local"
+                        defaultValue={new Date(a.ride.scheduled_at).toISOString().slice(0, 16)}
                         required
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                       />
                     </div>
                     <div>
                       <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Terug op standplaats
+                        Eindtijd rit (op dropoff)
                       </label>
                       <input
-                        name="returned_base_at"
+                        name="ride_end_at"
                         type="datetime-local"
                         required
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
@@ -658,7 +669,7 @@ const EscortDashboard = () => {
                       />
                     </div>
                     <p className="md:col-span-2 text-xs text-brass-deep/55">
-                      Tarief: €{a.hourly_rate}/uur · Berekend over volledige tijd vanaf vertrek standplaats tot terugkeer.
+                      Tarief: €{a.hourly_rate}/uur · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.
                     </p>
                     <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                       Versturen
