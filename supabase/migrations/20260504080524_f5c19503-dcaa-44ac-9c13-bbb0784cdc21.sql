@@ -1,0 +1,1 @@
+ALTER TABLE public.ride_assignments ALTER COLUMN responds_by SET DEFAULT (now() + interval '10 minutes');

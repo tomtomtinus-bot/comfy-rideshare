@@ -418,7 +418,7 @@ const EscortDashboard = () => {
         () => {
           if ("Notification" in window && Notification.permission === "granted") {
             new Notification("Nieuwe rituitnodiging", {
-              body: "U heeft 30 minuten om te accepteren.",
+              body: "U heeft 10 minuten om te accepteren.",
             });
           }
           toast.info("Nieuwe rituitnodiging ontvangen");
