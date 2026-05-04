@@ -52,7 +52,10 @@ export default function Permits() {
   const [selected, setSelected] = useState<string | null>(params.get("id"));
 
   useEffect(() => {
-    if (!authLoading && !user) navigate("/auth");
+    if (!authLoading && !user) {
+      const redirect = window.location.pathname + window.location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(redirect)}`);
+    }
   }, [authLoading, user, navigate]);
 
   const load = async () => {
