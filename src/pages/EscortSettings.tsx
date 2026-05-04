@@ -350,7 +350,8 @@ const Inner = () => {
                       {lookupBusy ? "Locatie ophalen…" : city ? `Plaats: ${city}` : "Plaats wordt automatisch bepaald"}
                     </p>
                   </div>
-                  <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
                   <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"
