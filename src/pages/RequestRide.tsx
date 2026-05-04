@@ -159,8 +159,8 @@ const RequestRideInner = () => {
           ...e,
           distanceToPickup: dPickup,
           distanceFromDropoff: dDropoff,
-          travelToPickupMin: travelMinutes(dPickup),
-          travelBackHomeMin: travelMinutes(dDropoff),
+          travelToPickupMin: emptyTravelMinutes(dPickup),
+          travelBackHomeMin: emptyTravelMinutes(dDropoff),
           is_be_ride: isBe,
           effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
         };
