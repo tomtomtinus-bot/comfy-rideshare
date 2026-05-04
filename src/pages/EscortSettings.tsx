@@ -75,7 +75,7 @@ const Inner = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
-  const [surcharges, setSurcharges] = useState<{ label: string; amount: string }[]>([]);
+  const [surcharges, setSurcharges] = useState<{ label: string; amount: string; unit: "per_uur" | "percent" }[]>([]);
 
   // Postcode autodetect
   const [postcode, setPostcode] = useState("");
@@ -105,7 +105,11 @@ const Inner = () => {
         setProfile(p);
         setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
-        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({ label: String(s.label ?? ""), amount: String(s.amount ?? "") })));
+        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
+          label: String(s.label ?? ""),
+          amount: String(s.amount ?? ""),
+          unit: s.unit === "percent" ? "percent" : "per_uur",
+        })));
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
@@ -223,7 +227,7 @@ const Inner = () => {
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
-        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim() })) as any,
+        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
       })
       .eq("id", user.id);
 
