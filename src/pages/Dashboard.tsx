@@ -278,13 +278,7 @@ const ClientDashboard = () => {
                     )}
                     {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
                   </div>
-                  <div className="col-span-6 md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
-                      Schatting
-                    </p>
-                    <p className="font-semibold tabular-nums">€{totalEst.toFixed(2)}</p>
-                  </div>
-                  <div className="col-span-6 md:col-span-2">
+                  <div className="col-span-12 md:col-span-4">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
                       Werkelijk
                     </p>
@@ -564,10 +558,8 @@ const EscortDashboard = () => {
                     )}
                   </div>
                   <div className="col-span-6 md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Schatting</p>
-                    <p className="font-semibold tabular-nums">
-                      {a.estimated_hours}u · €{Number(a.estimated_cost).toFixed(2)}
-                    </p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Geschatte uren</p>
+                    <p className="font-semibold tabular-nums">{a.estimated_hours}u</p>
                   </div>
                   <div className="col-span-6 md:col-span-2 text-right">
                     {isInvited && !expired ? (
