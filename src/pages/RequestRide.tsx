@@ -261,7 +261,7 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Starttijd</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label="Geplande starttijd" type="datetime-local" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+                <Input label="Geplande starttijd (per kwartier)" type="datetime-local" step="900" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
               </div>
             </section>
 

@@ -457,6 +457,9 @@ const EscortDashboard = () => {
     const rideStart = new Date(`${parsed.data.ride_start_date}T${parsed.data.ride_start_time}`);
     const rideEnd = new Date(`${parsed.data.ride_end_date}T${parsed.data.ride_end_time}`);
     if (isNaN(rideStart.getTime()) || isNaN(rideEnd.getTime())) return toast.error("Ongeldige datum of tijd");
+    if (rideStart.getMinutes() % 15 !== 0 || rideEnd.getMinutes() % 15 !== 0) {
+      return toast.error("Tijden moeten op het kwartier vallen (00, 15, 30, 45)");
+    }
     if (rideEnd <= rideStart) return toast.error("Eindtijd rit moet na starttijd liggen");
 
     const item = items.find((i) => i.id === id);
@@ -669,6 +672,7 @@ const EscortDashboard = () => {
                             <input
                               name="ride_start_time"
                               type="time"
+                              step={900}
                               defaultValue={defTime}
                               required
                               className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
@@ -692,6 +696,7 @@ const EscortDashboard = () => {
                             <input
                               name="ride_end_time"
                               type="time"
+                              step={900}
                               required
                               className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                             />
