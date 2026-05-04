@@ -6,7 +6,7 @@ export const Footer = () => {
           <div className="flex items-center gap-3 mb-6">
             <div className="size-6 bg-brass-gold rounded-full" />
             <span className="font-display text-xl tracking-tight text-parchment italic">
-              Konvooi
+              Pilotcrew
             </span>
           </div>
           <p className="text-sm leading-relaxed">
@@ -35,7 +35,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-parchment/10 flex flex-col md:flex-row gap-3 justify-between items-center text-[10px] uppercase tracking-widest">
-        <span>© 2026 Konvooi · Convoi Exceptionnel</span>
+        <span>© 2026 Pilotcrew · Convoi Exceptionnel</span>
         <span>Veilig over de weg</span>
       </div>
     </footer>

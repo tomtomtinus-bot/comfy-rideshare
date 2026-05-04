@@ -28,7 +28,7 @@ export const Nav = () => {
             <Compass className="size-4 text-parchment" strokeWidth={2.5} />
           </span>
           <span className="font-display text-2xl tracking-tight text-brass-deep italic">
-            Konvooi
+            Pilotcrew
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
