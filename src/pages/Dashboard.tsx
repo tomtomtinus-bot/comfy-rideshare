@@ -669,6 +669,7 @@ const EscortDashboard = () => {
                             <input
                               name="ride_start_time"
                               type="time"
+                              step={900}
                               defaultValue={defTime}
                               required
                               className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
