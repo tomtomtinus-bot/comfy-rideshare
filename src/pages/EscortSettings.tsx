@@ -76,6 +76,12 @@ const Inner = () => {
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
   const [surcharges, setSurcharges] = useState<{ label: string; amount: string; unit: "per_uur" | "percent" }[]>([]);
+  const [fuel, setFuel] = useState<{
+    enabled: boolean;
+    kind: "per_uur" | "percent";
+    tiers: { from: string; to: string; value: string }[];
+  }>({ enabled: false, kind: "per_uur", tiers: [{ from: "0", to: "1.60", value: "0" }] });
+  const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
   // Postcode autodetect
   const [postcode, setPostcode] = useState("");
@@ -110,6 +116,18 @@ const Inner = () => {
           amount: String(s.amount ?? ""),
           unit: s.unit === "percent" ? "percent" : "per_uur",
         })));
+        const fs = (p as any).fuel_surcharge ?? {};
+        setFuel({
+          enabled: !!fs.enabled,
+          kind: fs.kind === "percent" ? "percent" : "per_uur",
+          tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
+            ? fs.tiers.map((t: any) => ({
+                from: String(t.from ?? "0"),
+                to: t.to == null ? "" : String(t.to),
+                value: String(t.value ?? "0"),
+              }))
+            : [{ from: "0", to: "1.60", value: "0" }],
+        });
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
