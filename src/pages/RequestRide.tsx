@@ -445,7 +445,7 @@ const Matches = ({
                 </div>
                 <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
                 <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
-                <Cell label="Tarief" value={`€${m.hourly_rate}/u`} />
+                <Cell label={m.is_be_ride ? "Tarief BE" : "Tarief NL"} value={`€${m.effective_rate}/u`} />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
                 </div>
