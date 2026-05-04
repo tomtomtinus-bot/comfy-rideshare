@@ -106,6 +106,7 @@ const ClientDashboard = () => {
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
+  const [escortNames, setEscortNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     (async () => {
