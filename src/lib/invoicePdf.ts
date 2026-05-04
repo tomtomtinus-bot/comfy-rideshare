@@ -260,6 +260,7 @@ export interface PlatformInvoicePdfData extends BasePdfOpts {
   rows: Array<{
     ride_date: string;
     route: string | null;
+    reference?: string | null;
     num_escorts: number;
     amount: number;
   }>;
@@ -277,10 +278,11 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
 
   autoTable(doc, {
     startY: 105,
-    head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
+    head: [["Datum", "Omschrijving", "Referentie", "Aantal", "Prijs", "Totaal"]],
     body: data.rows.map((r) => [
       fmtDate(r.ride_date),
       `App-fee rit ${r.route ?? ""}`.trim(),
+      r.reference ?? "",
       String(r.num_escorts),
       fmtMoney(2.5),
       fmtMoney(r.amount),
@@ -300,9 +302,10 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
     },
     columnStyles: {
       0: { cellWidth: 22 },
-      2: { halign: "right", cellWidth: 22 },
-      3: { halign: "right", cellWidth: 28 },
-      4: { halign: "right", cellWidth: 32 },
+      2: { cellWidth: 28 },
+      3: { halign: "right", cellWidth: 18 },
+      4: { halign: "right", cellWidth: 24 },
+      5: { halign: "right", cellWidth: 28 },
     },
     styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
     margin: { left: 18, right: 18 },
