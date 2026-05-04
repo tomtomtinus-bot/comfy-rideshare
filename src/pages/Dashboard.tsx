@@ -423,7 +423,21 @@ const EscortDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
   const [counterpartyNames, setCounterpartyNames] = useState<Record<string, string>>({});
+  const [extraCosts, setExtraCosts] = useState<Record<string, ExtraCost[]>>({});
   const [tick, setTick] = useState(0);
+
+  const getExtras = (id: string) => extraCosts[id] ?? [];
+  const setExtras = (id: string, next: ExtraCost[]) =>
+    setExtraCosts((prev) => ({ ...prev, [id]: next }));
+  const addExtra = (id: string) =>
+    setExtras(id, [...getExtras(id), { description: "", amount: 0 }]);
+  const updateExtra = (id: string, idx: number, patch: Partial<ExtraCost>) => {
+    const list = [...getExtras(id)];
+    list[idx] = { ...list[idx], ...patch };
+    setExtras(id, list);
+  };
+  const removeExtra = (id: string, idx: number) =>
+    setExtras(id, getExtras(id).filter((_, i) => i !== idx));
 
   // Tick every 30s for the countdown timer
   useEffect(() => {
