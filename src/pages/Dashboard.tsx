@@ -569,7 +569,7 @@ const EscortDashboard = () => {
                       <>
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
                         <p className="font-medium">
-                          Vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                          Vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
                         </p>
                         {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
                           <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
