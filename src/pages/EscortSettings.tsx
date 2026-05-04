@@ -392,6 +392,64 @@ const Inner = () => {
                   Brandstoftoeslag toepassen op mijn facturen
                 </label>
                 {fuel.enabled && (
+                  <div className="mb-3 p-3 bg-parchment border border-brass-deep/15">
+                    <p className="text-[11px] text-brass-deep/70 mb-2">
+                      <strong>Staffel-PDF uploaden?</strong> Wij lezen de tiers automatisch uit en vullen de tabel hieronder in. Controleer altijd het resultaat.
+                    </p>
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      disabled={fuelParsing}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !user) return;
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast.error("PDF mag max 10 MB zijn");
+                          return;
+                        }
+                        setFuelParsing(true);
+                        try {
+                          const path = `${user.id}/staffel-${Date.now()}.pdf`;
+                          const { error: upErr } = await supabase.storage
+                            .from("fuel-staffels")
+                            .upload(path, file, { contentType: file.type, upsert: true });
+                          if (upErr) throw upErr;
+                          const buf = await file.arrayBuffer();
+                          let bin = "";
+                          const bytes = new Uint8Array(buf);
+                          for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+                          const b64 = btoa(bin);
+                          const { data, error } = await supabase.functions.invoke("parse-fuel-staffel", {
+                            body: { pdf_base64: b64, mime_type: file.type || "application/pdf" },
+                          });
+                          if (error) throw error;
+                          if (!data?.tiers || data.tiers.length === 0) {
+                            toast.error("Geen geldige staffel gevonden in PDF");
+                          } else {
+                            setFuel((f) => ({
+                              ...f,
+                              kind: data.kind === "percent" ? "percent" : "per_uur",
+                              tiers: data.tiers.map((t: any) => ({
+                                from: String(t.from ?? 0),
+                                to: t.to == null ? "" : String(t.to),
+                                value: String(t.value ?? 0),
+                              })),
+                            }));
+                            toast.success(`${data.tiers.length} drempels geladen — controleer hieronder`);
+                          }
+                        } catch (err: any) {
+                          toast.error(err?.message || "PDF kon niet verwerkt worden");
+                        } finally {
+                          setFuelParsing(false);
+                          e.target.value = "";
+                        }
+                      }}
+                      className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold disabled:opacity-50"
+                    />
+                    {fuelParsing && <p className="text-[11px] text-brass-gold mt-2">PDF wordt uitgelezen…</p>}
+                  </div>
+                )}
+                {fuel.enabled && (
                   <>
                     <div className="flex gap-2 mb-2 text-sm">
                       <span className="text-brass-deep/60">Toeslag-eenheid:</span>
