@@ -503,7 +503,13 @@ const EscortDashboard = () => {
       })
       .eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success(accept ? "Rit geaccepteerd" : "Rit geweigerd");
+    if (accept) {
+      const { error: nErr } = await supabase.rpc("notify_ride_confirmed", { _assignment_id: id });
+      if (nErr) console.warn("notify_ride_confirmed:", nErr.message);
+      toast.success("Rit bevestigd — opdrachtgever is op de hoogte gebracht");
+    } else {
+      toast.success("Rit geweigerd");
+    }
     load();
   };
   void tick;
