@@ -636,9 +636,12 @@ const EscortDashboard = () => {
                 <div className="col-span-12 md:col-span-7">
                   {isInvited ? (
                     <>
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Reistijd</p>
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
                       <p className="font-medium">
-                        Vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
+                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
+                      </p>
+                      <p className="text-sm text-brass-deep/55 mt-2">
+                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
                       </p>
                       {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
                         <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
