@@ -311,11 +311,7 @@ const ClientDashboard = () => {
                             {r.client_reference ? ` · ref ${r.client_reference}` : ""}
                           </p>
                         )}
-                        {r.permit_id && (
-                          <Link to={`/ontheffingen?id=${r.permit_id}`} className="inline-block mt-2 text-xs text-brass-gold underline hover:no-underline">
-                            📍 Routebeschrijving bekijken
-                          </Link>
-                        )}
+                        
                         {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
                       </div>
                       <div className="col-span-12 md:col-span-4">
@@ -663,11 +659,6 @@ const EscortDashboard = () => {
                           Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
                           {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
                         </p>
-                      )}
-                      {a.ride.permit_id && (
-                        <Link to={`/ontheffingen?id=${a.ride.permit_id}`} className="inline-block mt-2 text-xs text-brass-gold underline hover:no-underline">
-                          📍 Routebeschrijving bekijken
-                        </Link>
                       )}
                     </>
                   )}
