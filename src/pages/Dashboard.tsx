@@ -594,16 +594,20 @@ const EscortDashboard = () => {
           <p className="text-brass-deep/60">U heeft nog geen toegewezen ritten.</p>
         </div>
       ) : (() => {
+        const isExpired = (a: typeof items[number]) =>
+          a.status === "invited" && new Date(a.responds_by).getTime() <= Date.now();
         const categorize = (a: typeof items[number]) => {
+          if (a.status === "expired" || isExpired(a)) return "verlopen";
           if (a.hours_submitted_at) return "afgerond";
           if (a.status === "accepted") return "geaccepteerd";
           if (a.status === "invited") return "openstaand";
-          return "afgerond"; // declined / expired / cancelled bij historie
+          return "afgerond"; // declined / cancelled bij historie
         };
         const buckets = {
           openstaand: items.filter((a) => categorize(a) === "openstaand"),
           geaccepteerd: items.filter((a) => categorize(a) === "geaccepteerd"),
           afgerond: items.filter((a) => categorize(a) === "afgerond"),
+          verlopen: items.filter((a) => categorize(a) === "verlopen"),
         };
 
         const renderItem = (a: typeof items[number]) => {
