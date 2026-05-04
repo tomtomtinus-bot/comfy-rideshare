@@ -360,6 +360,55 @@ const Inner = () => {
               </section>
 
               <section>
+                <Label>Brandstoftoeslag (staffel)</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
+                  Wordt automatisch berekend op basis van de gemiddelde Nederlandse dieselprijs (CBS) van de gefactureerde week.
+                  {currentFuel && (
+                    <> Huidige weekprijs: <strong>€{Number(currentFuel.eur_per_liter).toFixed(3)}/l</strong> (week {currentFuel.week_start}).</>
+                  )}
+                </p>
+                <label className="flex items-center gap-2 mb-3 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={fuel.enabled}
+                    onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
+                  />
+                  Brandstoftoeslag toepassen op mijn facturen
+                </label>
+                {fuel.enabled && (
+                  <>
+                    <div className="flex gap-2 mb-2 text-sm">
+                      <span className="text-brass-deep/60">Toeslag-eenheid:</span>
+                      <label className="flex items-center gap-1">
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> € per uur
+                      </label>
+                      <label className="flex items-center gap-1">
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> % van uurtarief
+                      </label>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+                        <div className="col-span-4">Dieselprijs vanaf (€/l)</div>
+                        <div className="col-span-4">tot (€/l, leeg = ∞)</div>
+                        <div className="col-span-3">{fuel.kind === "percent" ? "% uurtarief" : "€ / uur"}</div>
+                      </div>
+                      {fuel.tiers.map((t, i) => (
+                        <div key={i} className="grid grid-cols-12 gap-2">
+                          <input value={t.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15">×</button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
+                        + Drempel toevoegen
+                      </button>
+                    </div>
+                  </>
+                )}
+              </section>
+
+              <section>
                 <Label>Certificaten (uploads)</Label>
                 <div className="mt-2 space-y-2">
                   {files.map((p) => (
