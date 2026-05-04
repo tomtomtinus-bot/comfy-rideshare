@@ -94,6 +94,7 @@ const Inner = () => {
     kind: "per_uur" | "percent";
     tiers: { from: string; to: string; value: string }[];
   }>({ enabled: false, kind: "per_uur", tiers: [{ from: "0", to: "1.60", value: "0" }] });
+  const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
   // Postcode autodetect
