@@ -36,11 +36,13 @@ Deno.serve(async (req) => {
       .toISOString().slice(0, 10).replace(/-/g, "");
     const url =
       `https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?` +
-      `$filter=Perioden gt '${since}'&$top=200`;
+      `$filter=${encodeURIComponent(`Perioden gt '${since}'`)}&$top=200`;
     const res = await fetch(url, { headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(`CBS fetch failed: ${res.status}`);
     const json = await res.json();
     const rows: Array<Record<string, unknown>> = json.value ?? [];
+    console.log(`CBS returned ${rows.length} rows for filter since=${since}`);
+    if (rows[0]) console.log(`first row sample:`, JSON.stringify(rows[0]));
 
     // Group by ISO week (Mon)
     const weekly = new Map<string, { sum: number; n: number }>();
