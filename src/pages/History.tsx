@@ -14,7 +14,9 @@ interface HistoryRide {
   dropoff_address?: string;
   amount: number;
   counterpart: string; // anon id of other party
+  counterpart_name?: string; // real name (revealed after acceptance)
   invoice_number?: string | null;
+  assignment_ids: string[]; // for resolving names
 }
 
 const fmtDate = (d: string) =>
