@@ -6,9 +6,11 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, type BillingParty } from "@/lib/invoicePdf";
 
 interface PlatformInvoice {
   id: string;
+  client_id: string;
   invoice_number: string;
   period_start: string;
   period_end: string;
@@ -155,8 +157,76 @@ const InvoicesInner = () => {
     load();
   };
 
+  const fetchClientParty = async (id: string): Promise<BillingParty> => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number")
+      .eq("id", id)
+      .maybeSingle();
+    return (data ?? {}) as BillingParty;
+  };
+
+  const fetchEscortParty = async (id: string): Promise<BillingParty> => {
+    const [{ data: prof }, { data: ep }] = await Promise.all([
+      supabase.from("profiles").select("full_name").eq("id", id).maybeSingle(),
+      supabase
+        .from("escort_profiles")
+        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder")
+        .eq("id", id)
+        .maybeSingle(),
+    ]);
+    return { ...(prof ?? {}), ...(ep ?? {}) } as BillingParty;
+  };
+
+  const PLATFORM_PARTY: BillingParty = {
+    company_name: "Lowloads B.V.",
+    billing_address: "Mediavaert 1",
+    billing_postcode: "1114 BC",
+    billing_city: "Amsterdam-Duivendrecht",
+    billing_country: "Nederland",
+    kvk_number: "00000000",
+    vat_number: "NL000000000B01",
+    billing_email: "facturatie@lowloads.app",
+  };
+
+  const downloadEscortPdf = async (inv: Invoice) => {
+    try {
+      const [from, to] = await Promise.all([fetchEscortParty(inv.escort_id), fetchClientParty(inv.client_id)]);
+      downloadEscortInvoicePdf({
+        invoice_number: inv.invoice_number,
+        created_at: inv.created_at,
+        period_start: inv.period_start,
+        period_end: inv.period_end,
+        from,
+        to,
+        rows: items[inv.id] ?? [],
+      });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  const downloadPlatformPdf = async (inv: PlatformInvoice) => {
+    try {
+      const to = await fetchClientParty(inv.client_id);
+      downloadPlatformInvoicePdf({
+        invoice_number: inv.invoice_number,
+        created_at: inv.created_at,
+        period_start: inv.period_start,
+        period_end: inv.period_end,
+        from: PLATFORM_PARTY,
+        to,
+        rows: platformItems[inv.id] ?? [],
+        total_amount: inv.total_amount,
+      });
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto space-y-12">
@@ -261,6 +331,12 @@ const InvoicesInner = () => {
                 >
                   {isOpen ? "Verberg regels" : "Toon regels"}
                 </button>
+                <button
+                  onClick={() => downloadPlatformPdf(inv)}
+                  className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
+                >
+                  Download PDF
+                </button>
                 {inv.status !== "paid" && (
                   <button
                     onClick={() => markPlatformPaid(inv.id)}
@@ -351,6 +427,12 @@ const InvoicesInner = () => {
                         className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
                       >
                         {isOpen ? "Verberg regels" : "Toon regels"}
+                      </button>
+                      <button
+                        onClick={() => downloadEscortPdf(inv)}
+                        className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
+                      >
+                        Download PDF
                       </button>
                       {!isEscort && inv.status !== "paid" && (
                         <button
