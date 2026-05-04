@@ -5,6 +5,28 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+interface PlatformInvoice {
+  id: string;
+  invoice_number: string;
+  period_start: string;
+  period_end: string;
+  total_escorts: number;
+  total_amount: number;
+  status: "open" | "paid";
+  paid_at: string | null;
+  created_at: string;
+}
+
+interface PlatformItem {
+  id: string;
+  platform_invoice_id: string;
+  ride_date: string;
+  route: string | null;
+  num_escorts: number;
+  amount: number;
+}
 
 interface Invoice {
   id: string;
@@ -37,8 +59,14 @@ const InvoicesInner = () => {
   const { user, role } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [items, setItems] = useState<Record<string, Item[]>>({});
+  const [platformInvoices, setPlatformInvoices] = useState<PlatformInvoice[]>([]);
+  const [platformItems, setPlatformItems] = useState<Record<string, PlatformItem[]>>({});
+  const [billingFrequency, setBillingFrequency] = useState<"weekly" | "monthly">("monthly");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+  const [openPlat, setOpenPlat] = useState<string | null>(null);
+
+  const isEscort = role === "begeleider";
 
   const load = async () => {
     if (!user) return;
@@ -61,6 +89,33 @@ const InvoicesInner = () => {
       });
       setItems(grouped);
     }
+
+    if (!isEscort) {
+      const { data: plat } = await supabase
+        .from("platform_invoices")
+        .select("*")
+        .order("created_at", { ascending: false });
+      const platList = (plat ?? []) as PlatformInvoice[];
+      setPlatformInvoices(platList);
+      if (platList.length) {
+        const { data: pit } = await supabase
+          .from("platform_invoice_items")
+          .select("*")
+          .in("platform_invoice_id", platList.map((i) => i.id));
+        const pg: Record<string, PlatformItem[]> = {};
+        (pit ?? []).forEach((row: PlatformItem) => {
+          (pg[row.platform_invoice_id] ||= []).push(row);
+        });
+        setPlatformItems(pg);
+      }
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("billing_frequency")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (prof?.billing_frequency) setBillingFrequency(prof.billing_frequency as "weekly" | "monthly");
+    }
+
     setLoading(false);
   };
 
@@ -69,7 +124,16 @@ const InvoicesInner = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Weekly invoices are generated automatically by a scheduled job.
+  const updateFrequency = async (freq: "weekly" | "monthly") => {
+    if (!user) return;
+    setBillingFrequency(freq);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ billing_frequency: freq })
+      .eq("id", user.id);
+    if (error) toast.error(error.message);
+    else toast.success(`Factureringsfrequentie: ${freq === "weekly" ? "wekelijks" : "maandelijks"}`);
+  };
 
   const markPaid = async (id: string) => {
     const { error } = await supabase
@@ -81,7 +145,15 @@ const InvoicesInner = () => {
     load();
   };
 
-  const isEscort = role === "begeleider";
+  const markPlatformPaid = async (id: string) => {
+    const { error } = await supabase
+      .from("platform_invoices")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Gemarkeerd als betaald");
+    load();
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -95,18 +167,155 @@ const InvoicesInner = () => {
               </p>
               <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Facturen</h1>
               <p className="text-sm text-brass-deep/60 mt-3">
-                Facturen worden automatisch elke maandagochtend aangemaakt op basis van ingediende uren van de afgelopen week.
+                Facturen worden automatisch aangemaakt op basis van ingediende uren en geboekte ritten.
               </p>
             </div>
           </header>
 
-          {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
-          ) : invoices.length === 0 ? (
-            <div className="bg-card shadow-etched p-12 text-center">
-              <p className="text-brass-deep/60">Nog geen facturen.</p>
-            </div>
-          ) : (
+          {!isEscort && (
+            <Tabs defaultValue="begeleiders" className="w-full">
+              <TabsList className="mb-6">
+                <TabsTrigger value="begeleiders">Begeleiders ({invoices.length})</TabsTrigger>
+                <TabsTrigger value="platform">App-fee ({platformInvoices.length})</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="begeleiders">
+                {renderEscortInvoices()}
+              </TabsContent>
+
+              <TabsContent value="platform" className="space-y-6">
+                <div className="bg-card shadow-etched p-6 flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factureringsfrequentie</p>
+                    <p className="text-sm text-brass-deep/70">Bepaal hoe vaak je een factuur ontvangt voor de app-fee (€2,50 per begeleider per rit).</p>
+                  </div>
+                  <div className="flex gap-2">
+                    {(["weekly", "monthly"] as const).map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => updateFrequency(f)}
+                        className={`px-4 py-2 text-xs uppercase tracking-widest font-semibold transition-colors ${
+                          billingFrequency === f
+                            ? "bg-brass-deep text-parchment"
+                            : "bg-brass-deep/10 text-brass-deep hover:bg-brass-deep/20"
+                        }`}
+                      >
+                        {f === "weekly" ? "Wekelijks" : "Maandelijks"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {renderPlatformInvoices()}
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {isEscort && renderEscortInvoices()}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+
+  function renderPlatformInvoices() {
+    if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
+    if (platformInvoices.length === 0)
+      return (
+        <div className="bg-card shadow-etched p-12 text-center">
+          <p className="text-brass-deep/60">Nog geen platform-facturen.</p>
+        </div>
+      );
+    return (
+      <ul className="space-y-px bg-brass-deep/10">
+        {platformInvoices.map((inv) => {
+          const isOpen = openPlat === inv.id;
+          const rows = platformItems[inv.id] ?? [];
+          return (
+            <li key={inv.id} className="bg-card p-6 md:p-8">
+              <div className="grid grid-cols-12 gap-4 items-start">
+                <div className="col-span-12 md:col-span-3">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factuur</p>
+                  <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
+                  <p className="text-xs text-brass-deep/55 mt-1">{fmtDate(inv.created_at)}</p>
+                </div>
+                <div className="col-span-12 md:col-span-4">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Periode</p>
+                  <p className="text-sm">{fmtDate(inv.period_start)} → {fmtDate(inv.period_end)}</p>
+                </div>
+                <div className="col-span-6 md:col-span-2">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Begeleiders</p>
+                  <p className="font-semibold tabular-nums">{inv.total_escorts}</p>
+                </div>
+                <div className="col-span-6 md:col-span-2">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Totaal</p>
+                  <p className="font-semibold tabular-nums text-brass-gold">{fmtMoney(inv.total_amount)}</p>
+                </div>
+                <div className="col-span-12 md:col-span-1 text-right">
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-brass-gold">{inv.status}</span>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => setOpenPlat(isOpen ? null : inv.id)}
+                  className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
+                >
+                  {isOpen ? "Verberg regels" : "Toon regels"}
+                </button>
+                {inv.status !== "paid" && (
+                  <button
+                    onClick={() => markPlatformPaid(inv.id)}
+                    className="ml-auto px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                  >
+                    Markeer als betaald
+                  </button>
+                )}
+              </div>
+              {isOpen && (
+                <div className="mt-6 pt-6 border-t border-brass-deep/10">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
+                        <th className="text-left py-2">Datum</th>
+                        <th className="text-left py-2">Route</th>
+                        <th className="text-right py-2">Begeleiders</th>
+                        <th className="text-right py-2">Bedrag</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((r) => (
+                        <tr key={r.id} className="border-t border-brass-deep/5">
+                          <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                          <td className="py-2">{r.route}</td>
+                          <td className="py-2 text-right tabular-nums">{r.num_escorts}</td>
+                          <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(r.amount)}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t-2 border-brass-deep/30">
+                        <td colSpan={3} className="py-3 text-right text-xs uppercase tracking-widest font-bold text-brass-deep">
+                          Totaal
+                        </td>
+                        <td className="py-3 text-right tabular-nums font-bold text-brass-gold text-base">{fmtMoney(inv.total_amount)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
+
+  function renderEscortInvoices() {
+    if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
+    if (invoices.length === 0)
+      return (
+        <div className="bg-card shadow-etched p-12 text-center">
+          <p className="text-brass-deep/60">Nog geen facturen.</p>
+        </div>
+      );
+    return (
             <ul className="space-y-px bg-brass-deep/10">
               {invoices.map((inv) => {
                 const isOpen = open === inv.id;
@@ -237,12 +446,8 @@ const InvoicesInner = () => {
                 );
               })}
             </ul>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    );
+  }
 };
 
 const Invoices = () => (
