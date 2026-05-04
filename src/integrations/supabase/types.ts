@@ -804,6 +804,10 @@ export type Database = {
         Args: { _ride_id: string; _user_id: string }
         Returns: boolean
       }
+      notify_ride_confirmed: {
+        Args: { _assignment_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
