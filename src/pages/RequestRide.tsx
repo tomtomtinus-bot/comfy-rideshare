@@ -451,19 +451,24 @@ const Matches = ({
       <ul className="space-y-px bg-brass-deep/10">
         {matches.map((m) => {
           const isSelected = selected.includes(m.id);
+          const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
           return (
             <li key={m.id} onClick={() => toggle(m.id)}
               className={`bg-card p-6 cursor-pointer transition-all ${isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"}`}>
               <div className="grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-12 md:col-span-4">
+                <div className="col-span-12 md:col-span-3">
                   <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
                   <p className="text-xs text-brass-deep/55 mt-1">★ {m.rating} · {m.rides_completed} ritten</p>
                 </div>
                 <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
+                <Cell label="Rit" value={fmtHours(hourlyRideMin)} />
                 <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
-                <Cell label={m.is_be_ride ? "Tarief BE" : "Tarief NL"} value={`€${m.effective_rate}/u`} />
+                <Cell label="Totaal bezet" value={fmtHours(totalMin)} bold />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
+                </div>
+                <div className="col-span-12 text-[11px] text-brass-deep/55">
+                  Tarief {m.is_be_ride ? "BE" : "NL"}: €{m.effective_rate}/u · leegrijden 100 km/u, rit 70 km/u
                 </div>
               </div>
             </li>
