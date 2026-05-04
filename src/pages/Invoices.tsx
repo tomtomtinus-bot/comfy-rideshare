@@ -10,6 +10,7 @@ import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, type BillingParty
 
 interface PlatformInvoice {
   id: string;
+  client_id: string;
   invoice_number: string;
   period_start: string;
   period_end: string;
