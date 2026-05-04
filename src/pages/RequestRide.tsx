@@ -228,7 +228,7 @@ const RequestRideInner = () => {
         travel_to_pickup_min: e.travelToPickupMin,
         travel_back_home_min: e.travelBackHomeMin,
         estimated_hours: hours,
-        estimated_cost: +(hours * e.hourly_rate).toFixed(2),
+        estimated_cost: +(hours * e.effective_rate).toFixed(2),
       };
     });
 
