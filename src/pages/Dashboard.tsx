@@ -407,6 +407,8 @@ const hoursSchema = z.object({
   hours_notes: z.string().trim().max(500).optional(),
 });
 
+type ExtraCost = { description: string; amount: number };
+
 const EscortDashboard = () => {
   const { user } = useAuth();
   const [items, setItems] = useState<
