@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import EscortSettings from "./pages/EscortSettings.tsx";
 import Invoices from "./pages/Invoices.tsx";
 import BillingDetails from "./pages/BillingDetails.tsx";
+import History from "./pages/History.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/profiel" element={<EscortSettings />} />
             <Route path="/facturen" element={<Invoices />} />
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
+            <Route path="/geschiedenis" element={<History />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

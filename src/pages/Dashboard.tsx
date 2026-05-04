@@ -113,6 +113,7 @@ const ClientDashboard = () => {
         .from("rides")
         .select("*")
         .eq("client_id", user.id)
+        .is("platform_invoice_id", null)
         .order("scheduled_at", { ascending: false });
 
       const list = rs ?? [];
@@ -404,7 +405,8 @@ const EscortDashboard = () => {
     const { data: a } = await supabase
       .from("ride_assignments")
       .select("*")
-      .eq("escort_id", user.id);
+      .eq("escort_id", user.id)
+      .is("invoiced_at", null);
     const list = a ?? [];
 
     const rideIds = list.map((x) => x.ride_id);
