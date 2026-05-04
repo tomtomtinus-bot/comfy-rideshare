@@ -608,7 +608,18 @@ const EscortDashboard = () => {
     // Minimumtarief op urenbasis toepassen
     const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
     const hours = +billableHours.toFixed(2);
-    const cost = +(hours * item.hourly_rate).toFixed(2);
+    const baseCost = +(hours * item.hourly_rate).toFixed(2);
+
+    // Extra kosten: opschonen + valideren
+    const extrasRaw = getExtras(id);
+    const extras: ExtraCost[] = extrasRaw
+      .map((e) => ({ description: (e.description ?? "").trim(), amount: Number(e.amount) || 0 }))
+      .filter((e) => e.description.length > 0 || e.amount > 0);
+    if (extras.some((e) => !e.description || e.amount <= 0)) {
+      return toast.error("Vul voor elke extra kostenregel een omschrijving en een bedrag groter dan 0 in");
+    }
+    const extrasTotal = +extras.reduce((s, e) => s + e.amount, 0).toFixed(2);
+    const cost = +(baseCost + extrasTotal).toFixed(2);
 
     const { error } = await supabase
       .from("ride_assignments")
@@ -617,6 +628,8 @@ const EscortDashboard = () => {
         returned_base_at: end.toISOString(),
         actual_hours: hours,
         actual_cost: cost,
+        extra_costs: extras as never,
+        extra_costs_total: extrasTotal,
         hours_notes: parsed.data.hours_notes || null,
         hours_submitted_at: new Date().toISOString(),
       })
