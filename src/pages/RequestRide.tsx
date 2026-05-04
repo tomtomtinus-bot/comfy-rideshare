@@ -154,12 +154,15 @@ const RequestRideInner = () => {
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
+        const isBe = pickupGeo.country.includes("BE") || dropoffGeo.country.includes("BE");
         return {
           ...e,
           distanceToPickup: dPickup,
           distanceFromDropoff: dDropoff,
           travelToPickupMin: travelMinutes(dPickup),
           travelBackHomeMin: travelMinutes(dDropoff),
+          is_be_ride: isBe,
+          effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
         };
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
