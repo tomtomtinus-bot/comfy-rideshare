@@ -202,9 +202,10 @@ export interface EscortInvoicePdfData extends BasePdfOpts {
   }>;
 }
 
-export const downloadEscortInvoicePdf = (data: EscortInvoicePdfData) => {
+export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
   const doc = new jsPDF();
-  drawShell(doc, data);
+  const logo = await loadLogoDataUrl();
+  drawShell(doc, data, logo);
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
   const vat = subtotal * 0.21;
