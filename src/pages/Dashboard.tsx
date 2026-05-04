@@ -648,8 +648,8 @@ const EscortDashboard = () => {
                         {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
                       </div>
                       <div>
-                        <strong>Reistijd vanaf standplaats:</strong> {Math.ceil(a.travel_to_pickup_min / 15) * 15} min ·{" "}
-                        <strong>terug:</strong> {Math.ceil(a.travel_back_home_min / 15) * 15} min (afgerond op kwartier)
+                        <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
+                        <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
                       </div>
                     </div>
                     {(() => {
