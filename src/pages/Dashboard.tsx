@@ -644,29 +644,61 @@ const EscortDashboard = () => {
                         <strong>terug:</strong> {Math.ceil(a.travel_back_home_min / 15) * 15} min (afgerond op kwartier)
                       </div>
                     </div>
-                    <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Starttijd rit (op pickup)
-                      </label>
-                      <input
-                        name="ride_start_at"
-                        type="datetime-local"
-                        defaultValue={new Date(a.ride.scheduled_at).toISOString().slice(0, 16)}
-                        required
-                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Eindtijd rit (op dropoff)
-                      </label>
-                      <input
-                        name="ride_end_at"
-                        type="datetime-local"
-                        required
-                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                      />
-                    </div>
+                    {(() => {
+                      const sched = new Date(a.ride.scheduled_at);
+                      const pad = (n: number) => String(n).padStart(2, "0");
+                      const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
+                      const defTime = `${pad(sched.getHours())}:${pad(sched.getMinutes())}`;
+                      return (
+                        <>
+                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                            Starttijd rit (op pickup)
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                            <input
+                              name="ride_start_date"
+                              type="date"
+                              defaultValue={defDate}
+                              required
+                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                            <input
+                              name="ride_start_time"
+                              type="time"
+                              defaultValue={defTime}
+                              required
+                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                            />
+                          </div>
+                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
+                            Eindtijd rit (op dropoff)
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                            <input
+                              name="ride_end_date"
+                              type="date"
+                              defaultValue={defDate}
+                              required
+                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                            <input
+                              name="ride_end_time"
+                              type="time"
+                              required
+                              className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                            />
+                          </div>
+                        </>
+                      );
+                    })()}
                     <div className="md:col-span-2">
                       <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
                         Toelichting (optioneel)
