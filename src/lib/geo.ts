@@ -56,8 +56,14 @@ export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; ln
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-// Geschatte reistijd, afgerond per kwartier (15 min) op basis van 70 km/u
+// Geschatte reistijd tijdens de begeleide rit (beladen): 70 km/u, afgerond per kwartier
 export function travelMinutes(km: number): number {
   const min = (km / 70) * 60;
+  return Math.max(15, Math.ceil(min / 15) * 15);
+}
+
+// Leegrijtijd (aanrijden naar pickup of terug naar basis / volgende rit): 100 km/u
+export function emptyTravelMinutes(km: number): number {
+  const min = (km / 100) * 60;
   return Math.max(15, Math.ceil(min / 15) * 15);
 }

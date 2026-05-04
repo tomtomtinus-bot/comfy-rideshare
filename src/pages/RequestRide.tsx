@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { distanceKm, travelMinutes } from "@/lib/geo";
+import { distanceKm, travelMinutes, emptyTravelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
@@ -159,8 +159,8 @@ const RequestRideInner = () => {
           ...e,
           distanceToPickup: dPickup,
           distanceFromDropoff: dDropoff,
-          travelToPickupMin: travelMinutes(dPickup),
-          travelBackHomeMin: travelMinutes(dDropoff),
+          travelToPickupMin: emptyTravelMinutes(dPickup),
+          travelBackHomeMin: emptyTravelMinutes(dDropoff),
           is_be_ride: isBe,
           effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
         };
@@ -283,6 +283,22 @@ const RequestRideInner = () => {
                   )}
                 </div>
               </div>
+              {pickupGeo && dropoffGeo && (() => {
+                const km = distanceKm(pickupGeo, dropoffGeo);
+                const min = travelMinutes(km);
+                return (
+                  <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                      Geschatte ritduur
+                    </p>
+                    <p className="text-sm text-brass-deep">
+                      <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
+                      <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
+                      <span className="text-brass-deep/55">(70 km/u beladen, leegrijden 100 km/u)</span>
+                    </p>
+                  </div>
+                );
+              })()}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
@@ -435,19 +451,24 @@ const Matches = ({
       <ul className="space-y-px bg-brass-deep/10">
         {matches.map((m) => {
           const isSelected = selected.includes(m.id);
+          const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
           return (
             <li key={m.id} onClick={() => toggle(m.id)}
               className={`bg-card p-6 cursor-pointer transition-all ${isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"}`}>
               <div className="grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-12 md:col-span-4">
+                <div className="col-span-12 md:col-span-3">
                   <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
                   <p className="text-xs text-brass-deep/55 mt-1">★ {m.rating} · {m.rides_completed} ritten</p>
                 </div>
                 <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
+                <Cell label="Rit" value={fmtHours(hourlyRideMin)} />
                 <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
-                <Cell label={m.is_be_ride ? "Tarief BE" : "Tarief NL"} value={`€${m.effective_rate}/u`} />
+                <Cell label="Totaal bezet" value={fmtHours(totalMin)} bold />
                 <div className="col-span-12 md:col-span-1 text-right">
                   <span className={`size-5 inline-block rounded-full ${isSelected ? "bg-brass-gold" : "bg-patina"}`} />
+                </div>
+                <div className="col-span-12 text-[11px] text-brass-deep/55">
+                  Tarief {m.is_be_ride ? "BE" : "NL"}: €{m.effective_rate}/u · leegrijden 100 km/u, rit 70 km/u
                 </div>
               </div>
             </li>
