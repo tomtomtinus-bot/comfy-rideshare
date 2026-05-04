@@ -398,6 +398,7 @@ const EscortDashboard = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [counterpartyNames, setCounterpartyNames] = useState<Record<string, string>>({});
   const [tick, setTick] = useState(0);
 
   // Tick every 30s for the countdown timer
