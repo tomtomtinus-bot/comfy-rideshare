@@ -222,7 +222,10 @@ const InvoicesInner = () => {
       toast.error((e as Error).message);
     }
   };
+
+  return (
     <div className="min-h-screen bg-background text-foreground">
+
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto space-y-12">
