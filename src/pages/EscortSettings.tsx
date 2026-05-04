@@ -252,7 +252,18 @@ const Inner = () => {
         insurance_policy: parsed.data.insurancePolicy || null,
         categories,
         certificate_files: files,
-        surcharges: surcharges.filter((s) => s.label.trim()).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
+        surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
+        fuel_surcharge: {
+          enabled: fuel.enabled,
+          kind: fuel.kind,
+          tiers: fuel.tiers
+            .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
+            .map((t) => ({
+              from: Number(t.from) || 0,
+              to: t.to === "" ? null : Number(t.to),
+              value: Number(t.value) || 0,
+            })),
+        } as any,
       })
       .eq("id", user.id);
 
