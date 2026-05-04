@@ -152,6 +152,11 @@ const RequestRideInner = () => {
     const pickupCountries = expandCountries(pickupGeo.country);
     const dropoffCountries = expandCountries(dropoffGeo.country);
 
+    const rideKm = distanceKm(pickupGeo, dropoffGeo);
+    const rideMin = travelMinutes(rideKm);
+    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
+    const rideStartMs = new Date(scheduledISO).getTime();
+
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) =>
         pickupCountries.some((c) => e.countries.includes(c)) &&
@@ -169,13 +174,45 @@ const RequestRideInner = () => {
           travelBackHomeMin: emptyTravelMinutes(dDropoff),
           is_be_ride: isBe,
           effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
-        };
+          conflict: null,
+        } as MatchedEscort;
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
       .slice(0, 3);
 
     if (ranked.length === 0) return toast.error("Geen beschikbare begeleiders gevonden");
-    setMatches(ranked);
+
+    // Bezetting (overlap met bestaande aanvragen) per begeleider ophalen
+    const withConflicts = await Promise.all(ranked.map(async (m) => {
+      const myStartMs = rideStartMs - m.travelToPickupMin * 60_000;
+      const myEndMs = rideStartMs + rideMin * 60_000 + m.travelBackHomeMin * 60_000;
+      const fromIso = new Date(myStartMs - 24 * 3600_000).toISOString();
+      const toIso = new Date(myEndMs + 24 * 3600_000).toISOString();
+      const { data: windows } = await supabase.rpc("get_escort_busy_windows", {
+        _escort_id: m.id,
+        _from: fromIso,
+        _to: toIso,
+      });
+      const overlap = (windows ?? []).find((w: any) => {
+        const ws = new Date(w.window_start).getTime();
+        const we = new Date(w.window_end).getTime();
+        return ws < myEndMs && we > myStartMs;
+      });
+      if (!overlap) return m;
+      const ws = new Date(overlap.window_start).getTime();
+      const we = new Date(overlap.window_end).getTime();
+      return {
+        ...m,
+        conflict: {
+          rideStart: new Date(myStartMs).toISOString(),
+          rideEnd: new Date(myEndMs).toISOString(),
+          overlapStart: new Date(Math.max(ws, myStartMs)).toISOString(),
+          overlapEnd: new Date(Math.min(we, myEndMs)).toISOString(),
+        },
+      };
+    }));
+
+    setMatches(withConflicts);
   };
 
   const bookEscorts = async (selected: MatchedEscort[]) => {
