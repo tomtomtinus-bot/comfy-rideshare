@@ -5,6 +5,28 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+interface PlatformInvoice {
+  id: string;
+  invoice_number: string;
+  period_start: string;
+  period_end: string;
+  total_escorts: number;
+  total_amount: number;
+  status: "open" | "paid";
+  paid_at: string | null;
+  created_at: string;
+}
+
+interface PlatformItem {
+  id: string;
+  platform_invoice_id: string;
+  ride_date: string;
+  route: string | null;
+  num_escorts: number;
+  amount: number;
+}
 
 interface Invoice {
   id: string;
