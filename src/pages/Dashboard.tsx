@@ -584,7 +584,7 @@ const EscortDashboard = () => {
                           {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
                         </p>
                         <p className="text-sm text-brass-deep/55 mt-2">
-                          Reistijd vanaf basis: {a.travel_to_pickup_min} min · Terug: {a.travel_back_home_min} min
+                          Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
                         </p>
                         {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
                           <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
