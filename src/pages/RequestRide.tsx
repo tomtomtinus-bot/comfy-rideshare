@@ -60,7 +60,8 @@ const RequestRideInner = () => {
   const [form, setForm] = useState({
     pickup_address: "",
     dropoff_address: "",
-    scheduled_at: "",
+    scheduled_date: "",
+    scheduled_time: "",
     num_escorts: 1,
     notes: "",
     cargo_length_m: "",
