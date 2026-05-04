@@ -407,6 +407,8 @@ const hoursSchema = z.object({
   hours_notes: z.string().trim().max(500).optional(),
 });
 
+type ExtraCost = { description: string; amount: number };
+
 const EscortDashboard = () => {
   const { user } = useAuth();
   const [items, setItems] = useState<
@@ -421,7 +423,21 @@ const EscortDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
   const [counterpartyNames, setCounterpartyNames] = useState<Record<string, string>>({});
+  const [extraCosts, setExtraCosts] = useState<Record<string, ExtraCost[]>>({});
   const [tick, setTick] = useState(0);
+
+  const getExtras = (id: string) => extraCosts[id] ?? [];
+  const setExtras = (id: string, next: ExtraCost[]) =>
+    setExtraCosts((prev) => ({ ...prev, [id]: next }));
+  const addExtra = (id: string) =>
+    setExtras(id, [...getExtras(id), { description: "", amount: 0 }]);
+  const updateExtra = (id: string, idx: number, patch: Partial<ExtraCost>) => {
+    const list = [...getExtras(id)];
+    list[idx] = { ...list[idx], ...patch };
+    setExtras(id, list);
+  };
+  const removeExtra = (id: string, idx: number) =>
+    setExtras(id, getExtras(id).filter((_, i) => i !== idx));
 
   // Tick every 30s for the countdown timer
   useEffect(() => {
@@ -592,7 +608,18 @@ const EscortDashboard = () => {
     // Minimumtarief op urenbasis toepassen
     const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
     const hours = +billableHours.toFixed(2);
-    const cost = +(hours * item.hourly_rate).toFixed(2);
+    const baseCost = +(hours * item.hourly_rate).toFixed(2);
+
+    // Extra kosten: opschonen + valideren
+    const extrasRaw = getExtras(id);
+    const extras: ExtraCost[] = extrasRaw
+      .map((e) => ({ description: (e.description ?? "").trim(), amount: Number(e.amount) || 0 }))
+      .filter((e) => e.description.length > 0 || e.amount > 0);
+    if (extras.some((e) => !e.description || e.amount <= 0)) {
+      return toast.error("Vul voor elke extra kostenregel een omschrijving en een bedrag groter dan 0 in");
+    }
+    const extrasTotal = +extras.reduce((s, e) => s + e.amount, 0).toFixed(2);
+    const cost = +(baseCost + extrasTotal).toFixed(2);
 
     const { error } = await supabase
       .from("ride_assignments")
@@ -601,6 +628,8 @@ const EscortDashboard = () => {
         returned_base_at: end.toISOString(),
         actual_hours: hours,
         actual_cost: cost,
+        extra_costs: extras as never,
+        extra_costs_total: extrasTotal,
         hours_notes: parsed.data.hours_notes || null,
         hours_submitted_at: new Date().toISOString(),
       })
@@ -861,8 +890,75 @@ const EscortDashboard = () => {
                       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                     />
                   </div>
+
+                  <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                        Extra kosten (optioneel)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => addExtra(a.id)}
+                        className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
+                      >
+                        + Regel toevoegen
+                      </button>
+                    </div>
+                    {getExtras(a.id).length === 0 ? (
+                      <p className="text-xs text-brass-deep/45">
+                        Bijv. tol, parkeren, veerboot, extra materiaal — wordt op de factuur als losse regel meegenomen.
+                      </p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {getExtras(a.id).map((ec, idx) => (
+                          <li key={idx} className="grid grid-cols-12 gap-2 items-center">
+                            <input
+                              type="text"
+                              value={ec.description}
+                              onChange={(e) => updateExtra(a.id, idx, { description: e.target.value })}
+                              placeholder="Omschrijving (bijv. tol, parkeren)"
+                              maxLength={120}
+                              className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                            />
+                            <div className="col-span-4 relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/50 text-sm">€</span>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                min="0"
+                                value={ec.amount === 0 ? "" : ec.amount}
+                                onChange={(e) =>
+                                  updateExtra(a.id, idx, { amount: e.target.value === "" ? 0 : Number(e.target.value) })
+                                }
+                                placeholder="0,00"
+                                className="w-full bg-parchment border border-brass-deep/15 pl-7 pr-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeExtra(a.id, idx)}
+                              aria-label="Verwijder regel"
+                              className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                            >
+                              ×
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {getExtras(a.id).length > 0 && (
+                      <p className="text-xs text-brass-deep/60 mt-2 tabular-nums text-right">
+                        Subtotaal extra kosten: €
+                        {getExtras(a.id)
+                          .reduce((s, e) => s + (Number(e.amount) || 0), 0)
+                          .toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+
                   <p className="md:col-span-2 text-xs text-brass-deep/55">
-                    Tarief {a.is_be_ride ? "België" : "Nederland"}: €{a.hourly_rate}/uur{a.is_be_ride ? " (grensoverschrijdend → BE-tarief op alle uren)" : ""} · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""}
+                    Tarief {a.is_be_ride ? "België" : "Nederland"}: €{a.hourly_rate}/uur{a.is_be_ride ? " (grensoverschrijdend → BE-tarief op alle uren)" : ""} · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""} Extra kosten worden los op de factuur vermeld.
                   </p>
                   <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                     Versturen
