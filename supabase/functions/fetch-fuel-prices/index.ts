@@ -10,9 +10,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// CBS topic key for diesel pump price (excl. discounts)
-const DIESEL_TOPIC = "PrijsDieselExclAccijns_3"; // fallback; we'll prefer "PrijsDieselAanDePomp_2"
-const DIESEL_TOPIC_PREFERRED = "PrijsDieselAanDePomp_2";
+// CBS dataset 80416ned: daily Dutch motor fuel pump prices.
+// Diesel column key:
+const DIESEL_KEY = "Diesel_2";
 
 function isoWeekStart(d: Date): string {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -30,10 +30,13 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // Fetch the most recent ~8 weeks of daily prices (CBS publishes per day)
-    // We pull last 60 entries and group by ISO week.
+    // Pull last ~120 days. CBS OData v3 ignores $orderby reliably,
+    // so filter by date instead.
+    const since = new Date(Date.now() - 130 * 24 * 60 * 60 * 1000)
+      .toISOString().slice(0, 10).replace(/-/g, "");
     const url =
-      "https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?$orderby=Perioden desc&$top=60";
+      `https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?` +
+      `$filter=Perioden gt '${since}'&$top=200`;
     const res = await fetch(url, { headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(`CBS fetch failed: ${res.status}`);
     const json = await res.json();
@@ -56,7 +59,7 @@ Deno.serve(async (req) => {
       }
       if (!date || isNaN(date.getTime())) continue;
 
-      const priceRaw = row[DIESEL_TOPIC_PREFERRED] ?? row[DIESEL_TOPIC];
+      const priceRaw = row[DIESEL_KEY];
       const price = typeof priceRaw === "number" ? priceRaw : Number(priceRaw);
       if (!isFinite(price) || price <= 0) continue;
 
