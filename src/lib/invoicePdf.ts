@@ -1,7 +1,27 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logoUrl from "@/assets/pilotcrew-logo.png";
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
+
+let logoDataUrlCache: string | null = null;
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  if (logoDataUrlCache) return logoDataUrlCache;
+  try {
+    const res = await fetch(logoUrl);
+    const blob = await res.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    logoDataUrlCache = dataUrl;
+    return dataUrl;
+  } catch {
+    return null;
+  }
+};
 const fmtMoney = (n: number) =>
   `€ ${Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
