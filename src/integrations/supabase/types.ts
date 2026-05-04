@@ -60,6 +60,7 @@ export type Database = {
           countries: string[]
           created_at: string
           escort_types: string[]
+          fuel_surcharge: Json
           hourly_rate: number
           id: string
           insurance_policy: string | null
@@ -89,6 +90,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           escort_types?: string[]
+          fuel_surcharge?: Json
           hourly_rate?: number
           id: string
           insurance_policy?: string | null
@@ -118,6 +120,7 @@ export type Database = {
           countries?: string[]
           created_at?: string
           escort_types?: string[]
+          fuel_surcharge?: Json
           hourly_rate?: number
           id?: string
           insurance_policy?: string | null
