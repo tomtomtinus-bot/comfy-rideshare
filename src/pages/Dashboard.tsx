@@ -722,13 +722,17 @@ const EscortDashboard = () => {
                           </div>
                           <div>
                             <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
-                            <input
+                            <select
                               name="ride_end_time"
-                              type="time"
-                              step={900}
+                              defaultValue=""
                               required
                               className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                            />
+                            >
+                              <option value="" disabled>Kies tijd…</option>
+                              {QUARTER_TIMES.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
                           </div>
                         </>
                       );
