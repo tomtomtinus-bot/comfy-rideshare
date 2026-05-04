@@ -325,8 +325,8 @@ const ClientDashboard = () => {
 };
 
 const hoursSchema = z.object({
-  departed_base_at: z.string().min(1, "Vertrektijd vereist"),
-  returned_base_at: z.string().min(1, "Eindtijd vereist"),
+  ride_start_at: z.string().min(1, "Starttijd rit vereist"),
+  ride_end_at: z.string().min(1, "Eindtijd rit vereist"),
   hours_notes: z.string().trim().max(500).optional(),
 });
 
