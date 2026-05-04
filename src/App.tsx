@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profiel" element={<EscortSettings />} />
             <Route path="/facturen" element={<Invoices />} />
+            <Route path="/facturatiegegevens" element={<BillingDetails />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
