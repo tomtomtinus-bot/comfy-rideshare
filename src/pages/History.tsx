@@ -14,7 +14,9 @@ interface HistoryRide {
   dropoff_address?: string;
   amount: number;
   counterpart: string; // anon id of other party
+  counterpart_name?: string; // real name (revealed after acceptance)
   invoice_number?: string | null;
+  assignment_ids: string[]; // for resolving names
 }
 
 const fmtDate = (d: string) =>
@@ -92,6 +94,7 @@ const HistoryInner = () => {
               amount: Number(a.actual_cost ?? 0),
               counterpart: `#${clientMap.get(r.client_id) ?? "—"}`,
               invoice_number: a.invoice_id ? invMap.get(a.invoice_id) ?? null : null,
+              assignment_ids: [a.id],
             } as HistoryRide;
           })
           .filter(Boolean) as HistoryRide[];
@@ -108,7 +111,7 @@ const HistoryInner = () => {
         const invoiceIds = [...new Set(list.map((r: any) => r.platform_invoice_id).filter(Boolean))];
         const [{ data: ass }, { data: invs }] = await Promise.all([
           rideIds.length
-            ? supabase.from("ride_assignments").select("ride_id, escort_id, actual_cost").in("ride_id", rideIds)
+            ? supabase.from("ride_assignments").select("id, ride_id, escort_id, actual_cost").in("ride_id", rideIds)
             : Promise.resolve({ data: [] as any[] }),
           invoiceIds.length
             ? supabase.from("platform_invoices").select("id, invoice_number").in("id", invoiceIds)
@@ -121,10 +124,11 @@ const HistoryInner = () => {
         const escMap = new Map((escs ?? []).map((e: any) => [e.id, e.anonymous_id]));
         const invMap = new Map((invs ?? []).map((i: any) => [i.id, i.invoice_number]));
 
-        const byRide: Record<string, { total: number; anon: string[] }> = {};
+        const byRide: Record<string, { total: number; anon: string[]; assignment_ids: string[] }> = {};
         (ass ?? []).forEach((a: any) => {
-          (byRide[a.ride_id] ||= { total: 0, anon: [] });
+          (byRide[a.ride_id] ||= { total: 0, anon: [], assignment_ids: [] });
           byRide[a.ride_id].total += Number(a.actual_cost ?? 0);
+          byRide[a.ride_id].assignment_ids.push(a.id);
           const an = escMap.get(a.escort_id);
           if (an) byRide[a.ride_id].anon.push(`#${an}`);
         });
@@ -139,6 +143,7 @@ const HistoryInner = () => {
           amount: (byRide[r.id]?.total ?? 0) + Number(r.app_fee ?? 0),
           counterpart: byRide[r.id]?.anon.join(", ") || "—",
           invoice_number: invMap.get(r.platform_invoice_id) ?? null,
+          assignment_ids: byRide[r.id]?.assignment_ids ?? [],
         }));
         setRides(out);
       }
@@ -146,6 +151,31 @@ const HistoryInner = () => {
       setLoading(false);
     })();
   }, [user, role]);
+
+  // Resolve real counterparty names (history rows are post-acceptance)
+  useEffect(() => {
+    (async () => {
+      const ids = rides.flatMap((r) => r.assignment_ids).filter(Boolean);
+      if (!ids.length) return;
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+          const row = (data as any[])?.[0];
+          return [id, row?.name as string | undefined] as const;
+        }),
+      );
+      const nameById = new Map(results.filter(([, n]) => !!n) as [string, string][]);
+      setRides((prev) =>
+        prev.map((r) => {
+          const names = r.assignment_ids
+            .map((id) => nameById.get(id))
+            .filter(Boolean) as string[];
+          return names.length ? { ...r, counterpart_name: [...new Set(names)].join(", ") } : r;
+        }),
+      );
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rides.length]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, { label: string; items: HistoryRide[]; total: number }>();
@@ -201,6 +231,7 @@ const HistoryInner = () => {
                             <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
                             <p className="text-xs text-brass-deep/55 mt-1">
                               {role === "begeleider" ? "Opdrachtgever" : "Begeleider"} {r.counterpart}
+                              {r.counterpart_name ? ` · ${r.counterpart_name}` : ""}
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-6">

@@ -106,6 +106,7 @@ const ClientDashboard = () => {
   const [exportOpen, setExportOpen] = useState(false);
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
+  const [escortNames, setEscortNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     (async () => {
@@ -144,6 +145,24 @@ const ClientDashboard = () => {
           });
         });
         setAssignments(grouped);
+
+        const acceptedAssignmentIds = (ass ?? [])
+          .filter((a: any) => a.status === "accepted" || a.hours_submitted_at)
+          .map((a: any) => a.id as string);
+        if (acceptedAssignmentIds.length) {
+          const results = await Promise.all(
+            acceptedAssignmentIds.map(async (id) => {
+              const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+              const row = (data as any[])?.[0];
+              return [id, row?.name as string | undefined] as const;
+            }),
+          );
+          const next: Record<string, string> = {};
+          results.forEach(([id, name]) => {
+            if (name) next[id] = name;
+          });
+          setEscortNames(next);
+        }
       }
       setLoading(false);
     })();
@@ -340,6 +359,9 @@ const ClientDashboard = () => {
                           <div key={a.id} className="flex items-center justify-between text-sm">
                             <span className="font-medium">
                               Begeleider <span className="text-brass-deep">#{a.anon}</span>
+                              {escortNames[a.id] ? (
+                                <span className="ml-2 text-brass-deep/70">· {escortNames[a.id]}</span>
+                              ) : null}
                               <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
                                 {statusLabel[a.status] ?? a.status}
                               </span>
@@ -398,6 +420,7 @@ const EscortDashboard = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [counterpartyNames, setCounterpartyNames] = useState<Record<string, string>>({});
   const [tick, setTick] = useState(0);
 
   // Tick every 30s for the countdown timer
@@ -462,6 +485,25 @@ const EscortDashboard = () => {
 
     setItems(merged);
     setLoading(false);
+
+    // Resolve real names for accepted assignments only
+    const acceptedIds = merged
+      .filter((m) => m.status === "accepted" || m.hours_submitted_at)
+      .map((m) => m.id);
+    if (acceptedIds.length) {
+      const results = await Promise.all(
+        acceptedIds.map(async (id) => {
+          const { data } = await supabase.rpc("get_counterparty_name", { _assignment_id: id });
+          const row = (data as any[])?.[0];
+          return [id, row?.name as string | undefined] as const;
+        }),
+      );
+      const next: Record<string, string> = {};
+      results.forEach(([id, name]) => {
+        if (name) next[id] = name;
+      });
+      setCounterpartyNames(next);
+    }
   };
 
   useEffect(() => {
@@ -646,7 +688,10 @@ const EscortDashboard = () => {
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
                   <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
+                  <p className="text-xs text-brass-deep/55 mt-1">
+                    Opdrachtgever #{a.client_anon}
+                    {counterpartyNames[a.id] ? ` · ${counterpartyNames[a.id]}` : ""}
+                  </p>
                   <div className="mt-2"><StatusBadge status={a.status} /></div>
                 </div>
                 <div className="col-span-12 md:col-span-7">
