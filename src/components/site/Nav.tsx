@@ -17,6 +17,7 @@ export const Nav = () => {
     { to: "/dashboard", label: "Dashboard", show: !!user },
     { to: "/aanvragen", label: "Rit aanvragen", show: role !== "begeleider" },
     { to: "/profiel", label: "Profiel", show: !!user && role === "begeleider" },
+    { to: "/ontheffingen", label: "Ontheffingen", show: !!user && role !== "begeleider" },
     { to: "/facturen", label: "Facturen", show: !!user },
     { to: "/geschiedenis", label: "Geschiedenis", show: !!user },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
