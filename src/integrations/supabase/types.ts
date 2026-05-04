@@ -295,6 +295,104 @@ export type Database = {
         }
         Relationships: []
       }
+      permit_routes: {
+        Row: {
+          created_at: string
+          destination: string
+          id: string
+          loaded: boolean
+          origin: string
+          permit_id: string
+          route_index: number
+          waypoints: Json
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          id?: string
+          loaded?: boolean
+          origin: string
+          permit_id: string
+          route_index: number
+          waypoints?: Json
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          id?: string
+          loaded?: boolean
+          origin?: string
+          permit_id?: string
+          route_index?: number
+          waypoints?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_routes_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permits: {
+        Row: {
+          cargo: string | null
+          carrier: string | null
+          client_id: string
+          created_at: string
+          id: string
+          max_height_m: number | null
+          max_length_m: number | null
+          max_weight_kg: number | null
+          max_width_m: number | null
+          pdf_path: string | null
+          permit_number: string
+          raw_data: Json | null
+          reference: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          carrier?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          max_height_m?: number | null
+          max_length_m?: number | null
+          max_weight_kg?: number | null
+          max_width_m?: number | null
+          pdf_path?: string | null
+          permit_number: string
+          raw_data?: Json | null
+          reference?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          carrier?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          max_height_m?: number | null
+          max_length_m?: number | null
+          max_weight_kg?: number | null
+          max_width_m?: number | null
+          pdf_path?: string | null
+          permit_number?: string
+          raw_data?: Json | null
+          reference?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: []
+      }
       platform_invoice_items: {
         Row: {
           amount: number
@@ -546,6 +644,7 @@ export type Database = {
           id: string
           notes: string | null
           num_escorts: number
+          permit_id: string | null
           permit_number: string | null
           pickup_address: string
           pickup_city: string
@@ -575,6 +674,7 @@ export type Database = {
           id?: string
           notes?: string | null
           num_escorts?: number
+          permit_id?: string | null
           permit_number?: string | null
           pickup_address: string
           pickup_city: string
@@ -604,6 +704,7 @@ export type Database = {
           id?: string
           notes?: string | null
           num_escorts?: number
+          permit_id?: string | null
           permit_number?: string | null
           pickup_address?: string
           pickup_city?: string
@@ -616,7 +717,15 @@ export type Database = {
           time_window_start?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rides_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
