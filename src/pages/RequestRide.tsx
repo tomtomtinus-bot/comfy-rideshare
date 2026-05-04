@@ -250,11 +250,11 @@ const RequestRideInner = () => {
                 <Input label="Vergunningnummer (optioneel)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Bijv. XV-2026-0421" />
                 <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders (max 15)</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
                   <input
-                    type="number" min={1} max={15}
+                    type="number" min={1}
                     value={form.num_escorts}
-                    onChange={(e) => setForm({ ...form, num_escorts: Math.min(15, Math.max(1, +e.target.value || 1)) })}
+                    onChange={(e) => setForm({ ...form, num_escorts: Math.max(1, +e.target.value || 1) })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   />
                 </div>
@@ -262,9 +262,10 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Starttijd</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label="Geplande starttijd (per kwartier)" type="datetime-local" step="900" value={form.scheduled_at} onChange={(v) => setForm({ ...form, scheduled_at: v })} />
+                <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label="Tijd (per kwartier)" type="time" step="900" value={form.scheduled_time} onChange={(v) => setForm({ ...form, scheduled_time: v })} />
               </div>
             </section>
 
