@@ -455,6 +455,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_assigned_escort: {
+        Args: { _ride_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_ride_client: {
+        Args: { _ride_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
