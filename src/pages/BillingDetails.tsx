@@ -156,7 +156,7 @@ const BillingDetailsInner = () => {
     toast.success("Facturatiegegevens opgeslagen");
   };
 
-  const Field = (props: {
+  const renderField = (props: {
     label: string;
     name: keyof FormState;
     type?: string;
