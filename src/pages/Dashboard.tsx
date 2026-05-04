@@ -321,7 +321,7 @@ const ClientDashboard = () => {
                         </p>
                         {allSubmitted && (
                           <p className="text-[10px] text-brass-deep/50 mt-1">
-                            incl. 1% fee (€{(totalActual * 0.01).toFixed(2)})
+                            incl. 1,5% fee (€{(totalActual * 0.015).toFixed(2)})
                           </p>
                         )}
                       </div>
