@@ -21,12 +21,12 @@ export const Hero = () => {
             met pilotvoertuig voor te brede, te hoge, te lange of te zware ladingen
             in NL, BE, DE en FR.
           </p>
-          <a
-            href="#ritten"
+          <Link
+            to={user ? "/dashboard" : "/auth"}
             className="inline-block px-8 py-4 bg-brass-gold text-parchment font-medium tracking-wide hover:bg-brass-deep transition-colors"
           >
             Bekijk geplande transporten
-          </a>
+          </Link>
         </div>
       </div>
     </section>
