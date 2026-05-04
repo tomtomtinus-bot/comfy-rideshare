@@ -2,12 +2,13 @@
 // Leest een RDW ontheffing-PDF uit en extraheert metadata + routes met waypoints.
 // Pattern-based, geen AI. Werkt met de standaard RDW layout (versie 1.0.0.x).
 
-import * as pdfjsLib from "pdfjs-dist";
-// Vite worker import
+// Use legacy build for broader browser compatibility (iOS Safari, older Chromium)
+// @ts-ignore - legacy build has no types export
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 // @ts-ignore
-import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+(pdfjsLib as any).GlobalWorkerOptions.workerSrc = workerSrc;
 
 export interface PermitWaypoint {
   wegbeheerder?: string;
