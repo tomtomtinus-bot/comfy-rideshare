@@ -336,6 +336,7 @@ const Inner = () => {
                     </p>
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"
                     label="Pilotvoertuig (type & kenmerk)"
