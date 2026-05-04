@@ -594,16 +594,20 @@ const EscortDashboard = () => {
           <p className="text-brass-deep/60">U heeft nog geen toegewezen ritten.</p>
         </div>
       ) : (() => {
+        const isExpired = (a: typeof items[number]) =>
+          a.status === "invited" && new Date(a.responds_by).getTime() <= Date.now();
         const categorize = (a: typeof items[number]) => {
+          if (a.status === "expired" || isExpired(a)) return "verlopen";
           if (a.hours_submitted_at) return "afgerond";
           if (a.status === "accepted") return "geaccepteerd";
           if (a.status === "invited") return "openstaand";
-          return "afgerond"; // declined / expired / cancelled bij historie
+          return "afgerond"; // declined / cancelled bij historie
         };
         const buckets = {
           openstaand: items.filter((a) => categorize(a) === "openstaand"),
           geaccepteerd: items.filter((a) => categorize(a) === "geaccepteerd"),
           afgerond: items.filter((a) => categorize(a) === "afgerond"),
+          verlopen: items.filter((a) => categorize(a) === "verlopen"),
         };
 
         const renderItem = (a: typeof items[number]) => {
@@ -806,14 +810,16 @@ const EscortDashboard = () => {
 
         return (
           <Tabs defaultValue="openstaand" className="w-full">
-            <TabsList className="grid grid-cols-3 w-full md:w-auto md:inline-flex">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto md:inline-flex">
               <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
               <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
               <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
+              <TabsTrigger value="verlopen">Verlopen ({buckets.verlopen.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand)}</TabsContent>
             <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd)}</TabsContent>
             <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond)}</TabsContent>
+            <TabsContent value="verlopen" className="mt-6">{renderList(buckets.verlopen)}</TabsContent>
           </Tabs>
         );
       })()}
