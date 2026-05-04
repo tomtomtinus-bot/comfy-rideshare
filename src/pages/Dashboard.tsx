@@ -19,6 +19,16 @@ const fmtHours = (min: number) => {
   return `${h}u ${m}m`;
 };
 
+const QUARTER_TIMES: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+  return out;
+})();
+
 interface RideRow {
   id: string;
   client_id: string;
