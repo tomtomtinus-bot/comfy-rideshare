@@ -51,6 +51,7 @@ interface BasePdfOpts {
 
 const senderBlock = (p: BillingParty) =>
   [
+    [p.billing_contact_name || p.full_name || "", false],
     [p.billing_address || "", false],
     [
       [p.billing_postcode, p.billing_city].filter(Boolean).join(" ") || "",
@@ -196,6 +197,7 @@ export interface EscortInvoicePdfData extends BasePdfOpts {
   rows: Array<{
     ride_date: string;
     description: string | null;
+    reference?: string | null;
     hours: number;
     hourly_rate: number;
     amount: number;
@@ -213,10 +215,11 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   autoTable(doc, {
     startY: 105,
-    head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
+    head: [["Datum", "Omschrijving", "Referentie", "Aantal", "Prijs", "Totaal"]],
     body: data.rows.map((r) => [
       fmtDate(r.ride_date),
       r.description ?? "",
+      r.reference ?? "",
       Number(r.hours).toFixed(2),
       fmtMoney(r.hourly_rate),
       fmtMoney(r.amount),
@@ -236,9 +239,10 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
     },
     columnStyles: {
       0: { cellWidth: 22 },
-      2: { halign: "right", cellWidth: 22 },
-      3: { halign: "right", cellWidth: 28 },
-      4: { halign: "right", cellWidth: 32 },
+      2: { cellWidth: 28 },
+      3: { halign: "right", cellWidth: 18 },
+      4: { halign: "right", cellWidth: 24 },
+      5: { halign: "right", cellWidth: 28 },
     },
     styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
     margin: { left: 18, right: 18 },
