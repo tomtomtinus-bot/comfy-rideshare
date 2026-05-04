@@ -317,9 +317,13 @@ const ClientDashboard = () => {
                       <div className="col-span-12 md:col-span-4">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Werkelijk</p>
                         <p className="font-semibold tabular-nums text-brass-gold">
-                          {allSubmitted ? `€${(totalActual + Number(r.app_fee ?? 0)).toFixed(2)}` : "—"}
+                          {allSubmitted ? `€${(totalActual * 1.03).toFixed(2)}` : "—"}
                         </p>
-                        <p className="text-[10px] text-brass-deep/50 mt-1">incl. €{Number(r.app_fee ?? 0).toFixed(2)} fee</p>
+                        {allSubmitted && (
+                          <p className="text-[10px] text-brass-deep/50 mt-1">
+                            incl. 3% fee (€{(totalActual * 0.03).toFixed(2)})
+                          </p>
+                        )}
                       </div>
                     </div>
 
