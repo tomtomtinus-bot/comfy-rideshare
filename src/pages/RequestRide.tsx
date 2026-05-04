@@ -48,6 +48,15 @@ interface GeoPoint {
   lng: number;
 }
 
+const fmtHours = (min: number) => {
+  const total = Math.ceil(min / 15) * 15;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}u`;
+  return `${h}u ${m}m`;
+};
+
 const RequestRideInner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
