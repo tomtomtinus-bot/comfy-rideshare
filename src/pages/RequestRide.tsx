@@ -52,6 +52,12 @@ interface MatchedEscort {
   distanceFromDropoff: number;
   travelToPickupMin: number;
   travelBackHomeMin: number;
+  conflict?: {
+    rideStart: string; // ISO
+    rideEnd: string;
+    overlapStart: string;
+    overlapEnd: string;
+  } | null;
 }
 
 interface GeoPoint {
