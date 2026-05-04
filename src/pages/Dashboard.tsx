@@ -325,8 +325,10 @@ const ClientDashboard = () => {
 };
 
 const hoursSchema = z.object({
-  ride_start_at: z.string().min(1, "Starttijd rit vereist"),
-  ride_end_at: z.string().min(1, "Eindtijd rit vereist"),
+  ride_start_date: z.string().min(1, "Startdatum vereist"),
+  ride_start_time: z.string().min(1, "Starttijd vereist"),
+  ride_end_date: z.string().min(1, "Einddatum vereist"),
+  ride_end_time: z.string().min(1, "Eindtijd vereist"),
   hours_notes: z.string().trim().max(500).optional(),
 });
 
