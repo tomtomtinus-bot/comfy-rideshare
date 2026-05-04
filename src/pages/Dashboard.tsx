@@ -666,7 +666,10 @@ const EscortDashboard = () => {
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
                   <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">Opdrachtgever #{a.client_anon}</p>
+                  <p className="text-xs text-brass-deep/55 mt-1">
+                    Opdrachtgever #{a.client_anon}
+                    {counterpartyNames[a.id] ? ` · ${counterpartyNames[a.id]}` : ""}
+                  </p>
                   <div className="mt-2"><StatusBadge status={a.status} /></div>
                 </div>
                 <div className="col-span-12 md:col-span-7">
