@@ -60,6 +60,40 @@ const empty: FormState = {
   bank_account_holder: "",
 };
 
+const FieldImpl = ({
+  label,
+  type = "text",
+  placeholder,
+  autoComplete,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  placeholder?: string;
+  autoComplete?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+}) => (
+  <label className="block">
+    <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60 mb-1 block">
+      {label}
+    </span>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      autoComplete={autoComplete}
+      className="w-full bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+    />
+    {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+  </label>
+);
+
 const BillingDetailsInner = () => {
   const { user, role } = useAuth();
   const isEscort = role === "begeleider";
@@ -122,35 +156,19 @@ const BillingDetailsInner = () => {
     toast.success("Facturatiegegevens opgeslagen");
   };
 
-  const Field = ({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    autoComplete,
-  }: {
+  const Field = (props: {
     label: string;
     name: keyof FormState;
     type?: string;
     placeholder?: string;
     autoComplete?: string;
   }) => (
-    <label className="block">
-      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60 mb-1 block">
-        {label}
-      </span>
-      <input
-        type={type}
-        value={form[name]}
-        onChange={set(name)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        className="w-full bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
-      />
-      {errors[name] && (
-        <span className="text-xs text-red-700 mt-1 block">{errors[name]}</span>
-      )}
-    </label>
+    <FieldImpl
+      {...props}
+      value={form[props.name]}
+      error={errors[props.name]}
+      onChange={set(props.name)}
+    />
   );
 
   return (
