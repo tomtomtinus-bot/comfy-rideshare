@@ -87,8 +87,19 @@ const InvoicesInner = () => {
         .from("invoice_items")
         .select("*")
         .in("invoice_id", list.map((i) => i.id));
+      const itList = (it ?? []) as Item[];
+      const rideIds = [...new Set(itList.map((r) => r.ride_id).filter(Boolean) as string[])];
+      const refMap = new Map<string, string | null>();
+      if (rideIds.length) {
+        const { data: rs } = await supabase
+          .from("rides")
+          .select("id, client_reference")
+          .in("id", rideIds);
+        (rs ?? []).forEach((r: { id: string; client_reference: string | null }) => refMap.set(r.id, r.client_reference));
+      }
       const grouped: Record<string, Item[]> = {};
-      (it ?? []).forEach((row: Item) => {
+      itList.forEach((row) => {
+        row.reference = row.ride_id ? refMap.get(row.ride_id) ?? null : null;
         (grouped[row.invoice_id] ||= []).push(row);
       });
       setItems(grouped);
