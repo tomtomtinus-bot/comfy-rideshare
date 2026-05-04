@@ -442,6 +442,30 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_fuel_prices: {
+        Row: {
+          eur_per_liter: number
+          fetched_at: string
+          id: string
+          source: string
+          week_start: string
+        }
+        Insert: {
+          eur_per_liter: number
+          fetched_at?: string
+          id?: string
+          source?: string
+          week_start: string
+        }
+        Update: {
+          eur_per_liter?: number
+          fetched_at?: string
+          id?: string
+          source?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
