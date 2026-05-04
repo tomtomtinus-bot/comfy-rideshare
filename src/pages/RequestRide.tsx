@@ -25,6 +25,16 @@ const schema = z.object({
   client_reference: z.string().trim().max(80).optional(),
 });
 
+const QUARTER_TIMES: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 15, 30, 45]) {
+      out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+  return out;
+})();
+
 interface MatchedEscort {
   id: string;
   anonymous_id: string;
@@ -295,7 +305,19 @@ const RequestRideInner = () => {
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
-                <Input label="Tijd (per kwartier)" type="time" step="900" value={form.scheduled_time} onChange={(v) => setForm({ ...form, scheduled_time: v })} />
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Tijd (per kwartier)</label>
+                  <select
+                    value={form.scheduled_time}
+                    onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
+                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                  >
+                    <option value="" disabled>Kies tijd…</option>
+                    {QUARTER_TIMES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </section>
 
