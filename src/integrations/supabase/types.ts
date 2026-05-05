@@ -645,12 +645,14 @@ export type Database = {
           client_id: string
           client_reference: string | null
           created_at: string
+          drivers: Json
           dropoff_address: string
           dropoff_city: string
           dropoff_lat: number
           dropoff_lng: number
           escort_type_required: string
           id: string
+          license_plates: string[]
           notes: string | null
           num_escorts: number
           permit_id: string | null
@@ -675,12 +677,14 @@ export type Database = {
           client_id: string
           client_reference?: string | null
           created_at?: string
+          drivers?: Json
           dropoff_address: string
           dropoff_city: string
           dropoff_lat: number
           dropoff_lng: number
           escort_type_required?: string
           id?: string
+          license_plates?: string[]
           notes?: string | null
           num_escorts?: number
           permit_id?: string | null
@@ -705,12 +709,14 @@ export type Database = {
           client_id?: string
           client_reference?: string | null
           created_at?: string
+          drivers?: Json
           dropoff_address?: string
           dropoff_city?: string
           dropoff_lat?: number
           dropoff_lng?: number
           escort_type_required?: string
           id?: string
+          license_plates?: string[]
           notes?: string | null
           num_escorts?: number
           permit_id?: string | null
@@ -824,6 +830,7 @@ export type Database = {
           window_start: string
         }[]
       }
+      get_ride_details_for_client: { Args: { _ride_id: string }; Returns: Json }
       get_ride_details_for_escort: { Args: { _ride_id: string }; Returns: Json }
       has_role: {
         Args: {
