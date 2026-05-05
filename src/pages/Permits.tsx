@@ -158,6 +158,30 @@ export default function Permits() {
   const current = permits.find((p) => p.id === selected) ?? null;
   const currentRoutes = routes.filter((r) => r.permit_id === selected);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isExpired = (p: PermitRow) => p.valid_to ? new Date(p.valid_to) < today : false;
+  const activePermits = permits.filter((p) => !isExpired(p));
+  const expiredPermits = permits.filter((p) => isExpired(p));
+
+  const renderPermitButton = (p: PermitRow) => (
+    <button
+      key={p.id}
+      onClick={() => setSelected(p.id)}
+      className={`w-full text-left rounded-md border p-3 transition-colors ${
+        selected === p.id ? "bg-accent border-primary" : "hover:bg-accent"
+      }`}
+    >
+      <div className="font-mono text-sm font-semibold">{p.permit_number}</div>
+      <div className="text-xs text-muted-foreground truncate">
+        {p.carrier ?? "—"}
+      </div>
+      {p.valid_to && (
+        <div className="text-xs text-muted-foreground">t/m {new Date(p.valid_to).toLocaleDateString("nl-NL")}</div>
+      )}
+    </button>
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
       <Nav />
@@ -165,7 +189,7 @@ export default function Permits() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Ontheffingen</h1>
-            <p className="text-muted-foreground">Beheer je RDW-ontheffingen en bekijk de routebeschrijving.</p>
+            <p className="text-muted-foreground">Beheer je RDW-ontheffingen.</p>
           </div>
         </div>
 
@@ -196,8 +220,7 @@ export default function Permits() {
             </div>
             <Alert className="mt-4">
               <AlertDescription className="text-xs">
-                Upload de RDW-ontheffing als PDF. We lezen automatisch het ontheffingnummer, de geldigheid, afmetingen
-                en alle routes met waypoints en passagevoorwaarden uit.
+                Upload de RDW-ontheffing als PDF. We lezen automatisch het ontheffingnummer, de geldigheid en afmetingen uit.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -206,29 +229,27 @@ export default function Permits() {
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <Card className="h-fit">
             <CardHeader>
-              <CardTitle className="text-base">Mijn ontheffingen ({permits.length})</CardTitle>
+              <CardTitle className="text-base">Mijn ontheffingen</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              {permits.length === 0 && (
-                <p className="text-sm text-muted-foreground">Nog geen ontheffingen geüpload.</p>
-              )}
-              {permits.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelected(p.id)}
-                  className={`w-full text-left rounded-md border p-3 transition-colors ${
-                    selected === p.id ? "bg-accent border-primary" : "hover:bg-accent"
-                  }`}
-                >
-                  <div className="font-mono text-sm font-semibold">{p.permit_number}</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {p.carrier ?? "—"}
-                  </div>
-                  {p.valid_to && (
-                    <div className="text-xs text-muted-foreground">t/m {new Date(p.valid_to).toLocaleDateString("nl-NL")}</div>
+            <CardContent>
+              <Tabs defaultValue="active">
+                <TabsList className="w-full">
+                  <TabsTrigger value="active" className="flex-1">Actief ({activePermits.length})</TabsTrigger>
+                  <TabsTrigger value="expired" className="flex-1">Verlopen ({expiredPermits.length})</TabsTrigger>
+                </TabsList>
+                <TabsContent value="active" className="space-y-2 mt-3">
+                  {activePermits.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Geen actieve ontheffingen.</p>
                   )}
-                </button>
-              ))}
+                  {activePermits.map(renderPermitButton)}
+                </TabsContent>
+                <TabsContent value="expired" className="space-y-2 mt-3">
+                  {expiredPermits.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Geen verlopen ontheffingen.</p>
+                  )}
+                  {expiredPermits.map(renderPermitButton)}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
