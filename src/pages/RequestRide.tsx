@@ -77,7 +77,7 @@ const fmtHours = (min: number) => {
 };
 
 const RequestRideInner = () => {
-  const { user } = useAuth();
+  const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
