@@ -356,87 +356,100 @@ const ClientDashboard = () => {
           afgerond: rides.filter((r) => categorize(r) === "afgerond"),
         };
 
-        const renderList = (list: RideRow[]) => {
+        const renderList = (list: RideRow[], bucketKey: "openstaand" | "geaccepteerd" | "afgerond") => {
           if (list.length === 0) {
             return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
           }
-          return (
-            <ul className="space-y-px bg-brass-deep/10">
-              {list.map((r) => {
-                const ass = assignments[r.id] ?? [];
-                const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
-                const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
-                return (
-                  <li key={r.id} className="bg-card p-6 md:p-8">
-                    <div className="grid grid-cols-12 gap-4 items-start">
-                      <div className="col-span-12 md:col-span-3">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                        <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
-                        <div className="mt-3"><StatusBadge status={r.status} /></div>
-                      </div>
-                      <div className="col-span-12 md:col-span-5">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                        <p className="font-medium">
-                          {r.pickup_address} ({r.pickup_city})
-                          <span className="text-brass-gold mx-2">→</span>
-                          {r.dropoff_address} ({r.dropoff_city})
-                        </p>
-                        {(r.cargo_length_m || r.cargo_weight_t) && (
-                          <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
-                            Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
-                            {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
-                            {r.client_reference ? ` · ref ${r.client_reference}` : ""}
-                          </p>
-                        )}
-                        
-                        {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
-                      </div>
-                      <div className="col-span-12 md:col-span-4">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Werkelijk</p>
-                        <p className="font-semibold tabular-nums text-brass-gold">
-                          {allSubmitted ? `€${(totalActual * 1.01).toFixed(2)}` : "—"}
-                        </p>
-                        {allSubmitted && (
-                          <p className="text-[10px] text-brass-deep/50 mt-1">
-                            incl. 1,5% fee (€{(totalActual * 0.015).toFixed(2)})
-                          </p>
-                        )}
-                      </div>
-                    </div>
+          const order: "asc" | "desc" = bucketKey === "afgerond" ? "desc" : "asc";
+          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order);
+          const renderRide = (r: RideRow) => {
+            const ass = assignments[r.id] ?? [];
+            const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
+            const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
+            return (
+              <li key={r.id} className="bg-card p-6 md:p-8">
+                <div className="grid grid-cols-12 gap-4 items-start">
+                  <div className="col-span-12 md:col-span-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
+                    <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
+                    <div className="mt-3"><StatusBadge status={r.status} /></div>
+                  </div>
+                  <div className="col-span-12 md:col-span-5">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
+                    <p className="font-medium">
+                      {r.pickup_address} ({r.pickup_city})
+                      <span className="text-brass-gold mx-2">→</span>
+                      {r.dropoff_address} ({r.dropoff_city})
+                    </p>
+                    {(r.cargo_length_m || r.cargo_weight_t) && (
+                      <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
+                        Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
+                        {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
+                        {r.client_reference ? ` · ref ${r.client_reference}` : ""}
+                      </p>
+                    )}
+                    
+                    {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
+                  </div>
+                  <div className="col-span-12 md:col-span-4">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Werkelijk</p>
+                    <p className="font-semibold tabular-nums text-brass-gold">
+                      {allSubmitted ? `€${(totalActual * 1.01).toFixed(2)}` : "—"}
+                    </p>
+                    {allSubmitted && (
+                      <p className="text-[10px] text-brass-deep/50 mt-1">
+                        incl. 1,5% fee (€{(totalActual * 0.015).toFixed(2)})
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-                    <div className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {ass.map((a) => {
-                        const statusLabel: Record<string, string> = {
-                          invited: "uitgenodigd",
-                          accepted: "geaccepteerd",
-                          declined: "geweigerd",
-                          expired: "verlopen",
-                          cancelled: "geannuleerd",
-                        };
-                        return (
-                          <div key={a.id} className="flex items-center justify-between text-sm">
-                            <span className="font-medium">
-                              Begeleider <span className="text-brass-deep">#{a.anon}</span>
-                              {escortNames[a.id] ? (
-                                <span className="ml-2 text-brass-deep/70">· {escortNames[a.id]}</span>
-                              ) : null}
-                              <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                                {statusLabel[a.status] ?? a.status}
-                              </span>
-                            </span>
-                            <span className="text-brass-deep/60 tabular-nums">
-                              {a.actual_hours
-                                ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
-                                : "—"}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                <div className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {ass.map((a) => {
+                    const statusLabel: Record<string, string> = {
+                      invited: "uitgenodigd",
+                      accepted: "geaccepteerd",
+                      declined: "geweigerd",
+                      expired: "verlopen",
+                      cancelled: "geannuleerd",
+                    };
+                    return (
+                      <div key={a.id} className="flex items-center justify-between text-sm">
+                        <span className="font-medium">
+                          Begeleider <span className="text-brass-deep">#{a.anon}</span>
+                          {escortNames[a.id] ? (
+                            <span className="ml-2 text-brass-deep/70">· {escortNames[a.id]}</span>
+                          ) : null}
+                          <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                            {statusLabel[a.status] ?? a.status}
+                          </span>
+                        </span>
+                        <span className="text-brass-deep/60 tabular-nums">
+                          {a.actual_hours
+                            ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
+                            : "—"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </li>
+            );
+          };
+          return (
+            <div className="space-y-8">
+              {groups.map((g) => (
+                <section key={g.key}>
+                  <header className="flex items-end justify-between mb-3">
+                    <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
+                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                    </p>
+                  </header>
+                  <ul className="space-y-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
+                </section>
+              ))}
+            </div>
           );
         };
 
