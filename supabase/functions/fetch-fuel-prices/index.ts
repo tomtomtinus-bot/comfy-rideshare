@@ -1,24 +1,35 @@
-// Fetches Dutch diesel pump prices from CBS Open Data (StatLine)
-// and upserts the weekly average into public.weekly_fuel_prices.
-// Dataset: 80416ned — Motorbrandstoffen; consumentenprijzen, per dag
-// https://opendata.cbs.nl/ODataApi/odata/80416ned
+// Haalt het wekelijkse gemiddelde van de Nederlandse dieselprijs (af pomp, excl. btw)
+// op uit de TLN Brandstofmonitor-Excel en upsert het in public.weekly_fuel_prices.
+// Bron: https://www.tln.nl/ledenvoordeel/brandstofmonitor
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import * as XLSX from "https://esm.sh/xlsx@0.18.5";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// CBS dataset 80416ned: daily Dutch motor fuel pump prices.
-// Diesel column key:
-const DIESEL_KEY = "Diesel_2";
+const TLN_XLSX_URL =
+  "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/Weekgemiddelde-dieselprijs.xlsx";
 
-function isoWeekStart(d: Date): string {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const day = date.getUTCDay() || 7; // Mon=1..Sun=7
+function isoMonday(d: Date): string {
+  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = date.getUTCDay() || 7;
   if (day !== 1) date.setUTCDate(date.getUTCDate() - (day - 1));
   return date.toISOString().slice(0, 10);
+}
+
+// ISO week start (Monday) for a given (year, isoWeek).
+function isoWeekStartFromYearWeek(year: number, week: number): string {
+  // Jan 4 is always in ISO week 1.
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;
+  const week1Monday = new Date(jan4);
+  week1Monday.setUTCDate(jan4.getUTCDate() - (jan4Day - 1));
+  const monday = new Date(week1Monday);
+  monday.setUTCDate(week1Monday.getUTCDate() + (week - 1) * 7);
+  return monday.toISOString().slice(0, 10);
 }
 
 Deno.serve(async (req) => {
@@ -30,63 +41,50 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // Pull last ~120 days. CBS OData v3 ignores $orderby reliably,
-    // so filter by date instead.
-    const since = new Date(Date.now() - 130 * 24 * 60 * 60 * 1000)
-      .toISOString().slice(0, 10).replace(/-/g, "");
-    const url =
-      `https://opendata.cbs.nl/ODataApi/odata/80416ned/TypedDataSet?` +
-      `$filter=${encodeURIComponent(`Perioden gt '${since}'`)}&$top=200`;
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`CBS fetch failed: ${res.status}`);
-    const json = await res.json();
-    const rows: Array<Record<string, unknown>> = json.value ?? [];
-    console.log(`CBS returned ${rows.length} rows for filter since=${since}`);
-    if (rows[0]) console.log(`first row sample:`, JSON.stringify(rows[0]));
+    const res = await fetch(TLN_XLSX_URL);
+    if (!res.ok) throw new Error(`TLN download failed: ${res.status}`);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const wb = XLSX.read(buf, { type: "array" });
 
-    // Group by ISO week (Mon)
-    const weekly = new Map<string, { sum: number; n: number }>();
+    // Voorkeur: weekgemiddelde-sheet ('weekgemiddelde 2024 - Heden')
+    const wkSheetName =
+      wb.SheetNames.find((n) => n.toLowerCase().startsWith("weekgemiddelde")) ?? wb.SheetNames[0];
+    const ws = wb.Sheets[wkSheetName];
+    const rows = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, raw: true });
+
+    // Kolomstructuur (1-based in Excel, 0-based hier):
+    // [A=null, B=week, C=weekgemiddelde, D=year (alleen op rij waar jaar wisselt)]
+    let currentYear: number | null = null;
+    const upserts: Array<{ week_start: string; eur_per_liter: number; source: string }> = [];
 
     for (const row of rows) {
-      // Perioden codes look like "2026W18D5" or "20260504" depending on dataset.
-      // We try to parse a date from "Perioden" — if not parseable, skip.
-      const period = String(row["Perioden"] ?? "").trim();
-      let date: Date | null = null;
+      if (!Array.isArray(row)) continue;
+      const week = row[1];
+      const price = row[2];
+      const yearCell = row[3];
 
-      // Format yyyymmdd
-      if (/^\d{8}$/.test(period)) {
-        date = new Date(`${period.slice(0, 4)}-${period.slice(4, 6)}-${period.slice(6, 8)}T00:00:00Z`);
-      } else if (/^\d{4}-\d{2}-\d{2}$/.test(period)) {
-        date = new Date(period + "T00:00:00Z");
+      if (typeof yearCell === "number" && yearCell >= 2000 && yearCell < 2100) {
+        currentYear = yearCell;
       }
-      if (!date || isNaN(date.getTime())) continue;
-
-      const priceRaw = row[DIESEL_KEY];
-      const price = typeof priceRaw === "number" ? priceRaw : Number(priceRaw);
+      if (typeof week !== "number" || typeof price !== "number") continue;
+      if (currentYear === null) continue;
       if (!isFinite(price) || price <= 0) continue;
 
-      const wk = isoWeekStart(date);
-      const cur = weekly.get(wk) ?? { sum: 0, n: 0 };
-      cur.sum += price;
-      cur.n += 1;
-      weekly.set(wk, cur);
+      const weekStart = isoWeekStartFromYearWeek(currentYear, week);
+      upserts.push({
+        week_start: weekStart,
+        eur_per_liter: +price.toFixed(4),
+        source: "TLN",
+      });
     }
 
-    // If CBS yielded nothing, fall back to a sensible default for current week
-    // so the system keeps working — but mark source clearly.
-    let upserts: Array<{ week_start: string; eur_per_liter: number; source: string }> = [];
-    if (weekly.size === 0) {
+    // Fallback wanneer parse niets oplevert
+    if (upserts.length === 0) {
       upserts.push({
-        week_start: isoWeekStart(new Date()),
+        week_start: isoMonday(new Date()),
         eur_per_liter: 1.85,
         source: "fallback",
       });
-    } else {
-      upserts = Array.from(weekly.entries()).map(([week_start, { sum, n }]) => ({
-        week_start,
-        eur_per_liter: +(sum / n).toFixed(4),
-        source: "CBS",
-      }));
     }
 
     const { error } = await admin
@@ -95,10 +93,15 @@ Deno.serve(async (req) => {
     if (error) throw error;
 
     return new Response(
-      JSON.stringify({ ok: true, weeks_upserted: upserts.length, sample: upserts.slice(0, 3) }),
+      JSON.stringify({
+        ok: true,
+        weeks_upserted: upserts.length,
+        latest: upserts.slice(-3),
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
+    console.error("fetch-fuel-prices error:", e);
     return new Response(
       JSON.stringify({ ok: false, error: (e as Error).message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

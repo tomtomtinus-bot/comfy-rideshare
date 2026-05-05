@@ -85,13 +85,28 @@ const AdminFuel = () => {
     load();
   };
 
+  const [syncing, setSyncing] = useState(false);
+  const syncFromTLN = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("fetch-fuel-prices");
+    setSyncing(false);
+    if (error) return toast.error(error.message);
+    toast.success(`TLN-sync: ${data?.weeks_upserted ?? 0} weken bijgewerkt`);
+    load();
+  };
+
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="font-display text-2xl text-brass-deep mb-2">Brandstofprijzen</h2>
-        <p className="text-sm text-brass-deep/70">
-          Pas de gemiddelde dieselprijs (€/liter) per week aan. Wordt gebruikt voor brandstoftoeslagen.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl text-brass-deep mb-2">Brandstofprijzen</h2>
+          <p className="text-sm text-brass-deep/70">
+            Pas de gemiddelde dieselprijs (€/liter) per week aan. Wordt gebruikt voor brandstoftoeslagen.
+          </p>
+        </div>
+        <Button onClick={syncFromTLN} disabled={syncing} variant="outline">
+          {syncing ? "Synchroniseren…" : "Synchroniseer met TLN"}
+        </Button>
       </div>
 
       <div className="bg-parchment p-5 border border-brass-gold/20">
