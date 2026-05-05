@@ -477,8 +477,7 @@ const Matches = ({
   onBook: (selected: MatchedEscort[]) => void;
   busy: boolean;
 }) => {
-  const initialSelected = matches.filter((m) => !m.conflict).slice(0, numWanted).map((m) => m.id);
-  const [selected, setSelected] = useState<string[]>(initialSelected);
+  const [selected, setSelected] = useState<string[]>([]);
   const toggle = (id: string) => {
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : s.length < numWanted ? [...s, id] : s
@@ -491,48 +490,46 @@ const Matches = ({
       <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
       <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted}. <strong>Servicekosten: 1,5% van het ritbedrag</strong> (wekelijks gefactureerd).
+        Selecteer er {numWanted} zelf. <strong>Servicekosten: 1,5% van het ritbedrag</strong> (wekelijks gefactureerd).
       </p>
 
-      <ul className="space-y-px bg-brass-deep/10">
+      <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {matches.map((m) => {
           const isSelected = selected.includes(m.id);
           const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
           const conflict = m.conflict;
           return (
             <li key={m.id} onClick={() => toggle(m.id)}
-              className={`bg-card p-6 cursor-pointer transition-all ${
-                conflict ? "ring-2 ring-inset ring-destructive/60" :
-                isSelected ? "ring-2 ring-inset ring-brass-gold" : "hover:bg-parchment"
+              className={`bg-card p-4 cursor-pointer transition-all border ${
+                conflict ? "border-destructive/60 ring-1 ring-destructive/40" :
+                isSelected ? "border-brass-gold ring-1 ring-brass-gold" : "border-brass-deep/10 hover:bg-parchment"
               }`}>
-              <div className="grid grid-cols-12 gap-4 items-center">
-                <div className="col-span-12 md:col-span-3">
-                  <p className="font-display text-2xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">★ {m.rating} · {m.rides_completed} ritten</p>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <p className="font-display text-xl text-brass-deep tabular-nums">#{m.anonymous_id}</p>
+                  <p className="text-[11px] text-brass-deep/55 mt-0.5">★ {m.rating} · {m.rides_completed} ritten</p>
                 </div>
-                <Cell label="Aanrijden" value={fmtHours(m.travelToPickupMin)} />
-                <Cell label="Rit" value={fmtHours(hourlyRideMin)} />
-                <Cell label="Afrijden" value={fmtHours(m.travelBackHomeMin)} />
-                <Cell label="Totaal bezet" value={fmtHours(totalMin)} bold />
-                <div className="col-span-12 md:col-span-1 text-right">
-                  <span className={`size-5 inline-block rounded-full ${
-                    conflict ? "bg-destructive" : isSelected ? "bg-brass-gold" : "bg-patina"
-                  }`} />
-                </div>
-                <div className="col-span-12 text-[11px] text-brass-deep/55">
-                  Tarief {m.is_be_ride ? "BE" : "NL"}: €{m.effective_rate}/u · leegrijden 100 km/u, rit 70 km/u
-                </div>
-                {conflict && (
-                  <div className="col-span-12 mt-2 bg-destructive/10 border border-destructive/40 px-3 py-2">
-                    <p className="text-xs font-bold text-destructive uppercase tracking-widest">⚠ Bezetting overlapt</p>
-                    <p className="text-[12px] text-brass-deep mt-1">
-                      Deze begeleider heeft al een aanvraag die overlapt met jouw bezetting{" "}
-                      <strong>{fmtDT(conflict.rideStart)} – {fmtDT(conflict.rideEnd)}</strong>.
-                      Overlap: <strong>{fmtDT(conflict.overlapStart)} – {fmtDT(conflict.overlapEnd)}</strong>.
-                    </p>
-                  </div>
-                )}
+                <span className={`size-4 mt-1 inline-block rounded-full shrink-0 ${
+                  conflict ? "bg-destructive" : isSelected ? "bg-brass-gold" : "bg-patina"
+                }`} />
               </div>
+              <div className="grid grid-cols-4 gap-2 text-[11px]">
+                <MiniCell label="Aanrij" value={fmtHours(m.travelToPickupMin)} />
+                <MiniCell label="Rit" value={fmtHours(hourlyRideMin)} />
+                <MiniCell label="Afrij" value={fmtHours(m.travelBackHomeMin)} />
+                <MiniCell label="Totaal" value={fmtHours(totalMin)} bold />
+              </div>
+              <p className="text-[10px] text-brass-deep/55 mt-2">
+                Tarief {m.is_be_ride ? "BE" : "NL"}: €{m.effective_rate}/u
+              </p>
+              {conflict && (
+                <div className="mt-2 bg-destructive/10 border border-destructive/40 px-2 py-1.5">
+                  <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">⚠ Bezet</p>
+                  <p className="text-[11px] text-brass-deep mt-0.5">
+                    Overlap {fmtDT(conflict.overlapStart)} – {fmtDT(conflict.overlapEnd)}
+                  </p>
+                </div>
+              )}
             </li>
           );
         })}
