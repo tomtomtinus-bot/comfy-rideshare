@@ -87,6 +87,8 @@ const Inner = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  useUnsavedChanges(dirty);
   const [categories, setCategories] = useState<string[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
