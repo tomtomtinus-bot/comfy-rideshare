@@ -3,6 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "opdrachtgever" | "begeleider" | "admin";
+export type ApprovalStatus = "pending" | "approved" | "rejected";
 
 interface AuthCtx {
   user: User | null;
@@ -12,8 +13,13 @@ interface AuthCtx {
   /** All roles the user has. */
   roles: AppRole[];
   isAdmin: boolean;
+  /** Account approval status (admins are always approved). */
+  approvalStatus: ApprovalStatus;
+  isApproved: boolean;
+  rejectionReason: string | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshApproval: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthCtx>({
@@ -22,8 +28,12 @@ const AuthContext = createContext<AuthCtx>({
   role: null,
   roles: [],
   isAdmin: false,
+  approvalStatus: "pending",
+  isApproved: false,
+  rejectionReason: null,
   loading: true,
   signOut: async () => {},
+  refreshApproval: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -31,6 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>("pending");
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,18 +50,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        // defer role fetch to avoid deadlock
-        setTimeout(() => fetchRole(s.user.id), 0);
+        setTimeout(() => {
+          fetchRole(s.user.id);
+          fetchApproval(s.user.id);
+        }, 0);
       } else {
         setRole(null);
         setRoles([]);
+        setApprovalStatus("pending");
+        setRejectionReason(null);
       }
     });
 
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session?.user) fetchRole(data.session.user.id);
+      if (data.session?.user) {
+        fetchRole(data.session.user.id);
+        fetchApproval(data.session.user.id);
+      }
       setLoading(false);
     });
 
@@ -63,21 +82,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("user_id", uid);
     const all = ((data ?? []).map((r: any) => r.role)) as AppRole[];
     setRoles(all);
-    // Primary role = first non-admin role, fall back to admin
     const primary = all.find((r) => r !== "admin") ?? all[0] ?? null;
     setRole(primary);
+  };
+
+  const fetchApproval = async (uid: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("approval_status, rejection_reason")
+      .eq("id", uid)
+      .maybeSingle();
+    if (data) {
+      setApprovalStatus(((data as any).approval_status ?? "pending") as ApprovalStatus);
+      setRejectionReason(((data as any).rejection_reason ?? null) as string | null);
+    }
+  };
+
+  const refreshApproval = async () => {
+    if (user) await fetchApproval(user.id);
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setRole(null);
     setRoles([]);
+    setApprovalStatus("pending");
+    setRejectionReason(null);
   };
 
   const isAdmin = roles.includes("admin");
+  const isApproved = isAdmin || approvalStatus === "approved";
 
   return (
-    <AuthContext.Provider value={{ user, session, role, roles, isAdmin, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, role, roles, isAdmin, approvalStatus, isApproved, rejectionReason, loading, signOut, refreshApproval }}>
       {children}
     </AuthContext.Provider>
   );
