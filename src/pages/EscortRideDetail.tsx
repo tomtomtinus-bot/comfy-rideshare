@@ -155,7 +155,6 @@ const Inner = () => {
           <Field label="Vertrek" value={`${ride.pickup_address}, ${ride.pickup_city}`} />
           <Field label="Bestemming" value={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
           <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
-          <Field label="Type begeleiding" value={ride.escort_type_required ?? "—"} />
           <Field label="Aantal begeleiders" value={ride.num_escorts} />
           <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />
           {(ride.cargo_length_m || ride.cargo_weight_t) && (
@@ -176,7 +175,7 @@ const Inner = () => {
         </div>
       </Section>
 
-      <Section title="Opdrachtgever / chauffeur-contact">
+      <Section title="Opdrachtgever">
         {client ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Bedrijf" value={client.company_name ?? "—"} />
@@ -230,10 +229,8 @@ const Inner = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label="Vergunningnummer" value={permit.permit_number} />
-              <Field label="Referentie" value={permit.reference ?? "—"} />
               <Field label="Geldig van" value={permit.valid_from ?? "—"} />
-              <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
-              <Field label="Lading" value={permit.cargo ?? "—"} />
+              <Field label="Geldig tot" value={permit.valid_to ?? "—"} />              
               <div className="md:col-span-2">
                 <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
                   Maximale afmetingen
