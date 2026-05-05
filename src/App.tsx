@@ -15,6 +15,12 @@ import BillingDetails from "./pages/BillingDetails.tsx";
 import History from "./pages/History.tsx";
 import Permits from "./pages/Permits.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AdminLayout from "./pages/admin/AdminLayout.tsx";
+import AdminUsers from "./pages/admin/AdminUsers.tsx";
+import AdminRides from "./pages/admin/AdminRides.tsx";
+import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
+import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
+import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +42,13 @@ const App = () => (
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
             <Route path="/geschiedenis" element={<History />} />
             <Route path="/ontheffingen" element={<Permits />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="users" replace />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="rides" element={<AdminRides />} />
+              <Route path="invoices" element={<AdminInvoices />} />
+              <Route path="escorts" element={<AdminEscorts />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

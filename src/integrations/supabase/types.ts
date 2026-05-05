@@ -786,6 +786,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: never
+        Returns: {
+          anonymous_id: string
+          company_name: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          roles: string[]
+        }[]
+      }
+      admin_promote_user: { Args: { _email: string }; Returns: string }
+      admin_revoke_admin: { Args: { _user_id: string }; Returns: undefined }
+      admin_set_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_counterparty_name: {
