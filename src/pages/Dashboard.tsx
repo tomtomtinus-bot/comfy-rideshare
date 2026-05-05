@@ -864,7 +864,7 @@ const EscortDashboard = () => {
                     </span>
                   ) : accepted ? (
                     <button
-                      onClick={() => setOpenId(openId === a.id ? null : a.id)}
+                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
                       className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                     >
                       Uren invullen
