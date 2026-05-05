@@ -23,6 +23,8 @@ interface RideDetail {
     client_reference: string | null;
     escort_type_required: string | null;
     num_escorts: number;
+    drivers: { name: string; phone: string }[] | null;
+    license_plates: string[] | null;
   };
   client: {
     full_name: string | null;
