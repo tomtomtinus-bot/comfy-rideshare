@@ -12,6 +12,9 @@ interface AdminUser {
   created_at: string;
   roles: string[];
   anonymous_id: string | null;
+  approval_status: "pending" | "approved" | "rejected" | null;
+  approved_at: string | null;
+  rejection_reason: string | null;
 }
 
 const fmtDate = (d: string) =>
@@ -30,6 +33,25 @@ const RoleChip = ({ role }: { role: string }) => {
   );
 };
 
+const StatusChip = ({ status }: { status: AdminUser["approval_status"] }) => {
+  const map: Record<string, string> = {
+    pending: "bg-brass-gold/20 text-brass-deep",
+    approved: "bg-emerald-100 text-emerald-800",
+    rejected: "bg-red-100 text-red-800",
+  };
+  const label: Record<string, string> = {
+    pending: "In afwachting",
+    approved: "Goedgekeurd",
+    rejected: "Afgewezen",
+  };
+  const k = status ?? "pending";
+  return (
+    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 ${map[k]}`}>
+      {label[k]}
+    </span>
+  );
+};
+
 const AdminUsers = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -37,6 +59,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState("");
   const [promoteEmail, setPromoteEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
   const load = async () => {
     setLoading(true);
@@ -90,7 +113,27 @@ const AdminUsers = () => {
     }
   };
 
+  const approve = async (uid: string) => {
+    const { error } = await supabase.rpc("admin_approve_user", { _user_id: uid });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Account goedgekeurd");
+      load();
+    }
+  };
+
+  const reject = async (uid: string) => {
+    const reason = window.prompt("Optionele reden van afwijzing:") ?? null;
+    const { error } = await supabase.rpc("admin_reject_user", { _user_id: uid, _reason: reason });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Account afgewezen");
+      load();
+    }
+  };
+
   const filtered = users.filter((u) => {
+    if (filter !== "all" && (u.approval_status ?? "pending") !== filter) return false;
     const q = search.toLowerCase();
     if (!q) return true;
     return (
@@ -101,12 +144,17 @@ const AdminUsers = () => {
     );
   });
 
+  const pendingCount = users.filter((u) => (u.approval_status ?? "pending") === "pending").length;
+
   return (
     <div className="space-y-8">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Gebruikers & rollen</h2>
         <p className="text-sm text-brass-deep/60 mt-1">
-          {users.length} geregistreerde gebruiker{users.length === 1 ? "" : "s"}.
+          {users.length} geregistreerde gebruiker{users.length === 1 ? "" : "s"}
+          {pendingCount > 0 && (
+            <> · <span className="text-brass-gold font-semibold">{pendingCount} wacht{pendingCount === 1 ? "" : "en"} op goedkeuring</span></>
+          )}
         </p>
       </header>
 
@@ -135,14 +183,25 @@ const AdminUsers = () => {
         </p>
       </div>
 
-      <div>
+      <div className="flex flex-col md:flex-row gap-3">
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Zoek op naam, e-mail, bedrijf of anoniem ID…"
-          className="w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+          className="flex-1 bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
         />
+        <div className="flex gap-1 bg-brass-deep/10 p-1">
+          {(["all", "pending", "approved", "rejected"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setFilter(k)}
+              className={`text-[10px] uppercase tracking-widest font-bold px-3 py-2 ${filter === k ? "bg-brass-deep text-parchment" : "text-brass-deep hover:bg-parchment"}`}
+            >
+              {k === "all" ? "Alle" : k === "pending" ? "Wacht" : k === "approved" ? "Goedgekeurd" : "Afgewezen"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -153,10 +212,11 @@ const AdminUsers = () => {
         <ul className="space-y-px bg-brass-deep/10">
           {filtered.map((u) => {
             const isMe = u.id === user?.id;
+            const status = u.approval_status ?? "pending";
             return (
               <li key={u.id} className="bg-card p-4 md:p-5">
                 <div className="grid grid-cols-12 gap-3 items-start">
-                  <div className="col-span-12 md:col-span-5">
+                  <div className="col-span-12 md:col-span-4">
                     <p className="font-medium">
                       {u.full_name || u.email}
                       {isMe && <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold">jij</span>}
@@ -168,8 +228,14 @@ const AdminUsers = () => {
                     {u.anonymous_id && (
                       <p className="text-[10px] text-brass-deep/40 mt-1 tabular-nums">#{u.anonymous_id}</p>
                     )}
+                    {status === "rejected" && u.rejection_reason && (
+                      <p className="text-[11px] text-red-700 mt-1">Reden: {u.rejection_reason}</p>
+                    )}
                   </div>
-                  <div className="col-span-12 md:col-span-3 flex flex-wrap gap-1.5 items-start">
+                  <div className="col-span-6 md:col-span-2 flex flex-wrap gap-1.5 items-start">
+                    <StatusChip status={status} />
+                  </div>
+                  <div className="col-span-6 md:col-span-2 flex flex-wrap gap-1.5 items-start">
                     {u.roles.length === 0 ? (
                       <span className="text-xs text-brass-deep/40">geen rol</span>
                     ) : (
@@ -177,6 +243,22 @@ const AdminUsers = () => {
                     )}
                   </div>
                   <div className="col-span-12 md:col-span-4 flex flex-wrap gap-1.5 md:justify-end">
+                    {status !== "approved" && !isMe && (
+                      <button
+                        onClick={() => approve(u.id)}
+                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-emerald-700 text-parchment hover:bg-emerald-800"
+                      >
+                        Goedkeuren
+                      </button>
+                    )}
+                    {status !== "rejected" && !isMe && (
+                      <button
+                        onClick={() => reject(u.id)}
+                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-red-700/40 text-red-700 hover:bg-red-50"
+                      >
+                        Afwijzen
+                      </button>
+                    )}
                     <button
                       onClick={() => setRole(u.id, "opdrachtgever")}
                       className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
@@ -200,6 +282,9 @@ const AdminUsers = () => {
                   </div>
                   <p className="col-span-12 text-[10px] text-brass-deep/40 tabular-nums">
                     Aangemaakt {fmtDate(u.created_at)}
+                    {u.approved_at && status === "approved" && (
+                      <> · goedgekeurd {fmtDate(u.approved_at)}</>
+                    )}
                   </p>
                 </div>
               </li>
