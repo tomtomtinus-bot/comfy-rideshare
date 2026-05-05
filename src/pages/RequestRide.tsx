@@ -557,6 +557,13 @@ const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boo
   </div>
 );
 
+const MiniCell = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
+  <div>
+    <p className="text-[9px] uppercase tracking-wider text-brass-deep/50 font-bold">{label}</p>
+    <p className={`tabular-nums ${bold ? "font-semibold text-brass-deep" : "text-brass-deep/80"}`}>{value}</p>
+  </div>
+);
+
 const Input = ({
   label, value, onChange, type = "text", placeholder, step, inputMode,
 }: {
