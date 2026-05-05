@@ -434,6 +434,7 @@ const ClientDashboard = () => {
                     );
                   })}
                 </div>
+                </Link>
               </li>
             );
           };
