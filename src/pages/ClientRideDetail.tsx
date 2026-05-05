@@ -21,24 +21,14 @@ interface RideDetail {
     permit_number: string | null;
     permit_id: string | null;
     client_reference: string | null;
-    escort_type_required: string | null;
     num_escorts: number;
     drivers: { name: string; phone: string }[] | null;
     license_plates: string[] | null;
   };
-  client: {
-    full_name: string | null;
-    company_name: string | null;
-    phone: string | null;
-    billing_email: string | null;
-    billing_contact_name: string | null;
-    anonymous_id: string | null;
-  } | null;
   escorts: Array<{
     assignment_id: string;
     escort_id: string;
     status: string;
-    is_self: boolean;
     anonymous_id: string | null;
     full_name: string | null;
     phone: string | null;
@@ -48,8 +38,6 @@ interface RideDetail {
   permit: {
     id: string;
     permit_number: string;
-    reference: string | null;
-    cargo: string | null;
     valid_from: string | null;
     valid_to: string | null;
     pdf_path: string | null;
@@ -86,6 +74,14 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
     <span className="text-brass-deep/40">—</span>
   );
 
+const statusLabel: Record<string, string> = {
+  invited: "uitgenodigd",
+  accepted: "geaccepteerd",
+  declined: "geweigerd",
+  expired: "verlopen",
+  cancelled: "geannuleerd",
+};
+
 const Inner = () => {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<RideDetail | null>(null);
@@ -96,7 +92,7 @@ const Inner = () => {
   useEffect(() => {
     (async () => {
       if (!id) return;
-      const { data: res, error } = await supabase.rpc("get_ride_details_for_escort", { _ride_id: id });
+      const { data: res, error } = await supabase.rpc("get_ride_details_for_client", { _ride_id: id });
       if (error) {
         setError(error.message);
         setLoading(false);
@@ -104,7 +100,6 @@ const Inner = () => {
       }
       const detail = res as unknown as RideDetail;
       setData(detail);
-
       if (detail?.permit?.pdf_path) {
         const { data: signed } = await supabase.storage
           .from("permits")
@@ -115,15 +110,11 @@ const Inner = () => {
     })();
   }, [id]);
 
-  if (loading) {
-    return <p className="text-sm text-brass-deep/50">Laden…</p>;
-  }
+  if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
   if (error || !data) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/60 mb-4">
-          Geen toegang tot deze ritdetails. Alleen geaccepteerde ritten zijn zichtbaar.
-        </p>
+        <p className="text-brass-deep/60 mb-4">Geen toegang tot deze ritdetails.</p>
         <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
           ← Terug naar dashboard
         </Link>
@@ -131,21 +122,17 @@ const Inner = () => {
     );
   }
 
-  const { ride, client, escorts, permit } = data;
-  const others = escorts.filter((e) => !e.is_self);
+  const { ride, escorts, permit } = data;
+  const drivers = ride.drivers ?? [];
+  const plates = ride.license_plates ?? [];
 
   return (
     <div className="space-y-8">
       <header>
-        <Link
-          to="/dashboard"
-          className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
-        >
-          ← Terug naar mijn opdrachten
+        <Link to="/dashboard" className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
+          ← Terug naar mijn ritten
         </Link>
-        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">
-          Opdrachtdetails
-        </p>
+        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">Ritdetails</p>
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
           {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
         </h1>
@@ -158,7 +145,8 @@ const Inner = () => {
           <Field label="Bestemming" value={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
           <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
           <Field label="Aantal begeleiders" value={ride.num_escorts} />
-          <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />
+          <Field label="Eigen referentie" value={ride.client_reference ?? "—"} />
+          <Field label="Vergunningnummer" value={ride.permit_number ?? "—"} />
           {(ride.cargo_length_m || ride.cargo_weight_t) && (
             <div className="md:col-span-2">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
@@ -177,74 +165,46 @@ const Inner = () => {
         </div>
       </Section>
 
-      <Section title="Opdrachtgever">
-        {client ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="Bedrijf" value={client.company_name ?? "—"} />
-            <Field label="Contactpersoon" value={client.billing_contact_name ?? client.full_name ?? "—"} />
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
-              <p className="text-sm"><TelLink phone={client.phone} /></p>
-            </div>
-            <Field label="E-mail" value={client.billing_email ?? "—"} />
-          </div>
+      <Section title={`Chauffeurs (${drivers.length})`}>
+        {drivers.length === 0 ? (
+          <p className="text-sm text-brass-deep/50">Geen chauffeurs opgegeven.</p>
         ) : (
-          <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
+          <ul className="divide-y divide-brass-deep/10">
+            {drivers.map((d, i) => (
+              <li key={i} className="py-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <p className="font-medium">{d.name || <span className="text-brass-deep/40">—</span>}</p>
+                <TelLink phone={d.phone} />
+              </li>
+            ))}
+          </ul>
         )}
       </Section>
 
-      {(() => {
-        const drivers = ride.drivers ?? [];
-        const plates = ride.license_plates ?? [];
-        if (drivers.length === 0 && plates.length === 0) return null;
-        return (
-          <Section title="Chauffeurs & kentekens">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Chauffeurs</p>
-                {drivers.length === 0 ? (
-                  <p className="text-sm text-brass-deep/40">—</p>
-                ) : (
-                  <ul className="divide-y divide-brass-deep/10">
-                    {drivers.map((d, i) => (
-                      <li key={i} className="py-2 flex items-center justify-between gap-3">
-                        <span className="text-sm font-medium">{d.name || "—"}</span>
-                        <TelLink phone={d.phone} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Kentekens</p>
-                {plates.length === 0 ? (
-                  <p className="text-sm text-brass-deep/40">—</p>
-                ) : (
-                  <ul className="flex flex-wrap gap-2">
-                    {plates.map((p, i) => (
-                      <li key={i} className="px-3 py-1.5 bg-brass-gold/15 border border-brass-gold/40 text-sm font-mono tabular-nums tracking-wider">
-                        {p}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </Section>
-        );
-      })()}
+      <Section title={`Kentekens (${plates.length})`}>
+        {plates.length === 0 ? (
+          <p className="text-sm text-brass-deep/50">Geen kentekens opgegeven.</p>
+        ) : (
+          <ul className="flex flex-wrap gap-2">
+            {plates.map((p, i) => (
+              <li key={i} className="px-3 py-1.5 bg-brass-gold/15 border border-brass-gold/40 text-sm font-mono tabular-nums tracking-wider">
+                {p}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
-      <Section title={`Mede-begeleiders (${others.length})`}>
-        {others.length === 0 ? (
-          <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
+      <Section title={`Begeleiders (${escorts.length})`}>
+        {escorts.length === 0 ? (
+          <p className="text-sm text-brass-deep/50">Nog geen begeleiders toegewezen.</p>
         ) : (
           <ul className="divide-y divide-brass-deep/10">
-            {others.map((e) => (
+            {escorts.map((e) => (
               <li key={e.assignment_id} className="py-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                 <div>
                   <p className="font-medium text-brass-deep">#{e.anonymous_id ?? "—"}</p>
                   <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                    {e.status === "accepted" ? "geaccepteerd" : e.status}
+                    {statusLabel[e.status] ?? e.status}
                   </p>
                 </div>
                 <div className="text-sm">
@@ -273,11 +233,9 @@ const Inner = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Field label="Vergunningnummer" value={permit.permit_number} />
               <Field label="Geldig van" value={permit.valid_from ?? "—"} />
-              <Field label="Geldig tot" value={permit.valid_to ?? "—"} />              
+              <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
               <div className="md:col-span-2">
-                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
-                  Maximale afmetingen
-                </p>
+                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Maximale afmetingen</p>
                 <p className="text-sm font-medium tabular-nums">
                   {permit.max_length_m ?? "—"}m × {permit.max_width_m ?? "—"}m × {permit.max_height_m ?? "—"}m ·{" "}
                   {permit.max_weight_kg ? `${permit.max_weight_kg} kg` : "—"}
@@ -305,7 +263,7 @@ const Inner = () => {
   );
 };
 
-const EscortRideDetail = () => (
+const ClientRideDetail = () => (
   <RequireAuth>
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
@@ -319,4 +277,4 @@ const EscortRideDetail = () => (
   </RequireAuth>
 );
 
-export default EscortRideDetail;
+export default ClientRideDetail;

@@ -112,6 +112,19 @@ const RequestRideInner = () => {
     client_reference: "",
   });
 
+  const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>([]);
+  const [licensePlates, setLicensePlates] = useState<string[]>([]);
+
+  const addDriver = () => setDrivers((d) => [...d, { name: "", phone: "" }]);
+  const updateDriver = (i: number, patch: Partial<{ name: string; phone: string }>) =>
+    setDrivers((d) => d.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeDriver = (i: number) => setDrivers((d) => d.filter((_, idx) => idx !== i));
+
+  const addPlate = () => setLicensePlates((p) => [...p, ""]);
+  const updatePlate = (i: number, v: string) =>
+    setLicensePlates((p) => p.map((x, idx) => (idx === i ? v.toUpperCase() : x)));
+  const removePlate = (i: number) => setLicensePlates((p) => p.filter((_, idx) => idx !== i));
+
   // Auto-fill velden vanuit gekozen ontheffing
   useEffect(() => {
     if (!selectedPermitId) return;
@@ -253,6 +266,10 @@ const RequestRideInner = () => {
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
         time_window_end: null,
+        drivers: drivers
+          .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
+          .filter((d) => d.name || d.phone) as never,
+        license_plates: licensePlates.map((p) => p.trim()).filter(Boolean),
       })
       .select()
       .single();
@@ -410,6 +427,88 @@ const RequestRideInner = () => {
                       aria-label="Meer begeleiders"
                     >+</button>
                   </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">
+                Chauffeurs & kentekens <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs</label>
+                    <button type="button" onClick={addDriver} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
+                      + Chauffeur toevoegen
+                    </button>
+                  </div>
+                  {drivers.length === 0 ? (
+                    <p className="text-xs text-brass-deep/45">Voeg naam en telefoonnummer toe van de chauffeur(s).</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {drivers.map((d, i) => (
+                        <li key={i} className="grid grid-cols-12 gap-2 items-center">
+                          <input
+                            type="text"
+                            value={d.name}
+                            onChange={(e) => updateDriver(i, { name: e.target.value })}
+                            placeholder="Naam"
+                            maxLength={80}
+                            className="col-span-5 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                          <input
+                            type="tel"
+                            value={d.phone}
+                            onChange={(e) => updateDriver(i, { phone: e.target.value })}
+                            placeholder="+31 6 ..."
+                            maxLength={30}
+                            className="col-span-6 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeDriver(i)}
+                            aria-label="Verwijder chauffeur"
+                            className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                          >×</button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Kentekens</label>
+                    <button type="button" onClick={addPlate} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
+                      + Kenteken toevoegen
+                    </button>
+                  </div>
+                  {licensePlates.length === 0 ? (
+                    <p className="text-xs text-brass-deep/45">Bijv. trekker en oplegger.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {licensePlates.map((p, i) => (
+                        <li key={i} className="grid grid-cols-12 gap-2 items-center">
+                          <input
+                            type="text"
+                            value={p}
+                            onChange={(e) => updatePlate(i, e.target.value)}
+                            placeholder="Bv. 12-AB-345"
+                            maxLength={20}
+                            className="col-span-11 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm uppercase tracking-wider tabular-nums focus:outline-none focus:border-brass-gold"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removePlate(i)}
+                            aria-label="Verwijder kenteken"
+                            className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                          >×</button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </section>
