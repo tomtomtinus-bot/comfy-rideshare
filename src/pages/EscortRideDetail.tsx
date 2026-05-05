@@ -193,6 +193,47 @@ const Inner = () => {
         )}
       </Section>
 
+      {(() => {
+        const drivers = ride.drivers ?? [];
+        const plates = ride.license_plates ?? [];
+        if (drivers.length === 0 && plates.length === 0) return null;
+        return (
+          <Section title="Chauffeurs & kentekens">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Chauffeurs</p>
+                {drivers.length === 0 ? (
+                  <p className="text-sm text-brass-deep/40">—</p>
+                ) : (
+                  <ul className="divide-y divide-brass-deep/10">
+                    {drivers.map((d, i) => (
+                      <li key={i} className="py-2 flex items-center justify-between gap-3">
+                        <span className="text-sm font-medium">{d.name || "—"}</span>
+                        <TelLink phone={d.phone} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Kentekens</p>
+                {plates.length === 0 ? (
+                  <p className="text-sm text-brass-deep/40">—</p>
+                ) : (
+                  <ul className="flex flex-wrap gap-2">
+                    {plates.map((p, i) => (
+                      <li key={i} className="px-3 py-1.5 bg-brass-gold/15 border border-brass-gold/40 text-sm font-mono tabular-nums tracking-wider">
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </Section>
+        );
+      })()}
+
       <Section title={`Mede-begeleiders (${others.length})`}>
         {others.length === 0 ? (
           <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
