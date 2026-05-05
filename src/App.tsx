@@ -15,6 +15,12 @@ import BillingDetails from "./pages/BillingDetails.tsx";
 import History from "./pages/History.tsx";
 import Permits from "./pages/Permits.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AdminLayout from "./pages/admin/AdminLayout.tsx";
+import AdminUsers from "./pages/admin/AdminUsers.tsx";
+import AdminRides from "./pages/admin/AdminRides.tsx";
+import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
+import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
+import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
 
