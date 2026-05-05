@@ -482,6 +482,7 @@ type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<
     (AssignmentRow & {
       ride: RideRow;
