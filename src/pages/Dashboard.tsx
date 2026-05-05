@@ -367,7 +367,8 @@ const ClientDashboard = () => {
             const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
             const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
             return (
-              <li key={r.id} className="bg-card p-6 md:p-8">
+              <li key={r.id}>
+                <Link to={`/rit/${r.id}`} className="block bg-card p-6 md:p-8 hover:bg-parchment/40 transition-colors">
                 <div className="grid grid-cols-12 gap-4 items-start">
                   <div className="col-span-12 md:col-span-3">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
