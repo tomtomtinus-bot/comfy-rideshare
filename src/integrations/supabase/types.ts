@@ -482,6 +482,9 @@ export type Database = {
       profiles: {
         Row: {
           anonymous_id: string | null
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          approved_at: string | null
+          approved_by: string | null
           billing_address: string | null
           billing_city: string | null
           billing_contact_name: string | null
@@ -496,11 +499,15 @@ export type Database = {
           kvk_number: string | null
           last_platform_invoice_at: string | null
           phone: string | null
+          rejection_reason: string | null
           updated_at: string
           vat_number: string | null
         }
         Insert: {
           anonymous_id?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           billing_address?: string | null
           billing_city?: string | null
           billing_contact_name?: string | null
@@ -515,11 +522,15 @@ export type Database = {
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
+          rejection_reason?: string | null
           updated_at?: string
           vat_number?: string | null
         }
         Update: {
           anonymous_id?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status"]
+          approved_at?: string | null
+          approved_by?: string | null
           billing_address?: string | null
           billing_city?: string | null
           billing_contact_name?: string | null
@@ -534,6 +545,7 @@ export type Database = {
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
+          rejection_reason?: string | null
           updated_at?: string
           vat_number?: string | null
         }
@@ -792,20 +804,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_user: { Args: { _user_id: string }; Returns: undefined }
       admin_list_users: {
         Args: never
         Returns: {
           anonymous_id: string
+          approval_status: string
+          approved_at: string
           company_name: string
           created_at: string
           email: string
           full_name: string
           id: string
           phone: string
+          rejection_reason: string
           roles: string[]
         }[]
       }
       admin_promote_user: { Args: { _email: string }; Returns: string }
+      admin_reject_user: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: undefined
+      }
       admin_revoke_admin: { Args: { _user_id: string }; Returns: undefined }
       admin_set_role: {
         Args: {
@@ -839,6 +859,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_approved: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_escort: {
         Args: { _ride_id: string; _user_id: string }
         Returns: boolean
@@ -854,6 +875,7 @@ export type Database = {
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
+      approval_status: "pending" | "approved" | "rejected"
       assignment_status:
         | "invited"
         | "accepted"
@@ -995,6 +1017,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["opdrachtgever", "begeleider", "admin"],
+      approval_status: ["pending", "approved", "rejected"],
       assignment_status: [
         "invited",
         "accepted",

@@ -77,7 +77,7 @@ const fmtHours = (min: number) => {
 };
 
 const RequestRideInner = () => {
-  const { user } = useAuth();
+  const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
@@ -312,6 +312,20 @@ const RequestRideInner = () => {
             Van A naar B — vraag begeleiding aan.
           </h1>
 
+          {!isApproved ? (
+            <div className="bg-card shadow-etched p-8 md:p-10 border-l-4 border-brass-gold">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">
+                Account in afwachting
+              </p>
+              <h2 className="font-display text-2xl text-brass-deep mb-3">
+                Goedkeuring vereist
+              </h2>
+              <p className="text-brass-deep/75 text-sm leading-relaxed">
+                Je kunt pas ritten aanvragen zodra een beheerder je account heeft goedgekeurd.
+                Vul ondertussen je <Link to="/facturatiegegevens" className="underline font-semibold">facturatiegegevens</Link> alvast in.
+              </p>
+            </div>
+          ) : (
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
             <section>
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
@@ -550,6 +564,7 @@ const RequestRideInner = () => {
               {busy ? "Zoeken…" : "Zoek dichtstbijzijnde begeleiders"}
             </button>
           </form>
+          )}
 
           {matches && pickupGeo && dropoffGeo && (
             <Matches

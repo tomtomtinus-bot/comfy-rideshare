@@ -483,7 +483,7 @@ const hoursSchema = z.object({
 type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
-  const { user } = useAuth();
+  const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<
     (AssignmentRow & {
@@ -627,6 +627,9 @@ const EscortDashboard = () => {
   }, [user]);
 
   const respond = async (id: string, accept: boolean) => {
+    if (!isApproved) {
+      return toast.error("Je account moet eerst worden goedgekeurd door de beheerder.");
+    }
     const { error } = await supabase
       .from("ride_assignments")
       .update({
