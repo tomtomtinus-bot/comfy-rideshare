@@ -448,7 +448,7 @@ const ClientDashboard = () => {
                       {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
                     </p>
                   </header>
-                  <ul className="space-y-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
                 </section>
               ))}
             </div>
@@ -1064,7 +1064,7 @@ const EscortDashboard = () => {
                       {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
                     </p>
                   </header>
-                  <ul className="space-y-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
                 </section>
               ))}
             </div>
