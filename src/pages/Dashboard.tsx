@@ -784,7 +784,11 @@ const EscortDashboard = () => {
           const expired = isInvited && minsLeft === 0;
           const accepted = a.status === "accepted";
           return (
-            <li key={a.id} className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""}`}>
+            <li
+              key={a.id}
+              onClick={accepted ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
+              className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
+            >
               <div className="grid grid-cols-12 gap-4 items-start">
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
