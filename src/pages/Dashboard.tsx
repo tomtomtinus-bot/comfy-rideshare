@@ -460,9 +460,9 @@ const ClientDashboard = () => {
               <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
               <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
             </TabsList>
-            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand)}</TabsContent>
-            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd)}</TabsContent>
-            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond)}</TabsContent>
+            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
+            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
+            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond, "afgerond")}</TabsContent>
           </Tabs>
         );
       })()}
