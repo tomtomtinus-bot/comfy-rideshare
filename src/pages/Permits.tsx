@@ -306,31 +306,6 @@ export default function Permits() {
                         </div>
 
                         <PermitRouteMap origin={r.origin} destination={r.destination} waypoints={(r.waypoints as any) ?? []} />
-
-                        <div>
-                          <h3 className="font-semibold text-sm mb-2 flex items-center gap-1">
-                            <MapPin className="h-4 w-4" /> Trajectbeschrijving ({(r.waypoints as any[])?.length ?? 0} stappen)
-                          </h3>
-                          <ol className="space-y-1 text-sm">
-                            {((r.waypoints as any[]) ?? []).map((wp, i) => (
-                              <li key={i} className="rounded border-l-2 border-primary/40 bg-muted/30 px-3 py-2">
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-xs font-mono text-muted-foreground">{i + 1}.</span>
-                                  <span className="font-medium">{wp.trajectbeschrijving}</span>
-                                  {wp.hm && <span className="text-xs text-muted-foreground">HM {wp.hm}</span>}
-                                </div>
-                                {wp.wegbeheerder && (
-                                  <div className="text-xs text-muted-foreground ml-5">{wp.wegbeheerder}</div>
-                                )}
-                                {wp.passagevoorwaarden && (
-                                  <div className="text-xs text-amber-700 dark:text-amber-400 ml-5 mt-1">
-                                    ⚠ {wp.passagevoorwaarden}
-                                  </div>
-                                )}
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
                       </TabsContent>
                     ))}
                   </Tabs>
