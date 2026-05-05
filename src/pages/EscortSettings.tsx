@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland" },
@@ -86,6 +87,8 @@ const Inner = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  useUnsavedChanges(dirty);
   const [categories, setCategories] = useState<string[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [files, setFiles] = useState<string[]>([]);
@@ -301,6 +304,7 @@ const Inner = () => {
 
     setBusy(false);
     if (error) return toast.error(error.message);
+    setDirty(false);
     toast.success("Profiel bijgewerkt");
     navigate("/dashboard");
   };
@@ -332,7 +336,12 @@ const Inner = () => {
           {loading ? (
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : (
-            <form onSubmit={save} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
+            <form
+              onSubmit={save}
+              onInput={() => setDirty(true)}
+              onChange={() => setDirty(true)}
+              className="bg-card shadow-etched p-8 md:p-10 space-y-8"
+            >
               <section className="space-y-3">
                 <p className="text-[11px] text-brass-deep/60">
                   Vul je <strong>exacte standplaats</strong> in. Opdrachtgevers zien alleen de plaats/regio; het volledige adres wordt enkel gebruikt om aan- en afrijtijden te berekenen.

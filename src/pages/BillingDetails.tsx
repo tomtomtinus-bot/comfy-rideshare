@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
 const baseSchema = {
   company_name: z.string().trim().min(2, "Bedrijfsnaam is verplicht").max(120),
@@ -103,6 +104,9 @@ const BillingDetailsInner = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const initialRef = useRef<FormState>(empty);
+  const dirty = !loading && JSON.stringify(form) !== JSON.stringify(initialRef.current);
+  useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (!user) return;
@@ -117,10 +121,12 @@ const BillingDetailsInner = () => {
         .maybeSingle();
       if (error) toast.error(error.message);
       if (data) {
-        setForm({
+        const next = {
           ...empty,
           ...Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v ?? ""])),
-        } as FormState);
+        } as FormState;
+        setForm(next);
+        initialRef.current = next;
       }
       setLoading(false);
     })();
@@ -154,6 +160,7 @@ const BillingDetailsInner = () => {
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Facturatiegegevens opgeslagen");
+    initialRef.current = form;
   };
 
   const renderField = (props: {
