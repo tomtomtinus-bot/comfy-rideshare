@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -482,6 +482,7 @@ type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<
     (AssignmentRow & {
       ride: RideRow;
@@ -783,7 +784,11 @@ const EscortDashboard = () => {
           const expired = isInvited && minsLeft === 0;
           const accepted = a.status === "accepted";
           return (
-            <li key={a.id} className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""}`}>
+            <li
+              key={a.id}
+              onClick={accepted ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
+              className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
+            >
               <div className="grid grid-cols-12 gap-4 items-start">
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
@@ -859,7 +864,7 @@ const EscortDashboard = () => {
                     </span>
                   ) : accepted ? (
                     <button
-                      onClick={() => setOpenId(openId === a.id ? null : a.id)}
+                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
                       className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                     >
                       Uren invullen
@@ -872,6 +877,7 @@ const EscortDashboard = () => {
 
               {openId === a.id && (
                 <form
+                  onClick={(e) => e.stopPropagation()}
                   onSubmit={(e) => submitHours(a.id, e)}
                   className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
                 >

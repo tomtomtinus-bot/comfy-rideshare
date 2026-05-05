@@ -824,6 +824,7 @@ export type Database = {
           window_start: string
         }[]
       }
+      get_ride_details_for_escort: { Args: { _ride_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
