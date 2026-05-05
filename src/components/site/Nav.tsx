@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export const Nav = () => {
   const [open, setOpen] = useState(false);
-  const { user, role, signOut } = useAuth();
+  const { user, role, isAdmin, signOut } = useAuth();
 
   const close = () => setOpen(false);
 
@@ -21,6 +21,7 @@ export const Nav = () => {
     { to: "/facturen", label: "Facturen", show: !!user },
     { to: "/geschiedenis", label: "Geschiedenis", show: !!user },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
+    { to: "/admin", label: "Admin", show: isAdmin },
   ];
 
   return (
