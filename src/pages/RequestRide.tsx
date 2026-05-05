@@ -112,6 +112,19 @@ const RequestRideInner = () => {
     client_reference: "",
   });
 
+  const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>([]);
+  const [licensePlates, setLicensePlates] = useState<string[]>([]);
+
+  const addDriver = () => setDrivers((d) => [...d, { name: "", phone: "" }]);
+  const updateDriver = (i: number, patch: Partial<{ name: string; phone: string }>) =>
+    setDrivers((d) => d.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeDriver = (i: number) => setDrivers((d) => d.filter((_, idx) => idx !== i));
+
+  const addPlate = () => setLicensePlates((p) => [...p, ""]);
+  const updatePlate = (i: number, v: string) =>
+    setLicensePlates((p) => p.map((x, idx) => (idx === i ? v.toUpperCase() : x)));
+  const removePlate = (i: number) => setLicensePlates((p) => p.filter((_, idx) => idx !== i));
+
   // Auto-fill velden vanuit gekozen ontheffing
   useEffect(() => {
     if (!selectedPermitId) return;
