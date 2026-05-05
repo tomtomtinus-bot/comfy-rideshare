@@ -73,6 +73,64 @@ interface AssignmentRow {
 const fmtDate = (d: string) =>
   new Date(d).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" });
 
+type DateBucketKey = "vandaag" | "morgen" | "deze_week" | "later" | "eerder";
+const DATE_BUCKET_LABELS: Record<DateBucketKey, string> = {
+  vandaag: "Vandaag",
+  morgen: "Morgen",
+  deze_week: "Deze week",
+  later: "Later",
+  eerder: "Eerder",
+};
+const DATE_BUCKET_ORDER: DateBucketKey[] = ["vandaag", "morgen", "deze_week", "later", "eerder"];
+
+const dateBucketKey = (iso: string): DateBucketKey => {
+  const d = new Date(iso);
+  const now = new Date();
+  const startOfDay = (x: Date) => {
+    const c = new Date(x);
+    c.setHours(0, 0, 0, 0);
+    return c;
+  };
+  const today = startOfDay(now);
+  const target = startOfDay(d);
+  const diffDays = Math.round((+target - +today) / 86400000);
+  if (diffDays < 0) return "eerder";
+  if (diffDays === 0) return "vandaag";
+  if (diffDays === 1) return "morgen";
+  // rest of current ISO-week (week starts Monday)
+  const weekday = (today.getDay() + 6) % 7; // 0=Mon..6=Sun
+  const daysLeftInWeek = 6 - weekday;
+  if (diffDays <= daysLeftInWeek) return "deze_week";
+  return "later";
+};
+
+function groupByDateBucket<T>(
+  list: T[],
+  getDate: (item: T) => string,
+  order: "asc" | "desc",
+): { key: DateBucketKey; label: string; items: T[] }[] {
+  const map = new Map<DateBucketKey, T[]>();
+  for (const it of list) {
+    const k = dateBucketKey(getDate(it));
+    if (!map.has(k)) map.set(k, []);
+    map.get(k)!.push(it);
+  }
+  const sortedOrder = order === "asc"
+    ? DATE_BUCKET_ORDER
+    : [...DATE_BUCKET_ORDER].reverse();
+  return sortedOrder
+    .filter((k) => map.has(k))
+    .map((k) => ({
+      key: k,
+      label: DATE_BUCKET_LABELS[k],
+      items: map.get(k)!.sort((a, b) =>
+        order === "asc"
+          ? +new Date(getDate(a)) - +new Date(getDate(b))
+          : +new Date(getDate(b)) - +new Date(getDate(a)),
+      ),
+    }));
+}
+
 const StatusBadge = ({ status }: { status: string }) => {
   const map: Record<string, string> = {
     open: "Open",
