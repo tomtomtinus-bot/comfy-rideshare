@@ -266,6 +266,10 @@ const RequestRideInner = () => {
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
         time_window_end: null,
+        drivers: drivers
+          .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
+          .filter((d) => d.name || d.phone) as never,
+        license_plates: licensePlates.map((p) => p.trim()).filter(Boolean),
       })
       .select()
       .single();
