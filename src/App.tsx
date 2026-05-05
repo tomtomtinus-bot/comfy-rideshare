@@ -20,6 +20,7 @@ import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminRides from "./pages/admin/AdminRides.tsx";
 import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
 import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
+import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="rides" element={<AdminRides />} />
               <Route path="invoices" element={<AdminInvoices />} />
               <Route path="escorts" element={<AdminEscorts />} />
+              <Route path="fuel" element={<AdminFuel />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
