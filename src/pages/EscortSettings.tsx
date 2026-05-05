@@ -304,6 +304,7 @@ const Inner = () => {
 
     setBusy(false);
     if (error) return toast.error(error.message);
+    setDirty(false);
     toast.success("Profiel bijgewerkt");
     navigate("/dashboard");
   };
