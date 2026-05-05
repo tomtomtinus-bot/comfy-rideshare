@@ -513,6 +513,8 @@ const RequestRideInner = () => {
               </div>
             </section>
 
+            <section className="border-t border-brass-deep/10 pt-6">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
