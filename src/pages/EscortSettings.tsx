@@ -240,12 +240,18 @@ const Inner = () => {
     e.preventDefault();
     if (!user) return;
     const fd = new FormData(e.currentTarget);
+    const num = (k: string, fallback = "") => {
+      const v = fd.get(k);
+      const s = v == null ? "" : String(v).trim();
+      return s === "" ? fallback : s;
+    };
     const parsed = schema.safeParse({
       baseAddress: fd.get("baseAddress"),
       basePostcode: postcode,
       baseCity: city,
-      hourlyRate: fd.get("hourlyRate"),
-      minBillableHours: fd.get("minBillableHours") ?? 0,
+      hourlyRate: num("hourlyRate", "0"),
+      hourlyRateBe: num("hourlyRateBe", "0"),
+      minBillableHours: num("minBillableHours", "0"),
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
       certExpiresOn: fd.get("certExpiresOn") ?? "",
