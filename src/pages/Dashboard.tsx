@@ -1040,12 +1040,28 @@ const EscortDashboard = () => {
           );
         };
 
-        const renderList = (list: typeof items) =>
-          list.length === 0 ? (
-            <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>
-          ) : (
-            <ul className="space-y-px bg-brass-deep/10">{list.map(renderItem)}</ul>
+        const renderList = (list: typeof items, bucketKey: "openstaand" | "geaccepteerd" | "afgerond" | "verlopen") => {
+          if (list.length === 0) {
+            return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
+          }
+          const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
+          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order);
+          return (
+            <div className="space-y-8">
+              {groups.map((g) => (
+                <section key={g.key}>
+                  <header className="flex items-end justify-between mb-3">
+                    <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
+                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                    </p>
+                  </header>
+                  <ul className="space-y-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
+                </section>
+              ))}
+            </div>
           );
+        };
 
         return (
           <Tabs defaultValue="openstaand" className="w-full">
@@ -1055,10 +1071,10 @@ const EscortDashboard = () => {
               <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
               <TabsTrigger value="verlopen">Verlopen ({buckets.verlopen.length})</TabsTrigger>
             </TabsList>
-            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand)}</TabsContent>
-            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd)}</TabsContent>
-            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond)}</TabsContent>
-            <TabsContent value="verlopen" className="mt-6">{renderList(buckets.verlopen)}</TabsContent>
+            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
+            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
+            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond, "afgerond")}</TabsContent>
+            <TabsContent value="verlopen" className="mt-6">{renderList(buckets.verlopen, "verlopen")}</TabsContent>
           </Tabs>
         );
       })()}
