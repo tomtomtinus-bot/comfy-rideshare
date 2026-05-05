@@ -564,6 +564,7 @@ const RequestRideInner = () => {
               {busy ? "Zoeken…" : "Zoek dichtstbijzijnde begeleiders"}
             </button>
           </form>
+          )}
 
           {matches && pickupGeo && dropoffGeo && (
             <Matches
