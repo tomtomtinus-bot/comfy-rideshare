@@ -803,7 +803,7 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
-                {accepted && <span className="text-brass-gold text-lg shrink-0">›</span>}
+                {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
               {openId === a.id && (
