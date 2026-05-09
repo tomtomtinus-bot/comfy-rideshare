@@ -176,6 +176,42 @@ export type Database = {
         }
         Relationships: []
       }
+      google_calendar_tokens: {
+        Row: {
+          access_token: string
+          calendar_id: string
+          connected_at: string
+          escort_id: string
+          expires_at: string
+          last_sync_at: string | null
+          refresh_token: string
+          scope: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          calendar_id?: string
+          connected_at?: string
+          escort_id: string
+          expires_at: string
+          last_sync_at?: string | null
+          refresh_token: string
+          scope?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          calendar_id?: string
+          connected_at?: string
+          escort_id?: string
+          expires_at?: string
+          last_sync_at?: string | null
+          refresh_token?: string
+          scope?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           amount: number
@@ -562,6 +598,7 @@ export type Database = {
           estimated_hours: number | null
           extra_costs: Json
           extra_costs_total: number
+          google_event_id: string | null
           hours_notes: string | null
           hours_submitted_at: string | null
           id: string
@@ -588,6 +625,7 @@ export type Database = {
           estimated_hours?: number | null
           extra_costs?: Json
           extra_costs_total?: number
+          google_event_id?: string | null
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
@@ -614,6 +652,7 @@ export type Database = {
           estimated_hours?: number | null
           extra_costs?: Json
           extra_costs_total?: number
+          google_event_id?: string | null
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
