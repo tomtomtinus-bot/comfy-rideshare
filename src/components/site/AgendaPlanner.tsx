@@ -88,6 +88,30 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
       });
       setBlocked(set);
       setLoading(false);
+
+      // Google Agenda busy overlay (best-effort)
+      try {
+        const { data: gData } = await supabase.functions.invoke("google-calendar-sync");
+        if (gData && (gData as any).connected && Array.isArray((gData as any).busy)) {
+          const gset = new Set<string>();
+          for (const b of (gData as any).busy as { start: string; end: string }[]) {
+            const s = new Date(b.start);
+            const e = new Date(b.end);
+            // Walk per 30-minute slot
+            const cursor = new Date(s);
+            cursor.setMinutes(Math.floor(cursor.getMinutes() / 30) * 30, 0, 0);
+            while (cursor < e) {
+              const dKey = ymd(cursor);
+              const idx = slotIndex(cursor);
+              if (idx >= 0 && idx < SLOTS_PER_DAY) gset.add(`${dKey}|${idx}`);
+              cursor.setMinutes(cursor.getMinutes() + 30);
+            }
+          }
+          setGoogleBusy(gset);
+        }
+      } catch (_) {
+        // niet gekoppeld of fout — overlay blijft leeg
+      }
     })();
   }, [escortId, days]);
 
