@@ -550,6 +550,14 @@ const InvoicesInner = () => {
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
                               </tr>
+                              {weroFee > 0 && (
+                                <tr>
+                                  <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                    Wero-betaaltoeslag
+                                  </td>
+                                  <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(weroFee)}</td>
+                                </tr>
+                              )}
                               <tr className="border-t-2 border-brass-deep/30">
                                 <td colSpan={4} className="py-3 text-right text-xs uppercase tracking-widest font-bold text-brass-deep">
                                   Eindbedrag
