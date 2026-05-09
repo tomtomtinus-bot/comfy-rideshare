@@ -38,6 +38,7 @@ interface Anchor {
 
 export const AgendaPlanner = ({ escortId, rides }: Props) => {
   const [blocked, setBlocked] = useState<Set<string>>(new Set());
+  const [googleBusy, setGoogleBusy] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
