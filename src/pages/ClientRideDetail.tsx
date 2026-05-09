@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { RideMap } from "@/components/site/RideMap";
+import { MiniMap } from "@/components/site/MiniMap";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { toast } from "sonner";
 
