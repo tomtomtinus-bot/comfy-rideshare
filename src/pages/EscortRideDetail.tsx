@@ -5,6 +5,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { RideMap } from "@/components/site/RideMap";
+import { openPermitPdf } from "@/lib/openPermitPdf";
+import { toast } from "sonner";
 
 interface RideDetail {
   ride: {
@@ -291,15 +293,14 @@ const Inner = () => {
                 </p>
               </div>
             </div>
-            {permitUrl && (
-              <a
-                href={permitUrl}
-                target="_blank"
-                rel="noreferrer"
+            {permit.pdf_path && (
+              <button
+                type="button"
+                onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
                 className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
               >
                 PDF openen
-              </a>
+              </button>
             )}
           </div>
         ) : ride.permit_number ? (
