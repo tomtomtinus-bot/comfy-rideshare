@@ -13,8 +13,12 @@ interface RideDetail {
     id: string;
     pickup_address: string;
     pickup_city: string;
+    pickup_lat?: number | null;
+    pickup_lng?: number | null;
     dropoff_address: string;
     dropoff_city: string;
+    dropoff_lat?: number | null;
+    dropoff_lng?: number | null;
     scheduled_at: string;
     notes: string | null;
     cargo_length_m: number | null;
@@ -167,8 +171,8 @@ const Inner = () => {
           )}
         </div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} />
-          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
+          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
         </div>
       </Section>
 

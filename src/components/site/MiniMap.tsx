@@ -7,9 +7,11 @@ interface Props {
   address: string;
   label?: string;
   className?: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
-export function MiniMap({ address, label, className }: Props) {
+export function MiniMap({ address, label, className, lat, lng }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +31,17 @@ export function MiniMap({ address, label, className }: Props) {
           zoomControl: true,
         });
 
+        const place = (pos: { lat: number; lng: number }) => {
+          map.setCenter(pos);
+          map.setZoom(15);
+          new google.maps.Marker({ map, position: pos, label: label?.[0] });
+        };
+
+        if (lat != null && lng != null) {
+          place({ lat, lng });
+          return;
+        }
+
         const { data, error: fnErr } = await supabase.functions.invoke("google-geocode", {
           body: { queries: [address] },
         });
@@ -37,10 +50,7 @@ export function MiniMap({ address, label, className }: Props) {
 
         const r = data?.results?.[0];
         if (r && r.lat != null && r.lng != null) {
-          const pos = { lat: r.lat, lng: r.lng };
-          map.setCenter(pos);
-          map.setZoom(15);
-          new google.maps.Marker({ map, position: pos, label: label?.[0] });
+          place({ lat: r.lat, lng: r.lng });
         } else {
           setError("Locatie niet gevonden");
         }
@@ -49,7 +59,9 @@ export function MiniMap({ address, label, className }: Props) {
       }
     })();
     return () => { cancelled = true; };
-  }, [address, label]);
+  }, [address, label, lat, lng]);
+
+  const mapsTarget = lat != null && lng != null ? { lat, lng } : address;
 
   return (
     <div className={className}>
@@ -62,7 +74,7 @@ export function MiniMap({ address, label, className }: Props) {
           {error ? <span className="text-destructive">{error}</span> : <span className="truncate">{address}</span>}
         </div>
         <a
-          href={googleMapsDirectionsUrl(address, address)}
+          href={googleMapsDirectionsUrl(mapsTarget, mapsTarget)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[10px] uppercase tracking-widest text-brass-gold font-bold hover:underline shrink-0 ml-2"
