@@ -696,20 +696,6 @@ const Matches = ({
   );
 };
 
-const Cell = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
-  <div className="col-span-6 md:col-span-2 text-sm">
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
-    <p className={`tabular-nums ${bold ? "font-semibold" : "font-medium"}`}>{value}</p>
-  </div>
-);
-
-const MiniCell = ({ label, value, bold }: { label: string; value: string; bold?: boolean }) => (
-  <div>
-    <p className="text-[9px] uppercase tracking-wider text-brass-deep/50 font-bold">{label}</p>
-    <p className={`tabular-nums ${bold ? "font-semibold text-brass-deep" : "text-brass-deep/80"}`}>{value}</p>
-  </div>
-);
-
 const Input = ({
   label, value, onChange, type = "text", placeholder, step, inputMode,
 }: {
