@@ -166,11 +166,9 @@ const Inner = () => {
             </div>
           )}
         </div>
-        <div className="mt-6">
-          <RideMap
-            origin={`${ride.pickup_address}, ${ride.pickup_city}`}
-            destination={`${ride.dropoff_address}, ${ride.dropoff_city}`}
-          />
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} />
+          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
         </div>
       </Section>
 
