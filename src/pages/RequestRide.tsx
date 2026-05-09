@@ -647,8 +647,7 @@ const Matches = ({
       s.includes(id) ? s.filter((x) => x !== id) : s.length < numWanted ? [...s, id] : s
     );
   };
-  const fmtDT = (iso: string) => new Date(iso).toLocaleString("nl-NL", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-  const anySelectedConflict = matches.some((m) => selected.includes(m.id) && m.conflict);
+  const anySelectedConflict = false;
   const availableMatches = matches.filter((m) => !m.conflict);
   return (
     <section className="mt-12">
