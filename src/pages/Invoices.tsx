@@ -489,7 +489,8 @@ const InvoicesInner = () => {
                       const fuelSubtotal = fuelRows.reduce((s, r) => s + Number(r.amount), 0);
                       const subtotal = ridesSubtotal + fuelSubtotal;
                       const vat = subtotal * 0.21;
-                      const total = subtotal + vat;
+                      const weroFee = wero.enabled ? wero.fee : 0;
+                      const total = subtotal + vat + weroFee;
                       return (
                         <div className="mt-6 pt-6 border-t border-brass-deep/10">
                           <table className="w-full text-sm">
