@@ -197,7 +197,7 @@ const InvoicesInner = () => {
       supabase.from("profiles").select("full_name").eq("id", id).maybeSingle(),
       supabase
         .from("escort_profiles")
-        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder")
+        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder, wero_enabled, wero_handle, wero_fee")
         .eq("id", id)
         .maybeSingle(),
     ]);
