@@ -278,7 +278,7 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const endY = (doc as any).lastAutoTable.finalY as number;
-  drawTotals(doc, endY + 12, subtotal, 0.21, total);
+  drawTotals(doc, endY + 12, subtotal, 0.21, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
   drawFootNote(doc, data.invoice_number);
   doc.save(`${data.invoice_number}.pdf`);
 };
