@@ -8,6 +8,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland" },
