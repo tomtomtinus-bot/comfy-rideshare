@@ -68,6 +68,7 @@ const InvoicesInner = () => {
   const [platformInvoices, setPlatformInvoices] = useState<PlatformInvoice[]>([]);
   const [platformItems, setPlatformItems] = useState<Record<string, PlatformItem[]>>({});
   const [billingFrequency, setBillingFrequency] = useState<"weekly" | "monthly">("monthly");
+  const [wero, setWero] = useState<{ enabled: boolean; handle: string | null; fee: number }>({ enabled: false, handle: null, fee: 0 });
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
@@ -144,6 +145,15 @@ const InvoicesInner = () => {
       if (prof?.billing_frequency) setBillingFrequency(prof.billing_frequency as "weekly" | "monthly");
     }
 
+    if (isEscort) {
+      const { data: ep } = await supabase
+        .from("escort_profiles")
+        .select("wero_enabled, wero_handle, wero_fee")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (ep) setWero({ enabled: !!ep.wero_enabled, handle: ep.wero_handle ?? null, fee: Number(ep.wero_fee || 0) });
+    }
+
     setLoading(false);
   };
 
@@ -197,7 +207,7 @@ const InvoicesInner = () => {
       supabase.from("profiles").select("full_name").eq("id", id).maybeSingle(),
       supabase
         .from("escort_profiles")
-        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder")
+        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder, wero_enabled, wero_handle, wero_fee")
         .eq("id", id)
         .maybeSingle(),
     ]);
@@ -479,7 +489,8 @@ const InvoicesInner = () => {
                       const fuelSubtotal = fuelRows.reduce((s, r) => s + Number(r.amount), 0);
                       const subtotal = ridesSubtotal + fuelSubtotal;
                       const vat = subtotal * 0.21;
-                      const total = subtotal + vat;
+                      const weroFee = wero.enabled ? wero.fee : 0;
+                      const total = subtotal + vat + weroFee;
                       return (
                         <div className="mt-6 pt-6 border-t border-brass-deep/10">
                           <table className="w-full text-sm">
@@ -539,6 +550,14 @@ const InvoicesInner = () => {
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
                               </tr>
+                              {weroFee > 0 && (
+                                <tr>
+                                  <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
+                                    Wero-betaaltoeslag
+                                  </td>
+                                  <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(weroFee)}</td>
+                                </tr>
+                              )}
                               <tr className="border-t-2 border-brass-deep/30">
                                 <td colSpan={4} className="py-3 text-right text-xs uppercase tracking-widest font-bold text-brass-deep">
                                   Eindbedrag

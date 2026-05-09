@@ -45,6 +45,9 @@ type FormState = {
   vat_number: string;
   iban: string;
   bank_account_holder: string;
+  wero_enabled: boolean;
+  wero_handle: string;
+  wero_fee: string;
 };
 
 const empty: FormState = {
@@ -59,6 +62,9 @@ const empty: FormState = {
   vat_number: "",
   iban: "",
   bank_account_holder: "",
+  wero_enabled: false,
+  wero_handle: "",
+  wero_fee: "0",
 };
 
 const FieldImpl = ({
@@ -115,15 +121,22 @@ const BillingDetailsInner = () => {
         .from(table)
         .select(
           "company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number" +
-            (isEscort ? ", iban, bank_account_holder" : ""),
+            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee" : ""),
         )
         .eq("id", user.id)
         .maybeSingle();
       if (error) toast.error(error.message);
       if (data) {
-        const next = {
+        const d = data as unknown as Record<string, unknown>;
+        const next: FormState = {
           ...empty,
-          ...Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v ?? ""])),
+          ...Object.fromEntries(
+            Object.entries(d).map(([k, v]) => {
+              if (k === "wero_enabled") return [k, !!v];
+              if (k === "wero_fee") return [k, v == null ? "0" : String(v)];
+              return [k, v ?? ""];
+            }),
+          ),
         } as FormState;
         setForm(next);
         initialRef.current = next;
@@ -134,6 +147,8 @@ const BillingDetailsInner = () => {
 
   const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setBool = (k: keyof FormState) => (v: boolean) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,10 +167,15 @@ const BillingDetailsInner = () => {
     }
     setErrors({});
     setSaving(true);
-    const payload: Record<string, string | null> = { ...parsed.data };
+    const payload: Record<string, string | number | boolean | null> = { ...parsed.data };
     Object.keys(payload).forEach((k) => {
       if (payload[k] === "") payload[k] = null;
     });
+    if (isEscort) {
+      payload.wero_enabled = !!form.wero_enabled;
+      payload.wero_handle = form.wero_handle.trim() || null;
+      payload.wero_fee = Number(form.wero_fee || 0);
+    }
     const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
@@ -172,7 +192,7 @@ const BillingDetailsInner = () => {
   }) => (
     <FieldImpl
       {...props}
-      value={form[props.name]}
+      value={String(form[props.name] ?? "")}
       error={errors[props.name]}
       onChange={set(props.name)}
     />
@@ -250,6 +270,45 @@ const BillingDetailsInner = () => {
                     {renderField({ label: "IBAN", name: "iban", placeholder: "NL00BANK0123456789" })}
                     {renderField({ label: "Rekeninghouder", name: "bank_account_holder" })}
                   </div>
+                </section>
+              )}
+
+              {isEscort && (
+                <section className="space-y-4">
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                    Wero-betaling
+                  </h2>
+                  <p className="text-xs text-brass-deep/60 -mt-2">
+                    Wero is het nieuwe Europese betaalsysteem (opvolger van iDEAL/Bancontact). Voeg
+                    je Wero-handle toe en eventueel een vaste toeslag per factuur ter dekking van
+                    de transactiekosten.
+                  </p>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!form.wero_enabled}
+                      onChange={(e) => setBool("wero_enabled")(e.target.checked)}
+                      className="h-4 w-4 accent-brass-gold"
+                    />
+                    <span className="text-sm text-brass-deep">
+                      Toon Wero-betaaloptie en toeslag op facturen
+                    </span>
+                  </label>
+                  {form.wero_enabled && (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {renderField({
+                        label: "Wero-handle (e-mail of telefoonnummer)",
+                        name: "wero_handle",
+                        placeholder: "naam@bedrijf.nl of +31612345678",
+                      })}
+                      {renderField({
+                        label: "Vaste toeslag per factuur (€)",
+                        name: "wero_fee",
+                        type: "number",
+                        placeholder: "0.50",
+                      })}
+                    </div>
+                  )}
                 </section>
               )}
 

@@ -38,6 +38,9 @@ export interface BillingParty {
   iban?: string | null;
   bank_account_holder?: string | null;
   full_name?: string | null;
+  wero_enabled?: boolean | null;
+  wero_handle?: string | null;
+  wero_fee?: number | null;
 }
 
 interface BasePdfOpts {
@@ -168,6 +171,8 @@ const drawTotals = (
   subtotal: number,
   vatRate: number,
   total: number,
+  weroFee?: number,
+  weroHandle?: string | null,
 ) => {
   const pageW = doc.internal.pageSize.getWidth();
   const right = pageW - 18;
@@ -176,20 +181,42 @@ const drawTotals = (
   doc.setFontSize(10);
   doc.setTextColor(20);
 
-  doc.text("Totaal:", labelX, startY);
-  doc.text(fmtMoney(subtotal), right, startY, { align: "right" });
+  let y = startY;
+  doc.text("Subtotaal:", labelX, y);
+  doc.text(fmtMoney(subtotal), right, y, { align: "right" });
+  y += 6;
 
-  doc.text("BTW:", labelX, startY + 6);
-  doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, startY + 6);
-  doc.text(fmtMoney(subtotal * vatRate), right, startY + 6, { align: "right" });
+  doc.text("BTW:", labelX, y);
+  doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
+  doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
+  y += 6;
+
+  if (weroFee && weroFee > 0) {
+    doc.text("Wero-betaaltoeslag:", labelX, y);
+    doc.text(fmtMoney(weroFee), right, y, { align: "right" });
+    y += 6;
+  }
 
   doc.setDrawColor(20);
   doc.setLineWidth(0.3);
-  doc.line(labelX, startY + 10, right, startY + 10);
+  doc.line(labelX, y, right, y);
+  y += 6;
 
   doc.setFont("helvetica", "bold");
-  doc.text("Totaal te voldoen:", labelX, startY + 16);
-  doc.text(fmtMoney(total), right, startY + 16, { align: "right" });
+  doc.text("Totaal te voldoen:", labelX, y);
+  doc.text(fmtMoney(total), right, y, { align: "right" });
+  y += 10;
+
+  if (weroHandle) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    doc.text("Betaal eenvoudig met Wero naar:", labelX, y);
+    y += 5;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(20);
+    doc.text(weroHandle, labelX, y);
+  }
 };
 
 // ============ Begeleider invoice ============
@@ -211,7 +238,8 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
   const vat = subtotal * 0.21;
-  const total = subtotal + vat;
+  const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
+  const total = subtotal + vat + weroFee;
 
   autoTable(doc, {
     startY: 105,
@@ -250,7 +278,7 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const endY = (doc as any).lastAutoTable.finalY as number;
-  drawTotals(doc, endY + 12, subtotal, 0.21, total);
+  drawTotals(doc, endY + 12, subtotal, 0.21, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
   drawFootNote(doc, data.invoice_number);
   doc.save(`${data.invoice_number}.pdf`);
 };
@@ -274,7 +302,8 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
 
   const subtotal = data.total_amount;
   const vat = subtotal * 0.21;
-  const total = subtotal + vat;
+  const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
+  const total = subtotal + vat + weroFee;
 
   autoTable(doc, {
     startY: 105,
@@ -313,7 +342,7 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const endY = (doc as any).lastAutoTable.finalY as number;
-  drawTotals(doc, endY + 12, subtotal, 0.21, total);
+  drawTotals(doc, endY + 12, subtotal, 0.21, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
   drawFootNote(doc, data.invoice_number);
   doc.save(`${data.invoice_number}.pdf`);
 };
