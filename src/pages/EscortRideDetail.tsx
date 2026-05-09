@@ -186,6 +186,11 @@ const Inner = () => {
         </div>
       </Section>
 
+      {isInvited ? (
+        <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep">
+          U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+        </div>
+      ) : (
       <Section title="Opdrachtgever">
         {client ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -201,6 +206,7 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
         )}
       </Section>
+      )}
 
       {(() => {
         const drivers = ride.drivers ?? [];
