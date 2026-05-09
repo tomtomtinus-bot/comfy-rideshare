@@ -127,9 +127,16 @@ const BillingDetailsInner = () => {
         .maybeSingle();
       if (error) toast.error(error.message);
       if (data) {
-        const next = {
+        const d = data as Record<string, unknown>;
+        const next: FormState = {
           ...empty,
-          ...Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v ?? ""])),
+          ...Object.fromEntries(
+            Object.entries(d).map(([k, v]) => {
+              if (k === "wero_enabled") return [k, !!v];
+              if (k === "wero_fee") return [k, v == null ? "0" : String(v)];
+              return [k, v ?? ""];
+            }),
+          ),
         } as FormState;
         setForm(next);
         initialRef.current = next;
