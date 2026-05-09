@@ -140,6 +140,8 @@ const BillingDetailsInner = () => {
 
   const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setBool = (k: keyof FormState) => (v: boolean) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
