@@ -748,79 +748,47 @@ const EscortDashboard = () => {
             <li
               key={a.id}
               onClick={accepted ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
-              className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
+              className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
             >
-              <div className="grid grid-cols-12 gap-4 items-start">
-                <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                  <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">
-                    Opdrachtgever #{a.client_anon}
-                    {counterpartyNames[a.id] ? ` · ${counterpartyNames[a.id]}` : ""}
+              <div className="flex items-center gap-4 px-5 py-4">
+                <div className="w-28 shrink-0">
+                  <p className="font-medium tabular-nums text-sm">{fmtDate(a.ride.scheduled_at)}</p>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">
+                    {a.ride.pickup_city}
+                    <span className="text-brass-gold mx-2">→</span>
+                    {a.ride.dropoff_city}
                   </p>
-                  <div className="mt-2"><StatusBadge status={a.status} /></div>
                 </div>
-                <div className="col-span-12 md:col-span-7">
-                  {isInvited ? (
-                    <>
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                      <p className="font-medium">
-                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                      </p>
-                      <p className="text-sm text-brass-deep/55 mt-2">
-                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                      </p>
-                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                        <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
-                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                      <p className="font-medium">
-                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                      </p>
-                      <p className="text-sm text-brass-deep/55 mt-2">
-                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                      </p>
-                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                        <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
-                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                          {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
-                        </p>
-                      )}
-                    </>
-                  )}
+                <div className="shrink-0 hidden sm:block">
+                  <StatusBadge status={a.status} />
                 </div>
-                <div className="col-span-6 md:col-span-2 text-right">
+                <div className="shrink-0">
                   {isInvited && !expired ? (
-                    <div className="space-y-2">
-                      <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
                         Nog {minsLeft} min
-                      </p>
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() => respond(a.id, true)}
-                          className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                        >
-                          Accepteer
-                        </button>
-                        <button
-                          onClick={() => respond(a.id, false)}
-                          className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
-                        >
-                          Weiger
-                        </button>
-                      </div>
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
+                        className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                      >
+                        Accepteer
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
+                        className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
+                      >
+                        Weiger
+                      </button>
                     </div>
                   ) : expired ? (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
                       Verlopen
                     </span>
                   ) : submitted ? (
-                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold">
+                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
                       ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
                     </span>
                   ) : accepted ? (
@@ -834,6 +802,7 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
+                {accepted && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
               {openId === a.id && (
