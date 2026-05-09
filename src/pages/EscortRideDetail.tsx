@@ -208,7 +208,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {(() => {
+      {!isInvited && (() => {
         const drivers = ride.drivers ?? [];
         const plates = ride.license_plates ?? [];
         if (drivers.length === 0 && plates.length === 0) return null;
@@ -249,6 +249,7 @@ const Inner = () => {
         );
       })()}
 
+      {!isInvited && (
       <Section title={`Mede-begeleiders (${others.length})`}>
         {others.length === 0 ? (
           <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
