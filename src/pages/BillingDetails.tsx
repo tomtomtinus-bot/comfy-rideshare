@@ -127,7 +127,7 @@ const BillingDetailsInner = () => {
         .maybeSingle();
       if (error) toast.error(error.message);
       if (data) {
-        const d = data as Record<string, unknown>;
+        const d = data as unknown as Record<string, unknown>;
         const next: FormState = {
           ...empty,
           ...Object.fromEntries(
