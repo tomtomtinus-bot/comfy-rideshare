@@ -167,10 +167,15 @@ const BillingDetailsInner = () => {
     }
     setErrors({});
     setSaving(true);
-    const payload: Record<string, string | null> = { ...parsed.data };
+    const payload: Record<string, string | number | boolean | null> = { ...parsed.data };
     Object.keys(payload).forEach((k) => {
       if (payload[k] === "") payload[k] = null;
     });
+    if (isEscort) {
+      payload.wero_enabled = !!form.wero_enabled;
+      payload.wero_handle = form.wero_handle.trim() || null;
+      payload.wero_fee = Number(form.wero_fee || 0);
+    }
     const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
