@@ -13,8 +13,12 @@ interface RideDetail {
     id: string;
     pickup_address: string;
     pickup_city: string;
+    pickup_lat?: number | null;
+    pickup_lng?: number | null;
     dropoff_address: string;
     dropoff_city: string;
+    dropoff_lat?: number | null;
+    dropoff_lng?: number | null;
     scheduled_at: string;
     notes: string | null;
     cargo_length_m: number | null;
