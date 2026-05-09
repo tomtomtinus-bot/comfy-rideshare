@@ -87,6 +87,9 @@ export type Database = {
           vehicle_has_konvooi_sign: boolean
           vehicle_has_lightbar: boolean
           vehicle_type: string
+          wero_enabled: boolean
+          wero_fee: number
+          wero_handle: string | null
         }
         Insert: {
           anonymous_id?: string
@@ -130,6 +133,9 @@ export type Database = {
           vehicle_has_konvooi_sign?: boolean
           vehicle_has_lightbar?: boolean
           vehicle_type?: string
+          wero_enabled?: boolean
+          wero_fee?: number
+          wero_handle?: string | null
         }
         Update: {
           anonymous_id?: string
@@ -173,6 +179,9 @@ export type Database = {
           vehicle_has_konvooi_sign?: boolean
           vehicle_has_lightbar?: boolean
           vehicle_type?: string
+          wero_enabled?: boolean
+          wero_fee?: number
+          wero_handle?: string | null
         }
         Relationships: []
       }
