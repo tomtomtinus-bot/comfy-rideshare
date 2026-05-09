@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Upload, FileText, Trash2 } from "lucide-react";
+import { Loader2, Upload, FileText, Trash2, Download } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { parsePermitPdf, type ParsedPermit } from "@/lib/permitParser";
 import { PermitRouteMap } from "@/components/site/PermitRouteMap";
+import { buildGpx, downloadGpx } from "@/lib/permitGpx";
 
 interface PermitRow {
   id: string;
@@ -296,13 +297,32 @@ export default function Permits() {
                     </TabsList>
                     {currentRoutes.map((r) => (
                       <TabsContent key={r.id} value={`r-${r.route_index}`} className="space-y-4 pt-4">
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex flex-wrap items-center gap-2 text-sm">
                           <Badge variant="secondary">{r.origin}</Badge>
                           <span>→</span>
                           <Badge variant="secondary">{r.destination}</Badge>
                           <Badge variant={r.loaded ? "default" : "outline"}>
                             {r.loaded ? "Beladen" : "Onbeladen"}
                           </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-auto"
+                            onClick={() => {
+                              const wps = (r.waypoints as any) ?? [];
+                              const name = `${current.permit_number} — Route ${r.route_index} ${r.loaded ? "beladen" : "onbeladen"}`;
+                              const { gpx, pointCount, skipped } = buildGpx(name, r.origin, r.destination, wps);
+                              if (pointCount < 2) {
+                                toast.error("Te weinig herkende punten voor een GPX-route.");
+                                return;
+                              }
+                              downloadGpx(`${current.permit_number}-route-${r.route_index}${r.loaded ? "-beladen" : "-onbeladen"}.gpx`, gpx);
+                              toast.success(`GPX gedownload: ${pointCount} punten${skipped.length ? ` (${skipped.length} overgeslagen, niet geocodeerbaar)` : ""}`);
+                            }}
+                          >
+                            <Download className="mr-2 h-3.5 w-3.5" />
+                            GPX downloaden
+                          </Button>
                         </div>
 
                         <PermitRouteMap origin={r.origin} destination={r.destination} waypoints={(r.waypoints as any) ?? []} />
