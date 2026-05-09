@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AddressResult {
   display: string;
@@ -9,26 +10,11 @@ export interface AddressResult {
   lng: number;
 }
 
-interface NominatimItem {
-  display_name: string;
-  lat: string;
-  lon: string;
-  type?: string;
-  class?: string;
-  address: {
-    road?: string;
-    house_number?: string;
-    pedestrian?: string;
-    border_control?: string;
-    city?: string;
-    town?: string;
-    village?: string;
-    hamlet?: string;
-    municipality?: string;
-    county?: string;
-    state?: string;
-    country?: string;
-  };
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  main: string;
+  secondary: string;
 }
 
 // Volledige lijst van grensovergangen Nederland ↔ België
@@ -208,7 +194,7 @@ export const AddressAutocomplete = ({
   onSelect: (r: AddressResult) => void;
   placeholder?: string;
 }) => {
-  const [results, setResults] = useState<NominatimItem[]>([]);
+  const [results, setResults] = useState<PlacePrediction[]>([]);
   const [borderHits, setBorderHits] = useState<AddressResult[]>([]);
   const [allBorders, setAllBorders] = useState<AddressResult[]>([]);
   const [borderFilter, setBorderFilter] = useState("");
@@ -218,6 +204,7 @@ export const AddressAutocomplete = ({
   const [showBorders, setShowBorders] = useState(false);
   const timer = useRef<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const sessionToken = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
@@ -262,35 +249,43 @@ export const AddressAutocomplete = ({
     timer.current = window.setTimeout(async () => {
       setBusy(true);
       try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=8&countrycodes=nl,be,de,fr,lu&q=${encodeURIComponent(v)}`;
-        const res = await fetch(url, { headers: { "Accept-Language": "nl" } });
-        const data: NominatimItem[] = await res.json();
-        setResults(data);
+        const { data, error } = await supabase.functions.invoke("google-places-autocomplete", {
+          body: { action: "autocomplete", input: v, sessionToken: sessionToken.current },
+        });
+        if (error) throw error;
+        setResults((data?.predictions ?? []) as PlacePrediction[]);
         setOpen(true);
       } catch {
         setResults([]);
       } finally {
         setBusy(false);
       }
-    }, 350);
+    }, 300);
   };
 
-  const pickNominatim = (item: NominatimItem) => {
-    const a = item.address;
-    const street = [a.road ?? a.pedestrian, a.house_number].filter(Boolean).join(" ");
-    const city = a.city ?? a.town ?? a.village ?? a.hamlet ?? a.municipality ?? a.county ?? "";
-    const result: AddressResult = {
-      display: item.display_name,
-      address: street || item.display_name.split(",")[0],
-      city,
-      country: a.country ?? "",
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
-    };
-    onChange(result.display);
-    onSelect(result);
+  const pickPrediction = async (p: PlacePrediction) => {
+    onChange(p.description);
     setOpen(false);
     setShowBorders(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("google-places-autocomplete", {
+        body: { action: "details", placeId: p.place_id, sessionToken: sessionToken.current },
+      });
+      if (error) throw error;
+      // Nieuwe sessie na details-call (Google billing best-practice)
+      sessionToken.current = crypto.randomUUID();
+      onSelect({
+        display: data.formatted_address ?? p.description,
+        address: p.main,
+        city: data.city ?? "",
+        country: data.country ?? "",
+        lat: Number(data.lat),
+        lng: Number(data.lng),
+      });
+    } catch {
+      // fallback zonder coördinaten
+      onSelect({ display: p.description, address: p.main, city: "", country: "", lat: 0, lng: 0 });
+    }
   };
 
   const pickBorder = (b: AddressResult) => {
@@ -390,15 +385,16 @@ export const AddressAutocomplete = ({
           {results.length > 0 && (
             <>
               <li className="px-4 py-1.5 text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold bg-parchment/60">
-                Adressen
+                Adressen (Google)
               </li>
-              {results.map((r, i) => (
+              {results.map((r) => (
                 <li
-                  key={`n${i}`}
-                  onClick={() => pickNominatim(r)}
+                  key={r.place_id}
+                  onClick={() => pickPrediction(r)}
                   className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
                 >
-                  {r.display_name}
+                  <div className="font-medium">{r.main}</div>
+                  {r.secondary && <div className="text-xs text-brass-deep/60">{r.secondary}</div>}
                 </li>
               ))}
             </>

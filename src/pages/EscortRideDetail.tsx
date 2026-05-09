@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { RideMap } from "@/components/site/RideMap";
 
 interface RideDetail {
   ride: {
@@ -174,6 +175,12 @@ const Inner = () => {
               <p className="text-sm">{ride.notes}</p>
             </div>
           )}
+        </div>
+        <div className="mt-6">
+          <RideMap
+            origin={`${ride.pickup_address}, ${ride.pickup_city}`}
+            destination={`${ride.dropoff_address}, ${ride.dropoff_city}`}
+          />
         </div>
       </Section>
 
