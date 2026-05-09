@@ -238,7 +238,8 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
   const vat = subtotal * 0.21;
-  const total = subtotal + vat;
+  const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
+  const total = subtotal + vat + weroFee;
 
   autoTable(doc, {
     startY: 105,
