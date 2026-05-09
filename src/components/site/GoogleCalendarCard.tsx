@@ -54,27 +54,26 @@ export const GoogleCalendarCard = () => {
   const connect = async () => {
     setBusy("connect");
     const returnTo = `${window.location.origin}/escort-instellingen`;
-    const { data, error } = await supabase.functions.invoke("google-oauth-start", {
-      body: null,
-      method: "GET" as any,
-    });
-    // Some clients ignore method: fall back to direct fetch with query param
-    let url = (data as any)?.url;
-    if (!url) {
-      const session = (await supabase.auth.getSession()).data.session;
+    const session = (await supabase.auth.getSession()).data.session;
+    if (!session) {
+      setBusy(null);
+      return toast.error("Niet ingelogd");
+    }
+    try {
       const r = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-oauth-start?return_to=${encodeURIComponent(returnTo)}`,
-        { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } },
+        { headers: { Authorization: `Bearer ${session.access_token}` } },
       );
       const j = await r.json();
-      url = j.url;
-      if (!url) {
+      if (!j.url) {
         setBusy(null);
-        toast.error(j.error ?? "Kon OAuth niet starten");
-        return;
+        return toast.error(j.error ?? "Kon OAuth niet starten");
       }
+      window.location.href = j.url;
+    } catch (e) {
+      setBusy(null);
+      toast.error("Kon OAuth niet starten");
     }
-    window.location.href = url;
   };
 
   const sync = async (silent = false) => {
