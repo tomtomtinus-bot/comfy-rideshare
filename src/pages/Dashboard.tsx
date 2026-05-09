@@ -809,7 +809,7 @@ const EscortDashboard = () => {
                 <form
                   onClick={(e) => e.stopPropagation()}
                   onSubmit={(e) => submitHours(a.id, e)}
-                  className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="px-5 pb-5 pt-0 -mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-brass-deep/10"
                 >
                   <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
                     <div>
