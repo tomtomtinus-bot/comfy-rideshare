@@ -45,6 +45,9 @@ type FormState = {
   vat_number: string;
   iban: string;
   bank_account_holder: string;
+  wero_enabled: boolean;
+  wero_handle: string;
+  wero_fee: string;
 };
 
 const empty: FormState = {
@@ -59,6 +62,9 @@ const empty: FormState = {
   vat_number: "",
   iban: "",
   bank_account_holder: "",
+  wero_enabled: false,
+  wero_handle: "",
+  wero_fee: "0",
 };
 
 const FieldImpl = ({
