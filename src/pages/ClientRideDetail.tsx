@@ -171,8 +171,8 @@ const Inner = () => {
           )}
         </div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} />
-          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
+          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
         </div>
       </Section>
 
