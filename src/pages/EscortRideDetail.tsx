@@ -61,6 +61,7 @@ interface RideDetail {
     max_height_m: number | null;
     max_weight_kg: number | null;
   } | null;
+  viewer_status?: string;
 }
 
 const fmtDateTime = (d: string) =>
