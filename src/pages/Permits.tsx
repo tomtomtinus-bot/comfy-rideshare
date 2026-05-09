@@ -151,9 +151,11 @@ export default function Permits() {
   };
 
   const openPdf = async (path: string | null) => {
-    if (!path) return;
-    const { data } = await supabase.storage.from("permits").createSignedUrl(path, 600);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+    try {
+      await openPermitPdf(path);
+    } catch (e: any) {
+      toast.error(`Kan PDF niet openen: ${e?.message ?? e}`);
+    }
   };
 
   const current = permits.find((p) => p.id === selected) ?? null;
