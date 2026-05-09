@@ -85,7 +85,18 @@ Deno.serve(async (req) => {
       }
       const comps: any[] = result.address_components ?? [];
       const get = (t: string) => comps.find((c) => c.types.includes(t))?.long_name ?? "";
-      const city = get("locality") || get("postal_town") || get("administrative_area_level_2") || get("administrative_area_level_1");
+      // Voorkeur voor exacte stad/dorp i.p.v. gemeente (administratief).
+      // Volgorde: sublocality (kern/dorp) → locality (stad) → postal_town → neighborhood.
+      // administrative_area_level_2 = gemeente — alleen als laatste fallback.
+      const city =
+        get("sublocality_level_1") ||
+        get("sublocality") ||
+        get("locality") ||
+        get("postal_town") ||
+        get("neighborhood") ||
+        get("administrative_area_level_3") ||
+        get("administrative_area_level_2") ||
+        get("administrative_area_level_1");
       return new Response(JSON.stringify({
         formatted_address: result.formatted_address,
         city,
