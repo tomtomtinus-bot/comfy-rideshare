@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { RideMap } from "@/components/site/RideMap";
+import { MiniMap } from "@/components/site/MiniMap";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { toast } from "sonner";
 
@@ -166,11 +166,9 @@ const Inner = () => {
             </div>
           )}
         </div>
-        <div className="mt-6">
-          <RideMap
-            origin={`${ride.pickup_address}, ${ride.pickup_city}`}
-            destination={`${ride.dropoff_address}, ${ride.dropoff_city}`}
-          />
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} />
+          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
         </div>
       </Section>
 
