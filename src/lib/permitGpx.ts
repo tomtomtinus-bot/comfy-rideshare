@@ -1,8 +1,9 @@
 // GPX export voor RDW ontheffing-routes.
-// Output is GPX 1.1 met zowel <wpt> (waypoints) als een <rte> (route) zodat
-// apps als MyRouteApp, Garmin BaseCamp, Komoot en Google Earth het kunnen lezen.
+// Gebruikt Google Geocoding (via edge function) zodat we ook street-level
+// trajectbeschrijvingen herkennen — niet alleen plaatsnamen.
 
-import { geocodeWaypoint, isHighwayName } from "./permitGeo";
+import { supabase } from "@/integrations/supabase/client";
+import { isHighwayName } from "./permitGeo";
 import type { PermitWaypoint } from "./permitParser";
 
 interface GeoPoint {
@@ -10,6 +11,12 @@ interface GeoPoint {
   lat: number;
   lng: number;
   desc?: string;
+}
+
+interface QueueItem {
+  name: string;
+  desc?: string;
+  query: string;
 }
 
 function escapeXml(s: string): string {
@@ -21,49 +28,78 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
-export function buildRouteGeoPoints(
+function buildQuery(name: string, hint?: string): string {
+  // Voeg landhint toe zodat geocoder NL/BE bias krijgt.
+  const lower = name.toLowerCase();
+  if (lower.includes("nederland") || lower.includes("belgi") || lower.includes("duitsland")) {
+    return name;
+  }
+  // hint kan wegbeheerder zijn (bv "Provincie Gelderland") — helpt context
+  return hint ? `${name}, ${hint}, Nederland` : `${name}, Nederland`;
+}
+
+export async function buildRouteGeoPoints(
   origin: string,
   destination: string,
   waypoints: PermitWaypoint[],
-): { points: GeoPoint[]; skipped: string[] } {
-  const points: GeoPoint[] = [];
+): Promise<{ points: GeoPoint[]; skipped: string[] }> {
+  const queue: QueueItem[] = [];
   const skipped: string[] = [];
 
-  const tryAdd = (name: string, desc?: string) => {
-    if (!name) return;
+  const enqueue = (name: string, desc?: string, hint?: string) => {
+    if (!name || !name.trim()) return;
     if (isHighwayName(name)) {
       skipped.push(name);
       return;
     }
-    const g = geocodeWaypoint(name);
-    if (!g) {
-      skipped.push(name);
-      return;
-    }
-    const last = points[points.length - 1];
-    if (last && last.lat === g.lat && last.lng === g.lng) return;
-    points.push({ name, lat: g.lat, lng: g.lng, desc });
+    queue.push({ name, desc, query: buildQuery(name, hint) });
   };
 
-  tryAdd(origin, "Vertrekpunt");
+  enqueue(origin, "Vertrekpunt");
   for (const wp of waypoints) {
     const desc = [wp.wegbeheerder, wp.hm, wp.passagevoorwaarden]
       .filter(Boolean)
       .join(" · ");
-    tryAdd(wp.trajectbeschrijving, desc || undefined);
+    enqueue(wp.trajectbeschrijving, desc || undefined, wp.wegbeheerder);
   }
-  tryAdd(destination, "Eindbestemming");
+  enqueue(destination, "Eindbestemming");
+
+  if (queue.length === 0) return { points: [], skipped };
+
+  const { data, error } = await supabase.functions.invoke("google-geocode", {
+    body: { queries: queue.map((q) => q.query), region: "nl" },
+  });
+  if (error) throw error;
+
+  const results = (data?.results ?? []) as Array<{
+    lat: number | null;
+    lng: number | null;
+    status: string;
+  }>;
+
+  const points: GeoPoint[] = [];
+  for (let i = 0; i < queue.length; i++) {
+    const r = results[i];
+    const item = queue[i];
+    if (!r || r.lat == null || r.lng == null) {
+      skipped.push(item.name);
+      continue;
+    }
+    const last = points[points.length - 1];
+    if (last && Math.abs(last.lat - r.lat) < 1e-6 && Math.abs(last.lng - r.lng) < 1e-6) continue;
+    points.push({ name: item.name, lat: r.lat, lng: r.lng, desc: item.desc });
+  }
 
   return { points, skipped };
 }
 
-export function buildGpx(
+export async function buildGpx(
   routeName: string,
   origin: string,
   destination: string,
   waypoints: PermitWaypoint[],
-): { gpx: string; pointCount: number; skipped: string[] } {
-  const { points, skipped } = buildRouteGeoPoints(origin, destination, waypoints);
+): Promise<{ gpx: string; pointCount: number; skipped: string[] }> {
+  const { points, skipped } = await buildRouteGeoPoints(origin, destination, waypoints);
   const now = new Date().toISOString();
 
   const wpts = points
@@ -83,7 +119,7 @@ export function buildGpx(
     .join("\n");
 
   const gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Comfy Rideshare" xmlns="http://www.topografix.com/GPX/1/1"
+<gpx version="1.1" creator="ViaCust" xmlns="http://www.topografix.com/GPX/1/1"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
   <metadata>
