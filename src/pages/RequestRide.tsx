@@ -664,7 +664,6 @@ const Matches = ({
           {availableMatches.map((m) => {
             const isSelected = selected.includes(m.id);
             const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
-            const totalCost = +(totalMin / 60 * m.effective_rate).toFixed(2);
             return (
               <li key={m.id} onClick={() => toggle(m.id)}
                 className={`flex items-center justify-between gap-3 bg-card px-4 py-3 cursor-pointer transition-all border ${
