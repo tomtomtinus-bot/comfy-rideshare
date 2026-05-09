@@ -744,11 +744,12 @@ const EscortDashboard = () => {
           const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
           const expired = isInvited && minsLeft === 0;
           const accepted = a.status === "accepted";
+          const clickable = accepted || isInvited;
           return (
             <li
               key={a.id}
-              onClick={accepted ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
-              className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
+              onClick={clickable ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
+              className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${clickable ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
             >
               <div className="flex items-center gap-4 px-5 py-4">
                 <div className="w-28 shrink-0">
@@ -802,7 +803,7 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
-                {accepted && <span className="text-brass-gold text-lg shrink-0">›</span>}
+                {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
               {openId === a.id && (
