@@ -30,13 +30,13 @@ export const Nav = () => {
         <Link to="/" className="flex items-center gap-3" onClick={close}>
           <img
             src={logo}
-            alt="Pilotcrew"
+            alt="ViaCust"
             width={32}
             height={32}
             className="size-8 object-contain"
           />
           <span className="font-display text-2xl tracking-tight text-brass-deep italic">
-            Pilotcrew
+            ViaCust
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
