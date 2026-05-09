@@ -343,7 +343,9 @@ const Inner = () => {
           {loading ? (
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : (
-            <form
+            <>
+              <GoogleCalendarCard />
+              <form
               onSubmit={save}
               onInput={() => setDirty(true)}
               onChange={() => setDirty(true)}
