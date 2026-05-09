@@ -284,7 +284,7 @@ const RequestRideInner = () => {
         cargo_height_m: form.cargo_height_m ? parseFloat(form.cargo_height_m.replace(",", ".")) : null,
         cargo_weight_t: form.cargo_weight_t ? parseFloat(form.cargo_weight_t.replace(",", ".")) : null,
         permit_number: form.permit_number || null,
-        permit_id: selectedPermitId || null,
+        permit_id: uploadedPermit?.id ?? null,
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
         time_window_end: null,
