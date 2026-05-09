@@ -84,8 +84,17 @@ const RequestRideInner = () => {
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
 
-  const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
-  const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
+  const STORAGE_KEY = "requestRide:draft:v1";
+  const initial = (() => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return null;
+  })();
+
+  const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(initial?.pickupGeo ?? null);
+  const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(initial?.dropoffGeo ?? null);
 
   const [uploadedPermit, setUploadedPermit] = useState<{
     id: string;
@@ -93,10 +102,10 @@ const RequestRideInner = () => {
     carrier: string | null;
     pdf_path: string;
     routes_count: number;
-  } | null>(null);
+  } | null>(initial?.uploadedPermit ?? null);
   const [permitUploading, setPermitUploading] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(initial?.form ?? {
     pickup_address: "",
     dropoff_address: "",
     scheduled_date: "",
@@ -111,8 +120,16 @@ const RequestRideInner = () => {
     client_reference: "",
   });
 
-  const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>([]);
-  const [licensePlates, setLicensePlates] = useState<string[]>([]);
+  const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
+  const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates,
+      }));
+    } catch {}
+  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates]);
 
   const addDriver = () => setDrivers((d) => [...d, { name: "", phone: "" }]);
   const updateDriver = (i: number, patch: Partial<{ name: string; phone: string }>) =>
@@ -319,6 +336,7 @@ const RequestRideInner = () => {
     if (aErr) return toast.error(aErr.message);
 
     toast.success("Rit geboekt");
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
     navigate("/dashboard");
   };
 
