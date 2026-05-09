@@ -308,16 +308,21 @@ export default function Permits() {
                             size="sm"
                             variant="outline"
                             className="ml-auto"
-                            onClick={() => {
+                            onClick={async () => {
                               const wps = (r.waypoints as any) ?? [];
                               const name = `${current.permit_number} — Route ${r.route_index} ${r.loaded ? "beladen" : "onbeladen"}`;
-                              const { gpx, pointCount, skipped } = buildGpx(name, r.origin, r.destination, wps);
-                              if (pointCount < 2) {
-                                toast.error("Te weinig herkende punten voor een GPX-route.");
-                                return;
+                              const t = toast.loading("GPX wordt gegenereerd…");
+                              try {
+                                const { gpx, pointCount, skipped } = await buildGpx(name, r.origin, r.destination, wps);
+                                if (pointCount < 2) {
+                                  toast.error("Te weinig herkende punten voor een GPX-route.", { id: t });
+                                  return;
+                                }
+                                downloadGpx(`${current.permit_number}-route-${r.route_index}${r.loaded ? "-beladen" : "-onbeladen"}.gpx`, gpx);
+                                toast.success(`GPX gedownload: ${pointCount} punten${skipped.length ? ` (${skipped.length} overgeslagen)` : ""}`, { id: t });
+                              } catch (e: any) {
+                                toast.error(`GPX mislukt: ${e?.message ?? e}`, { id: t });
                               }
-                              downloadGpx(`${current.permit_number}-route-${r.route_index}${r.loaded ? "-beladen" : "-onbeladen"}.gpx`, gpx);
-                              toast.success(`GPX gedownload: ${pointCount} punten${skipped.length ? ` (${skipped.length} overgeslagen, niet geocodeerbaar)` : ""}`);
                             }}
                           >
                             <Download className="mr-2 h-3.5 w-3.5" />
