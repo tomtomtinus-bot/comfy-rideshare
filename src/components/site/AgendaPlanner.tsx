@@ -264,6 +264,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                   const key = `${dKey}|${i}`;
                   const ride = rideSlots.get(key);
                   const isBlocked = blocked.has(key);
+                  const isGoogleBusy = googleBusy.has(key) && !ride && !isBlocked;
                   const hourBoundary = i % 2 === 0;
                   const isAnchor = anchor && anchor.date === dKey && anchor.idx === i;
                   const inPreview =
@@ -288,6 +289,8 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                           ? anchor?.mode === "add"
                             ? "bg-brass-deep/40"
                             : "bg-brass-gold/30"
+                          : isGoogleBusy
+                          ? "bg-brass-deep/15 hover:bg-brass-gold/20 [background-image:repeating-linear-gradient(45deg,transparent_0_3px,rgba(0,0,0,0.18)_3px_4px)]"
                           : "bg-parchment hover:bg-brass-gold/20"
                       } ${hourBoundary ? "border-l border-brass-deep/15" : ""} ${
                         isAnchor ? "ring-2 ring-brass-gold ring-inset z-10" : ""
@@ -295,6 +298,8 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                       title={
                         ride
                           ? `Rit ${ride.pickup_city} → ${ride.dropoff_city}`
+                          : isGoogleBusy
+                          ? `Bezet volgens Google Agenda · ${hhmm(SLOT_START_H * 60 + i * 30)}`
                           : `${d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" })} · ${hhmm(SLOT_START_H * 60 + i * 30)}`
                       }
                     />
@@ -315,6 +320,9 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 bg-brass-gold/40" /> Rit gepland
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 bg-brass-deep/15 [background-image:repeating-linear-gradient(45deg,transparent_0_3px,rgba(0,0,0,0.18)_3px_4px)]" /> Google Agenda bezet
         </span>
       </div>
     </div>
