@@ -30,14 +30,14 @@ export function MiniMap({ address, label, className }: Props) {
         });
 
         const { data, error: fnErr } = await supabase.functions.invoke("google-geocode", {
-          body: { address },
+          body: { queries: [address] },
         });
         if (fnErr) throw fnErr;
         if (cancelled) return;
 
-        const loc = data?.location ?? data?.results?.[0]?.geometry?.location;
-        if (loc) {
-          const pos = { lat: loc.lat, lng: loc.lng };
+        const r = data?.results?.[0];
+        if (r && r.lat != null && r.lng != null) {
+          const pos = { lat: r.lat, lng: r.lng };
           map.setCenter(pos);
           map.setZoom(15);
           new google.maps.Marker({ map, position: pos, label: label?.[0] });
