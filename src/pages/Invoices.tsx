@@ -145,6 +145,15 @@ const InvoicesInner = () => {
       if (prof?.billing_frequency) setBillingFrequency(prof.billing_frequency as "weekly" | "monthly");
     }
 
+    if (isEscort) {
+      const { data: ep } = await supabase
+        .from("escort_profiles")
+        .select("wero_enabled, wero_handle, wero_fee")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (ep) setWero({ enabled: !!ep.wero_enabled, handle: ep.wero_handle ?? null, fee: Number(ep.wero_fee || 0) });
+    }
+
     setLoading(false);
   };
 
