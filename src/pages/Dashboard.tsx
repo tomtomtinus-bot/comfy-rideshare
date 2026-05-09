@@ -364,76 +364,32 @@ const ClientDashboard = () => {
           const groups = groupByDateBucket(list, (r) => r.scheduled_at, order);
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
-            const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
-            const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
+            const acceptedCount = ass.filter((a) => a.status === "accepted").length;
             return (
               <li key={r.id}>
-                <Link to={`/rit/${r.id}`} className="block bg-card p-6 md:p-8 hover:bg-parchment/40 transition-colors">
-                <div className="grid grid-cols-12 gap-4 items-start">
-                  <div className="col-span-12 md:col-span-3">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                    <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
-                    <div className="mt-3"><StatusBadge status={r.status} /></div>
+                <Link
+                  to={`/rit/${r.id}`}
+                  className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
+                >
+                  <div className="w-28 shrink-0">
+                    <p className="font-medium tabular-nums text-sm">{fmtDate(r.scheduled_at)}</p>
                   </div>
-                  <div className="col-span-12 md:col-span-5">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                    <p className="font-medium">
-                      {r.pickup_address} ({r.pickup_city})
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {r.pickup_city}
                       <span className="text-brass-gold mx-2">→</span>
-                      {r.dropoff_address} ({r.dropoff_city})
+                      {r.dropoff_city}
                     </p>
-                    {(r.cargo_length_m || r.cargo_weight_t) && (
-                      <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
-                        Lading: {r.cargo_length_m}m × {r.cargo_width_m}m × {r.cargo_height_m}m · {r.cargo_weight_t}t
-                        {r.permit_number ? ` · vergunning ${r.permit_number}` : ""}
-                        {r.client_reference ? ` · ref ${r.client_reference}` : ""}
-                      </p>
-                    )}
-                    
-                    {r.notes && <p className="text-sm text-brass-deep/55 mt-2">{r.notes}</p>}
                   </div>
-                  <div className="col-span-12 md:col-span-4">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Werkelijk</p>
-                    <p className="font-semibold tabular-nums text-brass-gold">
-                      {allSubmitted ? `€${(totalActual * 1.01).toFixed(2)}` : "—"}
-                    </p>
-                    {allSubmitted && (
-                      <p className="text-[10px] text-brass-deep/50 mt-1">
-                        incl. 1,5% fee (€{(totalActual * 0.015).toFixed(2)})
-                      </p>
+                  <div className="shrink-0 hidden sm:flex items-center gap-3">
+                    {acceptedCount > 0 && (
+                      <span className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-semibold tabular-nums">
+                        {acceptedCount}/{r.num_escorts ?? ass.length} begeleider{acceptedCount === 1 ? "" : "s"}
+                      </span>
                     )}
+                    <StatusBadge status={r.status} />
                   </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {ass.map((a) => {
-                    const statusLabel: Record<string, string> = {
-                      invited: "uitgenodigd",
-                      accepted: "geaccepteerd",
-                      declined: "geweigerd",
-                      expired: "verlopen",
-                      cancelled: "geannuleerd",
-                    };
-                    return (
-                      <div key={a.id} className="flex items-center justify-between text-sm">
-                        <span className="font-medium">
-                          Begeleider <span className="text-brass-deep">#{a.anon}</span>
-                          {escortNames[a.id] ? (
-                            <span className="ml-2 text-brass-deep/70">· {escortNames[a.id]}</span>
-                          ) : null}
-                          <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                            {statusLabel[a.status] ?? a.status}
-                          </span>
-                        </span>
-                        <span className="text-brass-deep/60 tabular-nums">
-                          {a.actual_hours
-                            ? `${a.actual_hours}u · €${Number(a.actual_cost).toFixed(2)}`
-                            : "—"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+                  <span className="text-brass-gold text-lg shrink-0">›</span>
                 </Link>
               </li>
             );
@@ -792,79 +748,47 @@ const EscortDashboard = () => {
             <li
               key={a.id}
               onClick={accepted ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
-              className={`bg-card p-6 md:p-8 ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
+              className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${accepted ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
             >
-              <div className="grid grid-cols-12 gap-4 items-start">
-                <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                  <p className="font-medium tabular-nums">{fmtDate(a.ride.scheduled_at)}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">
-                    Opdrachtgever #{a.client_anon}
-                    {counterpartyNames[a.id] ? ` · ${counterpartyNames[a.id]}` : ""}
+              <div className="flex items-center gap-4 px-5 py-4">
+                <div className="w-28 shrink-0">
+                  <p className="font-medium tabular-nums text-sm">{fmtDate(a.ride.scheduled_at)}</p>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">
+                    {a.ride.pickup_city}
+                    <span className="text-brass-gold mx-2">→</span>
+                    {a.ride.dropoff_city}
                   </p>
-                  <div className="mt-2"><StatusBadge status={a.status} /></div>
                 </div>
-                <div className="col-span-12 md:col-span-7">
-                  {isInvited ? (
-                    <>
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                      <p className="font-medium">
-                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                      </p>
-                      <p className="text-sm text-brass-deep/55 mt-2">
-                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                      </p>
-                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                        <p className="text-xs text-brass-deep/60 mt-2 tabular-nums">
-                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
-                      <p className="font-medium">
-                        {a.ride.pickup_city} <span className="text-brass-gold mx-2">→</span> {a.ride.dropoff_city}
-                      </p>
-                      <p className="text-sm text-brass-deep/55 mt-2">
-                        Reistijd vanaf basis: {fmtHours(a.travel_to_pickup_min)} · Terug: {fmtHours(a.travel_back_home_min)}
-                      </p>
-                      {(a.ride.cargo_length_m || a.ride.cargo_weight_t) && (
-                        <p className="text-xs text-brass-deep/60 mt-1 tabular-nums">
-                          Lading: {a.ride.cargo_length_m}m × {a.ride.cargo_width_m}m × {a.ride.cargo_height_m}m · {a.ride.cargo_weight_t}t
-                          {a.ride.permit_number ? ` · ${a.ride.permit_number}` : ""}
-                        </p>
-                      )}
-                    </>
-                  )}
+                <div className="shrink-0 hidden sm:block">
+                  <StatusBadge status={a.status} />
                 </div>
-                <div className="col-span-6 md:col-span-2 text-right">
+                <div className="shrink-0">
                   {isInvited && !expired ? (
-                    <div className="space-y-2">
-                      <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
                         Nog {minsLeft} min
-                      </p>
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() => respond(a.id, true)}
-                          className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                        >
-                          Accepteer
-                        </button>
-                        <button
-                          onClick={() => respond(a.id, false)}
-                          className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
-                        >
-                          Weiger
-                        </button>
-                      </div>
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
+                        className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                      >
+                        Accepteer
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
+                        className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
+                      >
+                        Weiger
+                      </button>
                     </div>
                   ) : expired ? (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
                       Verlopen
                     </span>
                   ) : submitted ? (
-                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold">
+                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
                       ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
                     </span>
                   ) : accepted ? (
@@ -878,13 +802,14 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
+                {accepted && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
               {openId === a.id && (
                 <form
                   onClick={(e) => e.stopPropagation()}
                   onSubmit={(e) => submitHours(a.id, e)}
-                  className="mt-6 pt-6 border-t border-brass-deep/10 grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="px-5 pb-5 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-brass-deep/10"
                 >
                   <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
                     <div>
