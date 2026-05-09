@@ -586,6 +586,7 @@ const Inner = () => {
                 {busy ? "Bezig…" : "Profiel opslaan"}
               </button>
             </form>
+            </>
           )}
         </div>
       </main>
