@@ -121,7 +121,7 @@ const BillingDetailsInner = () => {
         .from(table)
         .select(
           "company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number" +
-            (isEscort ? ", iban, bank_account_holder" : ""),
+            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee" : ""),
         )
         .eq("id", user.id)
         .maybeSingle();
