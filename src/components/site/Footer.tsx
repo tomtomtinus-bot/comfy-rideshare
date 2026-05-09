@@ -8,14 +8,14 @@ export const Footer = () => {
           <div className="flex items-center gap-3 mb-6">
             <img
               src={logo}
-              alt="Pilotcrew"
+              alt="ViaCust"
               width={24}
               height={24}
               loading="lazy"
               className="size-6 object-contain brightness-0 invert"
             />
             <span className="font-display text-xl tracking-tight text-parchment italic">
-              Pilotcrew
+              ViaCust
             </span>
           </div>
           <p className="text-sm leading-relaxed">
@@ -44,7 +44,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-parchment/10 flex flex-col md:flex-row gap-3 justify-between items-center text-[10px] uppercase tracking-widest">
-        <span>© 2026 Pilotcrew · Convoi Exceptionnel</span>
+        <span>© 2026 ViaCust · Convoi Exceptionnel</span>
         <span>Veilig over de weg</span>
       </div>
     </footer>
