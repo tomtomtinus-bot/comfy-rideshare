@@ -135,7 +135,8 @@ const Inner = () => {
     );
   }
 
-  const { ride, client, escorts, permit } = data;
+  const { ride, client, escorts, permit, viewer_status } = data;
+  const isInvited = viewer_status === "invited";
   const others = escorts.filter((e) => !e.is_self);
 
   return (
