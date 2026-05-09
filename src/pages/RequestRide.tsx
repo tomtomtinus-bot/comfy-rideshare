@@ -680,7 +680,7 @@ const Matches = ({
                     <span>Afrij <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
                   </div>
                 </div>
-                <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{totalCost.toFixed(2)}</p>
+                <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{m.effective_rate.toFixed(2)}/u</p>
               </li>
             );
           })}
