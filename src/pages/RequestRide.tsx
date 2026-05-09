@@ -664,7 +664,6 @@ const Matches = ({
           {availableMatches.map((m) => {
             const isSelected = selected.includes(m.id);
             const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
-            const totalCost = +(totalMin / 60 * m.effective_rate).toFixed(2);
             return (
               <li key={m.id} onClick={() => toggle(m.id)}
                 className={`flex items-center justify-between gap-3 bg-card px-4 py-3 cursor-pointer transition-all border ${
@@ -680,7 +679,7 @@ const Matches = ({
                     <span>Afrij <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
                   </div>
                 </div>
-                <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{totalCost.toFixed(2)}</p>
+                <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{m.effective_rate.toFixed(2)}/u</p>
               </li>
             );
           })}
