@@ -8,6 +8,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland" },
@@ -342,7 +343,9 @@ const Inner = () => {
           {loading ? (
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : (
-            <form
+            <>
+              <GoogleCalendarCard />
+              <form
               onSubmit={save}
               onInput={() => setDirty(true)}
               onChange={() => setDirty(true)}
@@ -583,6 +586,7 @@ const Inner = () => {
                 {busy ? "Bezig…" : "Profiel opslaan"}
               </button>
             </form>
+            </>
           )}
         </div>
       </main>

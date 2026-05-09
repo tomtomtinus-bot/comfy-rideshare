@@ -38,6 +38,7 @@ interface Anchor {
 
 export const AgendaPlanner = ({ escortId, rides }: Props) => {
   const [blocked, setBlocked] = useState<Set<string>>(new Set());
+  const [googleBusy, setGoogleBusy] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -87,6 +88,30 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
       });
       setBlocked(set);
       setLoading(false);
+
+      // Google Agenda busy overlay (best-effort)
+      try {
+        const { data: gData } = await supabase.functions.invoke("google-calendar-sync");
+        if (gData && (gData as any).connected && Array.isArray((gData as any).busy)) {
+          const gset = new Set<string>();
+          for (const b of (gData as any).busy as { start: string; end: string }[]) {
+            const s = new Date(b.start);
+            const e = new Date(b.end);
+            // Walk per 30-minute slot
+            const cursor = new Date(s);
+            cursor.setMinutes(Math.floor(cursor.getMinutes() / 30) * 30, 0, 0);
+            while (cursor < e) {
+              const dKey = ymd(cursor);
+              const idx = slotIndex(cursor);
+              if (idx >= 0 && idx < SLOTS_PER_DAY) gset.add(`${dKey}|${idx}`);
+              cursor.setMinutes(cursor.getMinutes() + 30);
+            }
+          }
+          setGoogleBusy(gset);
+        }
+      } catch (_) {
+        // niet gekoppeld of fout — overlay blijft leeg
+      }
     })();
   }, [escortId, days]);
 
@@ -239,6 +264,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                   const key = `${dKey}|${i}`;
                   const ride = rideSlots.get(key);
                   const isBlocked = blocked.has(key);
+                  const isGoogleBusy = googleBusy.has(key) && !ride && !isBlocked;
                   const hourBoundary = i % 2 === 0;
                   const isAnchor = anchor && anchor.date === dKey && anchor.idx === i;
                   const inPreview =
@@ -263,6 +289,8 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                           ? anchor?.mode === "add"
                             ? "bg-brass-deep/40"
                             : "bg-brass-gold/30"
+                          : isGoogleBusy
+                          ? "bg-brass-deep/15 hover:bg-brass-gold/20 [background-image:repeating-linear-gradient(45deg,transparent_0_3px,rgba(0,0,0,0.18)_3px_4px)]"
                           : "bg-parchment hover:bg-brass-gold/20"
                       } ${hourBoundary ? "border-l border-brass-deep/15" : ""} ${
                         isAnchor ? "ring-2 ring-brass-gold ring-inset z-10" : ""
@@ -270,6 +298,8 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
                       title={
                         ride
                           ? `Rit ${ride.pickup_city} → ${ride.dropoff_city}`
+                          : isGoogleBusy
+                          ? `Bezet volgens Google Agenda · ${hhmm(SLOT_START_H * 60 + i * 30)}`
                           : `${d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" })} · ${hhmm(SLOT_START_H * 60 + i * 30)}`
                       }
                     />
@@ -290,6 +320,9 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 bg-brass-gold/40" /> Rit gepland
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 bg-brass-deep/15 [background-image:repeating-linear-gradient(45deg,transparent_0_3px,rgba(0,0,0,0.18)_3px_4px)]" /> Google Agenda bezet
         </span>
       </div>
     </div>
