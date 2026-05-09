@@ -282,7 +282,9 @@ const Inner = () => {
           </ul>
         )}
       </Section>
+      )}
 
+      {!isInvited && (
       <Section title="Ontheffing">
         {permit ? (
           <div className="space-y-4">
@@ -316,6 +318,7 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
         )}
       </Section>
+      )}
     </div>
   );
 };
