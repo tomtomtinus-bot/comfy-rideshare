@@ -61,6 +61,7 @@ interface RideDetail {
     max_height_m: number | null;
     max_weight_kg: number | null;
   } | null;
+  viewer_status?: string;
 }
 
 const fmtDateTime = (d: string) =>
@@ -134,7 +135,8 @@ const Inner = () => {
     );
   }
 
-  const { ride, client, escorts, permit } = data;
+  const { ride, client, escorts, permit, viewer_status } = data;
+  const isInvited = viewer_status === "invited";
   const others = escorts.filter((e) => !e.is_self);
 
   return (
@@ -184,6 +186,11 @@ const Inner = () => {
         </div>
       </Section>
 
+      {isInvited ? (
+        <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep">
+          U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+        </div>
+      ) : (
       <Section title="Opdrachtgever">
         {client ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -199,8 +206,9 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
         )}
       </Section>
+      )}
 
-      {(() => {
+      {!isInvited && (() => {
         const drivers = ride.drivers ?? [];
         const plates = ride.license_plates ?? [];
         if (drivers.length === 0 && plates.length === 0) return null;
@@ -241,6 +249,7 @@ const Inner = () => {
         );
       })()}
 
+      {!isInvited && (
       <Section title={`Mede-begeleiders (${others.length})`}>
         {others.length === 0 ? (
           <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
@@ -273,7 +282,9 @@ const Inner = () => {
           </ul>
         )}
       </Section>
+      )}
 
+      {!isInvited && (
       <Section title="Ontheffing">
         {permit ? (
           <div className="space-y-4">
@@ -307,6 +318,7 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
         )}
       </Section>
+      )}
     </div>
   );
 };
