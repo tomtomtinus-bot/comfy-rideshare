@@ -180,7 +180,7 @@ const BillingDetailsInner = () => {
   }) => (
     <FieldImpl
       {...props}
-      value={form[props.name]}
+      value={String(form[props.name] ?? "")}
       error={errors[props.name]}
       onChange={set(props.name)}
     />
