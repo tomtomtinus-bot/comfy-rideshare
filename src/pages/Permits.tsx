@@ -143,6 +143,30 @@ export default function Permits() {
   };
 
   const handleDelete = async (id: string) => {
+    // Check of er ritten aan deze ontheffing gekoppeld zijn
+    const { data: linkedRides } = await supabase
+      .from("rides")
+      .select("id, status")
+      .eq("permit_id", id);
+
+    if (linkedRides && linkedRides.length > 0) {
+      // Haal alle assignments voor deze ritten op
+      const rideIds = linkedRides.map((r) => r.id);
+      const { data: assignments } = await supabase
+        .from("ride_assignments")
+        .select("ride_id, status, hours_submitted_at")
+        .in("ride_id", rideIds);
+
+      // Per rit: is er een geaccepteerde assignment waarvan de uren NOG NIET zijn ingediend?
+      const unfinished = (assignments ?? []).some(
+        (a) => a.status === "accepted" && !a.hours_submitted_at,
+      );
+      if (unfinished) {
+        toast.error("Deze ontheffing is gekoppeld aan een rit die nog niet door de begeleider is afgerond.");
+        return;
+      }
+    }
+
     if (!confirm("Ontheffing en bijbehorende routes verwijderen?")) return;
     const p = permits.find((x) => x.id === id);
     if (p?.pdf_path) await supabase.storage.from("permits").remove([p.pdf_path]);
