@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 // Loader voor Google Maps JavaScript SDK.
 // Haalt de API key op via een edge function (alleen voor ingelogde gebruikers).
 import { supabase } from "@/integrations/supabase/client";

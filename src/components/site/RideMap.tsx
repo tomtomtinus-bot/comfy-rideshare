@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 import { useEffect, useRef, useState } from "react";
 import { loadGoogleMaps, googleMapsDirectionsUrl } from "@/lib/googleMaps";
 import { supabase } from "@/integrations/supabase/client";
