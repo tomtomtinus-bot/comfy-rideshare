@@ -87,17 +87,14 @@ const RequestRideInner = () => {
   const [pickupGeo, setPickupGeo] = useState<GeoPoint | null>(null);
   const [dropoffGeo, setDropoffGeo] = useState<GeoPoint | null>(null);
 
-  const [permits, setPermits] = useState<{ id: string; permit_number: string; carrier: string | null; valid_to: string | null }[]>([]);
-  const [selectedPermitId, setSelectedPermitId] = useState<string>("");
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("permits")
-      .select("id, permit_number, carrier, valid_to")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setPermits((data ?? []) as any));
-  }, [user]);
+  const [uploadedPermit, setUploadedPermit] = useState<{
+    id: string;
+    permit_number: string;
+    carrier: string | null;
+    pdf_path: string;
+    routes_count: number;
+  } | null>(null);
+  const [permitUploading, setPermitUploading] = useState(false);
 
   const [form, setForm] = useState({
     pickup_address: "",
