@@ -38,6 +38,9 @@ export interface BillingParty {
   iban?: string | null;
   bank_account_holder?: string | null;
   full_name?: string | null;
+  wero_enabled?: boolean | null;
+  wero_handle?: string | null;
+  wero_fee?: number | null;
 }
 
 interface BasePdfOpts {
