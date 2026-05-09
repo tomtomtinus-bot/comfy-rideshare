@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { parsePermitPdf, type ParsedPermit } from "@/lib/permitParser";
 import { PermitRouteMap } from "@/components/site/PermitRouteMap";
 import { buildGpx, downloadGpx } from "@/lib/permitGpx";
+import { openPermitPdf } from "@/lib/openPermitPdf";
 
 interface PermitRow {
   id: string;
