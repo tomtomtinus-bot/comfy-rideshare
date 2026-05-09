@@ -273,6 +273,45 @@ const BillingDetailsInner = () => {
                 </section>
               )}
 
+              {isEscort && (
+                <section className="space-y-4">
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                    Wero-betaling
+                  </h2>
+                  <p className="text-xs text-brass-deep/60 -mt-2">
+                    Wero is het nieuwe Europese betaalsysteem (opvolger van iDEAL/Bancontact). Voeg
+                    je Wero-handle toe en eventueel een vaste toeslag per factuur ter dekking van
+                    de transactiekosten.
+                  </p>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!form.wero_enabled}
+                      onChange={(e) => setBool("wero_enabled")(e.target.checked)}
+                      className="h-4 w-4 accent-brass-gold"
+                    />
+                    <span className="text-sm text-brass-deep">
+                      Toon Wero-betaaloptie en toeslag op facturen
+                    </span>
+                  </label>
+                  {form.wero_enabled && (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {renderField({
+                        label: "Wero-handle (e-mail of telefoonnummer)",
+                        name: "wero_handle",
+                        placeholder: "naam@bedrijf.nl of +31612345678",
+                      })}
+                      {renderField({
+                        label: "Vaste toeslag per factuur (€)",
+                        name: "wero_fee",
+                        type: "number",
+                        placeholder: "0.50",
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
               <div className="flex justify-end">
                 <button
                   type="submit"
