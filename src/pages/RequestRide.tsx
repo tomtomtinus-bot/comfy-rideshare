@@ -336,6 +336,7 @@ const RequestRideInner = () => {
     if (aErr) return toast.error(aErr.message);
 
     toast.success("Rit geboekt");
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
     navigate("/dashboard");
   };
 
