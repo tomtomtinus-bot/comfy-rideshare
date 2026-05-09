@@ -406,31 +406,59 @@ const RequestRideInner = () => {
                 <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="mt-4">
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">RDW Ontheffing</label>
-                <div className="mt-1 flex flex-col sm:flex-row gap-2">
-                  <select
-                    value={selectedPermitId}
-                    onChange={(e) => setSelectedPermitId(e.target.value)}
-                    className="flex-1 bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                  RDW Ontheffing (PDF)
+                </label>
+                {!uploadedPermit ? (
+                  <label
+                    className={`mt-1 flex items-center justify-center gap-3 px-4 py-6 border-2 border-dashed border-brass-deep/25 bg-parchment/40 cursor-pointer hover:bg-parchment hover:border-brass-gold transition-colors text-sm text-brass-deep/70 ${
+                      permitUploading ? "opacity-60 pointer-events-none" : ""
+                    }`}
                   >
-                    <option value="">— Geen ontheffing kiezen —</option>
-                    {permits.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.permit_number}{p.carrier ? ` · ${p.carrier}` : ""}{p.valid_to ? ` (t/m ${new Date(p.valid_to).toLocaleDateString("nl-NL")})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  <Link
-                    to="/ontheffingen"
-                    className="px-4 py-3 text-xs uppercase tracking-widest font-semibold text-brass-deep border border-brass-deep/20 hover:bg-brass-deep hover:text-parchment text-center"
-                  >
-                    + Nieuwe uploaden
-                  </Link>
-                </div>
-                {selectedPermitId && (
-                  <p className="text-[11px] text-brass-deep/60 mt-1">
-                    De begeleider ziet de routebeschrijving uit deze ontheffing.
-                  </p>
+                    {permitUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Bezig met uitlezen…</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        <span>Kies of sleep een RDW ontheffing-PDF om bij te voegen</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      className="hidden"
+                      disabled={permitUploading}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        e.currentTarget.value = "";
+                        handlePermitFile(f);
+                      }}
+                    />
+                  </label>
+                ) : (
+                  <div className="mt-1 flex items-center gap-3 px-4 py-3 bg-brass-gold/10 border border-brass-gold/40 text-sm">
+                    <FileText className="h-4 w-4 text-brass-deep" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-brass-deep font-semibold truncate">
+                        {uploadedPermit.permit_number}
+                        {uploadedPermit.carrier ? ` · ${uploadedPermit.carrier}` : ""}
+                      </p>
+                      <p className="text-[11px] text-brass-deep/60">
+                        {uploadedPermit.routes_count} route(s) — wordt aan deze rit gekoppeld
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeUploadedPermit}
+                      className="p-1.5 text-brass-deep/70 hover:text-brass-deep hover:bg-brass-deep/10"
+                      aria-label="Ontheffing verwijderen"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
