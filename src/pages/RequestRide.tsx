@@ -124,12 +124,35 @@ const RequestRideInner = () => {
     setLicensePlates((p) => p.map((x, idx) => (idx === i ? v.toUpperCase() : x)));
   const removePlate = (i: number) => setLicensePlates((p) => p.filter((_, idx) => idx !== i));
 
-  // Auto-fill velden vanuit gekozen ontheffing
+  // Auto-fill vergunningnummer zodra een ontheffing is geüpload
   useEffect(() => {
-    if (!selectedPermitId) return;
-    const p = permits.find((x) => x.id === selectedPermitId);
-    if (p) setForm((f) => ({ ...f, permit_number: p.permit_number }));
-  }, [selectedPermitId, permits]);
+    if (!uploadedPermit) return;
+    setForm((f) => ({ ...f, permit_number: uploadedPermit.permit_number }));
+  }, [uploadedPermit]);
+
+  const handlePermitFile = async (file: File | null) => {
+    if (!file || !user) return;
+    setPermitUploading(true);
+    try {
+      toast.info("Ontheffing wordt uitgelezen…");
+      const up = await uploadPermitPdf(file, user.id);
+      setUploadedPermit(up);
+      toast.success(`Ontheffing ${up.permit_number} bijgevoegd (${up.routes_count} route(s))`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload mislukt");
+    } finally {
+      setPermitUploading(false);
+    }
+  };
+
+  const removeUploadedPermit = async () => {
+    if (!uploadedPermit) return;
+    // Verwijder permit + bestand — was nog niet aan een rit gekoppeld
+    await supabase.storage.from("permits").remove([uploadedPermit.pdf_path]).catch(() => {});
+    await supabase.from("permits").delete().eq("id", uploadedPermit.id);
+    setUploadedPermit(null);
+    setForm((f) => ({ ...f, permit_number: "" }));
+  };
 
   const onPickPickup = (r: AddressResult) => {
     setForm((f) => ({ ...f, pickup_address: r.display }));
