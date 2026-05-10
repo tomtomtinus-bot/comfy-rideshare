@@ -922,7 +922,7 @@ const EscortDashboard = () => {
                   })()}
                   <div className="md:col-span-2">
                     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                      Toelichting (optioneel)
+                      {t("dash.notes")}
                     </label>
                     <textarea
                       name="hours_notes"
@@ -934,19 +934,19 @@ const EscortDashboard = () => {
                   <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Extra kosten (optioneel)
+                        {t("dash.extraCosts")}
                       </label>
                       <button
                         type="button"
                         onClick={() => addExtra(a.id)}
                         className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
                       >
-                        + Regel toevoegen
+                        {t("dash.addRow")}
                       </button>
                     </div>
                     {getExtras(a.id).length === 0 ? (
                       <p className="text-xs text-brass-deep/45">
-                        Bijv. tol, parkeren, veerboot, extra materiaal — wordt op de factuur als losse regel meegenomen.
+                        {t("dash.extraCostsHint")}
                       </p>
                     ) : (
                       <ul className="space-y-2">
@@ -956,7 +956,7 @@ const EscortDashboard = () => {
                               type="text"
                               value={ec.description}
                               onChange={(e) => updateExtra(a.id, idx, { description: e.target.value })}
-                              placeholder="Omschrijving (bijv. tol, parkeren)"
+                              placeholder={t("dash.extraCostsDescPlaceholder")}
                               maxLength={120}
                               className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                             />
@@ -978,7 +978,7 @@ const EscortDashboard = () => {
                             <button
                               type="button"
                               onClick={() => removeExtra(a.id, idx)}
-                              aria-label="Verwijder regel"
+                              aria-label={t("dash.removeRow")}
                               className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                             >
                               ×
@@ -989,19 +989,21 @@ const EscortDashboard = () => {
                     )}
                     {getExtras(a.id).length > 0 && (
                       <p className="text-xs text-brass-deep/60 mt-2 tabular-nums text-right">
-                        Subtotaal extra kosten: €
-                        {getExtras(a.id)
-                          .reduce((s, e) => s + (Number(e.amount) || 0), 0)
-                          .toFixed(2)}
+                        {t("dash.extraCostsSubtotal", { amount: getExtras(a.id).reduce((s, e) => s + (Number(e.amount) || 0), 0).toFixed(2) })}
                       </p>
                     )}
                   </div>
 
                   <p className="md:col-span-2 text-xs text-brass-deep/55">
-                    Tarief {a.is_be_ride ? "België" : "Nederland"}: €{a.hourly_rate}/uur{a.is_be_ride ? " (grensoverschrijdend → BE-tarief op alle uren)" : ""} · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""} Extra kosten worden los op de factuur vermeld.
+                    {t("dash.rateInfo", {
+                      country: a.is_be_ride ? t("common.countryBE") : t("common.countryNL"),
+                      rate: a.hourly_rate,
+                      cross: a.is_be_ride ? t("dash.rateCrossBorder") : "",
+                      minHours: a.min_billable_hours > 0 ? t("dash.minBillable", { h: a.min_billable_hours }) : "",
+                    })}
                   </p>
                   <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
-                    Versturen
+                    {t("dash.submit")}
                   </button>
                 </form>
               )}
