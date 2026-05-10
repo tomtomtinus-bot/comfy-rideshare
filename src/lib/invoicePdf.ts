@@ -337,7 +337,8 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
   drawShell(doc, data, logo);
 
   const subtotal = data.total_amount;
-  const vat = subtotal * 0.21;
+  const vatRate = vatRateFor(data.from, data.to);
+  const vat = subtotal * vatRate;
   const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
   const total = subtotal + vat + weroFee;
 
