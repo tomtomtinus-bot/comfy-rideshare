@@ -66,7 +66,7 @@ const fmtMoney = (n: number) => `€${Number(n).toFixed(2)}`;
 const InvoicesInner = () => {
   const { user, role } = useAuth();
   const { t, i18n } = useTranslation();
-  const fd = (d: string) => fmtDate(d, i18n.language);
+  const fd = (d: string) => fd(d, i18n.language);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [items, setItems] = useState<Record<string, Item[]>>({});
   const [platformInvoices, setPlatformInvoices] = useState<PlatformInvoice[]>([]);
@@ -380,11 +380,11 @@ const InvoicesInner = () => {
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factuur</p>
                   <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">{fmtDate(inv.created_at)}</p>
+                  <p className="text-xs text-brass-deep/55 mt-1">{fd(inv.created_at)}</p>
                 </div>
                 <div className="col-span-12 md:col-span-4">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Periode</p>
-                  <p className="text-sm">{fmtDate(inv.period_start)} → {fmtDate(inv.period_end)}</p>
+                  <p className="text-sm">{fd(inv.period_start)} → {fd(inv.period_end)}</p>
                 </div>
                 <div className="col-span-6 md:col-span-2">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Begeleiders</p>
@@ -434,7 +434,7 @@ const InvoicesInner = () => {
                     <tbody>
                       {rows.map((r) => (
                         <tr key={r.id} className="border-t border-brass-deep/5">
-                          <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                          <td className="py-2 tabular-nums">{fd(r.ride_date)}</td>
                           <td className="py-2">{r.route}</td>
                           <td className="py-2 text-right tabular-nums">{r.num_escorts}</td>
                           <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(r.amount)}</td>
@@ -476,11 +476,11 @@ const InvoicesInner = () => {
                       <div className="col-span-12 md:col-span-3">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factuur</p>
                         <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
-                        <p className="text-xs text-brass-deep/55 mt-1">{fmtDate(inv.created_at)}</p>
+                        <p className="text-xs text-brass-deep/55 mt-1">{fd(inv.created_at)}</p>
                       </div>
                       <div className="col-span-12 md:col-span-4">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Periode</p>
-                        <p className="text-sm">{fmtDate(inv.period_start)} → {fmtDate(inv.period_end)}</p>
+                        <p className="text-sm">{fd(inv.period_start)} → {fd(inv.period_end)}</p>
                       </div>
                       <div className="col-span-6 md:col-span-2">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Uren</p>
@@ -549,7 +549,7 @@ const InvoicesInner = () => {
                             <tbody>
                               {rideRows.map((r) => (
                                 <tr key={r.id} className="border-t border-brass-deep/5">
-                                  <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                                  <td className="py-2 tabular-nums">{fd(r.ride_date)}</td>
                                   <td className="py-2">{r.description}</td>
                                   <td className="py-2 text-right tabular-nums">{Number(r.hours).toFixed(2)}</td>
                                   <td className="py-2 text-right tabular-nums">{fmtMoney(r.hourly_rate)}</td>
@@ -565,7 +565,7 @@ const InvoicesInner = () => {
 
                               {fuelRows.length > 0 && fuelRows.map((r) => (
                                 <tr key={r.id} className="border-t border-brass-deep/5">
-                                  <td className="py-2 tabular-nums">{fmtDate(r.ride_date)}</td>
+                                  <td className="py-2 tabular-nums">{fd(r.ride_date)}</td>
                                   <td className="py-2">{r.description}</td>
                                   <td className="py-2 text-right tabular-nums">{Number(r.hours).toFixed(2)}</td>
                                   <td className="py-2 text-right tabular-nums">{fmtMoney(r.hourly_rate)}</td>
