@@ -9,16 +9,65 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Supabase auto-handles the recovery hash and creates a session.
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
-    });
+    let cancelled = false;
+
+    const finish = (ok: boolean, msg?: string) => {
+      if (cancelled) return;
+      if (ok) setReady(true);
+      else setError(msg ?? "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
+    };
+
+    // 1) Errors in hash/query (e.g. expired link)
+    const hash = window.location.hash.startsWith("#")
+      ? new URLSearchParams(window.location.hash.slice(1))
+      : new URLSearchParams();
+    const search = new URLSearchParams(window.location.search);
+    const errDesc = hash.get("error_description") || search.get("error_description");
+    if (errDesc) {
+      finish(false, decodeURIComponent(errDesc.replace(/\+/g, " ")));
+      return;
+    }
+
+    // 2) PKCE flow: ?code=...
+    const code = search.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) finish(false, error.message);
+        else finish(true);
+      });
+      return;
+    }
+
+    // 3) Implicit flow: #access_token=...&type=recovery
+    const accessToken = hash.get("access_token");
+    const refreshToken = hash.get("refresh_token");
+    if (accessToken && refreshToken) {
+      supabase.auth
+        .setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ error }) => {
+          if (error) finish(false, error.message);
+          else finish(true);
+        });
+      return;
+    }
+
+    // 4) Already signed in (e.g. recovery already processed)
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
+      if (data.session) finish(true);
+      else finish(false);
     });
-    return () => sub.subscription.unsubscribe();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") finish(true);
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,7 +92,17 @@ const ResetPassword = () => {
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Wachtwoord</p>
           <h1 className="font-display text-4xl text-brass-deep italic mb-8">Nieuw wachtwoord</h1>
-          {!ready ? (
+          {error ? (
+            <div className="space-y-4">
+              <p className="text-sm text-destructive">{error}</p>
+              <button
+                onClick={() => navigate("/auth")}
+                className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
+              >
+                Terug naar inloggen
+              </button>
+            </div>
+          ) : !ready ? (
             <p className="text-sm text-brass-deep/70">Bezig met verifiëren van je herstellink…</p>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
