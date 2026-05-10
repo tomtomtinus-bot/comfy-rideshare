@@ -525,58 +525,13 @@ const Inner = () => {
                 </div>
               </section>
 
-              <section>
-                <Label>Agenda · 4 weken vooruit</Label>
-                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Klik op een dag om je <strong>niet-beschikbaar</strong> te markeren. Geplande ritten zijn vast.
+              <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
+                <p className="text-sm text-brass-deep/80">
+                  Je beschikbaarheid loopt voortaan via <strong>Google Agenda</strong>. Plaats verlof,
+                  persoonlijke afspraken of vakantie direct in je eigen agenda — de planner overslaat je
+                  automatisch als je bezet bent (incl. reistijd heen en terug).
                 </p>
-                <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-widest text-brass-deep/50 mb-1">
-                  {["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map((d) => (
-                    <div key={d}>{d}</div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1">
-                  {(() => {
-                    const first = days[0];
-                    const offset = (first.getDay() + 6) % 7; // make Monday=0
-                    return Array.from({ length: offset }).map((_, i) => <div key={"e" + i} />);
-                  })()}
-                  {days.map((d) => {
-                    const key = ymd(d);
-                    const ride = rides[key];
-                    const blocked = unavailable.has(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleDay(key)}
-                        className={`aspect-square p-1 border text-left text-[10px] flex flex-col justify-between transition-colors ${
-                          ride
-                            ? "bg-brass-gold/20 border-brass-gold text-brass-deep cursor-default"
-                            : blocked
-                            ? "bg-brass-deep text-parchment border-brass-deep"
-                            : "bg-parchment border-brass-deep/15 text-brass-deep/70 hover:border-brass-deep"
-                        }`}
-                      >
-                        <span className="font-bold">{d.getDate()}</span>
-                        {ride ? (
-                          <span className="truncate text-[9px] leading-tight">
-                            {ride.pickup_city}→{ride.dropoff_city}
-                          </span>
-                        ) : blocked ? (
-                          <span className="text-[9px] uppercase tracking-wider">Vrij</span>
-                        ) : (
-                          <span className="text-[9px] text-brass-deep/40">{niceDay(d).split(" ")[0]}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-4 mt-3 text-[10px] text-brass-deep/60">
-                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-parchment border border-brass-deep/15" />Beschikbaar</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-brass-deep" />Niet beschikbaar</span>
-                  <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 bg-brass-gold/30 border border-brass-gold" />Rit gepland</span>
-                </div>
               </section>
 
               <button
