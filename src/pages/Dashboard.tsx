@@ -788,6 +788,14 @@ const EscortDashboard = () => {
                 <div className="shrink-0">
                   {isInvited && !expired ? (
                     <div className="flex items-center gap-2">
+                      {hasGoogleConflict(a.ride.scheduled_at) && (
+                        <span
+                          title="Je hebt op dit moment een afspraak in je Google Agenda"
+                          className="text-[10px] uppercase tracking-widest text-destructive font-bold whitespace-nowrap"
+                        >
+                          ⚠ Agenda-conflict
+                        </span>
+                      )}
                       <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
                         Nog {minsLeft} min
                       </span>
