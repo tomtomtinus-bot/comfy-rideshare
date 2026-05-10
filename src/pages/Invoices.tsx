@@ -7,7 +7,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, vatRateFor, type BillingParty } from "@/lib/invoicePdf";
+import { vatRateFor, type BillingParty } from "@/lib/invoicePdf";
 
 interface PlatformInvoice {
   id: string;
@@ -231,37 +231,8 @@ const InvoicesInner = () => {
     load();
   };
 
-  const fetchClientParty = async (id: string): Promise<BillingParty> => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number")
-      .eq("id", id)
-      .maybeSingle();
-    return (data ?? {}) as BillingParty;
-  };
-
-  const fetchEscortParty = async (id: string): Promise<BillingParty> => {
-    const [{ data: prof }, { data: ep }] = await Promise.all([
-      supabase.from("profiles").select("full_name").eq("id", id).maybeSingle(),
-      supabase
-        .from("escort_profiles")
-        .select("company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number, iban, bank_account_holder, wero_enabled, wero_handle, wero_fee")
-        .eq("id", id)
-        .maybeSingle(),
-    ]);
-    return { ...(prof ?? {}), ...(ep ?? {}) } as BillingParty;
-  };
-
-  const PLATFORM_PARTY: BillingParty = {
-    company_name: "Lowloads B.V.",
-    billing_address: "Mediavaert 1",
-    billing_postcode: "1114 BC",
-    billing_city: "Amsterdam-Duivendrecht",
-    billing_country: "Nederland",
-    kvk_number: "00000000",
-    vat_number: "NL000000000B01",
-    billing_email: "facturatie@lowloads.app",
-  };
+  // PDF generation now happens server-side via the `generate-invoice-pdf` edge function.
+  // The local helpers/constants for client-side rendering have been removed.
 
   const openInvoicePdf = async (
     invoiceId: string,
