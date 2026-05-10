@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { NotificationsListener } from "@/components/NotificationsListener";
 import { PendingApprovalBanner } from "@/components/PendingApprovalBanner";
+import { CookieConsent } from "@/components/site/CookieConsent";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
@@ -39,6 +40,7 @@ const App = () => (
         <AuthProvider>
           <NotificationsListener />
           <PendingApprovalBanner />
+          <CookieConsent />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
