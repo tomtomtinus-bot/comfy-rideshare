@@ -17,6 +17,7 @@ import History from "./pages/History.tsx";
 
 import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
+import EditRide from "./pages/EditRide.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
+            <Route path="/rit/:id/bewerk" element={<EditRide />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="users" replace />} />
               <Route path="users" element={<AdminUsers />} />
