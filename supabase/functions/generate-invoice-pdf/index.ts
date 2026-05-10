@@ -349,18 +349,20 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: roleRow } = await admin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid)
-        .eq("role", "admin")
-        .maybeSingle();
-      const isAdmin = !!roleRow;
-      if (!isAdmin && uid !== inv.client_id) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (!isInternal) {
+        const { data: roleRow } = await admin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid!)
+          .eq("role", "admin")
+          .maybeSingle();
+        const isAdmin = !!roleRow;
+        if (!isAdmin && uid !== inv.client_id) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
       invoice = inv;
 
