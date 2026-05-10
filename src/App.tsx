@@ -22,6 +22,7 @@ import EditRide from "./pages/EditRide.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
+import Unsubscribe from "./pages/Unsubscribe.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminRides from "./pages/admin/AdminRides.tsx";
@@ -67,6 +68,7 @@ const App = () => (
             </Route>
             <Route path="/voorwaarden" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
