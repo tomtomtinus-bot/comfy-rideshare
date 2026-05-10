@@ -17,6 +17,7 @@ import History from "./pages/History.tsx";
 
 import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
+import EditRide from "./pages/EditRide.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
