@@ -43,9 +43,17 @@ export const Nav = () => {
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
-          <Link to="/#ritten" className="hover:text-brass-gold transition-colors">{t("nav.transports")}</Link>
+          <Link
+            to={role === "begeleider" ? "/dashboard" : "/#ritten"}
+            className="hover:text-brass-gold transition-colors"
+          >
+            {t("nav.transports")}
+          </Link>
           {role !== "begeleider" && (
             <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">{t("nav.requests")}</Link>
+          )}
+          {role === "begeleider" && user && (
+            <Link to="/profiel" className="hover:text-brass-gold transition-colors">{t("nav.profile")}</Link>
           )}
           <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
         </div>
