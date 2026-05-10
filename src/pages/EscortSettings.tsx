@@ -205,16 +205,6 @@ const Inner = () => {
     setFiles((s) => s.filter((p) => p !== path));
   };
 
-  const toggleDay = (key: string) => {
-    if (rides[key]) return; // ritten zijn niet bewerkbaar
-    setUnavailable((s) => {
-      const next = new Set(s);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
-
   const days = useMemo(() => {
     const arr: Date[] = [];
     const today = new Date();
