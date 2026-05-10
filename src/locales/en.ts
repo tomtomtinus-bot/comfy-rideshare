@@ -124,6 +124,12 @@ const en: Dict = {
     oauthFail: "Could not start OAuth",
     couplingFail: "Connection failed: {{error}}",
     unknownError: "unknown error",
+    syncNow: "Sync now",
+    syncing: "Syncing…",
+    disconnect: "Disconnect",
+    disconnecting: "Disconnecting…",
+    connectGoogle: "Connect with Google",
+    connecting: "Working…",
   },
 };
 export default en;
