@@ -13,7 +13,7 @@ const steps = [
   },
   {
     n: "03",
-    title: "Bevestiging binnen 30 min",
+    title: "Bevestiging binnen enkele momenten",
     body:
       "Begeleiders accepteren via app of pushmelding. U ziet live wie bevestigt en ontvangt automatisch de definitieve bemanning, contactgegevens en routedetails.",
   },

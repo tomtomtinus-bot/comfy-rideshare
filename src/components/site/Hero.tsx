@@ -12,7 +12,7 @@ export const Hero = () => {
           </p>
           <h1 className="font-display text-[2.25rem] sm:text-6xl lg:text-8xl text-brass-deep leading-[1] md:leading-[0.95] italic">
             Een begeleider<br />
-            binnen 30 minuten.
+            binnen enkele momenten.
           </h1>
         </div>
         <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
