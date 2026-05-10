@@ -846,12 +846,12 @@ const EscortDashboard = () => {
                 >
                   <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
                     <div>
-                      <strong>Geplande boekingstijd:</strong>{" "}
-                      {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                      <strong>{t("dash.plannedTime")}</strong>{" "}
+                      {new Date(a.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}
                     </div>
                     <div>
-                      <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
-                      <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
+                      <strong>{t("dash.travelFromBase")}</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
+                      <strong>{t("dash.back")}</strong> {fmtHours(a.travel_back_home_min)} {t("dash.roundedQuarter")}
                     </div>
                   </div>
                   {(() => {
