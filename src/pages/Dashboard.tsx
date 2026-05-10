@@ -538,6 +538,23 @@ const EscortDashboard = () => {
     setItems(merged);
     setLoading(false);
 
+    // Google Agenda bezet-vensters ophalen voor waarschuwing bij uitnodigingen
+    try {
+      const { data: g } = await supabase.functions.invoke("google-calendar-sync");
+      if (g && (g as any).connected && Array.isArray((g as any).busy)) {
+        setGoogleBusy(
+          ((g as any).busy as { start: string; end: string }[]).map((b) => ({
+            start: new Date(b.start).getTime(),
+            end: new Date(b.end).getTime(),
+          })),
+        );
+      } else {
+        setGoogleBusy([]);
+      }
+    } catch (_) {
+      setGoogleBusy([]);
+    }
+
     // Resolve real names for accepted assignments only
     const acceptedIds = merged
       .filter((m) => m.status === "accepted" || m.hours_submitted_at)
