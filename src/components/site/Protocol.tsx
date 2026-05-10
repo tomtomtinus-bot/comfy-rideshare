@@ -27,18 +27,18 @@ const steps = [
 
 export const Protocol = () => {
   return (
-    <section id="protocol" className="py-24 md:py-32 px-6 md:px-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-12 lg:gap-16">
+    <section id="protocol" className="py-16 md:py-32 px-5 md:px-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 lg:gap-16">
         <div className="col-span-12 lg:col-span-4">
-          <h2 className="font-display text-4xl md:text-5xl text-brass-deep italic leading-tight">
+          <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight">
             Van vergunning tot bestemming.
           </h2>
-          <p className="mt-6 text-brass-deep/60 max-w-sm">
+          <p className="mt-4 md:mt-6 text-brass-deep/60 max-w-sm text-sm md:text-base">
             Vier stappen van aanvraag tot afrekening, met certificering op elk niveau.
           </p>
         </div>
         <div className="col-span-12 lg:col-span-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 md:gap-y-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 md:gap-y-16">
             {steps.map((s) => (
               <div key={s.n}>
                 <span className="font-display text-4xl italic text-brass-gold block mb-3">{s.n}</span>

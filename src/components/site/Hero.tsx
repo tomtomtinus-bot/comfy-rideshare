@@ -4,19 +4,19 @@ import { useAuth } from "@/hooks/useAuth";
 export const Hero = () => {
   const { user } = useAuth();
   return (
-    <section className="relative pt-20 md:pt-32 pb-20 md:pb-24 px-6 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-12 items-end">
+    <section className="relative pt-14 md:pt-32 pb-12 md:pb-24 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 md:gap-12 items-end">
         <div className="col-span-12 lg:col-span-8 animate-fade-up">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
+          <p className="text-brass-gold uppercase tracking-[0.25em] md:tracking-[0.3em] font-semibold text-[10px] md:text-xs mb-4 md:mb-6">
             Convoi Exceptionnel · Pilotvoertuigen
           </p>
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-8xl text-brass-deep leading-[0.95] italic">
+          <h1 className="font-display text-[2.25rem] sm:text-6xl lg:text-8xl text-brass-deep leading-[1] md:leading-[0.95] italic">
             Begeleiding voor<br />
             uitzonderlijk vervoer.
           </h1>
         </div>
         <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
-          <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-[34ch] mb-8">
+          <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[34ch] mb-6 md:mb-8">
             Wij koppelen transportbedrijven aan gecertificeerde verkeersregelaars
             met pilotvoertuig voor te brede, te hoge, te lange of te zware ladingen
             in NL, BE, DE en FR.
