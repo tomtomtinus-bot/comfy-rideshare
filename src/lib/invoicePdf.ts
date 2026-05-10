@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoUrl from "@/assets/pilotcrew-logo.png";
+import logoUrl from "@/assets/viacust-logo.png";
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
 
@@ -109,11 +109,11 @@ const drawShell = (doc: jsPDF, opts: BasePdfOpts, logoDataUrl: string | null) =>
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   doc.setTextColor(20);
-  doc.text("PILOTCREW", nameX, 25);
+  doc.text("ViaCust", nameX, 25);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(120);
-  doc.text("Verstuurd via pilotcrew.app", nameX, 30);
+  doc.text("Verstuurd via viacust.app", nameX, 30);
 
   // Sender details (top-right, small)
   doc.setFont("helvetica", "normal");
