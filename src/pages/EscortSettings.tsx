@@ -235,6 +235,10 @@ const Inner = () => {
       baseCity: city,
       hourlyRate: num("hourlyRate", "0"),
       hourlyRateBe: num("hourlyRateBe", "0"),
+      hourlyRateDe: num("hourlyRateDe", "0"),
+      hourlyRateFr: num("hourlyRateFr", "0"),
+      hourlyRateLu: num("hourlyRateLu", "0"),
+      kmRateDe: num("kmRateDe", ""),
       minBillableHours: num("minBillableHours", "0"),
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
@@ -244,6 +248,11 @@ const Inner = () => {
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     if (!coords) return toast.error("Locatie niet bepaald — controleer postcode");
     if (categories.length === 0) return toast.error("Kies minimaal één land/certificering");
+
+    const derivedCountries = countriesFromCategories(categories);
+    if (derivedCountries.length === 0) {
+      return toast.error("Kies minimaal één land/certificering");
+    }
 
     setBusy(true);
     const { error } = await supabase
@@ -256,6 +265,14 @@ const Inner = () => {
         base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
         hourly_rate_be: parsed.data.hourlyRateBe,
+        hourly_rate_de: parsed.data.hourlyRateDe,
+        hourly_rate_fr: parsed.data.hourlyRateFr,
+        hourly_rate_lu: parsed.data.hourlyRateLu,
+        km_rate_de:
+          parsed.data.kmRateDe === "" || parsed.data.kmRateDe == null
+            ? null
+            : Number(parsed.data.kmRateDe),
+        countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         cert_number: parsed.data.certNumber || null,
