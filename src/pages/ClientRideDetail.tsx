@@ -6,6 +6,7 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { MiniMap } from "@/components/site/MiniMap";
 import { openPermitPdf } from "@/lib/openPermitPdf";
+import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { toast } from "sonner";
 
 interface RideDetail {
