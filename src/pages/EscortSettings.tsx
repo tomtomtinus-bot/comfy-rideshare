@@ -503,27 +503,6 @@ const Inner = () => {
                 )}
               </section>
 
-              <section>
-                <Label>Certificaten (uploads)</Label>
-                <div className="mt-2 space-y-2">
-                  {files.map((p) => (
-                    <div key={p} className="flex items-center justify-between bg-parchment border border-brass-deep/15 px-3 py-2 text-xs">
-                      <span className="truncate">{p.split("/").pop()}</span>
-                      <button type="button" onClick={() => removeFile(p)} className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest">
-                        Verwijder
-                      </button>
-                    </div>
-                  ))}
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={handleUpload}
-                    className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold"
-                  />
-                  <p className="text-[10px] text-brass-deep/50">PDF/JPG/PNG · max 10 MB</p>
-                </div>
-              </section>
-
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
                 <p className="text-sm text-brass-deep/80">
