@@ -292,6 +292,8 @@ const Inner = () => {
     };
     const composedAddress = [street.trim(), houseNumber.trim()].filter(Boolean).join(" ");
     const parsed = schema.safeParse({
+      fullName,
+      phone,
       baseAddress: composedAddress,
       basePostcode: postcode,
       baseCity: city,
