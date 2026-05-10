@@ -14,7 +14,7 @@ import EscortSettings from "./pages/EscortSettings.tsx";
 import Invoices from "./pages/Invoices.tsx";
 import BillingDetails from "./pages/BillingDetails.tsx";
 import History from "./pages/History.tsx";
-import Permits from "./pages/Permits.tsx";
+
 import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/facturen" element={<Invoices />} />
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
             <Route path="/geschiedenis" element={<History />} />
-            <Route path="/ontheffingen" element={<Permits />} />
+            
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
