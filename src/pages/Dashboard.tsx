@@ -237,10 +237,10 @@ const ClientDashboard = () => {
       filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= f);
     }
     if (exportTo) {
-      const t = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
-      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= t);
+      const endMs = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= endMs);
     }
-    if (filtered.length === 0) return toast.error("Geen ritten in dit tijdsbestek");
+    if (filtered.length === 0) return toast.error(t("dash.noRidesInRange"));
     const rows = filtered.map((r) => {
       const ass = assignments[r.id] ?? [];
       const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
@@ -248,29 +248,29 @@ const ClientDashboard = () => {
       const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
       const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
       return {
-        "Datum": fmtDate(r.scheduled_at),
-        "Rit ID": r.id.slice(0, 8),
-        "Referentie": r.client_reference ?? "",
-        "Vergunning": r.permit_number ?? "",
-        "Vertrek": `${r.pickup_address} (${r.pickup_city})`,
-        "Bestemming": `${r.dropoff_address} (${r.dropoff_city})`,
-        "Aantal begeleiders": r.num_escorts,
-        "Begeleiders": escortIds,
-        "Status": r.status,
-        "Geschatte kosten (€)": +totalEst.toFixed(2),
-        "Werkelijke kosten (€)": allSubmitted ? +totalActual.toFixed(2) : null,
-        "Servicekosten (€)": Number(r.app_fee ?? 0),
-        "Totaal incl. fee (€)": allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
-        "Opmerkingen": r.notes ?? "",
+        [t("common.date")]: fd(r.scheduled_at),
+        [t("xlsx.rideId") || "Ride ID"]: r.id.slice(0, 8),
+        [t("xlsx.reference") || "Reference"]: r.client_reference ?? "",
+        [t("xlsx.permit") || "Permit"]: r.permit_number ?? "",
+        [t("xlsx.pickup") || "Pickup"]: `${r.pickup_address} (${r.pickup_city})`,
+        [t("xlsx.dropoff") || "Dropoff"]: `${r.dropoff_address} (${r.dropoff_city})`,
+        [t("xlsx.numEscorts") || "Escorts"]: r.num_escorts,
+        [t("xlsx.escorts") || "Escorts list"]: escortIds,
+        [t("xlsx.status") || "Status"]: r.status,
+        [t("xlsx.estCost") || "Estimated cost (€)"]: +totalEst.toFixed(2),
+        [t("xlsx.actualCost") || "Actual cost (€)"]: allSubmitted ? +totalActual.toFixed(2) : null,
+        [t("xlsx.serviceFee") || "Service fee (€)"]: Number(r.app_fee ?? 0),
+        [t("xlsx.totalIncl") || "Total incl. fee (€)"]: allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
+        [t("xlsx.notes") || "Notes"]: r.notes ?? "",
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ritten");
+    XLSX.utils.book_append_sheet(wb, ws, t("dash.myRides"));
     const range = exportFrom || exportTo ? `-${exportFrom || "begin"}_tot_${exportTo || "eind"}` : "";
     XLSX.writeFile(wb, `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Excel-bestand gedownload");
+    toast.success(t("dash.excelDownloaded"));
     setExportOpen(false);
   };
 
