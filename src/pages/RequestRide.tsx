@@ -271,7 +271,7 @@ const RequestRideInner = () => {
   const bookEscorts = async (selected: MatchedEscort[]) => {
     if (!user || !pickupGeo || !dropoffGeo) return;
     if (selected.length !== form.num_escorts) {
-      return toast.error(`Selecteer precies ${form.num_escorts} begeleider(s)`);
+      return toast.error(t("request.pickExact", { n: form.num_escorts }));
     }
 
     const rideKm = distanceKm(pickupGeo, dropoffGeo);
