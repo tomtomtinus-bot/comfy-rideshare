@@ -85,14 +85,15 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // 1. Wipe existing demo users (anything ending in DEMO_DOMAIN).
+    // 1. Wipe existing demo users (DEMO_DOMAIN + legacy "@demo.nl").
     let page = 1;
     const toDelete: string[] = [];
     while (true) {
       const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
       if (error) throw error;
       for (const u of data.users) {
-        if (u.email && u.email.toLowerCase().endsWith(DEMO_DOMAIN)) toDelete.push(u.id);
+        const em = (u.email || "").toLowerCase();
+        if (em.endsWith(DEMO_DOMAIN) || em.endsWith("@demo.nl")) toDelete.push(u.id);
       }
       if (data.users.length < 200) break;
       page++;
