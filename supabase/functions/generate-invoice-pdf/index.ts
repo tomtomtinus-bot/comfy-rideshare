@@ -237,30 +237,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify user via their token
-    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const uid = userData.user.id;
-
+    const authHeader = req.headers.get("Authorization");
     const body = await req.json().catch(() => ({}));
     const invoiceId = String(body?.invoice_id ?? "");
     const type = body?.type === "platform" ? "platform" : "regular";
@@ -270,6 +251,39 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Determine mode: "user" (returns signed URL after authz) or "internal"
+    // (called by DB trigger; only generates+stores, no signed URL returned).
+    let uid: string | null = null;
+    const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim() ?? "";
+    const isInternal = !bearer || bearer === anonKey || bearer === serviceKey;
+    if (!isInternal) {
+      const userClient = createClient(url, anonKey, {
+        global: { headers: { Authorization: authHeader! } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      uid = userData.user.id;
+    }
+
+    const admin = createClient(url, serviceKey);
+
+    // Fetch logo (public bucket) once per call
+    let logoDataUrl: string | null = null;
+    try {
+      const logoRes = await fetch(`${url}/storage/v1/object/public/branding/viacust-logo.png`);
+      if (logoRes.ok) {
+        const buf = new Uint8Array(await logoRes.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+        logoDataUrl = `data:image/png;base64,${btoa(bin)}`;
+      }
+    } catch (_) { /* ignore */ }
 
     const admin = createClient(url, serviceKey);
 
