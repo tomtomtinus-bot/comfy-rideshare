@@ -226,16 +226,30 @@ const Inner = () => {
   const toggle = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
-  const onPostcodeBlur = async () => {
+  const runAddressLookup = async () => {
     if (!postcode || postcode.length < 4) return;
+    const country = detectCountry(postcode);
     setLookupBusy(true);
-    const c = await lookupPostcode(postcode, detectCountry(postcode));
+    if (country === "nl" && houseNumber.trim()) {
+      const a = await lookupAddressNL(postcode, houseNumber);
+      setLookupBusy(false);
+      if (a) {
+        setStreet(a.street);
+        setCity(a.city);
+        if (a.lat && a.lng) setCoords({ lat: a.lat, lng: a.lng });
+        setDirty(true);
+        return;
+      }
+      // fallback naar postcode-only lookup
+    }
+    const c = await lookupPostcode(postcode, country);
     setLookupBusy(false);
     if (c) {
       setCity(c.city);
       setCoords({ lat: c.lat, lng: c.lng });
+      setDirty(true);
     } else {
-      toast.error("Postcode niet gevonden");
+      toast.error("Adres niet gevonden — controleer postcode/huisnummer");
     }
   };
 
