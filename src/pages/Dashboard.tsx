@@ -865,10 +865,10 @@ const EscortDashboard = () => {
                     return (
                       <>
                         <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                          Starttijd rit (op pickup)
+                          {t("dash.rideStartTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_start_date"
                             type="date"
@@ -878,23 +878,23 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
                           <select
                             name="ride_start_time"
                             defaultValue={defTime}
                             required
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           >
-                            {QUARTER_TIMES.map((t) => (
-                              <option key={t} value={t}>{t}</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
                             ))}
                           </select>
                         </div>
                         <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
-                          Eindtijd rit (op dropoff)
+                          {t("dash.rideEndTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_end_date"
                             type="date"
@@ -904,16 +904,16 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
                           <select
                             name="ride_end_time"
                             defaultValue=""
                             required
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           >
-                            <option value="" disabled>Kies tijd…</option>
-                            {QUARTER_TIMES.map((t) => (
-                              <option key={t} value={t}>{t}</option>
+                            <option value="" disabled>{t("dash.pickTime")}</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
                             ))}
                           </select>
                         </div>
