@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
-import { CITIES, geocode } from "@/lib/geo";
 
 const Auth = () => {
   const { user, loading } = useAuth();
