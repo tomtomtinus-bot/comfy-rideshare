@@ -179,6 +179,8 @@ const en: Dict = {
     sent: "Sent",
     draft: "Draft",
   },
+  xlsx: { rideId: "Ride ID", reference: "Reference", permit: "Permit", pickup: "Pickup", dropoff: "Dropoff", numEscorts: "Number of escorts", escorts: "Escorts", status: "Status", estCost: "Estimated cost (€)", actualCost: "Actual cost (€)", serviceFee: "Service fee (€)", totalIncl: "Total incl. fee (€)", notes: "Notes" },
+
   dash: {
     clientKicker: "Client",
     escortKicker: "Escort",
