@@ -139,6 +139,29 @@ const Auth = () => {
               </p>
             )}
 
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 accent-brass-deep"
+                />
+                <span>
+                  Ik ga akkoord met de{" "}
+                  <Link
+                    to="/voorwaarden"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brass-gold underline hover:text-brass-deep"
+                  >
+                    algemene voorwaarden
+                  </Link>
+                  .
+                </span>
+              </label>
+            )}
+
             <button
               disabled={busy}
               className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
