@@ -277,17 +277,23 @@ const Inner = () => {
         vehicle_type: parsed.data.vehicleType,
         categories,
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
-        fuel_surcharge: {
-          enabled: fuel.enabled,
-          kind: fuel.kind,
-          tiers: fuel.tiers
-            .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
-            .map((t) => ({
-              from: Number(t.from) || 0,
-              to: t.to === "" ? null : Number(t.to),
-              value: Number(t.value) || 0,
-            })),
-        } as any,
+        fuel_surcharge: ((): any => {
+          const baseCountry = detectCountry(parsed.data.basePostcode || "");
+          if (baseCountry === "be" || baseCountry === "fr") {
+            return { enabled: false, kind: fuel.kind, tiers: [] };
+          }
+          return {
+            enabled: fuel.enabled,
+            kind: fuel.kind,
+            tiers: fuel.tiers
+              .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
+              .map((t) => ({
+                from: Number(t.from) || 0,
+                to: t.to === "" ? null : Number(t.to),
+                value: Number(t.value) || 0,
+              })),
+          };
+        })(),
       })
       .eq("id", user.id);
 
@@ -392,6 +398,10 @@ const Inner = () => {
                 </div>
               </section>
 
+              {(() => {
+                const baseCountry = detectCountry(postcode || "");
+                if (baseCountry === "be" || baseCountry === "fr") return null;
+                return (
               <section>
                 <Label>Brandstoftoeslag (staffel)</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
@@ -498,6 +508,8 @@ const Inner = () => {
                   </>
                 )}
               </section>
+                );
+              })()}
 
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
