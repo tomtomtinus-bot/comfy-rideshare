@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { AgendaPlanner } from "@/components/site/AgendaPlanner";
+import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const fmtHours = (min: number) => {
@@ -701,19 +701,7 @@ const EscortDashboard = () => {
         </Link>
       </header>
 
-      {user && (
-        <AgendaPlanner
-          escortId={user.id}
-          rides={items
-            .filter((i) => i.status === "accepted" || i.status === "invited")
-            .map((i) => ({
-              id: i.ride.id,
-              scheduled_at: i.ride.scheduled_at,
-              pickup_city: i.ride.pickup_city,
-              dropoff_city: i.ride.dropoff_city,
-            }))}
-        />
-      )}
+      {user && <GoogleAgendaStatus />}
 
       {loading ? (
         <p className="text-sm text-brass-deep/50">Laden…</p>
