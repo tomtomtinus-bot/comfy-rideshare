@@ -133,10 +133,10 @@ const Auth = () => {
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            {mode === "login" ? t("auth.login") : t("auth.signup")}
+            {mode === "login" ? t("auth.login") : mode === "signup" ? t("auth.signup") : "Wachtwoord vergeten"}
           </p>
           <h1 className="font-display text-4xl text-brass-deep italic mb-8">
-            {mode === "login" ? t("auth.welcomeBack") : t("auth.join")}
+            {mode === "login" ? t("auth.welcomeBack") : mode === "signup" ? t("auth.join") : "Herstel je toegang"}
           </h1>
 
           {mode === "signup" && (
@@ -156,92 +156,106 @@ const Auth = () => {
             </div>
           )}
 
-          <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
-            {mode === "signup" && (
-              <>
-                <Field name="fullName" label={t("auth.fullName")} required />
-                <Field name="phone" label={t("auth.phone")} required />
-              </>
-            )}
-            <Field name="email" type="email" label={t("auth.email")} required />
-            <Field name="password" type="password" label={t("auth.password")} required />
-
-            {mode === "login" && (
-              <label className="flex items-center gap-2 text-xs text-brass-deep/80 cursor-pointer select-none pt-1">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="accent-brass-deep"
-                />
-                <span>Blijf ingelogd op dit apparaat</span>
-              </label>
-            )}
-
-            {mode === "signup" && role === "begeleider" && (
-              <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
-                {t("auth.escortHint")}
+          {mode === "forgot" ? (
+            <form onSubmit={handleForgot} className="space-y-4">
+              <p className="text-xs text-brass-deep/70 leading-relaxed">
+                Vul je e-mailadres in. We sturen je een link om een nieuw wachtwoord in te stellen.
               </p>
-            )}
+              <Field name="email" type="email" label={t("auth.email")} required />
+              <button
+                disabled={busy}
+                className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
+              >
+                {busy ? t("auth.busy") : "Stuur herstellink"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
+              {mode === "signup" && (
+                <>
+                  <Field name="fullName" label={t("auth.fullName")} required />
+                  <Field name="phone" label={t("auth.phone")} required />
+                </>
+              )}
+              <Field name="email" type="email" label={t("auth.email")} required />
+              <Field name="password" type="password" label={t("auth.password")} required />
 
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={acceptedTerms}
-                    onChange={(e) => setAcceptedTerms(e.target.checked)}
-                    className="mt-0.5 accent-brass-deep"
-                  />
-                  <span>
-                    Ik ga akkoord met de{" "}
-                    <Link
-                      to="/voorwaarden"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brass-gold underline hover:text-brass-deep"
-                    >
-                      algemene voorwaarden
-                    </Link>
-                    .
-                  </span>
-                </label>
-                <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={acceptedPrivacy}
-                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                    className="mt-0.5 accent-brass-deep"
-                  />
-                  <span>
-                    Ik ga akkoord met de{" "}
-                    <Link
-                      to="/privacy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brass-gold underline hover:text-brass-deep"
-                    >
-                      privacyverklaring
-                    </Link>
-                    .
-                  </span>
-                </label>
-              </div>
-            )}
+              {mode === "login" && (
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <label className="flex items-center gap-2 text-xs text-brass-deep/80 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="accent-brass-deep"
+                    />
+                    <span>Blijf ingelogd</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setMode("forgot")}
+                    className="text-xs text-brass-gold hover:text-brass-deep underline"
+                  >
+                    Wachtwoord vergeten?
+                  </button>
+                </div>
+              )}
 
-            <button
-              disabled={busy}
-              className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
-            >
-              {busy ? t("auth.busy") : mode === "login" ? t("auth.login") : t("auth.signup")}
-            </button>
-          </form>
+              {mode === "signup" && role === "begeleider" && (
+                <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
+                  {t("auth.escortHint")}
+                </p>
+              )}
+
+              {mode === "signup" && (
+                <div className="space-y-2">
+                  <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-0.5 accent-brass-deep"
+                    />
+                    <span>
+                      Ik ga akkoord met de{" "}
+                      <Link to="/voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brass-gold underline hover:text-brass-deep">
+                        algemene voorwaarden
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                  <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={acceptedPrivacy}
+                      onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                      className="mt-0.5 accent-brass-deep"
+                    />
+                    <span>
+                      Ik ga akkoord met de{" "}
+                      <Link to="/privacy" target="_blank" rel="noopener noreferrer" className="text-brass-gold underline hover:text-brass-deep">
+                        privacyverklaring
+                      </Link>
+                      .
+                    </span>
+                  </label>
+                </div>
+              )}
+
+              <button
+                disabled={busy}
+                className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
+              >
+                {busy ? t("auth.busy") : mode === "login" ? t("auth.login") : t("auth.signup")}
+              </button>
+            </form>
+          )}
 
           <button
             onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
           >
-            {mode === "login" ? t("auth.noAccount") : t("auth.hasAccount")}
+            {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
           </button>
         </div>
       </main>
