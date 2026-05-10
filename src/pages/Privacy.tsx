@@ -96,7 +96,7 @@ const PrivacyNL = () => (
     <p>U heeft het recht op inzage, correctie of verwijdering van uw persoonsgegevens. Daarnaast heeft u het recht op dataportabiliteit en kunt u bezwaar maken tegen de verwerking. Voor het uitoefenen van deze rechten of het intrekken van toestemming kunt u terecht in uw accountinstellingen of contact met ons opnemen.</p>
 
     <h2>9. Contact</h2>
-    <p>Voor vragen over deze privacyverklaring: <strong>Tiny Paashuis — ViaCust</strong> · <a href="mailto:info@viacust.com">info@viacust.com</a></p>
+    <p>Voor vragen over deze privacyverklaring: <a href="mailto:info@viacust.com">info@viacust.com</a></p>
   </>
 );
 
