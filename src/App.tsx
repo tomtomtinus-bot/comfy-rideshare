@@ -52,6 +52,7 @@ const App = () => (
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
+            <Route path="/rit/:id/bewerk" element={<EditRide />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="users" replace />} />
               <Route path="users" element={<AdminUsers />} />
