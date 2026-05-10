@@ -715,7 +715,7 @@ const EscortDashboard = () => {
       await supabase.from("rides").update({ status: "completed" }).eq("id", item.ride_id);
     }
 
-    toast.success("Uren geregistreerd");
+    toast.success(t("dash.hoursRegistered"));
     setOpenId(null);
     load();
   };
