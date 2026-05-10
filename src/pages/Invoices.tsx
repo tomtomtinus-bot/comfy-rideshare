@@ -458,11 +458,11 @@ const InvoicesInner = () => {
   }
 
   function renderEscortInvoices() {
-    if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
+    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
     if (invoices.length === 0)
       return (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">Nog geen facturen.</p>
+          <p className="text-brass-deep/60">{t("invoices.noInvoices")}</p>
         </div>
       );
     return (
@@ -474,24 +474,24 @@ const InvoicesInner = () => {
                   <li key={inv.id} className="bg-card p-6 md:p-8">
                     <div className="grid grid-cols-12 gap-4 items-start">
                       <div className="col-span-12 md:col-span-3">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Factuur</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.invoice")}</p>
                         <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
                         <p className="text-xs text-brass-deep/55 mt-1">{fd(inv.created_at)}</p>
                       </div>
                       <div className="col-span-12 md:col-span-4">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Periode</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.period")}</p>
                         <p className="text-sm">{fd(inv.period_start)} → {fd(inv.period_end)}</p>
                       </div>
                       <div className="col-span-6 md:col-span-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Uren</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.hours")}</p>
                         <p className="font-semibold tabular-nums">{Number(inv.total_hours).toFixed(2)}u</p>
                       </div>
                       <div className="col-span-6 md:col-span-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Totaal</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.total")}</p>
                         <p className="font-semibold tabular-nums text-brass-gold">{fmtMoney(inv.total_amount)}</p>
                       </div>
                       <div className="col-span-12 md:col-span-1 text-right">
-                        <span className="text-[10px] uppercase tracking-widest font-bold text-brass-gold">{inv.status}</span>
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-brass-gold">{t(`status.${inv.status}` as any)}</span>
                       </div>
                     </div>
 
@@ -500,20 +500,20 @@ const InvoicesInner = () => {
                         onClick={() => setOpen(isOpen ? null : inv.id)}
                         className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
                       >
-                        {isOpen ? "Verberg regels" : "Toon regels"}
+                        {isOpen ? t("invoices.hideRows") : t("invoices.showRows")}
                       </button>
                       <button
                         onClick={() => downloadEscortPdf(inv)}
                         className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
                       >
-                        Download PDF
+                        {t("common.downloadPdf")}
                       </button>
                       {!isEscort && inv.status !== "paid" && (
                         <button
                           onClick={() => markPaid(inv.id)}
                           className="ml-auto px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                         >
-                          Markeer als betaald
+                          {t("invoices.markPaid")}
                         </button>
                       )}
                     </div>
@@ -539,11 +539,11 @@ const InvoicesInner = () => {
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
-                                <th className="text-left py-2">Datum</th>
-                                <th className="text-left py-2">Omschrijving</th>
-                                <th className="text-right py-2">Uren</th>
-                                <th className="text-right py-2">Tarief</th>
-                                <th className="text-right py-2">Bedrag</th>
+                                <th className="text-left py-2">{t("invoices.date")}</th>
+                                <th className="text-left py-2">{t("invoices.description")}</th>
+                                <th className="text-right py-2">{t("invoices.hours")}</th>
+                                <th className="text-right py-2">{t("invoices.rate")}</th>
+                                <th className="text-right py-2">{t("invoices.amount")}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -558,7 +558,7 @@ const InvoicesInner = () => {
                               ))}
                               <tr className="border-t-2 border-brass-deep/20">
                                 <td colSpan={4} className="py-3 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                  Subtotaal ritten
+                                  {t("invoices.subtotalRides")}
                                 </td>
                                 <td className="py-3 text-right tabular-nums font-semibold">{fmtMoney(ridesSubtotal)}</td>
                               </tr>
@@ -575,7 +575,7 @@ const InvoicesInner = () => {
                               {fuelRows.length > 0 && (
                                 <tr className="border-t border-brass-deep/10">
                                   <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                    Brandstoftoeslag
+                                    {t("invoices.fuelSurcharge")}
                                   </td>
                                   <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(fuelSubtotal)}</td>
                                 </tr>
@@ -583,34 +583,34 @@ const InvoicesInner = () => {
 
                               <tr className="border-t border-brass-deep/10">
                                 <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                  Subtotaal excl. btw
+                                  {t("invoices.subtotalExcl")}
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(subtotal)}</td>
                               </tr>
                               <tr>
                                 <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                  {reverseCharge ? "Btw verlegd" : "Btw 21%"}
+                                  {reverseCharge ? t("invoices.vatReverse") : t("invoices.vat21")}
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
                               </tr>
                               {reverseCharge && (
                                 <tr>
                                   <td colSpan={5} className="py-2 text-right text-[10px] italic text-brass-deep/55">
-                                    BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).
+                                    {t("invoices.vatNote")}
                                   </td>
                                 </tr>
                               )}
                               {weroFee > 0 && (
                                 <tr>
                                   <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                    Wero-betaaltoeslag
+                                    {t("invoices.weroSurcharge")}
                                   </td>
                                   <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(weroFee)}</td>
                                 </tr>
                               )}
                               <tr className="border-t-2 border-brass-deep/30">
                                 <td colSpan={4} className="py-3 text-right text-xs uppercase tracking-widest font-bold text-brass-deep">
-                                  Eindbedrag
+                                  {t("invoices.finalTotal")}
                                 </td>
                                 <td className="py-3 text-right tabular-nums font-bold text-brass-gold text-base">{fmtMoney(total)}</td>
                               </tr>
