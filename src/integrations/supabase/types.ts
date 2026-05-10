@@ -867,6 +867,7 @@ export type Database = {
       }
       weekly_fuel_prices: {
         Row: {
+          country: string
           eur_per_liter: number
           fetched_at: string
           id: string
@@ -874,6 +875,7 @@ export type Database = {
           week_start: string
         }
         Insert: {
+          country?: string
           eur_per_liter: number
           fetched_at?: string
           id?: string
@@ -881,6 +883,7 @@ export type Database = {
           week_start: string
         }
         Update: {
+          country?: string
           eur_per_liter?: number
           fetched_at?: string
           id?: string
