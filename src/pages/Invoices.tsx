@@ -87,6 +87,28 @@ const InvoicesInner = () => {
     if (error) toast.error(error.message);
     const list = (inv ?? []) as Invoice[];
     setInvoices(list);
+
+    // Landen ophalen voor BTW-bepaling (verlegd bij verschillende landen)
+    const escortIds = [...new Set(list.map((i) => i.escort_id))];
+    const clientIds = [...new Set(list.map((i) => i.client_id))];
+    if (escortIds.length) {
+      const { data: ec } = await supabase
+        .from("escort_profiles")
+        .select("id, billing_country")
+        .in("id", escortIds);
+      const map: Record<string, string | null> = {};
+      (ec ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+      setEscortCountries(map);
+    }
+    if (clientIds.length) {
+      const { data: cc } = await supabase
+        .from("profiles")
+        .select("id, billing_country")
+        .in("id", clientIds);
+      const map: Record<string, string | null> = {};
+      (cc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+      setClientCountries((prev) => ({ ...prev, ...map }));
+    }
     if (list.length) {
       const { data: it } = await supabase
         .from("invoice_items")
