@@ -59,10 +59,33 @@ const ymd = (d: Date) =>
 const niceDay = (d: Date) =>
   d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
 
-// Simple postcode geocoder using free zippopotam API
+// PDOK Locatieserver: NL postcode + huisnummer → straat, plaats, lat/lng
+async function lookupAddressNL(postcode: string, huisnummer: string) {
+  const pc = postcode.replace(/\s+/g, "").toUpperCase();
+  const hn = huisnummer.trim();
+  if (!pc || !hn) return null;
+  try {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?fq=type:adres&q=postcode:${encodeURIComponent(pc)}%20AND%20huisnummer:${encodeURIComponent(hn)}&rows=1`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const doc = data?.response?.docs?.[0];
+    if (!doc) return null;
+    const m = String(doc.centroide_ll ?? "").match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+    return {
+      street: doc.straatnaam as string,
+      city: doc.woonplaatsnaam as string,
+      lng: m ? parseFloat(m[1]) : null,
+      lat: m ? parseFloat(m[2]) : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Fallback: alleen postcode → plaats + coords (BE/DE/FR via zippopotam)
 async function lookupPostcode(postcode: string, country: "nl" | "be" | "de" | "fr" = "nl") {
   const raw = postcode.replace(/\s+/g, "").toUpperCase();
-  // Zippopotam verwacht voor NL alleen de 4 cijfers (geen letters)
   const candidates: string[] = [];
   if (country === "nl") {
     const digits = raw.match(/^\d{4}/)?.[0];
@@ -98,6 +121,14 @@ function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
   return "nl";
 }
 
+// Split "Straatnaam 12A" → { street: "Straatnaam", number: "12A" }
+function splitAddress(addr: string): { street: string; number: string } {
+  const s = (addr ?? "").trim();
+  const m = s.match(/^(.*?)[\s,]+(\d+\s*[A-Za-z]?(?:[-/]\d+\s*[A-Za-z]?)?)\s*$/);
+  if (m) return { street: m[1].trim(), number: m[2].replace(/\s+/g, "") };
+  return { street: s, number: "" };
+}
+
 const Inner = () => {
   const { user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -117,8 +148,10 @@ const Inner = () => {
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
-  // Postcode autodetect
+  // Adres autodetect
   const [postcode, setPostcode] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [lookupBusy, setLookupBusy] = useState(false);
@@ -169,6 +202,9 @@ const Inner = () => {
         });
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
+        const split = splitAddress((p as any).base_address ?? "");
+        setStreet(split.street);
+        setHouseNumber(split.number);
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
 
@@ -190,16 +226,30 @@ const Inner = () => {
   const toggle = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 
-  const onPostcodeBlur = async () => {
+  const runAddressLookup = async () => {
     if (!postcode || postcode.length < 4) return;
+    const country = detectCountry(postcode);
     setLookupBusy(true);
-    const c = await lookupPostcode(postcode, detectCountry(postcode));
+    if (country === "nl" && houseNumber.trim()) {
+      const a = await lookupAddressNL(postcode, houseNumber);
+      setLookupBusy(false);
+      if (a) {
+        setStreet(a.street);
+        setCity(a.city);
+        if (a.lat && a.lng) setCoords({ lat: a.lat, lng: a.lng });
+        setDirty(true);
+        return;
+      }
+      // fallback naar postcode-only lookup
+    }
+    const c = await lookupPostcode(postcode, country);
     setLookupBusy(false);
     if (c) {
       setCity(c.city);
       setCoords({ lat: c.lat, lng: c.lng });
+      setDirty(true);
     } else {
-      toast.error("Postcode niet gevonden");
+      toast.error("Adres niet gevonden — controleer postcode/huisnummer");
     }
   };
 
@@ -229,8 +279,9 @@ const Inner = () => {
       const s = v == null ? "" : String(v).trim();
       return s === "" ? fallback : s;
     };
+    const composedAddress = [street.trim(), houseNumber.trim()].filter(Boolean).join(" ");
     const parsed = schema.safeParse({
-      baseAddress: fd.get("baseAddress"),
+      baseAddress: composedAddress,
       basePostcode: postcode,
       baseCity: city,
       hourlyRate: num("hourlyRate", "0"),
@@ -341,20 +392,37 @@ const Inner = () => {
             >
               <section className="space-y-3">
                 <p className="text-[11px] text-brass-deep/60">
-                  Vul je <strong>exacte standplaats</strong> in. Opdrachtgevers zien alleen de plaats/regio; het volledige adres wordt enkel gebruikt om aan- en afrijtijden te berekenen.
+                  Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input name="baseAddress" label="Straat + huisnummer" defaultValue={profile?.base_address ?? ""} />
                   <div>
                     <Label>Postcode</Label>
                     <input
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
-                      onBlur={onPostcodeBlur}
+                      onBlur={runAddressLookup}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold uppercase"
+                    />
+                  </div>
+                  <div>
+                    <Label>Huisnummer</Label>
+                    <input
+                      value={houseNumber}
+                      onChange={(e) => setHouseNumber(e.target.value)}
+                      onBlur={runAddressLookup}
                       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Straat & plaats (automatisch)</Label>
+                    <input
+                      readOnly
+                      value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
+                      placeholder={lookupBusy ? "Adres ophalen…" : "Wordt ingevuld na postcode + huisnummer"}
+                      className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
+                    />
                     <p className="text-[10px] text-brass-deep/50 mt-1">
-                      {lookupBusy ? "Locatie ophalen…" : city ? `Plaats: ${city}` : "Plaats wordt automatisch bepaald"}
+                      {lookupBusy ? "Adres ophalen…" : street ? `${street} ${houseNumber}, ${city}` : "Voor BE/DE/FR wordt alleen de plaats opgehaald — vul de straat handmatig aan via de postcode/huisnummer."}
                     </p>
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
