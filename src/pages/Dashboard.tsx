@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -10,6 +11,15 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+const localeFromI18n = (lang: string) => {
+  switch (lang) {
+    case "en": return "en-GB";
+    case "de": return "de-DE";
+    case "fr": return "fr-FR";
+    default: return "nl-NL";
+  }
+};
 
 const fmtHours = (min: number) => {
   const total = Math.ceil(min / 15) * 15;
