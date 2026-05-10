@@ -440,22 +440,24 @@ const Inner = () => {
                   {categories.includes("lu") && (
                     <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
                   )}
-                  <div>
-                    <Input
-                      name="kmRateDe"
-                      type="number"
-                      step="0.01"
-                      label="Km-tarief Duitsland (€/km, optioneel)"
-                      defaultValue={
-                        (profile as any)?.km_rate_de == null
-                          ? ""
-                          : String((profile as any).km_rate_de)
-                      }
-                    />
-                    <p className="text-[10px] text-brass-deep/50 mt-1">
-                      Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
-                    </p>
-                  </div>
+                  {categories.includes("de") && (
+                    <div>
+                      <Input
+                        name="kmRateDe"
+                        type="number"
+                        step="0.01"
+                        label="Km-tarief Duitsland (€/km, optioneel)"
+                        defaultValue={
+                          (profile as any)?.km_rate_de == null
+                            ? ""
+                            : String((profile as any).km_rate_de)
+                        }
+                      />
+                      <p className="text-[10px] text-brass-deep/50 mt-1">
+                        Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
+                      </p>
+                    </div>
+                  )}
                   <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"
