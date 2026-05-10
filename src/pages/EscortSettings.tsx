@@ -277,17 +277,23 @@ const Inner = () => {
         vehicle_type: parsed.data.vehicleType,
         categories,
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
-        fuel_surcharge: {
-          enabled: fuel.enabled,
-          kind: fuel.kind,
-          tiers: fuel.tiers
-            .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
-            .map((t) => ({
-              from: Number(t.from) || 0,
-              to: t.to === "" ? null : Number(t.to),
-              value: Number(t.value) || 0,
-            })),
-        } as any,
+        fuel_surcharge: ((): any => {
+          const baseCountry = detectCountry(parsed.data.basePostcode || "");
+          if (baseCountry === "be" || baseCountry === "fr") {
+            return { enabled: false, kind: fuel.kind, tiers: [] };
+          }
+          return {
+            enabled: fuel.enabled,
+            kind: fuel.kind,
+            tiers: fuel.tiers
+              .filter((t) => t.from !== "" || t.to !== "" || t.value !== "")
+              .map((t) => ({
+                from: Number(t.from) || 0,
+                to: t.to === "" ? null : Number(t.to),
+                value: Number(t.value) || 0,
+              })),
+          };
+        })(),
       })
       .eq("id", user.id);
 
