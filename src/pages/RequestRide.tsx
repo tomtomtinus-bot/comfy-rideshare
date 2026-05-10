@@ -439,6 +439,9 @@ const RequestRideInner = () => {
           ) : (
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
             <section>
+              <p className="text-[12px] text-brass-deep/80 bg-parchment/60 border border-brass-deep/15 px-3 py-2 mb-4">
+                Let op: Voorlopig alleen beschikbaar in Nederland en België
+              </p>
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.route")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
