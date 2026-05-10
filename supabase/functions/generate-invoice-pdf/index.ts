@@ -285,8 +285,6 @@ Deno.serve(async (req) => {
       }
     } catch (_) { /* ignore */ }
 
-    const admin = createClient(url, serviceKey);
-
     // Fetch invoice + check access
     let invoice: Record<string, unknown> | null = null;
     let items: Array<Record<string, unknown>> = [];
