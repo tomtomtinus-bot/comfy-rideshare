@@ -396,12 +396,6 @@ const Inner = () => {
                 </div>
               </section>
 
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input name="certNumber" label="Certificaat verkeersregelaar (nr.)" defaultValue={profile?.cert_number ?? ""} />
-                <Input name="certExpiresOn" type="date" label="Certificaat geldig tot" defaultValue={profile?.cert_expires_on ?? ""} />
-                <Input name="insurancePolicy" label="Aansprakelijkheidsverzekering (polisnr.)" defaultValue={profile?.insurance_policy ?? ""} />
-              </section>
-
               <section>
                 <Label>Brandstoftoeslag (staffel)</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
