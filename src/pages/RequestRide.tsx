@@ -347,51 +347,53 @@ const RequestRideInner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-            Nieuwe konvooi-aanvraag
+            {t("request.kicker")}
           </p>
           <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            Van A naar B — vraag begeleiding aan.
+            {t("request.title")}
           </h1>
 
           {!isApproved ? (
             <div className="bg-card shadow-etched p-8 md:p-10 border-l-4 border-brass-gold">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">
-                Account in afwachting
+                {t("request.pendingKicker")}
               </p>
               <h2 className="font-display text-2xl text-brass-deep mb-3">
-                Goedkeuring vereist
+                {t("request.pendingTitle")}
               </h2>
               <p className="text-brass-deep/75 text-sm leading-relaxed">
-                Je kunt pas ritten aanvragen zodra een beheerder je account heeft goedgekeurd.
-                Vul ondertussen je <Link to="/facturatiegegevens" className="underline font-semibold">facturatiegegevens</Link> alvast in.
+                <Trans
+                  i18nKey="request.pendingBody"
+                  components={[<Link key="0" to="/facturatiegegevens" className="underline font-semibold" />]}
+                />
               </p>
             </div>
           ) : (
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
             <section>
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.route")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">A · Vertrek</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.pickup")}</p>
                   <AddressAutocomplete
-                    label="Adres of stad"
+                    label={t("request.addrLabel")}
                     value={form.pickup_address}
                     onChange={(v) => setForm({ ...form, pickup_address: v })}
                     onSelect={onPickPickup}
-                    placeholder="Bv. Hafenstraße 12, Duisburg"
+                    placeholder={t("request.pickupPlaceholder")}
                   />
                   {pickupGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
                   )}
                 </div>
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">B · Bestemming</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.dropoff")}</p>
                   <AddressAutocomplete
-                    label="Adres of stad"
+                    label={t("request.addrLabel")}
                     value={form.dropoff_address}
                     onChange={(v) => setForm({ ...form, dropoff_address: v })}
                     onSelect={onPickDropoff}
-                    placeholder="Bv. Havenweg 8, Rotterdam"
+                    placeholder={t("request.dropoffPlaceholder")}
                   />
                   {dropoffGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
@@ -404,12 +406,12 @@ const RequestRideInner = () => {
                 return (
                   <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
-                      Geschatte ritduur
+                      {t("request.estDuration")}
                     </p>
                     <p className="text-sm text-brass-deep">
                       <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
                       <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
-                      <span className="text-brass-deep/55">(70 km/u beladen, leegrijden 100 km/u)</span>
+                      <span className="text-brass-deep/55">{t("request.speedHint")}</span>
                     </p>
                   </div>
                 );
