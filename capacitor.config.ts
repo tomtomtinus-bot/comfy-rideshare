@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.6b20f361a1a147cdb1e18547af8ed122',
+  appId: 'com.viacust.escorts',
   appName: 'ViaCust',
   webDir: 'dist',
   server: {
