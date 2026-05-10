@@ -9,12 +9,19 @@ interface FuelPrice {
   eur_per_liter: number;
   source: string;
   fetched_at: string;
+  country: string;
 }
+
+const COUNTRY_LABEL: Record<string, string> = {
+  NL: "Nederland",
+  BE: "België",
+  FR: "Frankrijk",
+};
 
 const AdminFuel = () => {
   const [rows, setRows] = useState<FuelPrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -22,7 +29,7 @@ const AdminFuel = () => {
       .from("weekly_fuel_prices")
       .select("*")
       .order("week_start", { ascending: false })
-      .limit(52);
+      .limit(150);
     if (error) toast.error(error.message);
     setRows((data ?? []) as FuelPrice[]);
     setLoading(false);
@@ -32,27 +39,41 @@ const AdminFuel = () => {
     load();
   }, []);
 
-  const syncFromTLN = async () => {
-    setSyncing(true);
-    const { data, error } = await supabase.functions.invoke("fetch-fuel-prices");
-    setSyncing(false);
+  const sync = async (country: "NL" | "BE" | "FR") => {
+    setSyncing(country);
+    const fn =
+      country === "NL"
+        ? "fetch-fuel-prices"
+        : country === "BE"
+        ? "fetch-fuel-prices-be"
+        : "fetch-fuel-prices-fr";
+    const { data, error } = await supabase.functions.invoke(fn);
+    setSyncing(null);
     if (error) return toast.error(error.message);
-    toast.success(`TLN-sync: ${data?.weeks_upserted ?? 0} weken bijgewerkt`);
+    toast.success(`${COUNTRY_LABEL[country]}: bijgewerkt`);
     load();
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-2xl text-brass-deep mb-2">Brandstofprijzen</h2>
-          <p className="text-sm text-brass-deep/70">
-            Wekelijks gemiddelde dieselprijs (€/liter) volgens TLN. Wordt gebruikt voor brandstoftoeslagen.
-          </p>
-        </div>
-        <Button onClick={syncFromTLN} disabled={syncing} variant="outline">
-          {syncing ? "Synchroniseren…" : "Synchroniseer met TLN"}
-        </Button>
+      <div>
+        <h2 className="font-display text-2xl text-brass-deep mb-2">Brandstofprijzen</h2>
+        <p className="text-sm text-brass-deep/70">
+          Wekelijks gemiddelde dieselprijs (€/liter, exclusief btw). Wordt gebruikt voor brandstoftoeslagen.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {(["NL", "BE", "FR"] as const).map((c) => (
+          <Button
+            key={c}
+            onClick={() => sync(c)}
+            disabled={syncing !== null}
+            variant="outline"
+          >
+            {syncing === c ? "Synchroniseren…" : `Synchroniseer ${COUNTRY_LABEL[c]}`}
+          </Button>
+        ))}
       </div>
 
       <div>
@@ -62,14 +83,15 @@ const AdminFuel = () => {
         {loading ? (
           <p className="text-sm text-brass-deep/50">Laden…</p>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-brass-deep/50">Nog geen prijzen. Klik op "Synchroniseer met TLN".</p>
+          <p className="text-sm text-brass-deep/50">Nog geen prijzen.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left border-b border-brass-gold/30 text-brass-deep/70 uppercase text-xs tracking-widest">
+                  <th className="py-2 pr-4">Land</th>
                   <th className="py-2 pr-4">Weekstart</th>
-                  <th className="py-2 pr-4">€/liter</th>
+                  <th className="py-2 pr-4">€/liter (excl. btw)</th>
                   <th className="py-2 pr-4">Bron</th>
                   <th className="py-2 pr-4">Bijgewerkt</th>
                 </tr>
@@ -77,6 +99,7 @@ const AdminFuel = () => {
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-brass-gold/10">
+                    <td className="py-2 pr-4 font-semibold">{COUNTRY_LABEL[r.country] ?? r.country}</td>
                     <td className="py-2 pr-4">{r.week_start}</td>
                     <td className="py-2 pr-4">€ {Number(r.eur_per_liter).toFixed(3)}</td>
                     <td className="py-2 pr-4">{r.source}</td>
