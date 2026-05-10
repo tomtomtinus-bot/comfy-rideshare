@@ -19,6 +19,10 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("viacust_remember") !== "false";
+  });
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
