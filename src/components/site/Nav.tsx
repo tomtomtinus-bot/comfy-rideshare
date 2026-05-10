@@ -44,7 +44,7 @@ export const Nav = () => {
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link
-            to={role === "begeleider" ? "/dashboard" : "/#ritten"}
+            to={user ? "/dashboard" : "/#ritten"}
             className="hover:text-brass-gold transition-colors"
           >
             {t("nav.transports")}
