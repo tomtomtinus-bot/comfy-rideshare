@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 
 const DEMO_PASSWORD = "Demo1234!";
