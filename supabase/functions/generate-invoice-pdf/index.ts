@@ -3,7 +3,7 @@
 // and returns a short-lived signed download URL.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { jsPDF } from "npm:jspdf@2.5.2";
-import autoTable from "npm:jspdf-autotable@3.8.4";
+import * as autoTableModule from "npm:jspdf-autotable@3.8.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +17,19 @@ const fmtMoney = (n: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+
+type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
+const resolvedAutoTable = (autoTableModule as unknown as {
+  autoTable?: AutoTableFn;
+  default?: AutoTableFn;
+}).autoTable ?? (autoTableModule as unknown as { default?: AutoTableFn }).default;
+
+const addInvoiceTable = (doc: jsPDF, options: Record<string, unknown>) => {
+  if (typeof resolvedAutoTable !== "function") {
+    throw new Error("PDF tabelgenerator is niet beschikbaar");
+  }
+  resolvedAutoTable(doc, options);
+};
 
 interface BillingParty {
   company_name?: string | null;
@@ -392,7 +405,7 @@ Deno.serve(async (req) => {
     let subtotal = 0;
     if (type === "regular") {
       subtotal = items.reduce((s, r) => s + Number(r.amount ?? 0), 0);
-      autoTable(doc, {
+      addInvoiceTable(doc, {
         startY: 105,
         head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
         body: items.map((r) => [
@@ -426,7 +439,7 @@ Deno.serve(async (req) => {
       });
     } else {
       subtotal = Number(invoice!.total_amount ?? 0);
-      autoTable(doc, {
+      addInvoiceTable(doc, {
         startY: 105,
         head: [["Datum", "Omschrijving", "Aantal", "Tarief", "Totaal"]],
         body: items.map((r) => [
