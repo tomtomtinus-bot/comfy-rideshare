@@ -249,19 +249,19 @@ const ClientDashboard = () => {
       const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
       return {
         [t("common.date")]: fd(r.scheduled_at),
-        [t("xlsx.rideId") || "Ride ID"]: r.id.slice(0, 8),
-        [t("xlsx.reference") || "Reference"]: r.client_reference ?? "",
-        [t("xlsx.permit") || "Permit"]: r.permit_number ?? "",
-        [t("xlsx.pickup") || "Pickup"]: `${r.pickup_address} (${r.pickup_city})`,
-        [t("xlsx.dropoff") || "Dropoff"]: `${r.dropoff_address} (${r.dropoff_city})`,
-        [t("xlsx.numEscorts") || "Escorts"]: r.num_escorts,
-        [t("xlsx.escorts") || "Escorts list"]: escortIds,
-        [t("xlsx.status") || "Status"]: r.status,
-        [t("xlsx.estCost") || "Estimated cost (€)"]: +totalEst.toFixed(2),
-        [t("xlsx.actualCost") || "Actual cost (€)"]: allSubmitted ? +totalActual.toFixed(2) : null,
-        [t("xlsx.serviceFee") || "Service fee (€)"]: Number(r.app_fee ?? 0),
-        [t("xlsx.totalIncl") || "Total incl. fee (€)"]: allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
-        [t("xlsx.notes") || "Notes"]: r.notes ?? "",
+        [t("xlsx.rideId")]: r.id.slice(0, 8),
+        [t("xlsx.reference")]: r.client_reference ?? "",
+        [t("xlsx.permit")]: r.permit_number ?? "",
+        [t("xlsx.pickup")]: `${r.pickup_address} (${r.pickup_city})`,
+        [t("xlsx.dropoff")]: `${r.dropoff_address} (${r.dropoff_city})`,
+        [t("xlsx.numEscorts")]: r.num_escorts,
+        [t("xlsx.escorts")]: escortIds,
+        [t("xlsx.status")]: r.status,
+        [t("xlsx.estCost")]: +totalEst.toFixed(2),
+        [t("xlsx.actualCost")]: allSubmitted ? +totalActual.toFixed(2) : null,
+        [t("xlsx.serviceFee")]: Number(r.app_fee ?? 0),
+        [t("xlsx.totalIncl")]: allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
+        [t("xlsx.notes")]: r.notes ?? "",
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
