@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 
 export const RoleSwitch = () => {
   const { user, role, signOut } = useAuth();
+  const { t } = useTranslation();
   if (!user) {
     return (
       <Link
         to="/auth"
         className="px-5 md:px-6 py-2.5 bg-brass-deep text-parchment text-xs md:text-sm uppercase tracking-widest hover:bg-brass-gold transition-colors"
       >
-        Inloggen
+        {t("nav.login")}
       </Link>
     );
   }
@@ -19,13 +21,13 @@ export const RoleSwitch = () => {
         to="/dashboard"
         className="hidden md:inline text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
       >
-        {role === "begeleider" ? "Mijn opdrachten" : "Mijn ritten"}
+        {role === "begeleider" ? t("nav.myAssignments") : t("nav.myRides")}
       </Link>
       <button
         onClick={signOut}
         className="px-4 py-2 border border-brass-deep/20 text-brass-deep text-xs uppercase tracking-widest hover:bg-brass-deep hover:text-parchment transition-colors"
       >
-        Uitloggen
+        {t("nav.logout")}
       </button>
     </div>
   );
