@@ -392,6 +392,10 @@ const Inner = () => {
                 </div>
               </section>
 
+              {(() => {
+                const baseCountry = detectCountry(postcode || "");
+                if (baseCountry === "be" || baseCountry === "fr") return null;
+                return (
               <section>
                 <Label>Brandstoftoeslag (staffel)</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
@@ -498,6 +502,8 @@ const Inner = () => {
                   </>
                 )}
               </section>
+                );
+              })()}
 
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
