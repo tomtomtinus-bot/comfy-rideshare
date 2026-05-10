@@ -134,7 +134,7 @@ const fr: Dict = {
   common: {
     loading: "Chargement…", save: "Enregistrer", saving: "Enregistrement…", cancel: "Annuler", clear: "Effacer",
     delete: "Supprimer", edit: "Modifier", close: "Fermer", download: "Télécharger", downloadPdf: "Télécharger le PDF",
-    optional: "(optionnel)", yes: "Oui", no: "Non", of: "sur", company: "Entreprise", archive: "Archives",
+    optional: "optionnel", yes: "Oui", no: "Non", of: "sur", date: "Date", company: "Entreprise", archive: "Archives",
     client: "Donneur d'ordre", escort: "Accompagnateur", rides: "transports", ride: "transport",
     ridesPlural: "{{count}} transport{{plural}}",
     countryNL: "Pays-Bas", countryBE: "Belgique", countryDE: "Allemagne", countryFR: "France",
