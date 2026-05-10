@@ -412,6 +412,31 @@ const Inner = () => {
             >
               <section className="space-y-3">
                 <p className="text-[11px] text-brass-deep/60">
+                  Je <strong>naam</strong> en <strong>telefoonnummer</strong> worden pas met de opdrachtgever gedeeld nadat je een rit hebt geaccepteerd.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Volledige naam</Label>
+                    <input
+                      value={fullName}
+                      onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefoonnummer</Label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => { setPhone(e.target.value); setDirty(true); }}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <p className="text-[11px] text-brass-deep/60">
                   Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
