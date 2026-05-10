@@ -201,7 +201,7 @@ const RequestRideInner = () => {
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, available")
+      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
       .eq("available", true);
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -219,10 +219,21 @@ const RequestRideInner = () => {
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const rideStartMs = new Date(scheduledISO).getTime();
 
+    // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
+    const beInvolved = [...pickupCountries, ...dropoffCountries].includes("België");
+    const beTypeRequired = beInvolved ? form.be_escort_type : null;
+    const escortHasBeQualification = (cats: string[] | null): boolean => {
+      const c = cats ?? [];
+      if (!beTypeRequired) return true;
+      if (beTypeRequired === "type2") return c.includes("be-2");
+      return c.includes("be-1") || c.includes("be-2");
+    };
+
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) =>
         pickupCountries.some((c) => (e.countries ?? []).includes(c)) &&
-        dropoffCountries.some((c) => (e.countries ?? []).includes(c))
+        dropoffCountries.some((c) => (e.countries ?? []).includes(c)) &&
+        escortHasBeQualification((e as any).categories ?? [])
       )
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
