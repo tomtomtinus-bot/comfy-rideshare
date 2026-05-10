@@ -100,28 +100,60 @@ const Inner = () => {
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null } | null>(null);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const { data: res, error } = await supabase.rpc("get_ride_details_for_escort", { _ride_id: id });
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      const detail = res as unknown as RideDetail;
-      setData(detail);
+  const load = async () => {
+    if (!id) return;
+    setLoading(true);
+    const { data: res, error } = await supabase.rpc("get_ride_details_for_escort", { _ride_id: id });
+    if (error) { setError(error.message); setLoading(false); return; }
+    const detail = res as unknown as RideDetail;
+    setData(detail);
 
-      if (detail?.permit?.pdf_path) {
-        const { data: signed } = await supabase.storage
-          .from("permits")
-          .createSignedUrl(detail.permit.pdf_path, 3600);
-        if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
-      }
-      setLoading(false);
-    })();
-  }, [id]);
+    if (detail?.permit?.pdf_path) {
+      const { data: signed } = await supabase.storage
+        .from("permits")
+        .createSignedUrl(detail.permit.pdf_path, 3600);
+      if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
+    }
+
+    const { data: u } = await supabase.auth.getUser();
+    if (u?.user) {
+      const { data: ra } = await supabase
+        .from("ride_assignments")
+        .select("id, cancel_request_status, cancel_request_reason")
+        .eq("ride_id", id)
+        .eq("escort_id", u.user.id)
+        .maybeSingle();
+      if (ra) setMyAssignment({
+        id: ra.id,
+        cancel_request_status: (ra as any).cancel_request_status ?? "none",
+        cancel_request_reason: (ra as any).cancel_request_reason ?? null,
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [id]);
+
+  const submitCancelRequest = async () => {
+    if (!myAssignment) return;
+    if (cancelReason.trim().length < 3) { toast.error("Geef een korte reden op."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("escort_request_cancellation", {
+      _assignment_id: myAssignment.id,
+      _reason: cancelReason.trim(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Verzoek verstuurd naar opdrachtgever.");
+    setShowCancelForm(false);
+    setCancelReason("");
+    load();
+  };
 
   if (loading) {
     return <p className="text-sm text-brass-deep/50">Laden…</p>;
