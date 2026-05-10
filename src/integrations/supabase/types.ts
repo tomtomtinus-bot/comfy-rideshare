@@ -639,6 +639,11 @@ export type Database = {
         Row: {
           actual_cost: number | null
           actual_hours: number | null
+          cancel_decided_at: string | null
+          cancel_request_reason: string | null
+          cancel_request_status: string
+          cancel_requested_at: string | null
+          cancellation_fee: number
           created_at: string
           departed_base_at: string | null
           escort_id: string
@@ -666,6 +671,11 @@ export type Database = {
         Insert: {
           actual_cost?: number | null
           actual_hours?: number | null
+          cancel_decided_at?: string | null
+          cancel_request_reason?: string | null
+          cancel_request_status?: string
+          cancel_requested_at?: string | null
+          cancellation_fee?: number
           created_at?: string
           departed_base_at?: string | null
           escort_id: string
@@ -693,6 +703,11 @@ export type Database = {
         Update: {
           actual_cost?: number | null
           actual_hours?: number | null
+          cancel_decided_at?: string | null
+          cancel_request_reason?: string | null
+          cancel_request_status?: string
+          cancel_requested_at?: string | null
+          cancellation_fee?: number
           created_at?: string
           departed_base_at?: string | null
           escort_id?: string
@@ -738,6 +753,9 @@ export type Database = {
         Row: {
           app_fee: number
           be_escort_type: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           cargo_height_m: number | null
           cargo_length_m: number | null
           cargo_weight_t: number | null
@@ -771,6 +789,9 @@ export type Database = {
         Insert: {
           app_fee?: number
           be_escort_type?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           cargo_height_m?: number | null
           cargo_length_m?: number | null
           cargo_weight_t?: number | null
@@ -804,6 +825,9 @@ export type Database = {
         Update: {
           app_fee?: number
           be_escort_type?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           cargo_height_m?: number | null
           cargo_length_m?: number | null
           cargo_weight_t?: number | null
@@ -925,6 +949,18 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: undefined
+      }
+      client_cancel_ride: {
+        Args: { _reason?: string; _ride_id: string }
+        Returns: Json
+      }
+      client_decide_cancellation: {
+        Args: { _approve: boolean; _assignment_id: string }
+        Returns: undefined
+      }
+      escort_request_cancellation: {
+        Args: { _assignment_id: string; _reason: string }
         Returns: undefined
       }
       generate_platform_invoices: { Args: never; Returns: number }
