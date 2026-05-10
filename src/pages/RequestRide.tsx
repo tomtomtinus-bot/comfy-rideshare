@@ -350,6 +350,7 @@ const RequestRideInner = () => {
           .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
           .filter((d) => d.name || d.phone) as never,
         license_plates: licensePlates.map((p) => p.trim()).filter(Boolean),
+        be_escort_type: ((pickupGeo.country?.includes("BE") || pickupGeo.country?.includes("België") || dropoffGeo.country?.includes("BE") || dropoffGeo.country?.includes("België")) ? form.be_escort_type : null) as never,
       })
       .select()
       .single();
