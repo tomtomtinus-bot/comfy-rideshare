@@ -690,7 +690,7 @@ const EscortDashboard = () => {
     const hours = +billableHours.toFixed(2);
     let baseCost = +(hours * item.hourly_rate).toFixed(2);
     // Duitsland km-modus: kosten = afstand × km-tarief (uurtarief & brandstoftoeslag vervallen voor DE)
-    if ((item as any).de_km_mode && item.ride?.pickup_lat != null && item.ride?.dropoff_lat != null) {
+    if ((item as any).de_km_mode && (item.ride as any)?.pickup_lat != null && (item.ride as any)?.dropoff_lat != null) {
       const km = distanceKm(
         { lat: (item.ride as any).pickup_lat, lng: (item.ride as any).pickup_lng },
         { lat: (item.ride as any).dropoff_lat, lng: (item.ride as any).dropoff_lng },
