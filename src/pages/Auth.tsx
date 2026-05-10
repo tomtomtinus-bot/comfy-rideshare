@@ -149,6 +149,18 @@ const Auth = () => {
             <Field name="email" type="email" label={t("auth.email")} required />
             <Field name="password" type="password" label={t("auth.password")} required />
 
+            {mode === "login" && (
+              <label className="flex items-center gap-2 text-xs text-brass-deep/80 cursor-pointer select-none pt-1">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="accent-brass-deep"
+                />
+                <span>Blijf ingelogd op dit apparaat</span>
+              </label>
+            )}
+
             {mode === "signup" && role === "begeleider" && (
               <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
                 {t("auth.escortHint")}
