@@ -81,19 +81,25 @@ interface ShellOpts {
   to: BillingParty;
 }
 
-const drawShell = (doc: jsPDF, opts: ShellOpts) => {
+const drawShell = (doc: jsPDF, opts: ShellOpts, logoDataUrl: string | null) => {
   const pageW = doc.internal.pageSize.getWidth();
   const left = 18;
   const right = pageW - 18;
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(20);
-  doc.text("ViaCust", left, 25);
+  if (logoDataUrl) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", left, 12, 28, 28);
+    } catch (_) { /* ignore */ }
+  } else {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(20);
+    doc.text("ViaCust", left, 25);
+  }
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(120);
-  doc.text("Verstuurd via viacust.app", left, 30);
+  doc.text("Verstuurd via viacust.app", left, 44);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -231,30 +237,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const url = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify user via their token
-    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const uid = userData.user.id;
-
+    const authHeader = req.headers.get("Authorization");
     const body = await req.json().catch(() => ({}));
     const invoiceId = String(body?.invoice_id ?? "");
     const type = body?.type === "platform" ? "platform" : "regular";
@@ -264,6 +251,39 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Determine mode: "user" (returns signed URL after authz) or "internal"
+    // (called by DB trigger; only generates+stores, no signed URL returned).
+    let uid: string | null = null;
+    const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim() ?? "";
+    const isInternal = !bearer || bearer === anonKey || bearer === serviceKey;
+    if (!isInternal) {
+      const userClient = createClient(url, anonKey, {
+        global: { headers: { Authorization: authHeader! } },
+      });
+      const { data: userData, error: userErr } = await userClient.auth.getUser();
+      if (userErr || !userData.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      uid = userData.user.id;
+    }
+
+    const admin = createClient(url, serviceKey);
+
+    // Fetch logo (public bucket) once per call
+    let logoDataUrl: string | null = null;
+    try {
+      const logoRes = await fetch(`${url}/storage/v1/object/public/branding/viacust-logo.png`);
+      if (logoRes.ok) {
+        const buf = new Uint8Array(await logoRes.arrayBuffer());
+        let bin = "";
+        for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+        logoDataUrl = `data:image/png;base64,${btoa(bin)}`;
+      }
+    } catch (_) { /* ignore */ }
 
     const admin = createClient(url, serviceKey);
 
@@ -285,19 +305,21 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Authorize: escort, client, or admin
-      const { data: roleRow } = await admin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid)
-        .eq("role", "admin")
-        .maybeSingle();
-      const isAdmin = !!roleRow;
-      if (!isAdmin && uid !== inv.escort_id && uid !== inv.client_id) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Authorize: escort, client, or admin (skip when internal trigger call)
+      if (!isInternal) {
+        const { data: roleRow } = await admin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid!)
+          .eq("role", "admin")
+          .maybeSingle();
+        const isAdmin = !!roleRow;
+        if (!isAdmin && uid !== inv.escort_id && uid !== inv.client_id) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
       invoice = inv;
 
@@ -327,18 +349,20 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: roleRow } = await admin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", uid)
-        .eq("role", "admin")
-        .maybeSingle();
-      const isAdmin = !!roleRow;
-      if (!isAdmin && uid !== inv.client_id) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (!isInternal) {
+        const { data: roleRow } = await admin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", uid!)
+          .eq("role", "admin")
+          .maybeSingle();
+        const isAdmin = !!roleRow;
+        if (!isAdmin && uid !== inv.client_id) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
       invoice = inv;
 
@@ -365,7 +389,7 @@ Deno.serve(async (req) => {
       from,
       to,
     };
-    drawShell(doc, shellOpts);
+    drawShell(doc, shellOpts, logoDataUrl);
 
     let subtotal = 0;
     if (type === "regular") {
@@ -468,6 +492,13 @@ Deno.serve(async (req) => {
 
     const table = type === "regular" ? "invoices" : "platform_invoices";
     await admin.from(table).update({ pdf_path: path }).eq("id", invoiceId);
+
+    if (isInternal) {
+      return new Response(
+        JSON.stringify({ pdf_path: path, generated: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const { data: signed, error: signErr } = await admin.storage
       .from("invoices")
