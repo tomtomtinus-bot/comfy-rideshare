@@ -64,7 +64,6 @@ const Auth = () => {
       fullName: get("fullName"),
       phone: get("phone"),
       role,
-      baseCity: get("baseCity"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
