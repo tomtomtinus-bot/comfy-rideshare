@@ -316,7 +316,7 @@ const RequestRideInner = () => {
 
     if (error || !ride) {
       setBusy(false);
-      return toast.error(error?.message ?? "Fout bij aanmaken rit");
+      return toast.error(error?.message ?? t("request.createFail"));
     }
 
     const rows = selected.map((e) => {
