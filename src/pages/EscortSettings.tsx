@@ -148,6 +148,10 @@ const Inner = () => {
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
+  // Persoonlijk
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+
   // Adres autodetect
   const [postcode, setPostcode] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
