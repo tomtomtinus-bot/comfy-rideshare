@@ -44,7 +44,7 @@ export const GoogleAgendaStatus = () => {
             <h3 className="font-display text-2xl text-brass-deep italic">{t("google.connectTitle")}</h3>
             <p className="text-sm text-brass-deep/70 mt-1">{t("google.connectBody")}</p>
             <Link
-              to="/escort-instellingen"
+              to="/profiel"
               className="inline-block mt-4 px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors"
             >
               {t("google.connectCta")}

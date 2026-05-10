@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const returnTo = url.searchParams.get("return_to") ?? "/escort-instellingen";
+    const returnTo = url.searchParams.get("return_to") ?? "/profiel";
 
     // State = base64(user.id|returnTo)
     const state = btoa(`${user.id}|${returnTo}`);

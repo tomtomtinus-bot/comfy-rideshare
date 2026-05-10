@@ -55,7 +55,7 @@ export const GoogleCalendarCard = () => {
 
   const connect = async () => {
     setBusy("connect");
-    const returnTo = `${window.location.origin}/escort-instellingen`;
+    const returnTo = `${window.location.origin}/profiel`;
     const session = (await supabase.auth.getSession()).data.session;
     if (!session) {
       setBusy(null);
