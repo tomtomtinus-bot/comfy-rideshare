@@ -20,6 +20,7 @@ interface RideDetail {
     dropoff_lat?: number | null;
     dropoff_lng?: number | null;
     scheduled_at: string;
+    status?: string;
     notes: string | null;
     cargo_length_m: number | null;
     cargo_width_m: number | null;
