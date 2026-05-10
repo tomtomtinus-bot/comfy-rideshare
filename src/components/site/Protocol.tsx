@@ -31,10 +31,11 @@ export const Protocol = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 lg:gap-16">
         <div className="col-span-12 lg:col-span-4">
           <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight">
-            Van vergunning tot bestemming.
+            Van vergunning tot factuur — in één platform.
           </h2>
           <p className="mt-4 md:mt-6 text-brass-deep/60 max-w-sm text-sm md:text-base">
-            Vier stappen van aanvraag tot afrekening, met certificering op elk niveau.
+            Geen telefooncirkels, geen losse Excels. Vier stappen, volledig digitaal,
+            met certificering en agenda-controle op elk niveau.
           </p>
         </div>
         <div className="col-span-12 lg:col-span-8">
