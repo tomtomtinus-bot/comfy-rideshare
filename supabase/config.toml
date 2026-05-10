@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.cleanup-permit]
 verify_jwt = false
+
+[functions.process-email-queue]
+verify_jwt = true
