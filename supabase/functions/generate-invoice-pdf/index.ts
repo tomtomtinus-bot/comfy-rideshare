@@ -81,19 +81,25 @@ interface ShellOpts {
   to: BillingParty;
 }
 
-const drawShell = (doc: jsPDF, opts: ShellOpts) => {
+const drawShell = (doc: jsPDF, opts: ShellOpts, logoDataUrl: string | null) => {
   const pageW = doc.internal.pageSize.getWidth();
   const left = 18;
   const right = pageW - 18;
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(20);
-  doc.text("ViaCust", left, 25);
+  if (logoDataUrl) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", left, 12, 28, 28);
+    } catch (_) { /* ignore */ }
+  } else {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(20);
+    doc.text("ViaCust", left, 25);
+  }
   doc.setFont("helvetica", "italic");
   doc.setFontSize(8);
   doc.setTextColor(120);
-  doc.text("Verstuurd via viacust.app", left, 30);
+  doc.text("Verstuurd via viacust.app", left, 44);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
