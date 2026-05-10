@@ -2,26 +2,29 @@ import { Menu, X } from "lucide-react";
 import logo from "@/assets/pilotcrew-logo.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RoleSwitch } from "@/components/site/RoleSwitch";
 import { DemoSwitcher } from "@/components/site/DemoSwitcher";
+import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Nav = () => {
   const [open, setOpen] = useState(false);
   const { user, role, isAdmin, signOut } = useAuth();
+  const { t } = useTranslation();
 
   const close = () => setOpen(false);
 
   const links: { to: string; label: string; show: boolean }[] = [
-    { to: "/", label: "Home", show: true },
-    { to: "/dashboard", label: "Dashboard", show: !!user },
-    { to: "/aanvragen", label: "Rit aanvragen", show: role !== "begeleider" },
-    { to: "/profiel", label: "Profiel", show: !!user && role === "begeleider" },
-    { to: "/ontheffingen", label: "Ontheffingen", show: !!user && role !== "begeleider" },
-    { to: "/facturen", label: "Facturen", show: !!user },
-    { to: "/geschiedenis", label: "Geschiedenis", show: !!user },
-    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
-    { to: "/admin", label: "Admin", show: isAdmin },
+    { to: "/", label: t("nav.home"), show: true },
+    { to: "/dashboard", label: t("nav.dashboard"), show: !!user },
+    { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
+    { to: "/profiel", label: t("nav.profile"), show: !!user && role === "begeleider" },
+    { to: "/ontheffingen", label: t("nav.permits"), show: !!user && role !== "begeleider" },
+    { to: "/facturen", label: t("nav.invoices"), show: !!user },
+    { to: "/geschiedenis", label: t("nav.history"), show: !!user },
+    { to: "/facturatiegegevens", label: t("nav.billing"), show: !!user },
+    { to: "/admin", label: t("nav.admin"), show: isAdmin },
   ];
 
   return (
@@ -40,19 +43,20 @@ export const Nav = () => {
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
-          <Link to="/#ritten" className="hover:text-brass-gold transition-colors">Transporten</Link>
+          <Link to="/#ritten" className="hover:text-brass-gold transition-colors">{t("nav.transports")}</Link>
           {role !== "begeleider" && (
-            <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">Aanvragen</Link>
+            <Link to="/aanvragen" className="hover:text-brass-gold transition-colors">{t("nav.requests")}</Link>
           )}
-          <Link to="/facturen" className="hover:text-brass-gold transition-colors">Facturen</Link>
+          <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <DemoSwitcher />
           <RoleSwitch />
+          <LanguageSwitcher />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label={open ? "Menu sluiten" : "Menu openen"}
+            aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={open}
             className="p-2 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
           >
@@ -80,7 +84,7 @@ export const Nav = () => {
                   onClick={() => { close(); signOut(); }}
                   className="w-full text-left px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-gold hover:text-parchment transition-colors"
                 >
-                  Uitloggen
+                  {t("nav.logout")}
                 </button>
               ) : (
                 <Link
@@ -88,7 +92,7 @@ export const Nav = () => {
                   onClick={close}
                   className="block px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-gold hover:text-parchment transition-colors"
                 >
-                  Inloggen
+                  {t("nav.login")}
                 </Link>
               )}
             </div>
