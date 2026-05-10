@@ -134,7 +134,7 @@ const fr: Dict = {
   common: {
     loading: "Chargement…", save: "Enregistrer", saving: "Enregistrement…", cancel: "Annuler", clear: "Effacer",
     delete: "Supprimer", edit: "Modifier", close: "Fermer", download: "Télécharger", downloadPdf: "Télécharger le PDF",
-    optional: "(optionnel)", yes: "Oui", no: "Non", of: "sur", company: "Entreprise", archive: "Archives",
+    optional: "optionnel", yes: "Oui", no: "Non", of: "sur", date: "Date", company: "Entreprise", archive: "Archives",
     client: "Donneur d'ordre", escort: "Accompagnateur", rides: "transports", ride: "transport",
     ridesPlural: "{{count}} transport{{plural}}",
     countryNL: "Pays-Bas", countryBE: "Belgique", countryDE: "Allemagne", countryFR: "France",
@@ -145,6 +145,8 @@ const fr: Dict = {
     invited: "Invité", accepted: "Accepté", declined: "Refusé", expired: "Expiré",
     paid: "Payé", sent: "Envoyé", draft: "Brouillon",
   },
+  xlsx: { rideId: "ID transport", reference: "Référence", permit: "Permis", pickup: "Départ", dropoff: "Destination", numEscorts: "Nombre d'escortes", escorts: "Escortes", status: "Statut", estCost: "Coût estimé (€)", actualCost: "Coût réel (€)", serviceFee: "Frais de service (€)", totalIncl: "Total avec frais (€)", notes: "Notes" },
+
   dash: {
     clientKicker: "Donneur d'ordre", escortKicker: "Accompagnateur",
     myRides: "Mes transports", myAssignments: "Mes missions", myProfile: "Mon profil",

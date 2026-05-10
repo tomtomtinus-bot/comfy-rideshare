@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,11 +13,11 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
 
-const schema = z.object({
+const makeSchema = (t: (k: string) => string) => z.object({
   pickup_address: z.string().trim().min(2).max(200),
   dropoff_address: z.string().trim().min(2).max(200),
-  scheduled_date: z.string().min(1, "Datum vereist"),
-  scheduled_time: z.string().min(1, "Tijd vereist"),
+  scheduled_date: z.string().min(1, t("request.dateRequired")),
+  scheduled_time: z.string().min(1, t("request.timeRequired")),
   num_escorts: z.coerce.number().int().min(1),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.preprocess((v) => { if (v === "" || v == null) return undefined; const n = Number(String(v).replace(",", ".")); return Number.isNaN(n) ? undefined : n; }, z.number().min(0).max(120).optional()),
@@ -79,6 +80,7 @@ const fmtHours = (min: number) => {
 };
 
 const RequestRideInner = () => {
+  const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -151,12 +153,12 @@ const RequestRideInner = () => {
     if (!file || !user) return;
     setPermitUploading(true);
     try {
-      toast.info("Ontheffing wordt uitgelezen…");
+      toast.info(t("request.permitRead"));
       const up = await uploadPermitPdf(file, user.id);
       setUploadedPermit(up);
-      toast.success(`Ontheffing ${up.permit_number} bijgevoegd (${up.routes_count} route(s))`);
+      toast.success(t("request.permitUploaded", { nr: up.permit_number, n: up.routes_count }));
     } catch (e: any) {
-      toast.error(e?.message ?? "Upload mislukt");
+      toast.error(e?.message ?? t("request.uploadFail"));
     } finally {
       setPermitUploading(false);
     }
@@ -164,7 +166,6 @@ const RequestRideInner = () => {
 
   const removeUploadedPermit = async () => {
     if (!uploadedPermit) return;
-    // Verwijder permit + bestand — was nog niet aan een rit gekoppeld
     await supabase.storage.from("permits").remove([uploadedPermit.pdf_path]).catch(() => {});
     await supabase.from("permits").delete().eq("id", uploadedPermit.id);
     setUploadedPermit(null);
@@ -182,11 +183,11 @@ const RequestRideInner = () => {
 
   const findMatches = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const parsed = makeSchema(t).safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!pickupGeo || !dropoffGeo) return toast.error("Postcodes nog niet bevestigd");
+    if (!pickupGeo || !dropoffGeo) return toast.error(t("request.postcodesPending"));
     const [hh, mm] = form.scheduled_time.split(":").map(Number);
-    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error("Starttijd moet op het kwartier vallen (00, 15, 30, 45)");
+    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error(t("request.startQuarter"));
 
     setBusy(true);
     const { data, error } = await supabase
@@ -232,7 +233,7 @@ const RequestRideInner = () => {
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
       .slice(0, 8);
 
-    if (ranked.length === 0) return toast.error("Geen beschikbare begeleiders gevonden");
+    if (ranked.length === 0) return toast.error(t("request.noEscorts"));
 
     // Bezetting: alleen pure ritvenster (zonder reistijd), alleen ViaCust-ritten.
     const withConflicts = await Promise.all(ranked.map(async (m) => {
@@ -270,7 +271,7 @@ const RequestRideInner = () => {
   const bookEscorts = async (selected: MatchedEscort[]) => {
     if (!user || !pickupGeo || !dropoffGeo) return;
     if (selected.length !== form.num_escorts) {
-      return toast.error(`Selecteer precies ${form.num_escorts} begeleider(s)`);
+      return toast.error(t("request.pickExact", { n: form.num_escorts }));
     }
 
     const rideKm = distanceKm(pickupGeo, dropoffGeo);
@@ -315,7 +316,7 @@ const RequestRideInner = () => {
 
     if (error || !ride) {
       setBusy(false);
-      return toast.error(error?.message ?? "Fout bij aanmaken rit");
+      return toast.error(error?.message ?? t("request.createFail"));
     }
 
     const rows = selected.map((e) => {
@@ -335,7 +336,7 @@ const RequestRideInner = () => {
     setBusy(false);
     if (aErr) return toast.error(aErr.message);
 
-    toast.success("Rit geboekt");
+    toast.success(t("request.rideBooked"));
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
     navigate("/dashboard");
   };
@@ -346,51 +347,53 @@ const RequestRideInner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-            Nieuwe konvooi-aanvraag
+            {t("request.kicker")}
           </p>
           <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            Van A naar B — vraag begeleiding aan.
+            {t("request.title")}
           </h1>
 
           {!isApproved ? (
             <div className="bg-card shadow-etched p-8 md:p-10 border-l-4 border-brass-gold">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">
-                Account in afwachting
+                {t("request.pendingKicker")}
               </p>
               <h2 className="font-display text-2xl text-brass-deep mb-3">
-                Goedkeuring vereist
+                {t("request.pendingTitle")}
               </h2>
               <p className="text-brass-deep/75 text-sm leading-relaxed">
-                Je kunt pas ritten aanvragen zodra een beheerder je account heeft goedgekeurd.
-                Vul ondertussen je <Link to="/facturatiegegevens" className="underline font-semibold">facturatiegegevens</Link> alvast in.
+                <Trans
+                  i18nKey="request.pendingBody"
+                  components={[<Link key="0" to="/facturatiegegevens" className="underline font-semibold" />]}
+                />
               </p>
             </div>
           ) : (
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
             <section>
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Route</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.route")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">A · Vertrek</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.pickup")}</p>
                   <AddressAutocomplete
-                    label="Adres of stad"
+                    label={t("request.addrLabel")}
                     value={form.pickup_address}
                     onChange={(v) => setForm({ ...form, pickup_address: v })}
                     onSelect={onPickPickup}
-                    placeholder="Bv. Hafenstraße 12, Duisburg"
+                    placeholder={t("request.pickupPlaceholder")}
                   />
                   {pickupGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
                   )}
                 </div>
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">B · Bestemming</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.dropoff")}</p>
                   <AddressAutocomplete
-                    label="Adres of stad"
+                    label={t("request.addrLabel")}
                     value={form.dropoff_address}
                     onChange={(v) => setForm({ ...form, dropoff_address: v })}
                     onSelect={onPickDropoff}
-                    placeholder="Bv. Havenweg 8, Rotterdam"
+                    placeholder={t("request.dropoffPlaceholder")}
                   />
                   {dropoffGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
@@ -403,12 +406,12 @@ const RequestRideInner = () => {
                 return (
                   <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
-                      Geschatte ritduur
+                      {t("request.estDuration")}
                     </p>
                     <p className="text-sm text-brass-deep">
                       <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
                       <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
-                      <span className="text-brass-deep/55">(70 km/u beladen, leegrijden 100 km/u)</span>
+                      <span className="text-brass-deep/55">{t("request.speedHint")}</span>
                     </p>
                   </div>
                 );
@@ -416,16 +419,16 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span></p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
-                <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
-                <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
-                <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
+                <Input label={t("request.length")} inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
+                <Input label={t("request.width")} inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
+                <Input label={t("request.height")} inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
+                <Input label={t("request.weight")} inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="mt-4">
                 <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                  RDW Ontheffing (PDF)
+                  {t("request.permitLabel")}
                 </label>
                 {!uploadedPermit ? (
                   <label
@@ -436,12 +439,12 @@ const RequestRideInner = () => {
                     {permitUploading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Bezig met uitlezen…</span>
+                        <span>{t("request.permitParsing")}</span>
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4" />
-                        <span>Kies of sleep een RDW ontheffing-PDF om bij te voegen</span>
+                        <span>{t("request.permitDrop")}</span>
                       </>
                     )}
                     <input
@@ -465,14 +468,14 @@ const RequestRideInner = () => {
                         {uploadedPermit.carrier ? ` · ${uploadedPermit.carrier}` : ""}
                       </p>
                       <p className="text-[11px] text-brass-deep/60">
-                        {uploadedPermit.routes_count} route(s) — wordt aan deze rit gekoppeld
+                        {t("request.permitAttached", { n: uploadedPermit.routes_count })}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={removeUploadedPermit}
                       className="p-1.5 text-brass-deep/70 hover:text-brass-deep hover:bg-brass-deep/10"
-                      aria-label="Ontheffing verwijderen"
+                      aria-label={t("request.permitRemove")}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -480,16 +483,16 @@ const RequestRideInner = () => {
                 )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <Input label="Vergunningnummer (handmatig)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Auto ingevuld bij ontheffing" />
-                <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
+                <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
+                <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.numEscorts")}</label>
                   <div className="mt-1 flex items-stretch border border-brass-deep/15 bg-parchment">
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, num_escorts: Math.max(1, form.num_escorts - 1) })}
                       className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label="Minder begeleiders"
+                      aria-label={t("request.fewerEscorts")}
                     >−</button>
                     <input
                       type="number"
@@ -506,7 +509,7 @@ const RequestRideInner = () => {
                       type="button"
                       onClick={() => setForm({ ...form, num_escorts: form.num_escorts + 1 })}
                       className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label="Meer begeleiders"
+                      aria-label={t("request.moreEscorts")}
                     >+</button>
                   </div>
                 </div>
@@ -515,19 +518,19 @@ const RequestRideInner = () => {
 
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">
-                Chauffeurs & kentekens <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+                {t("request.driversSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span>
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.drivers")}</label>
                     <button type="button" onClick={addDriver} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
-                      + Chauffeur toevoegen
+                      {t("request.addDriver")}
                     </button>
                   </div>
                   {drivers.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">Voeg naam en telefoonnummer toe van de chauffeur(s).</p>
+                    <p className="text-xs text-brass-deep/45">{t("request.driversHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {drivers.map((d, i) => (
@@ -536,7 +539,7 @@ const RequestRideInner = () => {
                             type="text"
                             value={d.name}
                             onChange={(e) => updateDriver(i, { name: e.target.value })}
-                            placeholder="Naam"
+                            placeholder={t("request.driverName")}
                             maxLength={80}
                             className="col-span-5 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                           />
@@ -551,7 +554,7 @@ const RequestRideInner = () => {
                           <button
                             type="button"
                             onClick={() => removeDriver(i)}
-                            aria-label="Verwijder chauffeur"
+                            aria-label={t("request.removeDriver")}
                             className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
@@ -562,13 +565,13 @@ const RequestRideInner = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Kentekens</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.plates")}</label>
                     <button type="button" onClick={addPlate} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
-                      + Kenteken toevoegen
+                      {t("request.addPlate")}
                     </button>
                   </div>
                   {licensePlates.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">Bijv. trekker en oplegger.</p>
+                    <p className="text-xs text-brass-deep/45">{t("request.platesHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {licensePlates.map((p, i) => (
@@ -577,14 +580,14 @@ const RequestRideInner = () => {
                             type="text"
                             value={p}
                             onChange={(e) => updatePlate(i, e.target.value)}
-                            placeholder="Bv. 12-AB-345"
+                            placeholder={t("request.platePlaceholder")}
                             maxLength={20}
                             className="col-span-11 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm uppercase tracking-wider tabular-nums focus:outline-none focus:border-brass-gold"
                           />
                           <button
                             type="button"
                             onClick={() => removePlate(i)}
-                            aria-label="Verwijder kenteken"
+                            aria-label={t("request.removePlate")}
                             className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
@@ -596,19 +599,19 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label={t("common.date")} type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Tijd (per kwartier)</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
                   <select
                     value={form.scheduled_time}
                     onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   >
-                    <option value="" disabled>Kies tijd…</option>
-                    {QUARTER_TIMES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                    <option value="" disabled>{t("request.pickTime")}</option>
+                    {QUARTER_TIMES.map((qt) => (
+                      <option key={qt} value={qt}>{qt}</option>
                     ))}
                   </select>
                 </div>
@@ -616,7 +619,7 @@ const RequestRideInner = () => {
             </section>
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Opmerkingen (optioneel)</label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.notes")}</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -629,7 +632,7 @@ const RequestRideInner = () => {
               disabled={busy || !pickupGeo || !dropoffGeo}
               className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
-              {busy ? "Zoeken…" : "Zoek dichtstbijzijnde begeleiders"}
+              {busy ? t("request.searching") : t("request.search")}
             </button>
           </form>
           )}
@@ -659,6 +662,7 @@ const Matches = ({
   onBook: (selected: MatchedEscort[]) => void;
   busy: boolean;
 }) => {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string[]>([]);
   const toggle = (id: string) => {
     setSelected((s) =>
@@ -669,19 +673,18 @@ const Matches = ({
   const availableMatches = matches.filter((m) => !m.conflict);
   return (
     <section className="mt-12">
-      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
-      <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
+      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">{t("request.matchesKicker")}</p>
+      <h2 className="font-display text-3xl text-brass-deep italic mb-2">{t("request.matchesTitle")}</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted} zelf. <strong>Servicekosten: 1,5% van het ritbedrag</strong> (wekelijks gefactureerd).
+        <Trans i18nKey="request.matchesBody" values={{ n: numWanted }} components={{ strong: <strong /> }} />
       </p>
 
       {availableMatches.length === 0 ? (
-        <p className="text-sm text-brass-deep/60">Geen beschikbare begeleiders gevonden voor dit tijdstip.</p>
+        <p className="text-sm text-brass-deep/60">{t("request.noMatches")}</p>
       ) : (
         <ul className="space-y-2">
           {availableMatches.map((m) => {
             const isSelected = selected.includes(m.id);
-            const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
             return (
               <li key={m.id} onClick={() => toggle(m.id)}
                 className={`flex items-center justify-between gap-3 bg-card px-4 py-3 cursor-pointer transition-all border ${
@@ -693,8 +696,8 @@ const Matches = ({
                   }`} />
                   <p className="font-display text-lg text-brass-deep tabular-nums shrink-0">#{m.anonymous_id}</p>
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
-                    <span>Aanrij <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
-                    <span>Afrij <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
+                    <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
+                    <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
                   </div>
                 </div>
                 <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{m.effective_rate.toFixed(2)}/u</p>
@@ -707,7 +710,7 @@ const Matches = ({
       <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
         disabled={busy || selected.length !== numWanted || anySelectedConflict}
         className="mt-4 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
-        {busy ? "Boeken…" : `Boek ${selected.length}/${numWanted} begeleider(s)`}
+        {busy ? t("request.booking") : t("request.book", { sel: selected.length, want: numWanted })}
       </button>
     </section>
   );

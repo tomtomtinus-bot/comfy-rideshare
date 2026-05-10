@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -10,6 +11,15 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+const localeFromI18n = (lang: string) => {
+  switch (lang) {
+    case "en": return "en-GB";
+    case "de": return "de-DE";
+    case "fr": return "fr-FR";
+    default: return "nl-NL";
+  }
+};
 
 const fmtHours = (min: number) => {
   const total = Math.ceil(min / 15) * 15;
@@ -70,16 +80,16 @@ interface AssignmentRow {
   responded_at: string | null;
 }
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" });
+const fmtDate = (d: string, lang = "nl") =>
+  new Date(d).toLocaleString(localeFromI18n(lang), { dateStyle: "medium", timeStyle: "short" });
 
 type DateBucketKey = "vandaag" | "morgen" | "deze_week" | "later" | "eerder";
-const DATE_BUCKET_LABELS: Record<DateBucketKey, string> = {
-  vandaag: "Vandaag",
-  morgen: "Morgen",
-  deze_week: "Deze week",
-  later: "Later",
-  eerder: "Eerder",
+const DATE_BUCKET_TKEYS: Record<DateBucketKey, string> = {
+  vandaag: "bucket.today",
+  morgen: "bucket.tomorrow",
+  deze_week: "bucket.thisWeek",
+  later: "bucket.later",
+  eerder: "bucket.earlier",
 };
 const DATE_BUCKET_ORDER: DateBucketKey[] = ["vandaag", "morgen", "deze_week", "later", "eerder"];
 
@@ -108,6 +118,7 @@ function groupByDateBucket<T>(
   list: T[],
   getDate: (item: T) => string,
   order: "asc" | "desc",
+  t: (k: string) => string,
 ): { key: DateBucketKey; label: string; items: T[] }[] {
   const map = new Map<DateBucketKey, T[]>();
   for (const it of list) {
@@ -122,7 +133,7 @@ function groupByDateBucket<T>(
     .filter((k) => map.has(k))
     .map((k) => ({
       key: k,
-      label: DATE_BUCKET_LABELS[k],
+      label: t(DATE_BUCKET_TKEYS[k]),
       items: map.get(k)!.sort((a, b) =>
         order === "asc"
           ? +new Date(getDate(a)) - +new Date(getDate(b))
@@ -132,21 +143,12 @@ function groupByDateBucket<T>(
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const map: Record<string, string> = {
-    open: "Open",
-    matched: "Toegewezen",
-    in_progress: "Onderweg",
-    completed: "Voltooid",
-    cancelled: "Geannuleerd",
-    invited: "Uitgenodigd",
-    accepted: "Geaccepteerd",
-    declined: "Geweigerd",
-    expired: "Verlopen",
-  };
+  const { t } = useTranslation();
+  const known = ["open","matched","in_progress","completed","cancelled","invited","accepted","declined","expired"];
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-gold">
       <span className="size-1.5 rounded-full bg-brass-gold" />
-      {map[status] ?? status}
+      {known.includes(status) ? t(`status.${status}`) : status}
     </span>
   );
 };
@@ -157,6 +159,8 @@ const minutesLeft = (deadline: string) => {
 };
 
 const ClientDashboard = () => {
+  const { t, i18n } = useTranslation();
+  const fd = (d: string) => fmtDate(d, i18n.language);
   const { user } = useAuth();
   const [rides, setRides] = useState<RideRow[]>([]);
   const [assignments, setAssignments] = useState<Record<string, (AssignmentRow & { anon: string; rate: number })[]>>({});
@@ -233,10 +237,10 @@ const ClientDashboard = () => {
       filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= f);
     }
     if (exportTo) {
-      const t = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
-      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= t);
+      const endMs = new Date(exportTo).getTime() + 24 * 60 * 60 * 1000 - 1;
+      filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= endMs);
     }
-    if (filtered.length === 0) return toast.error("Geen ritten in dit tijdsbestek");
+    if (filtered.length === 0) return toast.error(t("dash.noRidesInRange"));
     const rows = filtered.map((r) => {
       const ass = assignments[r.id] ?? [];
       const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
@@ -244,29 +248,29 @@ const ClientDashboard = () => {
       const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
       const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
       return {
-        "Datum": fmtDate(r.scheduled_at),
-        "Rit ID": r.id.slice(0, 8),
-        "Referentie": r.client_reference ?? "",
-        "Vergunning": r.permit_number ?? "",
-        "Vertrek": `${r.pickup_address} (${r.pickup_city})`,
-        "Bestemming": `${r.dropoff_address} (${r.dropoff_city})`,
-        "Aantal begeleiders": r.num_escorts,
-        "Begeleiders": escortIds,
-        "Status": r.status,
-        "Geschatte kosten (€)": +totalEst.toFixed(2),
-        "Werkelijke kosten (€)": allSubmitted ? +totalActual.toFixed(2) : null,
-        "Servicekosten (€)": Number(r.app_fee ?? 0),
-        "Totaal incl. fee (€)": allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
-        "Opmerkingen": r.notes ?? "",
+        [t("common.date")]: fd(r.scheduled_at),
+        [t("xlsx.rideId")]: r.id.slice(0, 8),
+        [t("xlsx.reference")]: r.client_reference ?? "",
+        [t("xlsx.permit")]: r.permit_number ?? "",
+        [t("xlsx.pickup")]: `${r.pickup_address} (${r.pickup_city})`,
+        [t("xlsx.dropoff")]: `${r.dropoff_address} (${r.dropoff_city})`,
+        [t("xlsx.numEscorts")]: r.num_escorts,
+        [t("xlsx.escorts")]: escortIds,
+        [t("xlsx.status")]: r.status,
+        [t("xlsx.estCost")]: +totalEst.toFixed(2),
+        [t("xlsx.actualCost")]: allSubmitted ? +totalActual.toFixed(2) : null,
+        [t("xlsx.serviceFee")]: Number(r.app_fee ?? 0),
+        [t("xlsx.totalIncl")]: allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
+        [t("xlsx.notes")]: r.notes ?? "",
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ritten");
+    XLSX.utils.book_append_sheet(wb, ws, t("dash.myRides"));
     const range = exportFrom || exportTo ? `-${exportFrom || "begin"}_tot_${exportTo || "eind"}` : "";
     XLSX.writeFile(wb, `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Excel-bestand gedownload");
+    toast.success(t("dash.excelDownloaded"));
     setExportOpen(false);
   };
 
@@ -275,9 +279,9 @@ const ClientDashboard = () => {
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Opdrachtgever
+            {t("dash.clientKicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn ritten</h1>
+          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("dash.myRides")}</h1>
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
@@ -285,13 +289,13 @@ const ClientDashboard = () => {
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
           >
-            Download Excel
+            {t("dash.downloadExcel")}
           </button>
           <Link
             to="/aanvragen"
             className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
           >
-            Nieuwe rit aanvragen
+            {t("dash.newRequest")}
           </Link>
         </div>
       </header>
@@ -299,7 +303,7 @@ const ClientDashboard = () => {
       {exportOpen && (
         <div className="bg-card shadow-etched p-6 flex flex-wrap items-end gap-4">
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Van</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.from")}</label>
             <input
               type="date"
               value={exportFrom}
@@ -308,7 +312,7 @@ const ClientDashboard = () => {
             />
           </div>
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Tot</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.to")}</label>
             <input
               type="date"
               value={exportTo}
@@ -320,25 +324,25 @@ const ClientDashboard = () => {
             onClick={() => { setExportFrom(""); setExportTo(""); }}
             className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep"
           >
-            Wissen
+            {t("common.clear")}
           </button>
           <button
             onClick={exportXlsx}
             className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
           >
-            Exporteren
+            {t("dash.export")}
           </button>
-          <p className="text-xs text-brass-deep/50 ml-auto">Laat leeg voor alle ritten</p>
+          <p className="text-xs text-brass-deep/50 ml-auto">{t("dash.exportEmptyHint")}</p>
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
       ) : rides.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60 mb-6">U heeft nog geen ritten aangevraagd.</p>
+          <p className="text-brass-deep/60 mb-6">{t("dash.noRidesYet")}</p>
           <Link to="/aanvragen" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
-            Vraag uw eerste rit aan →
+            {t("dash.requestFirst")}
           </Link>
         </div>
       ) : (() => {
@@ -358,10 +362,10 @@ const ClientDashboard = () => {
 
         const renderList = (list: RideRow[], bucketKey: "openstaand" | "geaccepteerd" | "afgerond") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
+            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order);
+          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order, t);
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
@@ -372,7 +376,7 @@ const ClientDashboard = () => {
                   className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
                 >
                   <div className="w-28 shrink-0">
-                    <p className="font-medium tabular-nums text-sm">{fmtDate(r.scheduled_at)}</p>
+                    <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">
@@ -384,7 +388,7 @@ const ClientDashboard = () => {
                   <div className="shrink-0 hidden sm:flex items-center gap-3">
                     {acceptedCount > 0 && (
                       <span className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-semibold tabular-nums">
-                        {acceptedCount}/{r.num_escorts ?? ass.length} begeleider{acceptedCount === 1 ? "" : "s"}
+                        {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
                       </span>
                     )}
                     <StatusBadge status={r.status} />
@@ -401,7 +405,7 @@ const ClientDashboard = () => {
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
-                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
@@ -414,9 +418,9 @@ const ClientDashboard = () => {
         return (
           <Tabs defaultValue="openstaand" className="w-full">
             <TabsList className="grid grid-cols-3 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
+              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
+              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
+              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
             <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
@@ -439,6 +443,7 @@ const hoursSchema = z.object({
 type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
+  const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<
@@ -1010,7 +1015,7 @@ const EscortDashboard = () => {
             return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order);
+          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
           return (
             <div className="space-y-8">
               {groups.map((g) => (

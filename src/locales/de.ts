@@ -134,7 +134,7 @@ const de: Dict = {
   common: {
     loading: "Laden…", save: "Speichern", saving: "Speichern…", cancel: "Abbrechen", clear: "Löschen",
     delete: "Entfernen", edit: "Bearbeiten", close: "Schließen", download: "Download", downloadPdf: "PDF herunterladen",
-    optional: "(optional)", yes: "Ja", no: "Nein", of: "von", company: "Unternehmen", archive: "Archiv",
+    optional: "optional", yes: "Ja", no: "Nein", of: "von", date: "Datum", company: "Unternehmen", archive: "Archiv",
     client: "Auftraggeber", escort: "Begleiter", rides: "Fahrten", ride: "Fahrt", ridesPlural: "{{count}} Fahrt{{plural}}",
     countryNL: "Niederlande", countryBE: "Belgien", countryDE: "Deutschland", countryFR: "Frankreich",
   },
@@ -144,6 +144,8 @@ const de: Dict = {
     invited: "Eingeladen", accepted: "Angenommen", declined: "Abgelehnt", expired: "Abgelaufen",
     paid: "Bezahlt", sent: "Versendet", draft: "Entwurf",
   },
+  xlsx: { rideId: "Fahrt-ID", reference: "Referenz", permit: "Genehmigung", pickup: "Abfahrt", dropoff: "Ziel", numEscorts: "Anzahl Begleiter", escorts: "Begleiter", status: "Status", estCost: "Geschätzte Kosten (€)", actualCost: "Tatsächliche Kosten (€)", serviceFee: "Servicegebühr (€)", totalIncl: "Gesamt inkl. Gebühr (€)", notes: "Anmerkungen" },
+
   dash: {
     clientKicker: "Auftraggeber", escortKicker: "Begleiter", myRides: "Meine Fahrten", myAssignments: "Meine Aufträge",
     myProfile: "Mein Profil", downloadExcel: "Excel herunterladen", newRequest: "Neue Fahrt anfragen",
