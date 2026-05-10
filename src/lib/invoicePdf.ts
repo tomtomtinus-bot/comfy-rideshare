@@ -272,7 +272,8 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
   drawShell(doc, data, logo);
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
-  const vat = subtotal * 0.21;
+  const vatRate = vatRateFor(data.from, data.to);
+  const vat = subtotal * vatRate;
   const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
   const total = subtotal + vat + weroFee;
 
