@@ -463,8 +463,8 @@ const EscortDashboard = () => {
   const [tick, setTick] = useState(0);
 
   const hasGoogleConflict = (scheduledAt: string) => {
-    const t = new Date(scheduledAt).getTime();
-    return googleBusy.some((b) => b.start < t + 60_000 && b.end > t - 60_000);
+    const ts = new Date(scheduledAt).getTime();
+    return googleBusy.some((b) => b.start < ts + 60_000 && b.end > ts - 60_000);
   };
 
   const getExtras = (id: string) => extraCosts[id] ?? [];
