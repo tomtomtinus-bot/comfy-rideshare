@@ -794,31 +794,31 @@ const EscortDashboard = () => {
                     <div className="flex items-center gap-2">
                       {hasGoogleConflict(a.ride.scheduled_at) && (
                         <span
-                          title="Je hebt op dit moment een afspraak in je Google Agenda"
+                          title={t("dash.googleConflictTitle")}
                           className="text-[10px] uppercase tracking-widest text-destructive font-bold whitespace-nowrap"
                         >
-                          ⚠ Agenda-conflict
+                          {t("dash.calendarConflict")}
                         </span>
                       )}
                       <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
-                        Nog {minsLeft} min
+                        {t("dash.nMin", { min: minsLeft })}
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
                         className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                       >
-                        Accepteer
+                        {t("dash.accept")}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
                         className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
                       >
-                        Weiger
+                        {t("dash.decline")}
                       </button>
                     </div>
                   ) : expired ? (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
-                      Verlopen
+                      {t("dash.expired")}
                     </span>
                   ) : submitted ? (
                     <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
@@ -829,7 +829,7 @@ const EscortDashboard = () => {
                       onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
                       className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                     >
-                      Uren invullen
+                      {t("dash.fillHours")}
                     </button>
                   ) : (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
