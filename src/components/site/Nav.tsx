@@ -20,7 +20,7 @@ export const Nav = () => {
     { to: "/dashboard", label: t("nav.dashboard"), show: !!user },
     { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
     { to: "/profiel", label: t("nav.profile"), show: !!user && role === "begeleider" },
-    { to: "/ontheffingen", label: t("nav.permits"), show: !!user && role !== "begeleider" },
+    
     { to: "/facturen", label: t("nav.invoices"), show: !!user },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
     { to: "/facturatiegegevens", label: t("nav.billing"), show: !!user },
