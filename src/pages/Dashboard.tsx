@@ -688,7 +688,15 @@ const EscortDashboard = () => {
     // Minimumtarief op urenbasis toepassen
     const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
     const hours = +billableHours.toFixed(2);
-    const baseCost = +(hours * item.hourly_rate).toFixed(2);
+    let baseCost = +(hours * item.hourly_rate).toFixed(2);
+    // Duitsland km-modus: kosten = afstand × km-tarief (uurtarief & brandstoftoeslag vervallen voor DE)
+    if ((item as any).de_km_mode && item.ride?.pickup_lat != null && item.ride?.dropoff_lat != null) {
+      const km = distanceKm(
+        { lat: (item.ride as any).pickup_lat, lng: (item.ride as any).pickup_lng },
+        { lat: (item.ride as any).dropoff_lat, lng: (item.ride as any).dropoff_lng },
+      );
+      baseCost = +(km * Number(item.hourly_rate)).toFixed(2);
+    }
 
     // Extra kosten: opschonen + valideren
     const extrasRaw = getExtras(id);
