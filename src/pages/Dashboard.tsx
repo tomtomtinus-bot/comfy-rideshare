@@ -159,6 +159,8 @@ const minutesLeft = (deadline: string) => {
 };
 
 const ClientDashboard = () => {
+  const { t, i18n } = useTranslation();
+  const fd = (d: string) => fmtDate(d, i18n.language);
   const { user } = useAuth();
   const [rides, setRides] = useState<RideRow[]>([]);
   const [assignments, setAssignments] = useState<Record<string, (AssignmentRow & { anon: string; rate: number })[]>>({});
