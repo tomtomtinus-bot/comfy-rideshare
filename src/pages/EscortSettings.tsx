@@ -391,20 +391,37 @@ const Inner = () => {
             >
               <section className="space-y-3">
                 <p className="text-[11px] text-brass-deep/60">
-                  Vul je <strong>exacte standplaats</strong> in. Opdrachtgevers zien alleen de plaats/regio; het volledige adres wordt enkel gebruikt om aan- en afrijtijden te berekenen.
+                  Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input name="baseAddress" label="Straat + huisnummer" defaultValue={profile?.base_address ?? ""} />
                   <div>
                     <Label>Postcode</Label>
                     <input
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
-                      onBlur={onPostcodeBlur}
+                      onBlur={runAddressLookup}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold uppercase"
+                    />
+                  </div>
+                  <div>
+                    <Label>Huisnummer</Label>
+                    <input
+                      value={houseNumber}
+                      onChange={(e) => setHouseNumber(e.target.value)}
+                      onBlur={runAddressLookup}
                       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                     />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label>Straat & plaats (automatisch)</Label>
+                    <input
+                      readOnly
+                      value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
+                      placeholder={lookupBusy ? "Adres ophalen…" : "Wordt ingevuld na postcode + huisnummer"}
+                      className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
+                    />
                     <p className="text-[10px] text-brass-deep/50 mt-1">
-                      {lookupBusy ? "Locatie ophalen…" : city ? `Plaats: ${city}` : "Plaats wordt automatisch bepaald"}
+                      {lookupBusy ? "Adres ophalen…" : street ? `${street} ${houseNumber}, ${city}` : "Voor BE/DE/FR wordt alleen de plaats opgehaald — vul de straat handmatig aan via de postcode/huisnummer."}
                     </p>
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
