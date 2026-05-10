@@ -59,11 +59,14 @@ interface Item {
   reference?: string | null;
 }
 
-const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "medium" });
+const fmtDate = (d: string, lng: string) =>
+  new Date(d).toLocaleDateString(lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium" });
 const fmtMoney = (n: number) => `€${Number(n).toFixed(2)}`;
 
 const InvoicesInner = () => {
   const { user, role } = useAuth();
+  const { t, i18n } = useTranslation();
+  const fd = (d: string) => fmtDate(d, i18n.language);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [items, setItems] = useState<Record<string, Item[]>>({});
   const [platformInvoices, setPlatformInvoices] = useState<PlatformInvoice[]>([]);
