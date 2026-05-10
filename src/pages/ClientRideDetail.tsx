@@ -92,31 +92,75 @@ const statusLabel: Record<string, string> = {
 
 const Inner = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<RideDetail | null>(null);
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const { data: res, error } = await supabase.rpc("get_ride_details_for_client", { _ride_id: id });
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      const detail = res as unknown as RideDetail;
-      setData(detail);
-      if (detail?.permit?.pdf_path) {
-        const { data: signed } = await supabase.storage
-          .from("permits")
-          .createSignedUrl(detail.permit.pdf_path, 3600);
-        if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
-      }
+  const load = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    const { data: res, error } = await supabase.rpc("get_ride_details_for_client", { _ride_id: id });
+    if (error) {
+      setError(error.message);
       setLoading(false);
-    })();
+      return;
+    }
+    const detail = res as unknown as RideDetail;
+    setData(detail);
+    if (detail?.permit?.pdf_path) {
+      const { data: signed } = await supabase.storage
+        .from("permits")
+        .createSignedUrl(detail.permit.pdf_path, 3600);
+      if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
+    }
+    // Fetch cancel-request status per assignment
+    const { data: ras } = await supabase
+      .from("ride_assignments")
+      .select("id, cancel_request_status, cancel_request_reason")
+      .eq("ride_id", id);
+    const map: Record<string, { status: string; reason: string | null }> = {};
+    (ras ?? []).forEach((r: any) => {
+      map[r.id] = { status: r.cancel_request_status ?? "none", reason: r.cancel_request_reason ?? null };
+    });
+    setCancelReqs(map);
+    setLoading(false);
   }, [id]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleCancelRide = async () => {
+    if (!data) return;
+    const hours = (new Date(data.ride.scheduled_at).getTime() - Date.now()) / 3600000;
+    const late = hours < 4;
+    const msg = late
+      ? "Let op: deze rit start binnen 4 uur. Per geaccepteerde begeleider wordt het minimumtarief (minimum aantal factureerbare uren × uurtarief) in rekening gebracht. Doorgaan?"
+      : "Weet je zeker dat je deze rit wilt annuleren? Er worden geen kosten in rekening gebracht.";
+    if (!confirm(msg)) return;
+    setBusy(true);
+    const { data: res, error } = await supabase.rpc("client_cancel_ride", { _ride_id: data.ride.id, _reason: null });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    const r = res as any;
+    if (r?.charged_escorts > 0) {
+      toast.success(`Rit geannuleerd. Minimumtarief berekend voor ${r.charged_escorts} begeleider(s): € ${Number(r.total_fee).toFixed(2)}.`);
+    } else {
+      toast.success("Rit geannuleerd. Geen kosten.");
+    }
+    navigate("/dashboard");
+  };
+
+  const handleDecide = async (assignmentId: string, approve: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("client_decide_cancellation", { _assignment_id: assignmentId, _approve: approve });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(approve ? "Annulering goedgekeurd." : "Verzoek afgewezen.");
+    load();
+  };
 
   if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
   if (error || !data) {
