@@ -205,18 +205,6 @@ const Inner = () => {
     setFiles((s) => s.filter((p) => p !== path));
   };
 
-  const days = useMemo(() => {
-    const arr: Date[] = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    for (let i = 0; i < 28; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      arr.push(d);
-    }
-    return arr;
-  }, []);
-
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
