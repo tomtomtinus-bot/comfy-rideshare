@@ -279,8 +279,9 @@ const Inner = () => {
       const s = v == null ? "" : String(v).trim();
       return s === "" ? fallback : s;
     };
+    const composedAddress = [street.trim(), houseNumber.trim()].filter(Boolean).join(" ");
     const parsed = schema.safeParse({
-      baseAddress: fd.get("baseAddress"),
+      baseAddress: composedAddress,
       basePostcode: postcode,
       baseCity: city,
       hourlyRate: num("hourlyRate", "0"),
