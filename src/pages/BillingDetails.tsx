@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,30 +9,31 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
-const baseSchema = {
-  company_name: z.string().trim().min(2, "Bedrijfsnaam is verplicht").max(120),
-  billing_contact_name: z.string().trim().min(2, "Contactpersoon is verplicht").max(120),
-  billing_email: z.string().trim().email("Ongeldig e-mailadres").max(160),
-  billing_address: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
-  billing_postcode: z.string().trim().min(4, "Vul postcode in").max(12),
-  billing_city: z.string().trim().min(2, "Vul plaats in").max(80),
-  billing_country: z.string().trim().min(2).max(60),
-  kvk_number: z.string().trim().min(6, "Ongeldig KvK-nummer").max(20),
-  vat_number: z.string().trim().max(30).optional().or(z.literal("")),
+const makeSchemas = (t: (k: string) => string) => {
+  const baseSchema = {
+    company_name: z.string().trim().min(2, t("billing.err.companyName")).max(120),
+    billing_contact_name: z.string().trim().min(2, t("billing.err.contact")).max(120),
+    billing_email: z.string().trim().email(t("billing.err.email")).max(160),
+    billing_address: z.string().trim().min(3, t("billing.err.address")).max(160),
+    billing_postcode: z.string().trim().min(4, t("billing.err.postcode")).max(12),
+    billing_city: z.string().trim().min(2, t("billing.err.city")).max(80),
+    billing_country: z.string().trim().min(2).max(60),
+    kvk_number: z.string().trim().min(6, t("billing.err.kvk")).max(20),
+    vat_number: z.string().trim().max(30).optional().or(z.literal("")),
+  };
+  const clientSchema = z.object(baseSchema);
+  const escortSchema = z.object({
+    ...baseSchema,
+    iban: z
+      .string()
+      .trim()
+      .min(15, t("billing.err.iban"))
+      .max(34)
+      .regex(/^[A-Z]{2}[0-9A-Z]+$/i, t("billing.err.ibanFmt")),
+    bank_account_holder: z.string().trim().min(2, t("billing.err.holder")).max(120),
+  });
+  return { clientSchema, escortSchema };
 };
-
-const clientSchema = z.object(baseSchema);
-
-const escortSchema = z.object({
-  ...baseSchema,
-  iban: z
-    .string()
-    .trim()
-    .min(15, "Ongeldig IBAN")
-    .max(34)
-    .regex(/^[A-Z]{2}[0-9A-Z]+$/i, "Ongeldig IBAN-formaat"),
-  bank_account_holder: z.string().trim().min(2, "Vul rekeninghouder in").max(120),
-});
 
 type FormState = {
   company_name: string;
@@ -103,8 +105,10 @@ const FieldImpl = ({
 
 const BillingDetailsInner = () => {
   const { user, role } = useAuth();
+  const { t } = useTranslation();
   const isEscort = role === "begeleider";
   const table = isEscort ? "escort_profiles" : "profiles";
+  const { clientSchema, escortSchema } = makeSchemas(t);
 
   const [form, setForm] = useState<FormState>(empty);
   const [loading, setLoading] = useState(true);
@@ -162,7 +166,7 @@ const BillingDetailsInner = () => {
         if (k && !fieldErrors[k]) fieldErrors[k] = i.message;
       });
       setErrors(fieldErrors);
-      toast.error("Controleer de gegevens");
+      toast.error(t("billing.checkData"));
       return;
     }
     setErrors({});
@@ -179,7 +183,7 @@ const BillingDetailsInner = () => {
     const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
-    toast.success("Facturatiegegevens opgeslagen");
+    toast.success(t("billing.saved"));
     initialRef.current = form;
   };
 
@@ -205,70 +209,70 @@ const BillingDetailsInner = () => {
         <div className="max-w-3xl mx-auto space-y-10">
           <header>
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {isEscort ? "Begeleider" : "Opdrachtgever"}
+              {isEscort ? t("common.escort") : t("common.client")}
             </p>
             <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">
-              Facturatiegegevens
+              {t("billing.title")}
             </h1>
             <p className="text-sm text-brass-deep/60 mt-3">
-              Deze gegevens worden gebruikt op alle facturen
-              {isEscort ? " en voor uitbetaling van je ritten." : "."}
+              {t("billing.intro")}
+              {isEscort ? t("billing.introEscort") : "."}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : (
             <form onSubmit={save} className="bg-card shadow-etched p-6 md:p-8 space-y-8">
               <section className="space-y-4">
                 <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  Bedrijf
+                  {t("billing.company")}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {renderField({ label: "Bedrijfsnaam", name: "company_name", autoComplete: "organization" })}
+                  {renderField({ label: t("billing.f.companyName"), name: "company_name", autoComplete: "organization" })}
                   {renderField({
-                    label: "Contactpersoon facturen",
+                    label: t("billing.f.contact"),
                     name: "billing_contact_name",
                     autoComplete: "name",
                   })}
                   {renderField({
-                    label: "Factuur-e-mailadres",
+                    label: t("billing.f.email"),
                     name: "billing_email",
                     type: "email",
                     autoComplete: "email",
                   })}
                   <div />
-                  {renderField({ label: "KvK-nummer", name: "kvk_number", placeholder: "12345678" })}
-                  {renderField({ label: "Btw-nummer", name: "vat_number", placeholder: "NL000000000B01" })}
+                  {renderField({ label: t("billing.f.kvk"), name: "kvk_number", placeholder: "12345678" })}
+                  {renderField({ label: t("billing.f.vat"), name: "vat_number", placeholder: "NL000000000B01" })}
                 </div>
               </section>
 
               <section className="space-y-4">
                 <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  Factuuradres
+                  {t("billing.address")}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     {renderField({
-                      label: "Straat + huisnummer",
+                      label: t("billing.f.street"),
                       name: "billing_address",
                       autoComplete: "street-address",
                     })}
                   </div>
-                  {renderField({ label: "Postcode", name: "billing_postcode", autoComplete: "postal-code" })}
-                  {renderField({ label: "Plaats", name: "billing_city", autoComplete: "address-level2" })}
-                  {renderField({ label: "Land", name: "billing_country", autoComplete: "country-name" })}
+                  {renderField({ label: t("billing.f.postcode"), name: "billing_postcode", autoComplete: "postal-code" })}
+                  {renderField({ label: t("billing.f.city"), name: "billing_city", autoComplete: "address-level2" })}
+                  {renderField({ label: t("billing.f.country"), name: "billing_country", autoComplete: "country-name" })}
                 </div>
               </section>
 
               {isEscort && (
                 <section className="space-y-4">
                   <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    Uitbetaling
+                    {t("billing.payout")}
                   </h2>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {renderField({ label: "IBAN", name: "iban", placeholder: "NL00BANK0123456789" })}
-                    {renderField({ label: "Rekeninghouder", name: "bank_account_holder" })}
+                    {renderField({ label: t("billing.f.iban"), name: "iban", placeholder: "NL00BANK0123456789" })}
+                    {renderField({ label: t("billing.f.holder"), name: "bank_account_holder" })}
                   </div>
                 </section>
               )}
@@ -276,12 +280,10 @@ const BillingDetailsInner = () => {
               {isEscort && (
                 <section className="space-y-4">
                   <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    Wero-betaling
+                    {t("billing.weroSection")}
                   </h2>
                   <p className="text-xs text-brass-deep/60 -mt-2">
-                    Wero is het nieuwe Europese betaalsysteem (opvolger van iDEAL/Bancontact). Voeg
-                    je Wero-handle toe en eventueel een vaste toeslag per factuur ter dekking van
-                    de transactiekosten.
+                    {t("billing.weroIntro")}
                   </p>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -291,18 +293,18 @@ const BillingDetailsInner = () => {
                       className="h-4 w-4 accent-brass-gold"
                     />
                     <span className="text-sm text-brass-deep">
-                      Toon Wero-betaaloptie en toeslag op facturen
+                      {t("billing.weroToggle")}
                     </span>
                   </label>
                   {form.wero_enabled && (
                     <div className="grid md:grid-cols-2 gap-4">
                       {renderField({
-                        label: "Wero-handle (e-mail of telefoonnummer)",
+                        label: t("billing.f.weroHandle"),
                         name: "wero_handle",
                         placeholder: "naam@bedrijf.nl of +31612345678",
                       })}
                       {renderField({
-                        label: "Vaste toeslag per factuur (€)",
+                        label: t("billing.f.weroFee"),
                         name: "wero_fee",
                         type: "number",
                         placeholder: "0.50",
@@ -318,7 +320,7 @@ const BillingDetailsInner = () => {
                   disabled={saving}
                   className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
                 >
-                  {saving ? "Opslaan…" : "Opslaan"}
+                  {saving ? t("common.saving") : t("common.save")}
                 </button>
               </div>
             </form>
