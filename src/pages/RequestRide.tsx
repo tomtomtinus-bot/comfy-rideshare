@@ -128,6 +128,7 @@ const RequestRideInner = () => {
     cargo_weight_t: "",
     permit_number: "",
     client_reference: "",
+    be_escort_type: "type1" as "type1" | "type2",
   });
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
