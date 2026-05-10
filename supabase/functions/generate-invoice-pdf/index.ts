@@ -1,0 +1,488 @@
+// Generates a PDF for a regular invoice or platform invoice,
+// uploads it to the private "invoices" bucket, stores the pdf_path,
+// and returns a short-lived signed download URL.
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import { jsPDF } from "npm:jspdf@2.5.2";
+import autoTable from "npm:jspdf-autotable@3.8.4";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
+const fmtMoney = (n: number) =>
+  `€ ${Number(n).toLocaleString("nl-NL", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+interface BillingParty {
+  company_name?: string | null;
+  billing_contact_name?: string | null;
+  billing_email?: string | null;
+  billing_address?: string | null;
+  billing_postcode?: string | null;
+  billing_city?: string | null;
+  billing_country?: string | null;
+  kvk_number?: string | null;
+  vat_number?: string | null;
+  iban?: string | null;
+  full_name?: string | null;
+  wero_enabled?: boolean | null;
+  wero_handle?: string | null;
+  wero_fee?: number | null;
+}
+
+const PLATFORM_PARTY: BillingParty = {
+  company_name: "Lowloads B.V.",
+  billing_address: "Mediavaert 1",
+  billing_postcode: "1114 BC",
+  billing_city: "Amsterdam-Duivendrecht",
+  billing_country: "Nederland",
+  kvk_number: "00000000",
+  vat_number: "NL000000000B01",
+  billing_email: "facturatie@lowloads.app",
+};
+
+const norm = (s?: string | null) => (s ?? "").trim().toLowerCase();
+const vatRateFor = (from: BillingParty, to: BillingParty) => {
+  const a = norm(from.billing_country);
+  const b = norm(to.billing_country);
+  if (!a || !b) return 0.21;
+  return a === b ? 0.21 : 0;
+};
+
+const senderLines = (p: BillingParty) =>
+  [
+    p.billing_contact_name || p.full_name || "",
+    p.billing_address || "",
+    [p.billing_postcode, p.billing_city].filter(Boolean).join(" "),
+    p.iban ? `IBAN: ${p.iban}` : "",
+    p.vat_number ? `BTW: ${p.vat_number}` : "",
+    p.kvk_number ? `KVK: ${p.kvk_number}` : "",
+  ].filter(Boolean);
+
+const recipientLines = (p: BillingParty) =>
+  [
+    p.company_name || p.full_name || "",
+    p.billing_contact_name || "",
+    p.billing_address || "",
+    [p.billing_postcode, p.billing_city].filter(Boolean).join(" "),
+  ].filter(Boolean);
+
+interface ShellOpts {
+  invoice_number: string;
+  created_at: string;
+  period_start: string;
+  period_end: string;
+  from: BillingParty;
+  to: BillingParty;
+}
+
+const drawShell = (doc: jsPDF, opts: ShellOpts) => {
+  const pageW = doc.internal.pageSize.getWidth();
+  const left = 18;
+  const right = pageW - 18;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(20);
+  doc.text("ViaCust", left, 25);
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(120);
+  doc.text("Verstuurd via viacust.app", left, 30);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(40);
+  let y = 18;
+  doc.setFont("helvetica", "bold");
+  doc.text(opts.from.company_name || opts.from.full_name || "", right, y, {
+    align: "right",
+  });
+  y += 5;
+  doc.setFont("helvetica", "normal");
+  for (const line of senderLines(opts.from)) {
+    doc.text(line, right, y, { align: "right" });
+    y += 4.5;
+  }
+
+  doc.setDrawColor(20);
+  doc.setLineWidth(0.4);
+  doc.line(left, 56, right, 56);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("Factuur:", left, 66);
+  const rec = recipientLines(opts.to);
+  doc.text(rec[0] ?? "", left, 76);
+  doc.setFont("helvetica", "normal");
+  rec.slice(1).forEach((line, i) => doc.text(line, left, 82 + i * 5));
+
+  const metaX = pageW - 80;
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text("Factuurdatum:", metaX, 66);
+  doc.text(fmtDate(opts.created_at), right, 66, { align: "right" });
+  doc.text("Factuurnummer:", metaX, 72);
+  doc.text(opts.invoice_number, right, 72, { align: "right" });
+  doc.text("Betalingsconditie:", metaX, 78);
+  doc.text("30 dagen", right, 78, { align: "right" });
+  doc.text("Periode:", metaX, 84);
+  doc.text(`${fmtDate(opts.period_start)} – ${fmtDate(opts.period_end)}`, right, 84, {
+    align: "right",
+  });
+};
+
+const drawTotals = (
+  doc: jsPDF,
+  startY: number,
+  subtotal: number,
+  vatRate: number,
+  total: number,
+  weroFee: number,
+  weroHandle: string | null,
+) => {
+  const pageW = doc.internal.pageSize.getWidth();
+  const right = pageW - 18;
+  const labelX = pageW - 80;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(20);
+  let y = startY;
+
+  doc.text("Subtotaal:", labelX, y);
+  doc.text(fmtMoney(subtotal), right, y, { align: "right" });
+  y += 6;
+
+  if (vatRate === 0) {
+    doc.text("BTW verlegd:", labelX, y);
+    doc.text(fmtMoney(0), right, y, { align: "right" });
+  } else {
+    doc.text("BTW:", labelX, y);
+    doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
+    doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
+  }
+  y += 6;
+
+  if (weroFee > 0) {
+    doc.text("Wero-betaaltoeslag:", labelX, y);
+    doc.text(fmtMoney(weroFee), right, y, { align: "right" });
+    y += 6;
+  }
+
+  doc.setDrawColor(20);
+  doc.setLineWidth(0.3);
+  doc.line(labelX, y, right, y);
+  y += 6;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Totaal te voldoen:", labelX, y);
+  doc.text(fmtMoney(total), right, y, { align: "right" });
+  y += 10;
+
+  if (vatRate === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    doc.text(
+      "BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).",
+      labelX,
+      y,
+      { maxWidth: right - labelX },
+    );
+    y += 8;
+  }
+
+  if (weroHandle) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    doc.text("Betaal eenvoudig met Wero naar:", labelX, y);
+    y += 5;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(20);
+    doc.text(weroHandle, labelX, y);
+  }
+};
+
+const drawFootNote = (doc: jsPDF, invoiceNumber: string) => {
+  const pageW = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.setTextColor(80);
+  doc.text(
+    `Bij betaling factuurnummer vermelden:  ${invoiceNumber}`,
+    pageW / 2,
+    h - 18,
+    { align: "center" },
+  );
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(140);
+  doc.text("Gegenereerd via Lowloads", pageW / 2, h - 12, { align: "center" });
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Verify user via their token
+    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !userData.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const uid = userData.user.id;
+
+    const body = await req.json().catch(() => ({}));
+    const invoiceId = String(body?.invoice_id ?? "");
+    const type = body?.type === "platform" ? "platform" : "regular";
+    if (!invoiceId) {
+      return new Response(JSON.stringify({ error: "invoice_id required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const admin = createClient(url, serviceKey);
+
+    // Fetch invoice + check access
+    let invoice: Record<string, unknown> | null = null;
+    let items: Array<Record<string, unknown>> = [];
+    let from: BillingParty;
+    let to: BillingParty;
+
+    if (type === "regular") {
+      const { data: inv } = await admin
+        .from("invoices")
+        .select("*")
+        .eq("id", invoiceId)
+        .maybeSingle();
+      if (!inv) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Authorize: escort, client, or admin
+      const { data: roleRow } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .maybeSingle();
+      const isAdmin = !!roleRow;
+      if (!isAdmin && uid !== inv.escort_id && uid !== inv.client_id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      invoice = inv;
+
+      const [{ data: its }, { data: ep }, { data: epProf }, { data: cp }] =
+        await Promise.all([
+          admin
+            .from("invoice_items")
+            .select("*")
+            .eq("invoice_id", invoiceId)
+            .order("ride_date"),
+          admin.from("escort_profiles").select("*").eq("id", inv.escort_id).maybeSingle(),
+          admin.from("profiles").select("*").eq("id", inv.escort_id).maybeSingle(),
+          admin.from("profiles").select("*").eq("id", inv.client_id).maybeSingle(),
+        ]);
+      items = its ?? [];
+      from = { ...(epProf ?? {}), ...(ep ?? {}) } as BillingParty;
+      to = (cp ?? {}) as BillingParty;
+    } else {
+      const { data: inv } = await admin
+        .from("platform_invoices")
+        .select("*")
+        .eq("id", invoiceId)
+        .maybeSingle();
+      if (!inv) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: roleRow } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .maybeSingle();
+      const isAdmin = !!roleRow;
+      if (!isAdmin && uid !== inv.client_id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      invoice = inv;
+
+      const [{ data: its }, { data: cp }] = await Promise.all([
+        admin
+          .from("platform_invoice_items")
+          .select("*")
+          .eq("platform_invoice_id", invoiceId)
+          .order("ride_date"),
+        admin.from("profiles").select("*").eq("id", inv.client_id).maybeSingle(),
+      ]);
+      items = its ?? [];
+      from = PLATFORM_PARTY;
+      to = (cp ?? {}) as BillingParty;
+    }
+
+    // Build PDF
+    const doc = new jsPDF();
+    const shellOpts: ShellOpts = {
+      invoice_number: String(invoice!.invoice_number),
+      created_at: String(invoice!.created_at),
+      period_start: String(invoice!.period_start),
+      period_end: String(invoice!.period_end),
+      from,
+      to,
+    };
+    drawShell(doc, shellOpts);
+
+    let subtotal = 0;
+    if (type === "regular") {
+      subtotal = items.reduce((s, r) => s + Number(r.amount ?? 0), 0);
+      autoTable(doc, {
+        startY: 105,
+        head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
+        body: items.map((r) => [
+          fmtDate(String(r.ride_date)),
+          String(r.description ?? ""),
+          Number(r.hours ?? 0).toFixed(2),
+          fmtMoney(Number(r.hourly_rate ?? 0)),
+          fmtMoney(Number(r.amount ?? 0)),
+        ]),
+        theme: "plain",
+        headStyles: {
+          fontStyle: "bold",
+          textColor: 20,
+          lineWidth: { top: 0, bottom: 0.4, left: 0, right: 0 },
+          lineColor: 20,
+          fillColor: [255, 255, 255],
+        },
+        bodyStyles: {
+          textColor: 30,
+          lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 },
+          lineColor: [200, 200, 200],
+        },
+        columnStyles: {
+          0: { cellWidth: 22 },
+          2: { halign: "right", cellWidth: 18 },
+          3: { halign: "right", cellWidth: 28 },
+          4: { halign: "right", cellWidth: 32 },
+        },
+        styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
+        margin: { left: 18, right: 18 },
+      });
+    } else {
+      subtotal = Number(invoice!.total_amount ?? 0);
+      autoTable(doc, {
+        startY: 105,
+        head: [["Datum", "Omschrijving", "Aantal", "Tarief", "Totaal"]],
+        body: items.map((r) => [
+          fmtDate(String(r.ride_date)),
+          `App-fee rit ${r.route ?? ""}`.trim(),
+          String(r.num_escorts ?? 0),
+          "1,5%",
+          fmtMoney(Number(r.amount ?? 0)),
+        ]),
+        theme: "plain",
+        headStyles: {
+          fontStyle: "bold",
+          textColor: 20,
+          lineWidth: { top: 0, bottom: 0.4, left: 0, right: 0 },
+          lineColor: 20,
+          fillColor: [255, 255, 255],
+        },
+        bodyStyles: {
+          textColor: 30,
+          lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 },
+          lineColor: [200, 200, 200],
+        },
+        columnStyles: {
+          0: { cellWidth: 22 },
+          2: { halign: "right", cellWidth: 18 },
+          3: { halign: "right", cellWidth: 28 },
+          4: { halign: "right", cellWidth: 32 },
+        },
+        styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
+        margin: { left: 18, right: 18 },
+      });
+    }
+
+    // deno-lint-ignore no-explicit-any
+    const endY = (doc as any).lastAutoTable.finalY as number;
+    const vatRate = vatRateFor(from, to);
+    const weroFee = from.wero_enabled ? Number(from.wero_fee || 0) : 0;
+    const total = subtotal + subtotal * vatRate + weroFee;
+    drawTotals(
+      doc,
+      endY + 12,
+      subtotal,
+      vatRate,
+      total,
+      weroFee,
+      from.wero_enabled ? from.wero_handle ?? null : null,
+    );
+    drawFootNote(doc, shellOpts.invoice_number);
+
+    const pdfBytes = doc.output("arraybuffer") as ArrayBuffer;
+    const folder = type === "regular" ? "regular" : "platform";
+    const path = `${folder}/${invoiceId}.pdf`;
+
+    const { error: upErr } = await admin.storage
+      .from("invoices")
+      .upload(path, new Uint8Array(pdfBytes), {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+    if (upErr) throw upErr;
+
+    const table = type === "regular" ? "invoices" : "platform_invoices";
+    await admin.from(table).update({ pdf_path: path }).eq("id", invoiceId);
+
+    const { data: signed, error: signErr } = await admin.storage
+      .from("invoices")
+      .createSignedUrl(path, 60 * 10);
+    if (signErr) throw signErr;
+
+    return new Response(
+      JSON.stringify({ pdf_path: path, signed_url: signed.signedUrl }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  } catch (e) {
+    console.error("generate-invoice-pdf", e);
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
