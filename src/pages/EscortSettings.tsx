@@ -148,8 +148,10 @@ const Inner = () => {
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
-  // Postcode autodetect
+  // Adres autodetect
   const [postcode, setPostcode] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [lookupBusy, setLookupBusy] = useState(false);
