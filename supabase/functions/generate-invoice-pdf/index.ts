@@ -19,16 +19,32 @@ const fmtMoney = (n: number) =>
   })}`;
 
 type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
-const resolvedAutoTable = (autoTableModule as unknown as {
+type AutoTablePluginFn = (jsPDFClass: typeof jsPDF) => void;
+const autoTableExports = autoTableModule as unknown as {
   autoTable?: AutoTableFn;
-  default?: AutoTableFn;
-}).autoTable ?? (autoTableModule as unknown as { default?: AutoTableFn }).default;
+  applyPlugin?: AutoTablePluginFn;
+  default?: AutoTableFn | { autoTable?: AutoTableFn; default?: AutoTableFn; applyPlugin?: AutoTablePluginFn };
+};
+const autoTableDefault = autoTableExports.default;
+const resolvedAutoTable = autoTableExports.autoTable
+  ?? (typeof autoTableDefault === "function" ? autoTableDefault : autoTableDefault?.autoTable)
+  ?? (typeof autoTableDefault === "object" ? autoTableDefault.default : undefined);
+const applyAutoTablePlugin = autoTableExports.applyPlugin
+  ?? (typeof autoTableDefault === "object" ? autoTableDefault.applyPlugin : undefined);
 
 const addInvoiceTable = (doc: jsPDF, options: Record<string, unknown>) => {
-  if (typeof resolvedAutoTable !== "function") {
+  if (typeof resolvedAutoTable === "function") {
+    resolvedAutoTable(doc, options);
+    return;
+  }
+  if (typeof applyAutoTablePlugin === "function") {
+    applyAutoTablePlugin(jsPDF);
+  }
+  const docAutoTable = (doc as unknown as { autoTable?: (options: Record<string, unknown>) => void }).autoTable;
+  if (typeof docAutoTable !== "function") {
     throw new Error("PDF tabelgenerator is niet beschikbaar");
   }
-  resolvedAutoTable(doc, options);
+  docAutoTable.call(doc, options);
 };
 
 interface BillingParty {
