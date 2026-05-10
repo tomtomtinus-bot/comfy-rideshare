@@ -85,17 +85,18 @@ Deno.serve(async (req) => {
         week_start: isoMonday(new Date()),
         eur_per_liter: 1.85,
         source: "fallback",
+        country: "NL",
       });
     }
 
     // Dedupe per week_start (laatste voorkomen wint)
-    const dedupedMap = new Map<string, { week_start: string; eur_per_liter: number; source: string }>();
+    const dedupedMap = new Map<string, { week_start: string; eur_per_liter: number; source: string; country: string }>();
     for (const u of upserts) dedupedMap.set(u.week_start, u);
     const deduped = Array.from(dedupedMap.values());
 
     const { error } = await admin
       .from("weekly_fuel_prices")
-      .upsert(deduped, { onConflict: "week_start" });
+      .upsert(deduped, { onConflict: "country,week_start" });
     if (error) throw error;
 
     return new Response(
