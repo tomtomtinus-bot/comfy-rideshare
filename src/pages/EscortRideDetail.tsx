@@ -124,6 +124,7 @@ const Inner = () => {
 
     const { data: u } = await supabase.auth.getUser();
     if (u?.user) {
+      setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
         .select("id, cancel_request_status, cancel_request_reason")
