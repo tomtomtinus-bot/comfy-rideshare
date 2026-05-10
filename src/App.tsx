@@ -9,6 +9,7 @@ import { PendingApprovalBanner } from "@/components/PendingApprovalBanner";
 import { CookieConsent } from "@/components/site/CookieConsent";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import EscortSettings from "./pages/EscortSettings.tsx";
@@ -47,6 +48,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/aanvragen" element={<RequestRide />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profiel" element={<EscortSettings />} />
