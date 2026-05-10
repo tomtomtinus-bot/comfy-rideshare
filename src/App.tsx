@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/facturen" element={<Invoices />} />
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
             <Route path="/geschiedenis" element={<History />} />
-            <Route path="/ontheffingen" element={<Permits />} />
+            
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
