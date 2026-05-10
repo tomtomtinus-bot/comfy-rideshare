@@ -24,6 +24,7 @@ import AdminRides from "./pages/admin/AdminRides.tsx";
 import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
 import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
+import FuelPrices from "./pages/FuelPrices.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
             <Route path="/geschiedenis" element={<History />} />
             <Route path="/ontheffingen" element={<Permits />} />
+            <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
             <Route path="/admin" element={<AdminLayout />}>

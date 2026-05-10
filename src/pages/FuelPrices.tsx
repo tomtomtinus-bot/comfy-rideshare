@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/site/Footer";
 
 interface FuelPrice {
   id: string;
@@ -11,10 +12,9 @@ interface FuelPrice {
   fetched_at: string;
 }
 
-const AdminFuel = () => {
+const FuelPrices = () => {
   const [rows, setRows] = useState<FuelPrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -32,37 +32,34 @@ const AdminFuel = () => {
     load();
   }, []);
 
-  const syncFromTLN = async () => {
-    setSyncing(true);
-    const { data, error } = await supabase.functions.invoke("fetch-fuel-prices");
-    setSyncing(false);
-    if (error) return toast.error(error.message);
-    toast.success(`TLN-sync: ${data?.weeks_upserted ?? 0} weken bijgewerkt`);
-    load();
-  };
+  const current = rows[0];
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-2xl text-brass-deep mb-2">Brandstofprijzen</h2>
-          <p className="text-sm text-brass-deep/70">
-            Wekelijks gemiddelde dieselprijs (€/liter) volgens TLN. Wordt gebruikt voor brandstoftoeslagen.
-          </p>
-        </div>
-        <Button onClick={syncFromTLN} disabled={syncing} variant="outline">
-          {syncing ? "Synchroniseren…" : "Synchroniseer met TLN"}
-        </Button>
-      </div>
+    <div className="min-h-screen flex flex-col bg-parchment">
+      <Nav />
+      <main className="flex-1 max-w-4xl mx-auto px-6 md:px-8 py-10 w-full">
+        <h1 className="font-display text-3xl text-brass-deep mb-2">Brandstofprijzen</h1>
+        <p className="text-sm text-brass-deep/70 mb-8">
+          Wekelijks gemiddelde dieselprijs (af pomp, excl. btw) volgens TLN Brandstofmonitor.
+        </p>
 
-      <div>
-        <h3 className="text-xs uppercase tracking-widest font-semibold text-brass-deep mb-3">
+        {current && (
+          <div className="bg-brass-deep text-parchment p-6 mb-8 border border-brass-gold/30">
+            <div className="text-xs uppercase tracking-widest opacity-70 mb-2">Huidige week</div>
+            <div className="font-display text-4xl">€ {Number(current.eur_per_liter).toFixed(3)}/L</div>
+            <div className="text-xs opacity-70 mt-2">
+              Weekstart {current.week_start} · bron {current.source}
+            </div>
+          </div>
+        )}
+
+        <h2 className="text-xs uppercase tracking-widest font-semibold text-brass-deep mb-3">
           Geschiedenis
-        </h3>
+        </h2>
         {loading ? (
           <p className="text-sm text-brass-deep/50">Laden…</p>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-brass-deep/50">Nog geen prijzen. Klik op "Synchroniseer met TLN".</p>
+          <p className="text-sm text-brass-deep/50">Nog geen prijzen beschikbaar.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -89,9 +86,10 @@ const AdminFuel = () => {
             </table>
           </div>
         )}
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };
 
-export default AdminFuel;
+export default FuelPrices;
