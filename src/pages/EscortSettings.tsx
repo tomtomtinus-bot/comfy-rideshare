@@ -357,6 +357,25 @@ const Inner = () => {
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
                   <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
+                  <div>
+                    <Input
+                      name="kmRateDe"
+                      type="number"
+                      step="0.01"
+                      label="Km-tarief Duitsland (€/km, optioneel)"
+                      defaultValue={
+                        (profile as any)?.km_rate_de == null
+                          ? ""
+                          : String((profile as any).km_rate_de)
+                      }
+                    />
+                    <p className="text-[10px] text-brass-deep/50 mt-1">
+                      Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
+                    </p>
+                  </div>
                   <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"
