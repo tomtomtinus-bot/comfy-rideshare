@@ -153,12 +153,12 @@ const RequestRideInner = () => {
     if (!file || !user) return;
     setPermitUploading(true);
     try {
-      toast.info("Ontheffing wordt uitgelezen…");
+      toast.info(t("request.permitRead"));
       const up = await uploadPermitPdf(file, user.id);
       setUploadedPermit(up);
-      toast.success(`Ontheffing ${up.permit_number} bijgevoegd (${up.routes_count} route(s))`);
+      toast.success(t("request.permitUploaded", { nr: up.permit_number, n: up.routes_count }));
     } catch (e: any) {
-      toast.error(e?.message ?? "Upload mislukt");
+      toast.error(e?.message ?? t("request.uploadFail"));
     } finally {
       setPermitUploading(false);
     }
@@ -166,7 +166,6 @@ const RequestRideInner = () => {
 
   const removeUploadedPermit = async () => {
     if (!uploadedPermit) return;
-    // Verwijder permit + bestand — was nog niet aan een rit gekoppeld
     await supabase.storage.from("permits").remove([uploadedPermit.pdf_path]).catch(() => {});
     await supabase.from("permits").delete().eq("id", uploadedPermit.id);
     setUploadedPermit(null);
@@ -184,11 +183,11 @@ const RequestRideInner = () => {
 
   const findMatches = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const parsed = makeSchema(t).safeParse(form);
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!pickupGeo || !dropoffGeo) return toast.error("Postcodes nog niet bevestigd");
+    if (!pickupGeo || !dropoffGeo) return toast.error(t("request.postcodesPending"));
     const [hh, mm] = form.scheduled_time.split(":").map(Number);
-    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error("Starttijd moet op het kwartier vallen (00, 15, 30, 45)");
+    if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error(t("request.startQuarter"));
 
     setBusy(true);
     const { data, error } = await supabase
