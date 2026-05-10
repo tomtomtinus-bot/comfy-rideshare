@@ -100,6 +100,11 @@ const Inner = () => {
   const [error, setError] = useState<string | null>(null);
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
 
   const load = useCallback(async () => {
     if (!id) return;
