@@ -17,6 +17,7 @@ const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
   const [busy, setBusy] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
