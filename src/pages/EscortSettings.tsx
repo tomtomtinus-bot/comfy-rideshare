@@ -30,6 +30,8 @@ const countriesFromCategories = (cats: string[]): string[] => {
 };
 
 const schema = z.object({
+  fullName: z.string().trim().min(2, "Vul je naam in").max(120),
+  phone: z.string().trim().min(6, "Vul een telefoonnummer in").max(32),
   baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
   basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
@@ -148,6 +150,10 @@ const Inner = () => {
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
 
+  // Persoonlijk
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+
   // Adres autodetect
   const [postcode, setPostcode] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
@@ -163,8 +169,9 @@ const Inner = () => {
     (async () => {
       if (!user) return;
 
-      const [{ data: p }, { data: assigns }, { data: fp }] = await Promise.all([
+      const [{ data: p }, { data: pp }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
         supabase
           .from("ride_assignments")
           .select("status, ride_id, rides(id, scheduled_at, pickup_city, dropoff_city)")
@@ -178,6 +185,10 @@ const Inner = () => {
           .maybeSingle(),
       ]);
       if (fp) setCurrentFuel(fp as any);
+      if (pp) {
+        setFullName(pp.full_name ?? "");
+        setPhone(pp.phone ?? "");
+      }
 
       if (p) {
         setProfile(p);
@@ -281,6 +292,8 @@ const Inner = () => {
     };
     const composedAddress = [street.trim(), houseNumber.trim()].filter(Boolean).join(" ");
     const parsed = schema.safeParse({
+      fullName,
+      phone,
       baseAddress: composedAddress,
       basePostcode: postcode,
       baseCity: city,
@@ -306,7 +319,8 @@ const Inner = () => {
     }
 
     setBusy(true);
-    const { error } = await supabase
+    const [{ error }, { error: pErr }] = await Promise.all([
+      supabase
       .from("escort_profiles")
       .update({
         base_city: parsed.data.baseCity,
@@ -346,9 +360,15 @@ const Inner = () => {
           };
         })(),
       })
-      .eq("id", user.id);
+      .eq("id", user.id),
+      supabase
+        .from("profiles")
+        .update({ full_name: parsed.data.fullName, phone: parsed.data.phone })
+        .eq("id", user.id),
+    ]);
 
     setBusy(false);
+    if (pErr) return toast.error(pErr.message);
     if (error) return toast.error(error.message);
     setDirty(false);
     toast.success("Profiel bijgewerkt");
@@ -390,6 +410,31 @@ const Inner = () => {
               onChange={() => setDirty(true)}
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
+              <section className="space-y-3">
+                <p className="text-[11px] text-brass-deep/60">
+                  Je <strong>naam</strong> en <strong>telefoonnummer</strong> worden pas met de opdrachtgever gedeeld nadat je een rit hebt geaccepteerd.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Volledige naam</Label>
+                    <input
+                      value={fullName}
+                      onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                  </div>
+                  <div>
+                    <Label>Telefoonnummer</Label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => { setPhone(e.target.value); setDirty(true); }}
+                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                  </div>
+                </div>
+              </section>
+
               <section className="space-y-3">
                 <p className="text-[11px] text-brass-deep/60">
                   Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
