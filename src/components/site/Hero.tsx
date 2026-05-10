@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 export const Hero = () => {
   return (
     <section className="relative pt-10 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero text-left">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 md:gap-12 items-end text-right">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 md:gap-12 items-end">
         <div className="col-span-12 lg:col-span-8 animate-fade-up text-left">
           <p className="text-brass-gold uppercase tracking-[0.25em] md:tracking-[0.3em] font-semibold text-[10px] md:text-xs mb-4 md:mb-6">
             ViaCust — Transportbegeleiding
@@ -12,7 +12,7 @@ export const Hero = () => {
             De slimme schakel<br />in transportbegeleiding.
           </h1>
         </div>
-        <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
+        <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms] text-left">
           <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[40ch] mb-6 md:mb-8">
             Plan, beheer en synchroniseer begeleidingsritten in één centraal platform.
             Geen gedoe meer met overvolle mailboxen of gemiste updates.
