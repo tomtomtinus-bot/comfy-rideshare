@@ -30,6 +30,8 @@ const countriesFromCategories = (cats: string[]): string[] => {
 };
 
 const schema = z.object({
+  fullName: z.string().trim().min(2, "Vul je naam in").max(120),
+  phone: z.string().trim().min(6, "Vul een telefoonnummer in").max(32),
   baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
   basePostcode: z.string().trim().min(4, "Vul postcode in").max(12),
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
