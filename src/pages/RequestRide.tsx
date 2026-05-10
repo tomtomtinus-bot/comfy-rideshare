@@ -80,6 +80,7 @@ const fmtHours = (min: number) => {
 };
 
 const RequestRideInner = () => {
+  const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
