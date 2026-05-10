@@ -1,27 +1,27 @@
 const steps = [
   {
     n: "01",
-    title: "Aanvraag",
+    title: "Aanvraag in 1 minuut",
     body:
-      "Geef afmetingen, gewicht, route, vergunningnummer en tijdvenster door. Het systeem berekent het verplichte aantal begeleiders.",
+      "Voer afmetingen, gewicht, route, vergunning en tijdvenster in. Het systeem berekent automatisch het verplichte aantal begeleiders en pilotvoertuigen volgens NL-, BE-, DE- en FR-richtlijnen.",
   },
   {
     n: "02",
-    title: "Matching",
+    title: "Slimme matching",
     body:
-      "Wij vinden de dichtstbijzijnde begeleiders met het juiste certificaat, pilotvoertuig en categorie voor uw transport.",
+      "Alleen begeleiders met het juiste certificaat, de juiste categorie en een vrije agenda krijgen een uitnodiging. Google Agenda-koppeling voorkomt dubbele boekingen.",
   },
   {
     n: "03",
-    title: "Bevestiging",
+    title: "Bevestiging binnen 30 min",
     body:
-      "De begeleider heeft 30 minuten om de opdracht te aanvaarden. U ontvangt automatisch bevestiging zodra dat gebeurt.",
+      "Begeleiders accepteren via app of pushmelding. U ziet live wie bevestigt en ontvangt automatisch de definitieve bemanning, contactgegevens en routedetails.",
   },
   {
     n: "04",
-    title: "Uitvoering & afrekening",
+    title: "Uitvoering & facturatie",
     body:
-      "Na afloop registreert de begeleider de uren vanaf vertrek standplaats tot terugkeer. U ziet direct de definitieve kosten.",
+      "Uren lopen automatisch vanaf vertrek standplaats tot terugkeer. Na afloop staat de factuur klaar — transparant per begeleider, per kilometer en per uur.",
   },
 ];
 
@@ -31,10 +31,11 @@ export const Protocol = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 lg:gap-16">
         <div className="col-span-12 lg:col-span-4">
           <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight">
-            Van vergunning tot bestemming.
+            Van vergunning tot factuur — in één platform.
           </h2>
           <p className="mt-4 md:mt-6 text-brass-deep/60 max-w-sm text-sm md:text-base">
-            Vier stappen van aanvraag tot afrekening, met certificering op elk niveau.
+            Geen telefooncirkels, geen losse Excels. Vier stappen, volledig digitaal,
+            met certificering en agenda-controle op elk niveau.
           </p>
         </div>
         <div className="col-span-12 lg:col-span-8">
