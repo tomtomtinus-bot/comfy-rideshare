@@ -585,10 +585,17 @@ const InvoicesInner = () => {
                               </tr>
                               <tr>
                                 <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                  Btw 21%
+                                  {reverseCharge ? "Btw verlegd" : "Btw 21%"}
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
                               </tr>
+                              {reverseCharge && (
+                                <tr>
+                                  <td colSpan={5} className="py-2 text-right text-[10px] italic text-brass-deep/55">
+                                    BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).
+                                  </td>
+                                </tr>
+                              )}
                               {weroFee > 0 && (
                                 <tr>
                                   <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
