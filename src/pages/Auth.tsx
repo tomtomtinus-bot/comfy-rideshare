@@ -75,13 +75,6 @@ const Auth = () => {
       phone: d.phone,
       role: d.role,
     };
-    if (d.role === "begeleider") {
-      const geo = geocode(d.baseCity || "Utrecht");
-      if (!geo) return toast.error(t("auth.err.cityNotRecognised"));
-      meta.base_city = geo.city;
-      meta.base_lat = geo.lat;
-      meta.base_lng = geo.lng;
-    }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: d.email,
