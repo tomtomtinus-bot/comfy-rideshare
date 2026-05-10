@@ -27,18 +27,18 @@ Deno.serve(async (req) => {
   };
 
   if (error || !code || !state) {
-    return redirectBack("/escort-instellingen", { ok: "0", error: error ?? "missing_code" });
+    return redirectBack("/profiel", { ok: "0", error: error ?? "missing_code" });
   }
 
   let userId = "";
-  let returnTo = "/escort-instellingen";
+  let returnTo = "/profiel";
   try {
     const decoded = atob(state);
     const [u, r] = decoded.split("|");
     userId = u;
     if (r) returnTo = r;
   } catch {
-    return redirectBack("/escort-instellingen", { ok: "0", error: "bad_state" });
+    return redirectBack("/profiel", { ok: "0", error: "bad_state" });
   }
 
   try {
