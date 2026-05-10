@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
-import { CITIES, geocode } from "@/lib/geo";
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -27,7 +26,6 @@ const Auth = () => {
     fullName: z.string().trim().min(2, t("auth.err.nameRequired")).max(100),
     phone: z.string().trim().min(6).max(30),
     role: z.enum(["opdrachtgever", "begeleider"]),
-    baseCity: z.string().optional(),
   });
 
   const loginSchema = z.object({
@@ -66,7 +64,6 @@ const Auth = () => {
       fullName: get("fullName"),
       phone: get("phone"),
       role,
-      baseCity: get("baseCity"),
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -78,13 +75,6 @@ const Auth = () => {
       phone: d.phone,
       role: d.role,
     };
-    if (d.role === "begeleider") {
-      const geo = geocode(d.baseCity || "Utrecht");
-      if (!geo) return toast.error(t("auth.err.cityNotRecognised"));
-      meta.base_city = geo.city;
-      meta.base_lat = geo.lat;
-      meta.base_lng = geo.lng;
-    }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: d.email,
@@ -138,27 +128,9 @@ const Auth = () => {
             <Field name="password" type="password" label={t("auth.password")} required />
 
             {mode === "signup" && role === "begeleider" && (
-              <>
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                    {t("auth.baseCity")}
-                  </label>
-                  <select
-                    name="baseCity"
-                    required
-                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  >
-                    {CITIES.map((c) => (
-                      <option key={c.city} value={c.city}>
-                        {c.city}, {c.country}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
-                  {t("auth.escortHint")}
-                </p>
-              </>
+              <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
+                {t("auth.escortHint")}
+              </p>
             )}
 
             <button
