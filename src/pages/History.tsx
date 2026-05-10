@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
@@ -19,11 +20,11 @@ interface HistoryRide {
   assignment_ids: string[]; // for resolving names
 }
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" });
+const fmtDate = (d: string, lng: string) =>
+  new Date(d).toLocaleString(lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
 
 // ISO week key (YYYY-Www) and human label of the week range
-const weekInfo = (iso: string) => {
+const weekInfo = (iso: string, t: (k: string, v?: any) => string, lng: string) => {
   const d = new Date(iso);
   const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = tmp.getUTCDay() || 7;
@@ -32,19 +33,20 @@ const weekInfo = (iso: string) => {
   const week = Math.ceil(((+tmp - +yearStart) / 86400000 + 1) / 7);
   const key = `${tmp.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 
-  // Monday of that week (local)
   const monday = new Date(d);
   const localDay = monday.getDay() || 7;
   monday.setDate(monday.getDate() - (localDay - 1));
   monday.setHours(0, 0, 0, 0);
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
-  const fmt = (x: Date) => x.toLocaleDateString("nl-NL", { day: "2-digit", month: "short" });
-  return { key, label: `Week ${week} · ${fmt(monday)} – ${fmt(sunday)} ${tmp.getUTCFullYear()}` };
+  const locale = lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB";
+  const fmt = (x: Date) => x.toLocaleDateString(locale, { day: "2-digit", month: "short" });
+  return { key, label: t("history.weekLabel", { week, from: fmt(monday), to: fmt(sunday), year: tmp.getUTCFullYear() }) };
 };
 
 const HistoryInner = () => {
   const { user, role } = useAuth();
+  const { t, i18n } = useTranslation();
   const [rides, setRides] = useState<HistoryRide[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -180,7 +182,7 @@ const HistoryInner = () => {
   const grouped = useMemo(() => {
     const map = new Map<string, { label: string; items: HistoryRide[]; total: number }>();
     for (const r of rides) {
-      const { key, label } = weekInfo(r.scheduled_at);
+      const { key, label } = weekInfo(r.scheduled_at, t, i18n.language);
       if (!map.has(key)) map.set(key, { label, items: [], total: 0 });
       const g = map.get(key)!;
       g.items.push(r);
@@ -189,7 +191,7 @@ const HistoryInner = () => {
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? 1 : -1))
       .map(([key, v]) => ({ key, ...v, items: v.items.sort((x, y) => +new Date(y.scheduled_at) - +new Date(x.scheduled_at)) }));
-  }, [rides]);
+  }, [rides, t, i18n.language]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -198,19 +200,19 @@ const HistoryInner = () => {
         <div className="max-w-6xl mx-auto space-y-12">
           <header>
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              Archief
+              {t("history.kicker")}
             </p>
-            <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Geschiedenis</h1>
+            <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("history.title")}</h1>
             <p className="text-brass-deep/60 mt-3">
-              Afgeronde en gefactureerde ritten, gegroepeerd per week.
+              {t("history.intro")}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : grouped.length === 0 ? (
             <div className="bg-card shadow-etched p-12 text-center">
-              <p className="text-brass-deep/60">Nog geen gefactureerde ritten in uw archief.</p>
+              <p className="text-brass-deep/60">{t("history.none")}</p>
             </div>
           ) : (
             <div className="space-y-10">
@@ -219,7 +221,7 @@ const HistoryInner = () => {
                   <header className="flex items-end justify-between flex-wrap gap-2 mb-4">
                     <h2 className="font-display text-2xl text-brass-deep">{g.label}</h2>
                     <p className="text-xs uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
-                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"} · €{g.total.toFixed(2)}
+                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : (i18n.language === "nl" ? "ten" : "s") })} · €{g.total.toFixed(2)}
                     </p>
                   </header>
                   <ul className="space-y-px bg-brass-deep/10">
@@ -227,24 +229,24 @@ const HistoryInner = () => {
                       <li key={r.id} className="bg-card p-6 md:p-8">
                         <div className="grid grid-cols-12 gap-4 items-start">
                           <div className="col-span-12 md:col-span-3">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
-                            <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at)}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.date")}</p>
+                            <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at, i18n.language)}</p>
                             <p className="text-xs text-brass-deep/55 mt-1">
-                              {role === "begeleider" ? "Opdrachtgever" : "Begeleider"} {r.counterpart}
+                              {role === "begeleider" ? t("common.client") : t("common.escort")} {r.counterpart}
                               {r.counterpart_name ? ` · ${r.counterpart_name}` : ""}
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-6">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.route")}</p>
                             <p className="font-medium">
                               {r.pickup_city} <span className="text-brass-gold mx-2">→</span> {r.dropoff_city}
                             </p>
                             {r.invoice_number && (
-                              <p className="text-xs text-brass-deep/55 mt-2">Factuur {r.invoice_number}</p>
+                              <p className="text-xs text-brass-deep/55 mt-2">{t("history.invoice", { nr: r.invoice_number })}</p>
                             )}
                           </div>
                           <div className="col-span-12 md:col-span-3 md:text-right">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Bedrag</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.amount")}</p>
                             <p className="font-semibold tabular-nums text-brass-gold">
                               €{r.amount.toFixed(2)}
                             </p>
