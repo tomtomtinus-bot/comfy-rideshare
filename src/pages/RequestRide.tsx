@@ -233,7 +233,7 @@ const RequestRideInner = () => {
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
       .slice(0, 8);
 
-    if (ranked.length === 0) return toast.error("Geen beschikbare begeleiders gevonden");
+    if (ranked.length === 0) return toast.error(t("request.noEscorts"));
 
     // Bezetting: alleen pure ritvenster (zonder reistijd), alleen ViaCust-ritten.
     const withConflicts = await Promise.all(ranked.map(async (m) => {
