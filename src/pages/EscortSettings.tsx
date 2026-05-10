@@ -11,12 +11,23 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 
 const COUNTRY_CERTS = [
-  { id: "nl", label: "Nederland" },
-  { id: "be-1", label: "België type 1" },
-  { id: "be-2", label: "België type 2" },
-  { id: "de", label: "Duitsland" },
-  { id: "fr", label: "Frankrijk" },
+  { id: "nl", label: "Nederland", country: "Nederland" },
+  { id: "be-1", label: "België type 1", country: "België" },
+  { id: "be-2", label: "België type 2", country: "België" },
+  { id: "de", label: "Duitsland", country: "Duitsland" },
+  { id: "fr", label: "Frankrijk", country: "Frankrijk" },
+  { id: "lu", label: "Luxemburg", country: "Luxemburg" },
 ] as const;
+
+// Leid het countries-veld af uit de gekozen certificeringen
+const countriesFromCategories = (cats: string[]): string[] => {
+  const set = new Set<string>();
+  for (const c of cats) {
+    const found = COUNTRY_CERTS.find((cc) => cc.id === c);
+    if (found) set.add(found.country);
+  }
+  return Array.from(set);
+};
 
 const schema = z.object({
   baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
@@ -24,6 +35,10 @@ const schema = z.object({
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
   hourlyRateBe: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateDe: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateFr: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateLu: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  kmRateDe: z.union([z.coerce.number().min(0).max(10), z.literal("")]).optional(),
   minBillableHours: z.coerce.number().min(0).max(24).multipleOf(0.25),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
