@@ -389,7 +389,7 @@ Deno.serve(async (req) => {
       from,
       to,
     };
-    drawShell(doc, shellOpts);
+    drawShell(doc, shellOpts, logoDataUrl);
 
     let subtotal = 0;
     if (type === "regular") {
