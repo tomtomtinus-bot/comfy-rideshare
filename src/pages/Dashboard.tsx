@@ -1054,6 +1054,7 @@ const EscortDashboard = () => {
 };
 
 const DashboardInner = () => {
+  const { t } = useTranslation();
   const { role, loading } = useAuth();
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -1061,7 +1062,7 @@ const DashboardInner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto">
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
             <EscortDashboard />
           ) : (
