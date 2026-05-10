@@ -19,6 +19,10 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("viacust_remember") !== "false";
+  });
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
@@ -44,6 +48,12 @@ const Auth = () => {
       return;
     }
     setBusy(true);
+    try {
+      localStorage.setItem("viacust_remember", rememberMe ? "true" : "false");
+      sessionStorage.setItem("viacust_session_active", "1");
+    } catch {
+      // ignore storage errors
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
       password: parsed.data.password,
@@ -138,6 +148,18 @@ const Auth = () => {
             )}
             <Field name="email" type="email" label={t("auth.email")} required />
             <Field name="password" type="password" label={t("auth.password")} required />
+
+            {mode === "login" && (
+              <label className="flex items-center gap-2 text-xs text-brass-deep/80 cursor-pointer select-none pt-1">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="accent-brass-deep"
+                />
+                <span>Blijf ingelogd op dit apparaat</span>
+              </label>
+            )}
 
             {mode === "signup" && role === "begeleider" && (
               <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
