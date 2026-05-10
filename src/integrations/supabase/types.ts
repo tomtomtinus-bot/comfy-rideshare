@@ -197,8 +197,6 @@ export type Database = {
           min_billable_hours: number
           rating: number
           rides_completed: number
-          sms_notifications_enabled: boolean
-          sms_opt_in_at: string | null
           surcharges: Json
           updated_at: string
           vat_number: string | null
@@ -249,8 +247,6 @@ export type Database = {
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
-          sms_notifications_enabled?: boolean
-          sms_opt_in_at?: string | null
           surcharges?: Json
           updated_at?: string
           vat_number?: string | null
@@ -301,8 +297,6 @@ export type Database = {
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
-          sms_notifications_enabled?: boolean
-          sms_opt_in_at?: string | null
           surcharges?: Json
           updated_at?: string
           vat_number?: string | null
