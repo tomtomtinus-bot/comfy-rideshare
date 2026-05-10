@@ -98,7 +98,7 @@ const Inner = () => {
     const scheduledISO = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
 
     setBusy(true);
-    const update: Record<string, unknown> = {
+    const update: any = {
       pickup_address: pickupAddr,
       dropoff_address: dropoffAddr,
       scheduled_at: scheduledISO,
