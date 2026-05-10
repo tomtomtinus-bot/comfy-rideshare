@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { AgendaPlanner } from "@/components/site/AgendaPlanner";
+import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const fmtHours = (min: number) => {
