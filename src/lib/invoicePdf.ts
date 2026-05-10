@@ -43,6 +43,22 @@ export interface BillingParty {
   wero_fee?: number | null;
 }
 
+const normCountry = (s?: string | null) => (s ?? "").trim().toLowerCase();
+
+/**
+ * BTW-tarief voor B2B-facturen.
+ * Verschillende landen tussen verzender en ontvanger → 0% (BTW verlegd, art. 196 EU-richtlijn 2006/112/EG).
+ * Zelfde land of onbekend → standaard 21%.
+ */
+export const vatRateFor = (from: BillingParty, to: BillingParty): number => {
+  const a = normCountry(from.billing_country);
+  const b = normCountry(to.billing_country);
+  if (!a || !b) return 0.21;
+  return a === b ? 0.21 : 0;
+};
+
+export const isReverseCharge = (from: BillingParty, to: BillingParty) => vatRateFor(from, to) === 0;
+
 interface BasePdfOpts {
   invoice_number: string;
   created_at: string;
@@ -186,10 +202,16 @@ const drawTotals = (
   doc.text(fmtMoney(subtotal), right, y, { align: "right" });
   y += 6;
 
-  doc.text("BTW:", labelX, y);
-  doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
-  doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
-  y += 6;
+  if (vatRate === 0) {
+    doc.text("BTW verlegd:", labelX, y);
+    doc.text(fmtMoney(0), right, y, { align: "right" });
+    y += 6;
+  } else {
+    doc.text("BTW:", labelX, y);
+    doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
+    doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
+    y += 6;
+  }
 
   if (weroFee && weroFee > 0) {
     doc.text("Wero-betaaltoeslag:", labelX, y);
@@ -206,6 +228,19 @@ const drawTotals = (
   doc.text("Totaal te voldoen:", labelX, y);
   doc.text(fmtMoney(total), right, y, { align: "right" });
   y += 10;
+
+  if (vatRate === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    doc.text(
+      "BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).",
+      labelX,
+      y,
+      { maxWidth: right - labelX },
+    );
+    y += 8;
+  }
 
   if (weroHandle) {
     doc.setFont("helvetica", "normal");
@@ -237,7 +272,8 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
   drawShell(doc, data, logo);
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
-  const vat = subtotal * 0.21;
+  const vatRate = vatRateFor(data.from, data.to);
+  const vat = subtotal * vatRate;
   const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
   const total = subtotal + vat + weroFee;
 
@@ -278,7 +314,7 @@ export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const endY = (doc as any).lastAutoTable.finalY as number;
-  drawTotals(doc, endY + 12, subtotal, 0.21, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
+  drawTotals(doc, endY + 12, subtotal, vatRate, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
   drawFootNote(doc, data.invoice_number);
   doc.save(`${data.invoice_number}.pdf`);
 };
@@ -301,7 +337,8 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
   drawShell(doc, data, logo);
 
   const subtotal = data.total_amount;
-  const vat = subtotal * 0.21;
+  const vatRate = vatRateFor(data.from, data.to);
+  const vat = subtotal * vatRate;
   const weroFee = data.from.wero_enabled ? Number(data.from.wero_fee || 0) : 0;
   const total = subtotal + vat + weroFee;
 
@@ -342,7 +379,7 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const endY = (doc as any).lastAutoTable.finalY as number;
-  drawTotals(doc, endY + 12, subtotal, 0.21, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
+  drawTotals(doc, endY + 12, subtotal, vatRate, total, weroFee, data.from.wero_enabled ? data.from.wero_handle : null);
   drawFootNote(doc, data.invoice_number);
   doc.save(`${data.invoice_number}.pdf`);
 };

@@ -6,7 +6,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, type BillingParty } from "@/lib/invoicePdf";
+import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, vatRateFor, type BillingParty } from "@/lib/invoicePdf";
 
 interface PlatformInvoice {
   id: string;
@@ -69,6 +69,8 @@ const InvoicesInner = () => {
   const [platformItems, setPlatformItems] = useState<Record<string, PlatformItem[]>>({});
   const [billingFrequency, setBillingFrequency] = useState<"weekly" | "monthly">("monthly");
   const [wero, setWero] = useState<{ enabled: boolean; handle: string | null; fee: number }>({ enabled: false, handle: null, fee: 0 });
+  const [escortCountries, setEscortCountries] = useState<Record<string, string | null>>({});
+  const [clientCountries, setClientCountries] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
@@ -85,6 +87,28 @@ const InvoicesInner = () => {
     if (error) toast.error(error.message);
     const list = (inv ?? []) as Invoice[];
     setInvoices(list);
+
+    // Landen ophalen voor BTW-bepaling (verlegd bij verschillende landen)
+    const escortIds = [...new Set(list.map((i) => i.escort_id))];
+    const clientIds = [...new Set(list.map((i) => i.client_id))];
+    if (escortIds.length) {
+      const { data: ec } = await supabase
+        .from("escort_profiles")
+        .select("id, billing_country")
+        .in("id", escortIds);
+      const map: Record<string, string | null> = {};
+      (ec ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+      setEscortCountries(map);
+    }
+    if (clientIds.length) {
+      const { data: cc } = await supabase
+        .from("profiles")
+        .select("id, billing_country")
+        .in("id", clientIds);
+      const map: Record<string, string | null> = {};
+      (cc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+      setClientCountries((prev) => ({ ...prev, ...map }));
+    }
     if (list.length) {
       const { data: it } = await supabase
         .from("invoice_items")
@@ -115,6 +139,16 @@ const InvoicesInner = () => {
         .order("created_at", { ascending: false });
       const platList = (plat ?? []) as PlatformInvoice[];
       setPlatformInvoices(platList);
+      const platClientIds = [...new Set(platList.map((i) => i.client_id))];
+      if (platClientIds.length) {
+        const { data: pc } = await supabase
+          .from("profiles")
+          .select("id, billing_country")
+          .in("id", platClientIds);
+        const map: Record<string, string | null> = {};
+        (pc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+        setClientCountries((prev) => ({ ...prev, ...map }));
+      }
       if (platList.length) {
         const { data: pit } = await supabase
           .from("platform_invoice_items")
@@ -488,7 +522,12 @@ const InvoicesInner = () => {
                       const ridesSubtotal = rideRows.reduce((s, r) => s + Number(r.amount), 0);
                       const fuelSubtotal = fuelRows.reduce((s, r) => s + Number(r.amount), 0);
                       const subtotal = ridesSubtotal + fuelSubtotal;
-                      const vat = subtotal * 0.21;
+                      const vatRate = vatRateFor(
+                        { billing_country: escortCountries[inv.escort_id] ?? null },
+                        { billing_country: clientCountries[inv.client_id] ?? null },
+                      );
+                      const reverseCharge = vatRate === 0;
+                      const vat = subtotal * vatRate;
                       const weroFee = wero.enabled ? wero.fee : 0;
                       const total = subtotal + vat + weroFee;
                       return (
@@ -546,10 +585,17 @@ const InvoicesInner = () => {
                               </tr>
                               <tr>
                                 <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
-                                  Btw 21%
+                                  {reverseCharge ? "Btw verlegd" : "Btw 21%"}
                                 </td>
                                 <td className="py-2 text-right tabular-nums font-semibold">{fmtMoney(vat)}</td>
                               </tr>
+                              {reverseCharge && (
+                                <tr>
+                                  <td colSpan={5} className="py-2 text-right text-[10px] italic text-brass-deep/55">
+                                    BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).
+                                  </td>
+                                </tr>
+                              )}
                               {weroFee > 0 && (
                                 <tr>
                                   <td colSpan={4} className="py-2 text-right text-[10px] uppercase tracking-widest font-bold text-brass-deep/70">
