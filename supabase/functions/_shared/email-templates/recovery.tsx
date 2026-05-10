@@ -22,22 +22,20 @@ export const RecoveryEmail = ({
   siteName,
   confirmationUrl,
 }: RecoveryEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="nl" dir="ltr">
     <Head />
-    <Preview>Reset your password for {siteName}</Preview>
+    <Preview>Wachtwoord opnieuw instellen voor {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Reset your password</Heading>
+        <Heading style={h1}>Wachtwoord opnieuw instellen</Heading>
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
+          We hebben een verzoek ontvangen om je wachtwoord voor {siteName} opnieuw in te stellen. Klik op de knop hieronder om een nieuw wachtwoord te kiezen.
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Reset Password
+          Wachtwoord opnieuw instellen
         </Button>
         <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
+          Heb je geen wachtwoordreset aangevraagd? Dan kun je deze e-mail negeren. Je wachtwoord blijft ongewijzigd.
         </Text>
       </Container>
     </Body>
@@ -46,25 +44,25 @@ export const RecoveryEmail = ({
 
 export default RecoveryEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'Inter Tight', 'Inter', Arial, sans-serif" }
 const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  color: '#161f2b',
   margin: '0 0 20px',
 }
 const text = {
   fontSize: '14px',
-  color: '#55575d',
+  color: '#556070',
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
 const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
+  backgroundColor: '#1a2a3f',
+  color: '#f5f7f9',
   fontSize: '14px',
-  borderRadius: '8px',
+  borderRadius: '2px',
   padding: '12px 20px',
   textDecoration: 'none',
 }
