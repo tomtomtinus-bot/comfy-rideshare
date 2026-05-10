@@ -43,6 +43,22 @@ export interface BillingParty {
   wero_fee?: number | null;
 }
 
+const normCountry = (s?: string | null) => (s ?? "").trim().toLowerCase();
+
+/**
+ * BTW-tarief voor B2B-facturen.
+ * Verschillende landen tussen verzender en ontvanger → 0% (BTW verlegd, art. 196 EU-richtlijn 2006/112/EG).
+ * Zelfde land of onbekend → standaard 21%.
+ */
+export const vatRateFor = (from: BillingParty, to: BillingParty): number => {
+  const a = normCountry(from.billing_country);
+  const b = normCountry(to.billing_country);
+  if (!a || !b) return 0.21;
+  return a === b ? 0.21 : 0;
+};
+
+export const isReverseCharge = (from: BillingParty, to: BillingParty) => vatRateFor(from, to) === 0;
+
 interface BasePdfOpts {
   invoice_number: string;
   created_at: string;
