@@ -508,7 +508,7 @@ const EscortDashboard = () => {
 
     const { data: me } = await supabase
       .from("escort_profiles")
-      .select("hourly_rate, hourly_rate_be, min_billable_hours")
+      .select("hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, min_billable_hours")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -516,19 +516,29 @@ const EscortDashboard = () => {
     const merged = list
       .map((x) => {
         const ride = rideMap.get(x.ride_id) as RideRow | undefined;
-        const isBe = ride
-          ? /belgi|brussel|antwerp|gent|luik|liege|brugge|charleroi|namur|namen|leuven|mechelen|hasselt|kortrijk/i.test(
-              `${ride.pickup_city ?? ""} ${ride.dropoff_city ?? ""} ${ride.pickup_address ?? ""} ${ride.dropoff_address ?? ""}`,
-            )
-          : false;
-        const rate = isBe
-          ? Number((me as any)?.hourly_rate_be ?? me?.hourly_rate ?? 0)
-          : Number(me?.hourly_rate ?? 0);
+        const blob = ride
+          ? `${ride.pickup_city ?? ""} ${ride.dropoff_city ?? ""} ${ride.pickup_address ?? ""} ${ride.dropoff_address ?? ""}`
+          : "";
+        const isBe = /belgi|brussel|antwerp|gent|luik|liege|brugge|charleroi|namur|namen|leuven|mechelen|hasselt|kortrijk/i.test(blob);
+        const isDe = /duitsland|germany|deutschland|köln|koeln|aachen|düsseldorf|dusseldorf|berlin|münchen|munchen|hamburg|frankfurt|stuttgart|dortmund|essen|bremen/i.test(blob);
+        const isFr = /frankrijk|france|paris|lille|lyon|marseille|strasbourg|rijsel|nantes|bordeaux|toulouse|nice/i.test(blob);
+        const isLu = /luxemburg|luxembourg/i.test(blob);
+        const kmRateDe = (me as any)?.km_rate_de == null ? null : Number((me as any).km_rate_de);
+        const deKmMode = isDe && kmRateDe != null && kmRateDe > 0;
+        let rate = Number(me?.hourly_rate ?? 0);
+        if (isLu) rate = Number((me as any)?.hourly_rate_lu ?? me?.hourly_rate ?? 0);
+        else if (isFr) rate = Number((me as any)?.hourly_rate_fr ?? me?.hourly_rate ?? 0);
+        else if (isDe) rate = deKmMode ? Number(kmRateDe) : Number((me as any)?.hourly_rate_de ?? me?.hourly_rate ?? 0);
+        else if (isBe) rate = Number((me as any)?.hourly_rate_be ?? me?.hourly_rate ?? 0);
         return {
           ...x,
           ride: ride as RideRow,
           hourly_rate: rate,
           is_be_ride: isBe,
+          is_de_ride: isDe,
+          is_fr_ride: isFr,
+          is_lu_ride: isLu,
+          de_km_mode: deKmMode,
           min_billable_hours: Number((me as any)?.min_billable_hours ?? 0),
           client_anon: ride ? clientMap.get(ride.client_id) ?? "—" : "—",
         };
