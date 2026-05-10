@@ -613,14 +613,12 @@ const EscortDashboard = () => {
 
   const respond = async (id: string, accept: boolean) => {
     if (!isApproved) {
-      return toast.error("Je account moet eerst worden goedgekeurd door de beheerder.");
+      return toast.error(t("dash.needsApproval"));
     }
     if (accept) {
       const it = items.find((x) => x.id === id);
       if (it && hasGoogleConflict(it.ride.scheduled_at)) {
-        const ok = window.confirm(
-          "Let op: je hebt op dit moment al een afspraak in je Google Agenda. Toch accepteren?",
-        );
+        const ok = window.confirm(t("dash.googleConfirm"));
         if (!ok) return;
       }
     }
@@ -635,9 +633,9 @@ const EscortDashboard = () => {
     if (accept) {
       const { error: nErr } = await supabase.rpc("notify_ride_confirmed", { _assignment_id: id });
       if (nErr) console.warn("notify_ride_confirmed:", nErr.message);
-      toast.success("Rit bevestigd — opdrachtgever is op de hoogte gebracht");
+      toast.success(t("dash.rideConfirmed"));
     } else {
-      toast.success("Rit geweigerd");
+      toast.success(t("dash.rideDeclined"));
     }
     load();
   };
