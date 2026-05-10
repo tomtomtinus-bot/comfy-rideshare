@@ -737,6 +737,7 @@ export type Database = {
       rides: {
         Row: {
           app_fee: number
+          be_escort_type: string | null
           cargo_height_m: number | null
           cargo_length_m: number | null
           cargo_weight_t: number | null
@@ -769,6 +770,7 @@ export type Database = {
         }
         Insert: {
           app_fee?: number
+          be_escort_type?: string | null
           cargo_height_m?: number | null
           cargo_length_m?: number | null
           cargo_weight_t?: number | null
@@ -801,6 +803,7 @@ export type Database = {
         }
         Update: {
           app_fee?: number
+          be_escort_type?: string | null
           cargo_height_m?: number | null
           cargo_length_m?: number | null
           cargo_weight_t?: number | null

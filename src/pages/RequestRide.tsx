@@ -128,6 +128,7 @@ const RequestRideInner = () => {
     cargo_weight_t: "",
     permit_number: "",
     client_reference: "",
+    be_escort_type: "type1" as "type1" | "type2",
   });
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
@@ -200,7 +201,7 @@ const RequestRideInner = () => {
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, available")
+      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
       .eq("available", true);
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -218,10 +219,21 @@ const RequestRideInner = () => {
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const rideStartMs = new Date(scheduledISO).getTime();
 
+    // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
+    const beInvolved = [...pickupCountries, ...dropoffCountries].includes("België");
+    const beTypeRequired = beInvolved ? form.be_escort_type : null;
+    const escortHasBeQualification = (cats: string[] | null): boolean => {
+      const c = cats ?? [];
+      if (!beTypeRequired) return true;
+      if (beTypeRequired === "type2") return c.includes("be-2");
+      return c.includes("be-1") || c.includes("be-2");
+    };
+
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) =>
         pickupCountries.some((c) => (e.countries ?? []).includes(c)) &&
-        dropoffCountries.some((c) => (e.countries ?? []).includes(c))
+        dropoffCountries.some((c) => (e.countries ?? []).includes(c)) &&
+        escortHasBeQualification((e as any).categories ?? [])
       )
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
@@ -338,6 +350,7 @@ const RequestRideInner = () => {
           .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
           .filter((d) => d.name || d.phone) as never,
         license_plates: licensePlates.map((p) => p.trim()).filter(Boolean),
+        be_escort_type: ((pickupGeo.country?.includes("BE") || pickupGeo.country?.includes("België") || dropoffGeo.country?.includes("BE") || dropoffGeo.country?.includes("België")) ? (form.be_escort_type ?? "type1") : null) as never,
       })
       .select()
       .single();
@@ -542,6 +555,45 @@ const RequestRideInner = () => {
                   </div>
                 </div>
               </div>
+              {(() => {
+                const beInvolved =
+                  (pickupGeo?.country?.includes("BE") || pickupGeo?.country?.includes("België")) ||
+                  (dropoffGeo?.country?.includes("BE") || dropoffGeo?.country?.includes("België"));
+                if (!beInvolved) return null;
+                return (
+                  <div className="mt-4 p-4 border border-brass-gold/40 bg-brass-gold/5">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                      Type begeleider België (vereist)
+                    </label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        { id: "type1", label: "Type 1", hint: "Type 1 of Type 2 begeleider" },
+                        { id: "type2", label: "Type 2", hint: "Alleen Type 2 begeleider" },
+                      ].map((opt) => {
+                        const active = form.be_escort_type === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, be_escort_type: opt.id as "type1" | "type2" })}
+                            className={`px-4 py-2 text-sm border transition ${
+                              active
+                                ? "bg-brass-deep text-parchment border-brass-deep"
+                                : "bg-parchment text-brass-deep border-brass-deep/20 hover:border-brass-deep/50"
+                            }`}
+                          >
+                            <span className="font-semibold">{opt.label}</span>
+                            <span className="block text-[10px] opacity-70 mt-0.5">{opt.hint}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-brass-deep/60 mt-2">
+                      Een Type 2 begeleider mag ook Type 1-ritten uitvoeren — andersom niet.
+                    </p>
+                  </div>
+                );
+              })()}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
