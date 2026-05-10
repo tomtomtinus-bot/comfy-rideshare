@@ -275,11 +275,7 @@ const Inner = () => {
         countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
-        cert_number: parsed.data.certNumber || null,
-        cert_expires_on: parsed.data.certExpiresOn || null,
-        insurance_policy: parsed.data.insurancePolicy || null,
         categories,
-        certificate_files: files,
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
         fuel_surcharge: {
           enabled: fuel.enabled,
@@ -396,12 +392,6 @@ const Inner = () => {
                 </div>
               </section>
 
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input name="certNumber" label="Certificaat verkeersregelaar (nr.)" defaultValue={profile?.cert_number ?? ""} />
-                <Input name="certExpiresOn" type="date" label="Certificaat geldig tot" defaultValue={profile?.cert_expires_on ?? ""} />
-                <Input name="insurancePolicy" label="Aansprakelijkheidsverzekering (polisnr.)" defaultValue={profile?.insurance_policy ?? ""} />
-              </section>
-
               <section>
                 <Label>Brandstoftoeslag (staffel)</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
@@ -507,27 +497,6 @@ const Inner = () => {
                     </div>
                   </>
                 )}
-              </section>
-
-              <section>
-                <Label>Certificaten (uploads)</Label>
-                <div className="mt-2 space-y-2">
-                  {files.map((p) => (
-                    <div key={p} className="flex items-center justify-between bg-parchment border border-brass-deep/15 px-3 py-2 text-xs">
-                      <span className="truncate">{p.split("/").pop()}</span>
-                      <button type="button" onClick={() => removeFile(p)} className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest">
-                        Verwijder
-                      </button>
-                    </div>
-                  ))}
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={handleUpload}
-                    className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold"
-                  />
-                  <p className="text-[10px] text-brass-deep/50">PDF/JPG/PNG · max 10 MB</p>
-                </div>
               </section>
 
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
