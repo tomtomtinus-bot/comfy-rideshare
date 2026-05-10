@@ -20,6 +20,7 @@ import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
 import EditRide from "./pages/EditRide.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Terms from "./pages/Terms.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminRides from "./pages/admin/AdminRides.tsx";
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="escorts" element={<AdminEscorts />} />
               <Route path="fuel" element={<AdminFuel />} />
             </Route>
+            <Route path="/voorwaarden" element={<Terms />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
   const [busy, setBusy] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
@@ -69,11 +70,16 @@ const Auth = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (!acceptedTerms) {
+      toast.error("Je moet de algemene voorwaarden accepteren om door te gaan.");
+      return;
+    }
     const d = parsed.data;
     const meta: Record<string, string | number> = {
       full_name: d.fullName,
       phone: d.phone,
       role: d.role,
+      terms_accepted: "true",
     };
     setBusy(true);
     const { error } = await supabase.auth.signUp({
@@ -131,6 +137,29 @@ const Auth = () => {
               <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
                 {t("auth.escortHint")}
               </p>
+            )}
+
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 accent-brass-deep"
+                />
+                <span>
+                  Ik ga akkoord met de{" "}
+                  <Link
+                    to="/voorwaarden"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brass-gold underline hover:text-brass-deep"
+                  >
+                    algemene voorwaarden
+                  </Link>
+                  .
+                </span>
+              </label>
             )}
 
             <button
