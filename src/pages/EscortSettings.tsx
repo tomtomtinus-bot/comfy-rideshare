@@ -202,6 +202,9 @@ const Inner = () => {
         });
         setPostcode((p as any).base_postcode ?? "");
         setCity(p.base_city ?? "");
+        const split = splitAddress((p as any).base_address ?? "");
+        setStreet(split.street);
+        setHouseNumber(split.number);
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
 
