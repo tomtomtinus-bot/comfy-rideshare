@@ -208,7 +208,7 @@ const InvoicesInner = () => {
       .update({ billing_frequency: freq })
       .eq("id", user.id);
     if (error) toast.error(error.message);
-    else toast.success(`Factureringsfrequentie: ${freq === "weekly" ? "wekelijks" : "maandelijks"}`);
+    else toast.success(t("invoices.freqUpdated", { label: t(freq === "weekly" ? "invoices.weeklyLower" : "invoices.monthlyLower") }));
   };
 
   const markPaid = async (id: string) => {
@@ -217,7 +217,7 @@ const InvoicesInner = () => {
       .update({ status: "paid", paid_at: new Date().toISOString() })
       .eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Gemarkeerd als betaald");
+    toast.success(t("invoices.markedPaid"));
     load();
   };
 
@@ -227,7 +227,7 @@ const InvoicesInner = () => {
       .update({ status: "paid", paid_at: new Date().toISOString() })
       .eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Gemarkeerd als betaald");
+    toast.success(t("invoices.markedPaid"));
     load();
   };
 
