@@ -321,6 +321,13 @@ const Inner = () => {
                     </div>
                   </div>
                 )}
+                {e.status === "accepted" && userId && (
+                  <AssignmentChat
+                    assignmentId={e.assignment_id}
+                    currentUserId={userId}
+                    counterpartyLabel={`begeleider #${e.anonymous_id ?? "—"}`}
+                  />
+                )}
               </li>
               );
             })}
