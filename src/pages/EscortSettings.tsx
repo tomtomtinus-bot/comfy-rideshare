@@ -115,9 +115,8 @@ const Inner = () => {
     (async () => {
       if (!user) return;
 
-      const [{ data: p }, { data: av }, { data: assigns }, { data: fp }] = await Promise.all([
+      const [{ data: p }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("escort_availability").select("*").eq("escort_id", user.id),
         supabase
           .from("ride_assignments")
           .select("status, ride_id, rides(id, scheduled_at, pickup_city, dropoff_city)")
