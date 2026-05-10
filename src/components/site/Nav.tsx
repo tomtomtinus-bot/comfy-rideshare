@@ -29,7 +29,7 @@ export const Nav = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-parchment/85 backdrop-blur-md border-b border-brass-deep/10">
+    <nav className="sticky top-0 z-50 bg-parchment/85 backdrop-blur-md border-b border-brass-deep/10 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3" onClick={close}>
           <img
