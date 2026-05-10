@@ -3,7 +3,7 @@
 // and returns a short-lived signed download URL.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { jsPDF } from "npm:jspdf@2.5.2";
-import autoTable from "npm:jspdf-autotable@3.8.4";
+import * as autoTableModule from "npm:jspdf-autotable@3.8.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +17,35 @@ const fmtMoney = (n: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+
+type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
+type AutoTablePluginFn = (jsPDFClass: typeof jsPDF) => void;
+const autoTableExports = autoTableModule as unknown as {
+  autoTable?: AutoTableFn;
+  applyPlugin?: AutoTablePluginFn;
+  default?: AutoTableFn | { autoTable?: AutoTableFn; default?: AutoTableFn; applyPlugin?: AutoTablePluginFn };
+};
+const autoTableDefault = autoTableExports.default;
+const resolvedAutoTable = autoTableExports.autoTable
+  ?? (typeof autoTableDefault === "function" ? autoTableDefault : autoTableDefault?.autoTable)
+  ?? (typeof autoTableDefault === "object" ? autoTableDefault.default : undefined);
+const applyAutoTablePlugin = autoTableExports.applyPlugin
+  ?? (typeof autoTableDefault === "object" ? autoTableDefault.applyPlugin : undefined);
+
+const addInvoiceTable = (doc: jsPDF, options: Record<string, unknown>) => {
+  if (typeof resolvedAutoTable === "function") {
+    resolvedAutoTable(doc, options);
+    return;
+  }
+  if (typeof applyAutoTablePlugin === "function") {
+    applyAutoTablePlugin(jsPDF);
+  }
+  const docAutoTable = (doc as unknown as { autoTable?: (options: Record<string, unknown>) => void }).autoTable;
+  if (typeof docAutoTable !== "function") {
+    throw new Error("PDF tabelgenerator is niet beschikbaar");
+  }
+  docAutoTable.call(doc, options);
+};
 
 interface BillingParty {
   company_name?: string | null;
@@ -392,7 +421,7 @@ Deno.serve(async (req) => {
     let subtotal = 0;
     if (type === "regular") {
       subtotal = items.reduce((s, r) => s + Number(r.amount ?? 0), 0);
-      autoTable(doc, {
+      addInvoiceTable(doc, {
         startY: 105,
         head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
         body: items.map((r) => [
@@ -426,7 +455,7 @@ Deno.serve(async (req) => {
       });
     } else {
       subtotal = Number(invoice!.total_amount ?? 0);
-      autoTable(doc, {
+      addInvoiceTable(doc, {
         startY: 105,
         head: [["Datum", "Omschrijving", "Aantal", "Tarief", "Totaal"]],
         body: items.map((r) => [
