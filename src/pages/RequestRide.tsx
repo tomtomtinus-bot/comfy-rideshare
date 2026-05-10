@@ -234,10 +234,10 @@ const RequestRideInner = () => {
 
     if (ranked.length === 0) return toast.error("Geen beschikbare begeleiders gevonden");
 
-    // Bezetting (overlap met bestaande aanvragen) per begeleider ophalen
+    // Bezetting: alleen pure ritvenster (zonder reistijd), alleen ViaCust-ritten.
     const withConflicts = await Promise.all(ranked.map(async (m) => {
-      const myStartMs = rideStartMs - m.travelToPickupMin * 60_000;
-      const myEndMs = rideStartMs + rideMin * 60_000 + m.travelBackHomeMin * 60_000;
+      const myStartMs = rideStartMs;
+      const myEndMs = rideStartMs + rideMin * 60_000;
       const fromIso = new Date(myStartMs - 24 * 3600_000).toISOString();
       const toIso = new Date(myEndMs + 24 * 3600_000).toISOString();
       const { data: windows } = await supabase.rpc("get_escort_busy_windows", {
@@ -264,39 +264,7 @@ const RequestRideInner = () => {
       };
     }));
 
-    // Google Agenda check: filter out escorts whose Google FreeBusy overlaps the
-    // (reistijd-inclusief) ritvenster, en escorts zonder Google-koppeling.
-    const candidateIds = withConflicts.map((m) => m.id);
-    let allowed = withConflicts;
-    if (candidateIds.length > 0) {
-      // Use the widest possible window across candidates so we can ask once.
-      const maxTravelTo = Math.max(...withConflicts.map((m) => m.travelToPickupMin));
-      const maxTravelBack = Math.max(...withConflicts.map((m) => m.travelBackHomeMin));
-      const winStart = new Date(rideStartMs - maxTravelTo * 60_000).toISOString();
-      const winEnd = new Date(rideStartMs + rideMin * 60_000 + maxTravelBack * 60_000).toISOString();
-      try {
-        const { data: gRes } = await supabase.functions.invoke("google-calendar-busy-check", {
-          body: { escort_ids: candidateIds, start: winStart, end: winEnd },
-        });
-        const busy = new Set<string>(((gRes as any)?.busy ?? []) as string[]);
-        const noCal = new Set<string>(((gRes as any)?.no_calendar ?? []) as string[]);
-        const removed = withConflicts.filter((m) => busy.has(m.id) || noCal.has(m.id)).length;
-        allowed = withConflicts.filter((m) => !busy.has(m.id) && !noCal.has(m.id));
-        if (removed > 0) {
-          toast.message(`${removed} begeleider(s) overgeslagen`, {
-            description: "Bezet of geen Google Agenda gekoppeld.",
-          });
-        }
-      } catch (e) {
-        console.error("google-calendar-busy-check failed", e);
-      }
-    }
-
-    if (allowed.length === 0) {
-      return toast.error("Geen beschikbare begeleiders — iedereen is bezet volgens Google Agenda.");
-    }
-
-    setMatches(allowed);
+    setMatches(withConflicts);
   };
 
   const bookEscorts = async (selected: MatchedEscort[]) => {

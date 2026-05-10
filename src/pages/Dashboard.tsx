@@ -454,7 +454,13 @@ const EscortDashboard = () => {
   const [openId, setOpenId] = useState<string | null>(null);
   const [counterpartyNames, setCounterpartyNames] = useState<Record<string, string>>({});
   const [extraCosts, setExtraCosts] = useState<Record<string, ExtraCost[]>>({});
+  const [googleBusy, setGoogleBusy] = useState<{ start: number; end: number }[]>([]);
   const [tick, setTick] = useState(0);
+
+  const hasGoogleConflict = (scheduledAt: string) => {
+    const t = new Date(scheduledAt).getTime();
+    return googleBusy.some((b) => b.start < t + 60_000 && b.end > t - 60_000);
+  };
 
   const getExtras = (id: string) => extraCosts[id] ?? [];
   const setExtras = (id: string, next: ExtraCost[]) =>
@@ -532,6 +538,23 @@ const EscortDashboard = () => {
     setItems(merged);
     setLoading(false);
 
+    // Google Agenda bezet-vensters ophalen voor waarschuwing bij uitnodigingen
+    try {
+      const { data: g } = await supabase.functions.invoke("google-calendar-sync");
+      if (g && (g as any).connected && Array.isArray((g as any).busy)) {
+        setGoogleBusy(
+          ((g as any).busy as { start: string; end: string }[]).map((b) => ({
+            start: new Date(b.start).getTime(),
+            end: new Date(b.end).getTime(),
+          })),
+        );
+      } else {
+        setGoogleBusy([]);
+      }
+    } catch (_) {
+      setGoogleBusy([]);
+    }
+
     // Resolve real names for accepted assignments only
     const acceptedIds = merged
       .filter((m) => m.status === "accepted" || m.hours_submitted_at)
@@ -585,6 +608,15 @@ const EscortDashboard = () => {
   const respond = async (id: string, accept: boolean) => {
     if (!isApproved) {
       return toast.error("Je account moet eerst worden goedgekeurd door de beheerder.");
+    }
+    if (accept) {
+      const it = items.find((x) => x.id === id);
+      if (it && hasGoogleConflict(it.ride.scheduled_at)) {
+        const ok = window.confirm(
+          "Let op: je hebt op dit moment al een afspraak in je Google Agenda. Toch accepteren?",
+        );
+        if (!ok) return;
+      }
     }
     const { error } = await supabase
       .from("ride_assignments")
@@ -756,6 +788,14 @@ const EscortDashboard = () => {
                 <div className="shrink-0">
                   {isInvited && !expired ? (
                     <div className="flex items-center gap-2">
+                      {hasGoogleConflict(a.ride.scheduled_at) && (
+                        <span
+                          title="Je hebt op dit moment een afspraak in je Google Agenda"
+                          className="text-[10px] uppercase tracking-widest text-destructive font-bold whitespace-nowrap"
+                        >
+                          ⚠ Agenda-conflict
+                        </span>
+                      )}
                       <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
                         Nog {minsLeft} min
                       </span>
