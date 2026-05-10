@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -20,6 +20,7 @@ interface RideDetail {
     dropoff_lat?: number | null;
     dropoff_lng?: number | null;
     scheduled_at: string;
+    status?: string;
     notes: string | null;
     cargo_length_m: number | null;
     cargo_width_m: number | null;
@@ -91,31 +92,75 @@ const statusLabel: Record<string, string> = {
 
 const Inner = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<RideDetail | null>(null);
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const { data: res, error } = await supabase.rpc("get_ride_details_for_client", { _ride_id: id });
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      const detail = res as unknown as RideDetail;
-      setData(detail);
-      if (detail?.permit?.pdf_path) {
-        const { data: signed } = await supabase.storage
-          .from("permits")
-          .createSignedUrl(detail.permit.pdf_path, 3600);
-        if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
-      }
+  const load = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    const { data: res, error } = await supabase.rpc("get_ride_details_for_client", { _ride_id: id });
+    if (error) {
+      setError(error.message);
       setLoading(false);
-    })();
+      return;
+    }
+    const detail = res as unknown as RideDetail;
+    setData(detail);
+    if (detail?.permit?.pdf_path) {
+      const { data: signed } = await supabase.storage
+        .from("permits")
+        .createSignedUrl(detail.permit.pdf_path, 3600);
+      if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
+    }
+    // Fetch cancel-request status per assignment
+    const { data: ras } = await supabase
+      .from("ride_assignments")
+      .select("id, cancel_request_status, cancel_request_reason")
+      .eq("ride_id", id);
+    const map: Record<string, { status: string; reason: string | null }> = {};
+    (ras ?? []).forEach((r: any) => {
+      map[r.id] = { status: r.cancel_request_status ?? "none", reason: r.cancel_request_reason ?? null };
+    });
+    setCancelReqs(map);
+    setLoading(false);
   }, [id]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleCancelRide = async () => {
+    if (!data) return;
+    const hours = (new Date(data.ride.scheduled_at).getTime() - Date.now()) / 3600000;
+    const late = hours < 4;
+    const msg = late
+      ? "Let op: deze rit start binnen 4 uur. Per geaccepteerde begeleider wordt het minimumtarief (minimum aantal factureerbare uren × uurtarief) in rekening gebracht. Doorgaan?"
+      : "Weet je zeker dat je deze rit wilt annuleren? Er worden geen kosten in rekening gebracht.";
+    if (!confirm(msg)) return;
+    setBusy(true);
+    const { data: res, error } = await supabase.rpc("client_cancel_ride", { _ride_id: data.ride.id, _reason: null });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    const r = res as any;
+    if (r?.charged_escorts > 0) {
+      toast.success(`Rit geannuleerd. Minimumtarief berekend voor ${r.charged_escorts} begeleider(s): € ${Number(r.total_fee).toFixed(2)}.`);
+    } else {
+      toast.success("Rit geannuleerd. Geen kosten.");
+    }
+    navigate("/dashboard");
+  };
+
+  const handleDecide = async (assignmentId: string, approve: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("client_decide_cancellation", { _assignment_id: assignmentId, _approve: approve });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(approve ? "Annulering goedgekeurd." : "Verzoek afgewezen.");
+    load();
+  };
 
   if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
   if (error || !data) {
@@ -210,33 +255,84 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Nog geen begeleiders toegewezen.</p>
         ) : (
           <ul className="divide-y divide-brass-deep/10">
-            {escorts.map((e) => (
-              <li key={e.assignment_id} className="py-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
-                <div>
-                  <p className="font-medium text-brass-deep">#{e.anonymous_id ?? "—"}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                    {statusLabel[e.status] ?? e.status}
-                  </p>
+            {escorts.map((e) => {
+              const cr = cancelReqs[e.assignment_id];
+              return (
+              <li key={e.assignment_id} className="py-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+                  <div>
+                    <p className="font-medium text-brass-deep">#{e.anonymous_id ?? "—"}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                      {statusLabel[e.status] ?? e.status}
+                    </p>
+                  </div>
+                  <div className="text-sm">
+                    {e.status === "accepted" ? (
+                      <>
+                        <p className="font-medium">{e.full_name ?? "—"}</p>
+                        <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
+                      </>
+                    ) : (
+                      <p className="text-brass-deep/40 text-xs italic">Nog niet bevestigd</p>
+                    )}
+                  </div>
+                  <div className="text-sm">
+                    <TelLink phone={e.phone} />
+                  </div>
+                  <div className="text-xs text-brass-deep/55">{e.vehicle_type ?? ""}</div>
                 </div>
-                <div className="text-sm">
-                  {e.status === "accepted" ? (
-                    <>
-                      <p className="font-medium">{e.full_name ?? "—"}</p>
-                      <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
-                    </>
-                  ) : (
-                    <p className="text-brass-deep/40 text-xs italic">Nog niet bevestigd</p>
-                  )}
-                </div>
-                <div className="text-sm">
-                  <TelLink phone={e.phone} />
-                </div>
-                <div className="text-xs text-brass-deep/55">{e.vehicle_type ?? ""}</div>
+                {cr?.status === "pending" && (
+                  <div className="bg-brass-gold/10 border border-brass-gold/40 p-3 space-y-2">
+                    <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">Annuleringsverzoek</p>
+                    {cr.reason && <p className="text-sm text-brass-deep/80 italic">"{cr.reason}"</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => handleDecide(e.assignment_id, true)}
+                        className="px-4 py-2 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
+                      >
+                        Goedkeuren
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => handleDecide(e.assignment_id, false)}
+                        className="px-4 py-2 border border-brass-deep/30 uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
+                      >
+                        Afwijzen
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </Section>
+
+      {ride.status !== "cancelled" && ride.status !== "completed" && (
+        <Section title="Annulering">
+          <p className="text-sm text-brass-deep/70 mb-3">
+            Annulering binnen 4 uur voor aanvang: minimumtarief per geaccepteerde begeleider (minimum aantal factureerbare uren × hun uurtarief).
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={handleCancelRide}
+            className="px-6 py-3 bg-red-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-red-800 transition-colors disabled:opacity-50"
+          >
+            Rit annuleren
+          </button>
+        </Section>
+      )}
+
+      {ride.status === "cancelled" && (
+        <div className="bg-red-50 border border-red-200 p-5 text-sm text-red-900">
+          Deze rit is geannuleerd.
+        </div>
+      )}
 
       <Section title="Ontheffing">
         {permit ? (

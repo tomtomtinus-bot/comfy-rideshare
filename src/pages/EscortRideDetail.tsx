@@ -100,28 +100,60 @@ const Inner = () => {
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null } | null>(null);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const { data: res, error } = await supabase.rpc("get_ride_details_for_escort", { _ride_id: id });
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-      const detail = res as unknown as RideDetail;
-      setData(detail);
+  const load = async () => {
+    if (!id) return;
+    setLoading(true);
+    const { data: res, error } = await supabase.rpc("get_ride_details_for_escort", { _ride_id: id });
+    if (error) { setError(error.message); setLoading(false); return; }
+    const detail = res as unknown as RideDetail;
+    setData(detail);
 
-      if (detail?.permit?.pdf_path) {
-        const { data: signed } = await supabase.storage
-          .from("permits")
-          .createSignedUrl(detail.permit.pdf_path, 3600);
-        if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
-      }
-      setLoading(false);
-    })();
-  }, [id]);
+    if (detail?.permit?.pdf_path) {
+      const { data: signed } = await supabase.storage
+        .from("permits")
+        .createSignedUrl(detail.permit.pdf_path, 3600);
+      if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
+    }
+
+    const { data: u } = await supabase.auth.getUser();
+    if (u?.user) {
+      const { data: ra } = await supabase
+        .from("ride_assignments")
+        .select("id, cancel_request_status, cancel_request_reason")
+        .eq("ride_id", id)
+        .eq("escort_id", u.user.id)
+        .maybeSingle();
+      if (ra) setMyAssignment({
+        id: ra.id,
+        cancel_request_status: (ra as any).cancel_request_status ?? "none",
+        cancel_request_reason: (ra as any).cancel_request_reason ?? null,
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [id]);
+
+  const submitCancelRequest = async () => {
+    if (!myAssignment) return;
+    if (cancelReason.trim().length < 3) { toast.error("Geef een korte reden op."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("escort_request_cancellation", {
+      _assignment_id: myAssignment.id,
+      _reason: cancelReason.trim(),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Verzoek verstuurd naar opdrachtgever.");
+    setShowCancelForm(false);
+    setCancelReason("");
+    load();
+  };
 
   if (loading) {
     return <p className="text-sm text-brass-deep/50">Laden…</p>;
@@ -322,6 +354,71 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
         )}
       </Section>
+      )}
+
+      {!isInvited && myAssignment && (
+        <Section title="Annulering">
+          {myAssignment.cancel_request_status === "pending" ? (
+            <div className="bg-brass-gold/10 border border-brass-gold/40 p-4 text-sm text-brass-deep">
+              <p className="font-semibold mb-1">Verzoek in behandeling</p>
+              {myAssignment.cancel_request_reason && (
+                <p className="italic text-brass-deep/70">"{myAssignment.cancel_request_reason}"</p>
+              )}
+              <p className="mt-2 text-xs text-brass-deep/60">De opdrachtgever moet je verzoek goedkeuren.</p>
+            </div>
+          ) : myAssignment.cancel_request_status === "rejected" ? (
+            <div className="bg-red-50 border border-red-200 p-4 text-sm text-red-900 mb-3">
+              Vorig verzoek afgewezen. Je kunt opnieuw aanvragen.
+              <button
+                type="button"
+                onClick={() => setShowCancelForm(true)}
+                className="ml-3 underline font-semibold"
+              >
+                Opnieuw aanvragen
+              </button>
+            </div>
+          ) : !showCancelForm ? (
+            <>
+              <p className="text-sm text-brass-deep/70 mb-3">
+                Annuleren kan alleen in overleg met de opdrachtgever. Stuur een verzoek met reden; bij goedkeuring vervalt de toewijzing zonder kosten.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCancelForm(true)}
+                className="px-6 py-3 border border-red-700 text-red-700 uppercase tracking-widest text-xs font-semibold hover:bg-red-700 hover:text-parchment transition-colors"
+              >
+                Annulering aanvragen
+              </button>
+            </>
+          ) : (
+            <div className="space-y-3">
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+                placeholder="Reden voor annulering (verplicht)…"
+                className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={submitCancelRequest}
+                  className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50"
+                >
+                  Verzoek versturen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowCancelForm(false); setCancelReason(""); }}
+                  className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5"
+                >
+                  Annuleren
+                </button>
+              </div>
+            </div>
+          )}
+        </Section>
       )}
     </div>
   );
