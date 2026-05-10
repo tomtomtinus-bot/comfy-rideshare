@@ -263,40 +263,40 @@ const InvoicesInner = () => {
     billing_email: "facturatie@lowloads.app",
   };
 
-  const downloadEscortPdf = async (inv: Invoice) => {
+  const openInvoicePdf = async (
+    invoiceId: string,
+    type: "regular" | "platform",
+    cachedPath?: string | null,
+  ) => {
     try {
-      const [from, to] = await Promise.all([fetchEscortParty(inv.escort_id), fetchClientParty(inv.client_id)]);
-      downloadEscortInvoicePdf({
-        invoice_number: inv.invoice_number,
-        created_at: inv.created_at,
-        period_start: inv.period_start,
-        period_end: inv.period_end,
-        from,
-        to,
-        rows: items[inv.id] ?? [],
+      // If we already have a path, just sign it.
+      if (cachedPath) {
+        const { data, error } = await supabase.storage
+          .from("invoices")
+          .createSignedUrl(cachedPath, 60 * 10);
+        if (!error && data?.signedUrl) {
+          window.open(data.signedUrl, "_blank");
+          return;
+        }
+      }
+      // Otherwise generate (and cache) it server-side.
+      const { data, error } = await supabase.functions.invoke("generate-invoice-pdf", {
+        body: { invoice_id: invoiceId, type },
       });
+      if (error) throw error;
+      const signed = (data as { signed_url?: string } | null)?.signed_url;
+      if (!signed) throw new Error("Geen download-URL ontvangen");
+      window.open(signed, "_blank");
     } catch (e) {
       toast.error((e as Error).message);
     }
   };
 
-  const downloadPlatformPdf = async (inv: PlatformInvoice) => {
-    try {
-      const to = await fetchClientParty(inv.client_id);
-      downloadPlatformInvoicePdf({
-        invoice_number: inv.invoice_number,
-        created_at: inv.created_at,
-        period_start: inv.period_start,
-        period_end: inv.period_end,
-        from: PLATFORM_PARTY,
-        to,
-        rows: platformItems[inv.id] ?? [],
-        total_amount: inv.total_amount,
-      });
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  };
+  const downloadEscortPdf = (inv: Invoice) =>
+    openInvoicePdf(inv.id, "regular", (inv as Invoice & { pdf_path?: string | null }).pdf_path);
+
+  const downloadPlatformPdf = (inv: PlatformInvoice) =>
+    openInvoicePdf(inv.id, "platform", (inv as PlatformInvoice & { pdf_path?: string | null }).pdf_path);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
