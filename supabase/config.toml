@@ -1,16 +1,15 @@
 project_id = "qsiduhrmgunvipxelgpe"
 
-[functions.seed-demo]
-verify_jwt = false
-
-[functions.fetch-fuel-prices]
-verify_jwt = false
-
-[functions.check-hours-reminders]
-verify_jwt = false
-
-[functions.cleanup-permit]
-verify_jwt = false
-
-[functions.process-email-queue]
-verify_jwt = true
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.check-hours-reminders]
+    verify_jwt = false
+  [functions.cleanup-permit]
+    verify_jwt = false
+  [functions.fetch-fuel-prices]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.seed-demo]
+    verify_jwt = false
