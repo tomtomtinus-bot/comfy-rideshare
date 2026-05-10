@@ -6,7 +6,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, type BillingParty } from "@/lib/invoicePdf";
+import { downloadEscortInvoicePdf, downloadPlatformInvoicePdf, vatRateFor, type BillingParty } from "@/lib/invoicePdf";
 
 interface PlatformInvoice {
   id: string;
