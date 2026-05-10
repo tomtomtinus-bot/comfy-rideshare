@@ -48,6 +48,12 @@ const Auth = () => {
       return;
     }
     setBusy(true);
+    try {
+      localStorage.setItem("viacust_remember", rememberMe ? "true" : "false");
+      sessionStorage.setItem("viacust_session_active", "1");
+    } catch {
+      // ignore storage errors
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
       password: parsed.data.password,
