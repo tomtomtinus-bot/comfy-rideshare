@@ -555,6 +555,45 @@ const RequestRideInner = () => {
                   </div>
                 </div>
               </div>
+              {(() => {
+                const beInvolved =
+                  (pickupGeo?.country?.includes("BE") || pickupGeo?.country?.includes("België")) ||
+                  (dropoffGeo?.country?.includes("BE") || dropoffGeo?.country?.includes("België"));
+                if (!beInvolved) return null;
+                return (
+                  <div className="mt-4 p-4 border border-brass-gold/40 bg-brass-gold/5">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                      Type begeleider België (vereist)
+                    </label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        { id: "type1", label: "Type 1", hint: "Type 1 of Type 2 begeleider" },
+                        { id: "type2", label: "Type 2", hint: "Alleen Type 2 begeleider" },
+                      ].map((opt) => {
+                        const active = form.be_escort_type === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, be_escort_type: opt.id as "type1" | "type2" })}
+                            className={`px-4 py-2 text-sm border transition ${
+                              active
+                                ? "bg-brass-deep text-parchment border-brass-deep"
+                                : "bg-parchment text-brass-deep border-brass-deep/20 hover:border-brass-deep/50"
+                            }`}
+                          >
+                            <span className="font-semibold">{opt.label}</span>
+                            <span className="block text-[10px] opacity-70 mt-0.5">{opt.hint}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-brass-deep/60 mt-2">
+                      Een Type 2 begeleider mag ook Type 1-ritten uitvoeren — andersom niet.
+                    </p>
+                  </div>
+                );
+              })()}
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
