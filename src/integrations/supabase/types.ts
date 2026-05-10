@@ -619,6 +619,7 @@ export type Database = {
           last_platform_invoice_at: string | null
           phone: string | null
           rejection_reason: string | null
+          terms_accepted_at: string | null
           updated_at: string
           vat_number: string | null
         }
@@ -642,6 +643,7 @@ export type Database = {
           last_platform_invoice_at?: string | null
           phone?: string | null
           rejection_reason?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           vat_number?: string | null
         }
@@ -665,6 +667,7 @@ export type Database = {
           last_platform_invoice_at?: string | null
           phone?: string | null
           rejection_reason?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string
           vat_number?: string | null
         }
