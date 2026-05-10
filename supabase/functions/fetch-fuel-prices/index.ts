@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
         week_start: weekStart,
         eur_per_liter: +price.toFixed(4),
         source: "TLN",
+        country: "NL",
       });
     }
 
