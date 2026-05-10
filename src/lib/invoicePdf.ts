@@ -202,10 +202,16 @@ const drawTotals = (
   doc.text(fmtMoney(subtotal), right, y, { align: "right" });
   y += 6;
 
-  doc.text("BTW:", labelX, y);
-  doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
-  doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
-  y += 6;
+  if (vatRate === 0) {
+    doc.text("BTW verlegd:", labelX, y);
+    doc.text(fmtMoney(0), right, y, { align: "right" });
+    y += 6;
+  } else {
+    doc.text("BTW:", labelX, y);
+    doc.text(`${(vatRate * 100).toFixed(0)}%`, labelX + 30, y);
+    doc.text(fmtMoney(subtotal * vatRate), right, y, { align: "right" });
+    y += 6;
+  }
 
   if (weroFee && weroFee > 0) {
     doc.text("Wero-betaaltoeslag:", labelX, y);
@@ -222,6 +228,19 @@ const drawTotals = (
   doc.text("Totaal te voldoen:", labelX, y);
   doc.text(fmtMoney(total), right, y, { align: "right" });
   y += 10;
+
+  if (vatRate === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    doc.text(
+      "BTW verlegd naar de afnemer (intracommunautaire dienst, art. 196 EU-richtlijn 2006/112/EG).",
+      labelX,
+      y,
+      { maxWidth: right - labelX },
+    );
+    y += 8;
+  }
 
   if (weroHandle) {
     doc.setFont("helvetica", "normal");
