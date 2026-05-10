@@ -425,11 +425,21 @@ const Inner = () => {
                       {lookupBusy ? "Adres ophalen…" : street ? `${street} ${houseNumber}, ${city}` : "Voor BE/DE/FR wordt alleen de plaats opgehaald — vul de straat handmatig aan via de postcode/huisnummer."}
                     </p>
                   </div>
-                  <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
-                  <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
-                  <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55)} />
-                  <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55)} />
-                  <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
+                  {categories.includes("nl") && (
+                    <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                  )}
+                  {(categories.includes("be-1") || categories.includes("be-2")) && (
+                    <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
+                  )}
+                  {categories.includes("de") && (
+                    <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55)} />
+                  )}
+                  {categories.includes("fr") && (
+                    <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55)} />
+                  )}
+                  {categories.includes("lu") && (
+                    <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
+                  )}
                   <div>
                     <Input
                       name="kmRateDe"
