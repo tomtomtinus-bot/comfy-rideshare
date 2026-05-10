@@ -66,7 +66,7 @@ const fmtMoney = (n: number) => `€${Number(n).toFixed(2)}`;
 const InvoicesInner = () => {
   const { user, role } = useAuth();
   const { t, i18n } = useTranslation();
-  const fd = (d: string) => fd(d, i18n.language);
+  const fd = (d: string) => fmtDate(d, i18n.language);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [items, setItems] = useState<Record<string, Item[]>>({});
   const [platformInvoices, setPlatformInvoices] = useState<PlatformInvoice[]>([]);
