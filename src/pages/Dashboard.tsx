@@ -1013,7 +1013,7 @@ const EscortDashboard = () => {
 
         const renderList = (list: typeof items, bucketKey: "openstaand" | "geaccepteerd" | "afgerond" | "verlopen") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
+            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
           const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
@@ -1024,7 +1024,7 @@ const EscortDashboard = () => {
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
-                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
@@ -1037,10 +1037,10 @@ const EscortDashboard = () => {
         return (
           <Tabs defaultValue="openstaand" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
-              <TabsTrigger value="verlopen">Verlopen ({buckets.verlopen.length})</TabsTrigger>
+              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
+              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
+              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
+              <TabsTrigger value="verlopen">{t("dash.tabExpired")} ({buckets.verlopen.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
             <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
