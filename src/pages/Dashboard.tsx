@@ -1015,7 +1015,7 @@ const EscortDashboard = () => {
             return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order);
+          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
           return (
             <div className="space-y-8">
               {groups.map((g) => (
