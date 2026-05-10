@@ -7,23 +7,23 @@ Deno.serve(async (req) => {
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
-  const appOrigin = req.headers.get("origin") ?? req.headers.get("referer") ?? "";
+  const appOrigin =
+    req.headers.get("origin") ??
+    (req.headers.get("referer") ? new URL(req.headers.get("referer")!).origin : "") ??
+    "";
+
+  const APP_BASE = appOrigin && appOrigin.includes("lovable")
+    ? appOrigin
+    : "https://comfy-rideshare.lovable.app";
 
   const redirectBack = (path: string, params: Record<string, string>) => {
-    // We don't know the app origin here, so respond with HTML that redirects via opener or top-location.
-    const target = `${path}?${new URLSearchParams(params).toString()}`;
-    const html = `<!doctype html><meta charset="utf-8"><title>Google Agenda</title>
-<script>
-  try {
-    if (window.opener) {
-      window.opener.postMessage({ type: 'google-calendar-connected', ok: ${params.ok === "1"} }, '*');
-      window.close();
-    }
-  } catch (e) {}
-  window.location.replace(${JSON.stringify(target)});
-</script>
-<p>Bezig met terugleiden…</p>`;
-    return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    const target = path.startsWith("http")
+      ? `${path}?${new URLSearchParams(params).toString()}`
+      : `${APP_BASE}${path}?${new URLSearchParams(params).toString()}`;
+    return new Response(null, {
+      status: 302,
+      headers: { Location: target },
+    });
   };
 
   if (error || !code || !state) {
