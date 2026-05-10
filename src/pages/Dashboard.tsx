@@ -443,6 +443,7 @@ const hoursSchema = z.object({
 type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
+  const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<
