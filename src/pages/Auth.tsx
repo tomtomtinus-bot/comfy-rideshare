@@ -128,27 +128,9 @@ const Auth = () => {
             <Field name="password" type="password" label={t("auth.password")} required />
 
             {mode === "signup" && role === "begeleider" && (
-              <>
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                    {t("auth.baseCity")}
-                  </label>
-                  <select
-                    name="baseCity"
-                    required
-                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  >
-                    {CITIES.map((c) => (
-                      <option key={c.city} value={c.city}>
-                        {c.city}, {c.country}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
-                  {t("auth.escortHint")}
-                </p>
-              </>
+              <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
+                {t("auth.escortHint")}
+              </p>
             )}
 
             <button
