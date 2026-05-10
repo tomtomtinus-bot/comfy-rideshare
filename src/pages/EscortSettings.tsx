@@ -319,7 +319,8 @@ const Inner = () => {
     }
 
     setBusy(true);
-    const { error } = await supabase
+    const [{ error }, { error: pErr }] = await Promise.all([
+      supabase
       .from("escort_profiles")
       .update({
         base_city: parsed.data.baseCity,
@@ -359,9 +360,15 @@ const Inner = () => {
           };
         })(),
       })
-      .eq("id", user.id);
+      .eq("id", user.id),
+      supabase
+        .from("profiles")
+        .update({ full_name: parsed.data.fullName, phone: parsed.data.phone })
+        .eq("id", user.id),
+    ]);
 
     setBusy(false);
+    if (pErr) return toast.error(pErr.message);
     if (error) return toast.error(error.message);
     setDirty(false);
     toast.success("Profiel bijgewerkt");
