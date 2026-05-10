@@ -725,25 +725,25 @@ const EscortDashboard = () => {
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Begeleider
+            {t("dash.escortKicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn opdrachten</h1>
+          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("dash.myAssignments")}</h1>
         </div>
         <Link
           to="/profiel"
           className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
         >
-          Mijn profiel
+          {t("dash.myProfile")}
         </Link>
       </header>
 
       {user && <GoogleAgendaStatus />}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
       ) : items.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">U heeft nog geen toegewezen ritten.</p>
+          <p className="text-brass-deep/60">{t("dash.noAssignmentsYet")}</p>
         </div>
       ) : (() => {
         const isExpired = (a: typeof items[number]) =>
