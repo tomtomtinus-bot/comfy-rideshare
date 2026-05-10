@@ -662,6 +662,7 @@ const Matches = ({
   onBook: (selected: MatchedEscort[]) => void;
   busy: boolean;
 }) => {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<string[]>([]);
   const toggle = (id: string) => {
     setSelected((s) =>
@@ -672,19 +673,18 @@ const Matches = ({
   const availableMatches = matches.filter((m) => !m.conflict);
   return (
     <section className="mt-12">
-      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Voorgestelde begeleiders</p>
-      <h2 className="font-display text-3xl text-brass-deep italic mb-2">Dichtstbijzijnde anonieme begeleiders</h2>
+      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">{t("request.matchesKicker")}</p>
+      <h2 className="font-display text-3xl text-brass-deep italic mb-2">{t("request.matchesTitle")}</h2>
       <p className="text-sm text-brass-deep/60 mb-6">
-        Selecteer er {numWanted} zelf. <strong>Servicekosten: 1,5% van het ritbedrag</strong> (wekelijks gefactureerd).
+        <Trans i18nKey="request.matchesBody" values={{ n: numWanted }} components={{ strong: <strong /> }} />
       </p>
 
       {availableMatches.length === 0 ? (
-        <p className="text-sm text-brass-deep/60">Geen beschikbare begeleiders gevonden voor dit tijdstip.</p>
+        <p className="text-sm text-brass-deep/60">{t("request.noMatches")}</p>
       ) : (
         <ul className="space-y-2">
           {availableMatches.map((m) => {
             const isSelected = selected.includes(m.id);
-            const totalMin = m.travelToPickupMin + hourlyRideMin + m.travelBackHomeMin;
             return (
               <li key={m.id} onClick={() => toggle(m.id)}
                 className={`flex items-center justify-between gap-3 bg-card px-4 py-3 cursor-pointer transition-all border ${
@@ -696,8 +696,8 @@ const Matches = ({
                   }`} />
                   <p className="font-display text-lg text-brass-deep tabular-nums shrink-0">#{m.anonymous_id}</p>
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
-                    <span>Aanrij <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
-                    <span>Afrij <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
+                    <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
+                    <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
                   </div>
                 </div>
                 <p className="text-sm font-semibold tabular-nums text-brass-deep shrink-0">€{m.effective_rate.toFixed(2)}/u</p>
@@ -710,7 +710,7 @@ const Matches = ({
       <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
         disabled={busy || selected.length !== numWanted || anySelectedConflict}
         className="mt-4 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
-        {busy ? "Boeken…" : `Boek ${selected.length}/${numWanted} begeleider(s)`}
+        {busy ? t("request.booking") : t("request.book", { sel: selected.length, want: numWanted })}
       </button>
     </section>
   );
