@@ -124,6 +124,12 @@ const fr: Dict = {
     oauthFail: "Impossible de démarrer OAuth",
     couplingFail: "Connexion échouée : {{error}}",
     unknownError: "erreur inconnue",
+    syncNow: "Synchroniser maintenant",
+    syncing: "Synchronisation…",
+    disconnect: "Déconnecter",
+    disconnecting: "Déconnexion…",
+    connectGoogle: "Se connecter à Google",
+    connecting: "En cours…",
   },
 };
 export default fr;
