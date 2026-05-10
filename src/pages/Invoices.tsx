@@ -522,7 +522,12 @@ const InvoicesInner = () => {
                       const ridesSubtotal = rideRows.reduce((s, r) => s + Number(r.amount), 0);
                       const fuelSubtotal = fuelRows.reduce((s, r) => s + Number(r.amount), 0);
                       const subtotal = ridesSubtotal + fuelSubtotal;
-                      const vat = subtotal * 0.21;
+                      const vatRate = vatRateFor(
+                        { billing_country: escortCountries[inv.escort_id] ?? null },
+                        { billing_country: clientCountries[inv.client_id] ?? null },
+                      );
+                      const reverseCharge = vatRate === 0;
+                      const vat = subtotal * vatRate;
                       const weroFee = wero.enabled ? wero.fee : 0;
                       const total = subtotal + vat + weroFee;
                       return (
