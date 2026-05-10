@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Calendar, AlertTriangle, RefreshCw, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,7 +10,10 @@ interface SyncResult { connected: boolean; busy?: BusyWindow[] }
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
+const localeMap: Record<string, string> = { nl: "nl-NL", en: "en-GB", de: "de-DE", fr: "fr-FR" };
+
 export const GoogleAgendaStatus = () => {
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [data, setData] = useState<SyncResult | null>(null);
@@ -29,7 +33,7 @@ export const GoogleAgendaStatus = () => {
 
   useEffect(() => { load(); }, []);
 
-  if (loading) return <p className="text-sm text-brass-deep/50">Agenda controleren…</p>;
+  if (loading) return <p className="text-sm text-brass-deep/50">{t("google.checking")}</p>;
 
   if (!data?.connected) {
     return (
@@ -37,17 +41,13 @@ export const GoogleAgendaStatus = () => {
         <div className="flex items-start gap-4">
           <AlertTriangle className="size-6 text-brass-gold shrink-0 mt-1" />
           <div className="flex-1">
-            <h3 className="font-display text-2xl text-brass-deep italic">Koppel je Google Agenda</h3>
-            <p className="text-sm text-brass-deep/70 mt-1">
-              Je krijgt pas rit-uitnodigingen als je Google Agenda gekoppeld is. De planner controleert
-              of je vrij bent op het ritmoment (incl. reistijd heen en terug). Geaccepteerde ritten worden
-              automatisch in je agenda geplaatst.
-            </p>
+            <h3 className="font-display text-2xl text-brass-deep italic">{t("google.connectTitle")}</h3>
+            <p className="text-sm text-brass-deep/70 mt-1">{t("google.connectBody")}</p>
             <Link
               to="/escort-instellingen"
               className="inline-block mt-4 px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors"
             >
-              Google Agenda koppelen
+              {t("google.connectCta")}
             </Link>
           </div>
         </div>
@@ -55,7 +55,6 @@ export const GoogleAgendaStatus = () => {
     );
   }
 
-  // Connected — overzicht 7 dagen
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today); d.setDate(today.getDate() + i); return d;
@@ -72,18 +71,17 @@ export const GoogleAgendaStatus = () => {
     }
   }
 
+  const locale = localeMap[i18n.resolvedLanguage ?? "nl"] ?? "nl-NL";
+
   return (
     <div className="bg-card shadow-etched p-6">
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="size-5 text-brass-gold mt-0.5" />
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">Google Agenda gekoppeld</p>
-            <h3 className="font-display text-xl text-brass-deep italic">Beschikbaarheid komende 7 dagen</h3>
-            <p className="text-[11px] text-brass-deep/60 mt-1">
-              Plaats verlof, persoonlijke afspraken en blokkades direct in je Google Agenda.
-              Wij gebruiken die als bron — je krijgt geen uitnodiging als je bezet bent.
-            </p>
+            <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("google.connected")}</p>
+            <h3 className="font-display text-xl text-brass-deep italic">{t("google.avail7days")}</h3>
+            <p className="text-[11px] text-brass-deep/60 mt-1">{t("google.availHint")}</p>
           </div>
         </div>
         <button
@@ -91,7 +89,7 @@ export const GoogleAgendaStatus = () => {
           disabled={syncing}
           className="px-4 py-2 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-40 inline-flex items-center gap-2"
         >
-          <RefreshCw className={`size-3 ${syncing ? "animate-spin" : ""}`} /> Vernieuwen
+          <RefreshCw className={`size-3 ${syncing ? "animate-spin" : ""}`} /> {t("google.refresh")}
         </button>
       </div>
 
@@ -99,9 +97,9 @@ export const GoogleAgendaStatus = () => {
         {days.map((d) => {
           const k = ymd(d);
           const min = busyByDay.get(k) ?? 0;
-          const heavy = min >= 240;   // >= 4u bezet
+          const heavy = min >= 240;
           const some = min > 0;
-          const label = d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric" });
+          const label = d.toLocaleDateString(locale, { weekday: "short", day: "numeric" });
           return (
             <div key={k} className={`p-2 text-center border ${
               heavy
@@ -112,7 +110,7 @@ export const GoogleAgendaStatus = () => {
             }`}>
               <p className="text-[10px] uppercase tracking-widest font-bold">{label}</p>
               <p className="text-[10px] mt-1 tabular-nums">
-                {min === 0 ? "vrij" : `${Math.round(min / 60 * 10) / 10}u bezet`}
+                {min === 0 ? t("google.free") : t("google.busyHours", { h: Math.round(min / 60 * 10) / 10 })}
               </p>
             </div>
           );
@@ -121,7 +119,7 @@ export const GoogleAgendaStatus = () => {
 
       <div className="flex items-center gap-2 mt-3 text-[10px] text-brass-deep/60">
         <Calendar className="size-3" />
-        Tip: gebruik een terugkerende afspraak voor vaste vrije dagen.
+        {t("google.tip")}
       </div>
     </div>
   );
