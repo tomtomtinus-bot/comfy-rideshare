@@ -1,177 +1,190 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// Demo-seed: wipes existing demo-* users and (re)creates a fresh demo set.
+// Safe to run repeatedly. Public (no JWT) but only touches users with
+// email ending in "@viacust.demo" — never real users.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const PASSWORD = "Demo1234!";
+const DEMO_DOMAIN = "@viacust.demo";
 
-const CLIENTS = [
-  { email: "demo-opdracht1@demo.nl", full_name: "Havenlogistiek Rotterdam BV", phone: "+31101234567" },
-  { email: "demo-opdracht2@demo.nl", full_name: "Antwerp Heavy Transport NV", phone: "+3232345678" },
+type Client = {
+  email: string;
+  full_name: string;
+  company_name: string;
+  phone: string;
+  billing_country: string;
+  billing_city: string;
+};
+
+type Escort = {
+  email: string;
+  full_name: string;
+  phone: string;
+  base_city: string;
+  base_lat: number;
+  base_lng: number;
+  countries: string[];
+  hourly_rate: number;
+  billing_country: string;
+};
+
+const CLIENTS: Client[] = [
+  {
+    email: "opdracht-rotterdam" + DEMO_DOMAIN,
+    full_name: "Rotterdam Heavy Transport",
+    company_name: "Rotterdam Heavy Transport BV",
+    phone: "+31 10 555 0101",
+    billing_country: "Nederland",
+    billing_city: "Rotterdam",
+  },
+  {
+    email: "opdracht-amsterdam" + DEMO_DOMAIN,
+    full_name: "Amsterdam Logistics",
+    company_name: "Amsterdam Logistics BV",
+    phone: "+31 20 555 0102",
+    billing_country: "Nederland",
+    billing_city: "Amsterdam",
+  },
+  {
+    email: "opdracht-antwerpen" + DEMO_DOMAIN,
+    full_name: "Antwerp Convoy",
+    company_name: "Antwerp Convoy BVBA",
+    phone: "+32 3 555 0103",
+    billing_country: "België",
+    billing_city: "Antwerpen",
+  },
 ];
 
-const ESCORTS = [
-  { email: "demo-begeleider1@demo.nl", full_name: "Jan de Vries", phone: "+31612340001", base_city: "Rotterdam", base_lat: 51.9244, base_lng: 4.4777, hourly_rate: 58 },
-  { email: "demo-begeleider2@demo.nl", full_name: "Pieter Janssens", phone: "+32498000002", base_city: "Antwerpen", base_lat: 51.2194, base_lng: 4.4025, hourly_rate: 52 },
-  { email: "demo-begeleider3@demo.nl", full_name: "Mark Hendriks", phone: "+31612340003", base_city: "Eindhoven", base_lat: 51.4416, base_lng: 5.4697, hourly_rate: 48 },
-  { email: "demo-begeleider4@demo.nl", full_name: "Sander Bakker", phone: "+31612340004", base_city: "Utrecht", base_lat: 52.0907, base_lng: 5.1214, hourly_rate: 60 },
-  { email: "demo-begeleider5@demo.nl", full_name: "Henk de Wit", phone: "+31612340005", base_city: "Den Haag", base_lat: 52.0705, base_lng: 4.3007, hourly_rate: 55 },
-  { email: "demo-begeleider6@demo.nl", full_name: "Tom Verschueren", phone: "+31612340006", base_city: "Tilburg", base_lat: 51.5555, base_lng: 5.0913, hourly_rate: 46 },
+const ESCORTS: Escort[] = [
+  // NL — 6
+  { email: "jan-rotterdam" + DEMO_DOMAIN, full_name: "Jan de Vries", phone: "+31 6 1000 0001", base_city: "Rotterdam", base_lat: 51.9225, base_lng: 4.4792, countries: ["Nederland", "België"], hourly_rate: 38, billing_country: "Nederland" },
+  { email: "pieter-utrecht" + DEMO_DOMAIN, full_name: "Pieter Jansen", phone: "+31 6 1000 0002", base_city: "Utrecht", base_lat: 52.0907, base_lng: 5.1214, countries: ["Nederland"], hourly_rate: 35, billing_country: "Nederland" },
+  { email: "mark-eindhoven" + DEMO_DOMAIN, full_name: "Mark van Dijk", phone: "+31 6 1000 0003", base_city: "Eindhoven", base_lat: 51.4416, base_lng: 5.4697, countries: ["Nederland", "België", "Duitsland"], hourly_rate: 40, billing_country: "Nederland" },
+  { email: "sander-denhaag" + DEMO_DOMAIN, full_name: "Sander Bakker", phone: "+31 6 1000 0004", base_city: "Den Haag", base_lat: 52.0705, base_lng: 4.3007, countries: ["Nederland"], hourly_rate: 36, billing_country: "Nederland" },
+  { email: "henk-amsterdam" + DEMO_DOMAIN, full_name: "Henk Visser", phone: "+31 6 1000 0005", base_city: "Amsterdam", base_lat: 52.3676, base_lng: 4.9041, countries: ["Nederland"], hourly_rate: 37, billing_country: "Nederland" },
+  { email: "tom-tilburg" + DEMO_DOMAIN, full_name: "Tom Smit", phone: "+31 6 1000 0006", base_city: "Tilburg", base_lat: 51.5555, base_lng: 5.0913, countries: ["Nederland", "België"], hourly_rate: 35, billing_country: "Nederland" },
+  // BE — 4
+  { email: "luc-antwerpen" + DEMO_DOMAIN, full_name: "Luc Peeters", phone: "+32 4 7000 0007", base_city: "Antwerpen", base_lat: 51.2194, base_lng: 4.4025, countries: ["België", "Nederland"], hourly_rate: 38, billing_country: "België" },
+  { email: "bart-gent" + DEMO_DOMAIN, full_name: "Bart Janssens", phone: "+32 4 7000 0008", base_city: "Gent", base_lat: 51.0543, base_lng: 3.7174, countries: ["België"], hourly_rate: 36, billing_country: "België" },
+  { email: "dries-brussel" + DEMO_DOMAIN, full_name: "Dries De Smet", phone: "+32 4 7000 0009", base_city: "Brussel", base_lat: 50.8503, base_lng: 4.3517, countries: ["België", "Frankrijk"], hourly_rate: 39, billing_country: "België" },
+  { email: "kris-luik" + DEMO_DOMAIN, full_name: "Kris Maes", phone: "+32 4 7000 0010", base_city: "Luik", base_lat: 50.6326, base_lng: 5.5797, countries: ["België", "Duitsland"], hourly_rate: 37, billing_country: "België" },
 ];
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
-
-  const result: { created: string[]; existing: string[]; ids: Record<string, string> } = {
-    created: [],
-    existing: [],
-    ids: {},
-  };
-
-  const upsertUser = async (
-    email: string,
-    full_name: string,
-    phone: string,
-    role: "opdrachtgever" | "begeleider",
-    extra: Record<string, string | number> = {}
-  ) => {
-    // Try to find existing
-    const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const existing = list.users.find((u) => u.email === email);
-    if (existing) {
-      result.existing.push(email);
-      result.ids[email] = existing.id;
-      return existing.id;
-    }
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password: PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name, phone, role, ...extra },
-    });
-    if (error) throw new Error(`${email}: ${error.message}`);
-    result.created.push(email);
-    result.ids[email] = data.user!.id;
-    return data.user!.id;
-  };
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } }
+    );
+
+    // 1. Wipe existing demo users (DEMO_DOMAIN + legacy "@demo.nl").
+    let page = 1;
+    const toDelete: string[] = [];
+    while (true) {
+      const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) throw error;
+      for (const u of data.users) {
+        const em = (u.email || "").toLowerCase();
+        if (em.endsWith(DEMO_DOMAIN) || em.endsWith("@demo.nl")) toDelete.push(u.id);
+      }
+      if (data.users.length < 200) break;
+      page++;
+    }
+    for (const id of toDelete) {
+      await supabase.auth.admin.deleteUser(id);
+    }
+
+    const created: { email: string; role: string; user_id: string }[] = [];
+
+    // 2. Create clients (opdrachtgevers).
     for (const c of CLIENTS) {
-      await upsertUser(c.email, c.full_name, c.phone, "opdrachtgever");
-    }
-    for (const e of ESCORTS) {
-      await upsertUser(e.email, e.full_name, e.phone, "begeleider", {
-        base_city: e.base_city,
-        base_lat: e.base_lat,
-        base_lng: e.base_lng,
-        hourly_rate: e.hourly_rate,
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: c.email,
+        password: PASSWORD,
+        email_confirm: true,
+        user_metadata: {
+          full_name: c.full_name,
+          phone: c.phone,
+          role: "opdrachtgever",
+          terms_accepted: "true",
+          privacy_accepted: "true",
+        },
       });
+      if (error) throw new Error(`create client ${c.email}: ${error.message}`);
+      const uid = data.user!.id;
+      // Approve + fill profile.
+      await supabase.from("profiles").update({
+        approval_status: "approved",
+        approved_at: new Date().toISOString(),
+        company_name: c.company_name,
+        billing_country: c.billing_country,
+        billing_city: c.billing_city,
+        billing_email: c.email,
+        billing_contact_name: c.full_name,
+      }).eq("id", uid);
+      created.push({ email: c.email, role: "opdrachtgever", user_id: uid });
     }
 
-    // Seed rides if none exist for client1
-    const client1 = result.ids["demo-opdracht1@demo.nl"];
-    const client2 = result.ids["demo-opdracht2@demo.nl"];
-    const esc1 = result.ids["demo-begeleider1@demo.nl"];
-    const esc2 = result.ids["demo-begeleider2@demo.nl"];
-    const esc4 = result.ids["demo-begeleider4@demo.nl"];
-
-    const { data: existingRides } = await admin
-      .from("rides")
-      .select("id")
-      .eq("client_id", client1)
-      .limit(1);
-
-    if (!existingRides || existingRides.length === 0) {
-      const now = Date.now();
-      const day = 24 * 60 * 60 * 1000;
-
-      // Ride 1 — open, future, invitations pending
-      const { data: r1 } = await admin.from("rides").insert({
-        client_id: client1,
-        pickup_address: "Maasvlakteweg 1, Rotterdam",
-        pickup_city: "Rotterdam", pickup_lat: 51.9500, pickup_lng: 4.0500,
-        dropoff_address: "Hafenstraße 12, Duisburg",
-        dropoff_city: "Duisburg", dropoff_lat: 51.4344, dropoff_lng: 6.7623,
-        scheduled_at: new Date(now + 3 * day).toISOString(),
-        num_escorts: 1, status: "open", app_fee: 2.5,
-        cargo_length_m: 38, cargo_width_m: 5.2, cargo_height_m: 4.9, cargo_weight_t: 110,
-        permit_number: "XV-2026-0421", client_reference: "PO-2026-118",
-        notes: "Nachtrit, transformator.",
-        time_window_start: new Date(now + 3 * day).toISOString(),
-      }).select().single();
-      if (r1) {
-        await admin.from("ride_assignments").insert({
-          ride_id: r1.id, escort_id: esc1,
-          travel_to_pickup_min: 15, travel_back_home_min: 90,
-          estimated_hours: 5, estimated_cost: 290, status: "invited",
-          responds_by: new Date(now + 10 * 60 * 1000).toISOString(),
-        });
-      }
-
-      // Ride 2 — accepted, upcoming
-      const { data: r2 } = await admin.from("rides").insert({
-        client_id: client1,
-        pickup_address: "Industriepark 5, Antwerpen",
-        pickup_city: "Antwerpen", pickup_lat: 51.2194, pickup_lng: 4.4025,
-        dropoff_address: "Acht 22, Eindhoven",
-        dropoff_city: "Eindhoven", dropoff_lat: 51.4416, dropoff_lng: 5.4697,
-        scheduled_at: new Date(now + 5 * day).toISOString(),
-        num_escorts: 1, status: "matched", app_fee: 2.5,
-        cargo_length_m: 28, cargo_width_m: 4.5, cargo_height_m: 4.4, cargo_weight_t: 62,
-        notes: "Windturbinemast.",
-        time_window_start: new Date(now + 5 * day).toISOString(),
-      }).select().single();
-      if (r2) {
-        await admin.from("ride_assignments").insert({
-          ride_id: r2.id, escort_id: esc2,
-          travel_to_pickup_min: 5, travel_back_home_min: 75,
-          estimated_hours: 4, estimated_cost: 208, status: "accepted",
-          responded_at: new Date(now - day).toISOString(),
-        });
-      }
-
-      // Ride 3 — completed + invoiced
-      const { data: r3 } = await admin.from("rides").insert({
-        client_id: client2,
-        pickup_address: "Westhaven 88, Amsterdam",
-        pickup_city: "Amsterdam", pickup_lat: 52.4017, pickup_lng: 4.8200,
-        dropoff_address: "Lage Weide 14, Utrecht",
-        dropoff_city: "Utrecht", dropoff_lat: 52.0907, dropoff_lng: 5.1214,
-        scheduled_at: new Date(now - 7 * day).toISOString(),
-        num_escorts: 1, status: "completed", app_fee: 2.5,
-        cargo_length_m: 22, cargo_width_m: 4.0, cargo_height_m: 4.3, cargo_weight_t: 48,
-        notes: "Prefab brugligger.",
-        time_window_start: new Date(now - 7 * day).toISOString(),
-      }).select().single();
-      if (r3) {
-        await admin.from("ride_assignments").insert({
-          ride_id: r3.id, escort_id: esc4,
-          travel_to_pickup_min: 30, travel_back_home_min: 30,
-          estimated_hours: 3, estimated_cost: 180,
-          actual_hours: 3.5, actual_cost: 210,
-          hours_submitted_at: new Date(now - 6 * day).toISOString(),
-          status: "accepted",
-          responded_at: new Date(now - 8 * day).toISOString(),
-          departed_base_at: new Date(now - 7 * day - 30 * 60 * 1000).toISOString(),
-          returned_base_at: new Date(now - 7 * day + 3 * 60 * 60 * 1000).toISOString(),
-        });
-      }
+    // 3. Create escorts (begeleiders).
+    for (const e of ESCORTS) {
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: e.email,
+        password: PASSWORD,
+        email_confirm: true,
+        user_metadata: {
+          full_name: e.full_name,
+          phone: e.phone,
+          role: "begeleider",
+          terms_accepted: "true",
+          privacy_accepted: "true",
+          base_city: e.base_city,
+          base_lat: e.base_lat,
+          base_lng: e.base_lng,
+          hourly_rate: e.hourly_rate,
+        },
+      });
+      if (error) throw new Error(`create escort ${e.email}: ${error.message}`);
+      const uid = data.user!.id;
+      await supabase.from("profiles").update({
+        approval_status: "approved",
+        approved_at: new Date().toISOString(),
+        billing_country: e.billing_country,
+        billing_email: e.email,
+        billing_contact_name: e.full_name,
+      }).eq("id", uid);
+      await supabase.from("escort_profiles").update({
+        countries: e.countries,
+        hourly_rate: e.hourly_rate,
+        hourly_rate_be: e.hourly_rate,
+        hourly_rate_de: e.hourly_rate,
+        hourly_rate_fr: e.hourly_rate,
+        hourly_rate_lu: e.hourly_rate,
+        available: true,
+      }).eq("id", uid);
+      created.push({ email: e.email, role: "begeleider", user_id: uid });
     }
 
-    return new Response(JSON.stringify({ ok: true, ...result, password: PASSWORD }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: (e as Error).message, ...result }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        deleted: toDelete.length,
+        created: created.length,
+        accounts: created,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    return new Response(
+      JSON.stringify({ ok: false, error: (err as Error).message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });

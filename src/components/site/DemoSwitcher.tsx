@@ -7,14 +7,22 @@ import { supabase } from "@/integrations/supabase/client";
 const DEMO_PASSWORD = "Demo1234!";
 
 const DEMO_ACCOUNTS = [
-  { email: "demo-opdracht1@demo.nl", label: "Opdrachtgever 1", sub: "Havenlogistiek RTM", group: "Opdrachtgevers" },
-  { email: "demo-opdracht2@demo.nl", label: "Opdrachtgever 2", sub: "Antwerp Heavy Tr.", group: "Opdrachtgevers" },
-  { email: "demo-begeleider1@demo.nl", label: "Begeleider 1", sub: "Jan · Rotterdam", group: "Begeleiders" },
-  { email: "demo-begeleider2@demo.nl", label: "Begeleider 2", sub: "Pieter · Antwerpen", group: "Begeleiders" },
-  { email: "demo-begeleider3@demo.nl", label: "Begeleider 3", sub: "Mark · Eindhoven", group: "Begeleiders" },
-  { email: "demo-begeleider4@demo.nl", label: "Begeleider 4", sub: "Sander · Utrecht", group: "Begeleiders" },
-  { email: "demo-begeleider5@demo.nl", label: "Begeleider 5", sub: "Henk · Den Haag", group: "Begeleiders" },
-  { email: "demo-begeleider6@demo.nl", label: "Begeleider 6", sub: "Tom · Tilburg", group: "Begeleiders" },
+  // Opdrachtgevers (3 — NL + BE)
+  { email: "opdracht-rotterdam@viacust.demo", label: "Rotterdam Heavy Tr.", sub: "NL · Rotterdam", group: "Opdrachtgevers" },
+  { email: "opdracht-amsterdam@viacust.demo", label: "Amsterdam Logistics", sub: "NL · Amsterdam", group: "Opdrachtgevers" },
+  { email: "opdracht-antwerpen@viacust.demo", label: "Antwerp Convoy", sub: "BE · Antwerpen", group: "Opdrachtgevers" },
+
+  // Begeleiders (10 — 6 NL + 4 BE)
+  { email: "jan-rotterdam@viacust.demo", label: "Jan de Vries", sub: "NL · Rotterdam", group: "Begeleiders" },
+  { email: "pieter-utrecht@viacust.demo", label: "Pieter Jansen", sub: "NL · Utrecht", group: "Begeleiders" },
+  { email: "mark-eindhoven@viacust.demo", label: "Mark van Dijk", sub: "NL · Eindhoven", group: "Begeleiders" },
+  { email: "sander-denhaag@viacust.demo", label: "Sander Bakker", sub: "NL · Den Haag", group: "Begeleiders" },
+  { email: "henk-amsterdam@viacust.demo", label: "Henk Visser", sub: "NL · Amsterdam", group: "Begeleiders" },
+  { email: "tom-tilburg@viacust.demo", label: "Tom Smit", sub: "NL · Tilburg", group: "Begeleiders" },
+  { email: "luc-antwerpen@viacust.demo", label: "Luc Peeters", sub: "BE · Antwerpen", group: "Begeleiders" },
+  { email: "bart-gent@viacust.demo", label: "Bart Janssens", sub: "BE · Gent", group: "Begeleiders" },
+  { email: "dries-brussel@viacust.demo", label: "Dries De Smet", sub: "BE · Brussel", group: "Begeleiders" },
+  { email: "kris-luik@viacust.demo", label: "Kris Maes", sub: "BE · Luik", group: "Begeleiders" },
 ];
 
 export const DemoSwitcher = () => {
