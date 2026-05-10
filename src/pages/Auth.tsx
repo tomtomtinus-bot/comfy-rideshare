@@ -70,11 +70,16 @@ const Auth = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (!acceptedTerms) {
+      toast.error("Je moet de algemene voorwaarden accepteren om door te gaan.");
+      return;
+    }
     const d = parsed.data;
     const meta: Record<string, string | number> = {
       full_name: d.fullName,
       phone: d.phone,
       role: d.role,
+      terms_accepted: "true",
     };
     setBusy(true);
     const { error } = await supabase.auth.signUp({
