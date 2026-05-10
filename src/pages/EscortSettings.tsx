@@ -275,11 +275,7 @@ const Inner = () => {
         countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
-        cert_number: parsed.data.certNumber || null,
-        cert_expires_on: parsed.data.certExpiresOn || null,
-        insurance_policy: parsed.data.insurancePolicy || null,
         categories,
-        certificate_files: files,
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
         fuel_surcharge: {
           enabled: fuel.enabled,
