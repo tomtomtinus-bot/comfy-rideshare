@@ -419,16 +419,16 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Lading & vergunning <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span></p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Input label="Lengte (m)" inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
-                <Input label="Breedte (m)" inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
-                <Input label="Hoogte (m)" inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
-                <Input label="Gewicht (ton)" inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
+                <Input label={t("request.length")} inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
+                <Input label={t("request.width")} inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
+                <Input label={t("request.height")} inputMode="decimal" value={form.cargo_height_m} onChange={(v) => setForm({ ...form, cargo_height_m: v })} placeholder="bv. 4.20" />
+                <Input label={t("request.weight")} inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="mt-4">
                 <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                  RDW Ontheffing (PDF)
+                  {t("request.permitLabel")}
                 </label>
                 {!uploadedPermit ? (
                   <label
@@ -439,12 +439,12 @@ const RequestRideInner = () => {
                     {permitUploading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Bezig met uitlezen…</span>
+                        <span>{t("request.permitParsing")}</span>
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4" />
-                        <span>Kies of sleep een RDW ontheffing-PDF om bij te voegen</span>
+                        <span>{t("request.permitDrop")}</span>
                       </>
                     )}
                     <input
@@ -468,14 +468,14 @@ const RequestRideInner = () => {
                         {uploadedPermit.carrier ? ` · ${uploadedPermit.carrier}` : ""}
                       </p>
                       <p className="text-[11px] text-brass-deep/60">
-                        {uploadedPermit.routes_count} route(s) — wordt aan deze rit gekoppeld
+                        {t("request.permitAttached", { n: uploadedPermit.routes_count })}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={removeUploadedPermit}
                       className="p-1.5 text-brass-deep/70 hover:text-brass-deep hover:bg-brass-deep/10"
-                      aria-label="Ontheffing verwijderen"
+                      aria-label={t("request.permitRemove")}
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -483,16 +483,16 @@ const RequestRideInner = () => {
                 )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <Input label="Vergunningnummer (handmatig)" value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder="Auto ingevuld bij ontheffing" />
-                <Input label="Eigen referentie (optioneel)" value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder="Bijv. PO-2026-118" />
+                <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
+                <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Aantal begeleiders</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.numEscorts")}</label>
                   <div className="mt-1 flex items-stretch border border-brass-deep/15 bg-parchment">
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, num_escorts: Math.max(1, form.num_escorts - 1) })}
                       className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label="Minder begeleiders"
+                      aria-label={t("request.fewerEscorts")}
                     >−</button>
                     <input
                       type="number"
@@ -509,7 +509,7 @@ const RequestRideInner = () => {
                       type="button"
                       onClick={() => setForm({ ...form, num_escorts: form.num_escorts + 1 })}
                       className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label="Meer begeleiders"
+                      aria-label={t("request.moreEscorts")}
                     >+</button>
                   </div>
                 </div>
@@ -518,19 +518,19 @@ const RequestRideInner = () => {
 
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">
-                Chauffeurs & kentekens <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+                {t("request.driversSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span>
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.drivers")}</label>
                     <button type="button" onClick={addDriver} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
-                      + Chauffeur toevoegen
+                      {t("request.addDriver")}
                     </button>
                   </div>
                   {drivers.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">Voeg naam en telefoonnummer toe van de chauffeur(s).</p>
+                    <p className="text-xs text-brass-deep/45">{t("request.driversHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {drivers.map((d, i) => (
@@ -539,7 +539,7 @@ const RequestRideInner = () => {
                             type="text"
                             value={d.name}
                             onChange={(e) => updateDriver(i, { name: e.target.value })}
-                            placeholder="Naam"
+                            placeholder={t("request.driverName")}
                             maxLength={80}
                             className="col-span-5 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                           />
@@ -554,7 +554,7 @@ const RequestRideInner = () => {
                           <button
                             type="button"
                             onClick={() => removeDriver(i)}
-                            aria-label="Verwijder chauffeur"
+                            aria-label={t("request.removeDriver")}
                             className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
@@ -565,13 +565,13 @@ const RequestRideInner = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Kentekens</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.plates")}</label>
                     <button type="button" onClick={addPlate} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
-                      + Kenteken toevoegen
+                      {t("request.addPlate")}
                     </button>
                   </div>
                   {licensePlates.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">Bijv. trekker en oplegger.</p>
+                    <p className="text-xs text-brass-deep/45">{t("request.platesHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {licensePlates.map((p, i) => (
@@ -580,14 +580,14 @@ const RequestRideInner = () => {
                             type="text"
                             value={p}
                             onChange={(e) => updatePlate(i, e.target.value)}
-                            placeholder="Bv. 12-AB-345"
+                            placeholder={t("request.platePlaceholder")}
                             maxLength={20}
                             className="col-span-11 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm uppercase tracking-wider tabular-nums focus:outline-none focus:border-brass-gold"
                           />
                           <button
                             type="button"
                             onClick={() => removePlate(i)}
-                            aria-label="Verwijder kenteken"
+                            aria-label={t("request.removePlate")}
                             className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
@@ -599,19 +599,19 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">Geplande starttijd</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label="Datum" type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label={t("common.date")} type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Tijd (per kwartier)</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
                   <select
                     value={form.scheduled_time}
                     onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                   >
-                    <option value="" disabled>Kies tijd…</option>
-                    {QUARTER_TIMES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                    <option value="" disabled>{t("request.pickTime")}</option>
+                    {QUARTER_TIMES.map((qt) => (
+                      <option key={qt} value={qt}>{qt}</option>
                     ))}
                   </select>
                 </div>
@@ -619,7 +619,7 @@ const RequestRideInner = () => {
             </section>
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Opmerkingen (optioneel)</label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.notes")}</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -632,7 +632,7 @@ const RequestRideInner = () => {
               disabled={busy || !pickupGeo || !dropoffGeo}
               className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
-              {busy ? "Zoeken…" : "Zoek dichtstbijzijnde begeleiders"}
+              {busy ? t("request.searching") : t("request.search")}
             </button>
           </form>
           )}
