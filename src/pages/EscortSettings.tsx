@@ -275,20 +275,6 @@ const Inner = () => {
       })
       .eq("id", user.id);
 
-    // Replace availability (date-based blocked days)
-    await supabase.from("escort_availability").delete().eq("escort_id", user.id);
-    if (unavailable.size > 0) {
-      await supabase.from("escort_availability").insert(
-        Array.from(unavailable).map((d) => ({
-          escort_id: user.id,
-          date: d,
-          weekday: new Date(d).getDay(),
-          start_time: "00:00",
-          end_time: "23:59",
-        }))
-      );
-    }
-
     setBusy(false);
     if (error) return toast.error(error.message);
     setDirty(false);
