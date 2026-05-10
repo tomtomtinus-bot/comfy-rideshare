@@ -1001,6 +1001,10 @@ export type Database = {
         Args: { _assignment_id: string }
         Returns: undefined
       }
+      notify_ride_updated: {
+        Args: { _ride_id: string; _summary: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
