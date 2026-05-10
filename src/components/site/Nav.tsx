@@ -1,5 +1,5 @@
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/pilotcrew-logo.png";
+import logo from "@/assets/viacust-logo.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
