@@ -14,7 +14,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
   const [busy, setBusy] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
