@@ -24,6 +24,7 @@ export const Nav = () => {
     { to: "/facturen", label: t("nav.invoices"), show: !!user },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
     { to: "/facturatiegegevens", label: t("nav.billing"), show: !!user },
+    { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
   ];
 
