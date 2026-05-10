@@ -443,7 +443,8 @@ const hoursSchema = z.object({
 type ExtraCost = { description: string; amount: number };
 
 const EscortDashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const fd2 = (d: string) => fmtDate(d, i18n.language);
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<
@@ -463,8 +464,8 @@ const EscortDashboard = () => {
   const [tick, setTick] = useState(0);
 
   const hasGoogleConflict = (scheduledAt: string) => {
-    const t = new Date(scheduledAt).getTime();
-    return googleBusy.some((b) => b.start < t + 60_000 && b.end > t - 60_000);
+    const ts = new Date(scheduledAt).getTime();
+    return googleBusy.some((b) => b.start < ts + 60_000 && b.end > ts - 60_000);
   };
 
   const getExtras = (id: string) => extraCosts[id] ?? [];
@@ -595,11 +596,11 @@ const EscortDashboard = () => {
         { event: "INSERT", schema: "public", table: "ride_assignments", filter: `escort_id=eq.${user.id}` },
         () => {
           if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("Nieuwe rituitnodiging", {
-              body: "U heeft 10 minuten om te accepteren.",
+            new Notification(t("dash.newInvitation"), {
+              body: t("dash.newInvitationBody"),
             });
           }
-          toast.info("Nieuwe rituitnodiging ontvangen");
+          toast.info(t("dash.newInvitationToast"));
           load();
         }
       )
@@ -612,14 +613,12 @@ const EscortDashboard = () => {
 
   const respond = async (id: string, accept: boolean) => {
     if (!isApproved) {
-      return toast.error("Je account moet eerst worden goedgekeurd door de beheerder.");
+      return toast.error(t("dash.needsApproval"));
     }
     if (accept) {
       const it = items.find((x) => x.id === id);
       if (it && hasGoogleConflict(it.ride.scheduled_at)) {
-        const ok = window.confirm(
-          "Let op: je hebt op dit moment al een afspraak in je Google Agenda. Toch accepteren?",
-        );
+        const ok = window.confirm(t("dash.googleConfirm"));
         if (!ok) return;
       }
     }
@@ -634,9 +633,9 @@ const EscortDashboard = () => {
     if (accept) {
       const { error: nErr } = await supabase.rpc("notify_ride_confirmed", { _assignment_id: id });
       if (nErr) console.warn("notify_ride_confirmed:", nErr.message);
-      toast.success("Rit bevestigd — opdrachtgever is op de hoogte gebracht");
+      toast.success(t("dash.rideConfirmed"));
     } else {
-      toast.success("Rit geweigerd");
+      toast.success(t("dash.rideDeclined"));
     }
     load();
   };
@@ -656,11 +655,11 @@ const EscortDashboard = () => {
 
     const rideStart = new Date(`${parsed.data.ride_start_date}T${parsed.data.ride_start_time}`);
     const rideEnd = new Date(`${parsed.data.ride_end_date}T${parsed.data.ride_end_time}`);
-    if (isNaN(rideStart.getTime()) || isNaN(rideEnd.getTime())) return toast.error("Ongeldige datum of tijd");
+    if (isNaN(rideStart.getTime()) || isNaN(rideEnd.getTime())) return toast.error(t("dash.invalidDateTime"));
     if (rideStart.getMinutes() % 15 !== 0 || rideEnd.getMinutes() % 15 !== 0) {
-      return toast.error("Tijden moeten op het kwartier vallen (00, 15, 30, 45)");
+      return toast.error(t("dash.quarterTimes"));
     }
-    if (rideEnd <= rideStart) return toast.error("Eindtijd rit moet na starttijd liggen");
+    if (rideEnd <= rideStart) return toast.error(t("dash.endAfterStart"));
 
     const item = items.find((i) => i.id === id);
     if (!item) return;
@@ -686,7 +685,7 @@ const EscortDashboard = () => {
       .map((e) => ({ description: (e.description ?? "").trim(), amount: Number(e.amount) || 0 }))
       .filter((e) => e.description.length > 0 || e.amount > 0);
     if (extras.some((e) => !e.description || e.amount <= 0)) {
-      return toast.error("Vul voor elke extra kostenregel een omschrijving en een bedrag groter dan 0 in");
+      return toast.error(t("dash.extraCostsValid"));
     }
     const extrasTotal = +extras.reduce((s, e) => s + e.amount, 0).toFixed(2);
     const cost = +(baseCost + extrasTotal).toFixed(2);
@@ -716,7 +715,7 @@ const EscortDashboard = () => {
       await supabase.from("rides").update({ status: "completed" }).eq("id", item.ride_id);
     }
 
-    toast.success("Uren geregistreerd");
+    toast.success(t("dash.hoursRegistered"));
     setOpenId(null);
     load();
   };
@@ -726,25 +725,25 @@ const EscortDashboard = () => {
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Begeleider
+            {t("dash.escortKicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn opdrachten</h1>
+          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("dash.myAssignments")}</h1>
         </div>
         <Link
           to="/profiel"
           className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
         >
-          Mijn profiel
+          {t("dash.myProfile")}
         </Link>
       </header>
 
       {user && <GoogleAgendaStatus />}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
       ) : items.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">U heeft nog geen toegewezen ritten.</p>
+          <p className="text-brass-deep/60">{t("dash.noAssignmentsYet")}</p>
         </div>
       ) : (() => {
         const isExpired = (a: typeof items[number]) =>
@@ -778,7 +777,7 @@ const EscortDashboard = () => {
             >
               <div className="flex items-center gap-4 px-5 py-4">
                 <div className="w-28 shrink-0">
-                  <p className="font-medium tabular-nums text-sm">{fmtDate(a.ride.scheduled_at)}</p>
+                  <p className="font-medium tabular-nums text-sm">{fd2(a.ride.scheduled_at)}</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">
@@ -795,31 +794,31 @@ const EscortDashboard = () => {
                     <div className="flex items-center gap-2">
                       {hasGoogleConflict(a.ride.scheduled_at) && (
                         <span
-                          title="Je hebt op dit moment een afspraak in je Google Agenda"
+                          title={t("dash.googleConflictTitle")}
                           className="text-[10px] uppercase tracking-widest text-destructive font-bold whitespace-nowrap"
                         >
-                          ⚠ Agenda-conflict
+                          {t("dash.calendarConflict")}
                         </span>
                       )}
                       <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
-                        Nog {minsLeft} min
+                        {t("dash.nMin", { min: minsLeft })}
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
                         className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                       >
-                        Accepteer
+                        {t("dash.accept")}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
                         className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
                       >
-                        Weiger
+                        {t("dash.decline")}
                       </button>
                     </div>
                   ) : expired ? (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
-                      Verlopen
+                      {t("dash.expired")}
                     </span>
                   ) : submitted ? (
                     <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
@@ -830,7 +829,7 @@ const EscortDashboard = () => {
                       onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
                       className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                     >
-                      Uren invullen
+                      {t("dash.fillHours")}
                     </button>
                   ) : (
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
@@ -847,12 +846,12 @@ const EscortDashboard = () => {
                 >
                   <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
                     <div>
-                      <strong>Geplande boekingstijd:</strong>{" "}
-                      {new Date(a.ride.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                      <strong>{t("dash.plannedTime")}</strong>{" "}
+                      {new Date(a.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}
                     </div>
                     <div>
-                      <strong>Reistijd vanaf standplaats:</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
-                      <strong>terug:</strong> {fmtHours(a.travel_back_home_min)} (afgerond op kwartier)
+                      <strong>{t("dash.travelFromBase")}</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
+                      <strong>{t("dash.back")}</strong> {fmtHours(a.travel_back_home_min)} {t("dash.roundedQuarter")}
                     </div>
                   </div>
                   {(() => {
@@ -866,10 +865,10 @@ const EscortDashboard = () => {
                     return (
                       <>
                         <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                          Starttijd rit (op pickup)
+                          {t("dash.rideStartTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_start_date"
                             type="date"
@@ -879,23 +878,23 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
                           <select
                             name="ride_start_time"
                             defaultValue={defTime}
                             required
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           >
-                            {QUARTER_TIMES.map((t) => (
-                              <option key={t} value={t}>{t}</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
                             ))}
                           </select>
                         </div>
                         <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
-                          Eindtijd rit (op dropoff)
+                          {t("dash.rideEndTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Datum</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_end_date"
                             type="date"
@@ -905,16 +904,16 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">Tijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
                           <select
                             name="ride_end_time"
                             defaultValue=""
                             required
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           >
-                            <option value="" disabled>Kies tijd…</option>
-                            {QUARTER_TIMES.map((t) => (
-                              <option key={t} value={t}>{t}</option>
+                            <option value="" disabled>{t("dash.pickTime")}</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
                             ))}
                           </select>
                         </div>
@@ -923,7 +922,7 @@ const EscortDashboard = () => {
                   })()}
                   <div className="md:col-span-2">
                     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                      Toelichting (optioneel)
+                      {t("dash.notes")}
                     </label>
                     <textarea
                       name="hours_notes"
@@ -935,19 +934,19 @@ const EscortDashboard = () => {
                   <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                        Extra kosten (optioneel)
+                        {t("dash.extraCosts")}
                       </label>
                       <button
                         type="button"
                         onClick={() => addExtra(a.id)}
                         className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
                       >
-                        + Regel toevoegen
+                        {t("dash.addRow")}
                       </button>
                     </div>
                     {getExtras(a.id).length === 0 ? (
                       <p className="text-xs text-brass-deep/45">
-                        Bijv. tol, parkeren, veerboot, extra materiaal — wordt op de factuur als losse regel meegenomen.
+                        {t("dash.extraCostsHint")}
                       </p>
                     ) : (
                       <ul className="space-y-2">
@@ -957,7 +956,7 @@ const EscortDashboard = () => {
                               type="text"
                               value={ec.description}
                               onChange={(e) => updateExtra(a.id, idx, { description: e.target.value })}
-                              placeholder="Omschrijving (bijv. tol, parkeren)"
+                              placeholder={t("dash.extraCostsDescPlaceholder")}
                               maxLength={120}
                               className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                             />
@@ -979,7 +978,7 @@ const EscortDashboard = () => {
                             <button
                               type="button"
                               onClick={() => removeExtra(a.id, idx)}
-                              aria-label="Verwijder regel"
+                              aria-label={t("dash.removeRow")}
                               className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
                             >
                               ×
@@ -990,19 +989,21 @@ const EscortDashboard = () => {
                     )}
                     {getExtras(a.id).length > 0 && (
                       <p className="text-xs text-brass-deep/60 mt-2 tabular-nums text-right">
-                        Subtotaal extra kosten: €
-                        {getExtras(a.id)
-                          .reduce((s, e) => s + (Number(e.amount) || 0), 0)
-                          .toFixed(2)}
+                        {t("dash.extraCostsSubtotal", { amount: getExtras(a.id).reduce((s, e) => s + (Number(e.amount) || 0), 0).toFixed(2) })}
                       </p>
                     )}
                   </div>
 
                   <p className="md:col-span-2 text-xs text-brass-deep/55">
-                    Tarief {a.is_be_ride ? "België" : "Nederland"}: €{a.hourly_rate}/uur{a.is_be_ride ? " (grensoverschrijdend → BE-tarief op alle uren)" : ""} · Totale uren = reistijd heen + rit-uren + reistijd terug. Vertrek/terug standplaats worden automatisch berekend.{a.min_billable_hours > 0 ? ` · Minimum afrekening: ${a.min_billable_hours} uur.` : ""} Extra kosten worden los op de factuur vermeld.
+                    {t("dash.rateInfo", {
+                      country: a.is_be_ride ? t("common.countryBE") : t("common.countryNL"),
+                      rate: a.hourly_rate,
+                      cross: a.is_be_ride ? t("dash.rateCrossBorder") : "",
+                      minHours: a.min_billable_hours > 0 ? t("dash.minBillable", { h: a.min_billable_hours }) : "",
+                    })}
                   </p>
                   <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
-                    Versturen
+                    {t("dash.submit")}
                   </button>
                 </form>
               )}
@@ -1012,7 +1013,7 @@ const EscortDashboard = () => {
 
         const renderList = (list: typeof items, bucketKey: "openstaand" | "geaccepteerd" | "afgerond" | "verlopen") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
+            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
           const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
@@ -1023,7 +1024,7 @@ const EscortDashboard = () => {
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
-                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
@@ -1036,10 +1037,10 @@ const EscortDashboard = () => {
         return (
           <Tabs defaultValue="openstaand" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
-              <TabsTrigger value="verlopen">Verlopen ({buckets.verlopen.length})</TabsTrigger>
+              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
+              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
+              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
+              <TabsTrigger value="verlopen">{t("dash.tabExpired")} ({buckets.verlopen.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
             <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
@@ -1053,6 +1054,7 @@ const EscortDashboard = () => {
 };
 
 const DashboardInner = () => {
+  const { t } = useTranslation();
   const { role, loading } = useAuth();
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -1060,7 +1062,7 @@ const DashboardInner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto">
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
             <EscortDashboard />
           ) : (
