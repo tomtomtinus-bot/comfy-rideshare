@@ -493,6 +493,13 @@ Deno.serve(async (req) => {
     const table = type === "regular" ? "invoices" : "platform_invoices";
     await admin.from(table).update({ pdf_path: path }).eq("id", invoiceId);
 
+    if (isInternal) {
+      return new Response(
+        JSON.stringify({ pdf_path: path, generated: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const { data: signed, error: signErr } = await admin.storage
       .from("invoices")
       .createSignedUrl(path, 60 * 10);
