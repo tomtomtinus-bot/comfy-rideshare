@@ -1,32 +1,36 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useAuth } from "@/hooks/useAuth";
 
 export const Hero = () => {
-  const { user } = useAuth();
-  const { t } = useTranslation();
   return (
-    <section className="relative pt-14 md:pt-32 pb-12 md:pb-24 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
+    <section className="relative pt-14 md:pt-32 pb-16 md:pb-28 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 md:gap-12 items-end">
         <div className="col-span-12 lg:col-span-8 animate-fade-up">
           <p className="text-brass-gold uppercase tracking-[0.25em] md:tracking-[0.3em] font-semibold text-[10px] md:text-xs mb-4 md:mb-6">
-            {t("hero.kicker")}
+            ViaCust — Transportbegeleiding
           </p>
           <h1 className="font-display text-[2.25rem] sm:text-6xl lg:text-8xl text-brass-deep leading-[1] md:leading-[0.95] italic">
-            {t("hero.title_1")}<br />
-            {t("hero.title_2")}
+            De slimme schakel<br />in transportbegeleiding.
           </h1>
         </div>
         <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
-          <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[34ch] mb-6 md:mb-8">
-            {t("hero.body")}
+          <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[40ch] mb-6 md:mb-8">
+            Plan, beheer en synchroniseer begeleidingsritten in één centraal platform.
+            Geen gedoe meer met overvolle mailboxen of gemiste updates.
           </p>
-          <Link
-            to={user ? "/dashboard" : "/auth"}
-            className="inline-block px-8 py-4 bg-brass-gold text-parchment font-medium tracking-wide hover:bg-brass-deep transition-colors"
-          >
-            {user ? t("hero.ctaDashboard") : t("hero.ctaPlan")}
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              to="/auth?role=begeleider"
+              className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
+            >
+              Word begeleider
+            </Link>
+            <Link
+              to="/aanvragen"
+              className="inline-block px-7 py-4 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:border-brass-gold hover:text-brass-gold transition-colors text-center"
+            >
+              Rit aanvragen
+            </Link>
+          </div>
         </div>
       </div>
     </section>
