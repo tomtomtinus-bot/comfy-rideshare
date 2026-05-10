@@ -118,6 +118,7 @@ function groupByDateBucket<T>(
   list: T[],
   getDate: (item: T) => string,
   order: "asc" | "desc",
+  t: (k: string) => string,
 ): { key: DateBucketKey; label: string; items: T[] }[] {
   const map = new Map<DateBucketKey, T[]>();
   for (const it of list) {
@@ -132,7 +133,7 @@ function groupByDateBucket<T>(
     .filter((k) => map.has(k))
     .map((k) => ({
       key: k,
-      label: DATE_BUCKET_LABELS[k],
+      label: t(DATE_BUCKET_TKEYS[k]),
       items: map.get(k)!.sort((a, b) =>
         order === "asc"
           ? +new Date(getDate(a)) - +new Date(getDate(b))
@@ -142,21 +143,12 @@ function groupByDateBucket<T>(
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const map: Record<string, string> = {
-    open: "Open",
-    matched: "Toegewezen",
-    in_progress: "Onderweg",
-    completed: "Voltooid",
-    cancelled: "Geannuleerd",
-    invited: "Uitgenodigd",
-    accepted: "Geaccepteerd",
-    declined: "Geweigerd",
-    expired: "Verlopen",
-  };
+  const { t } = useTranslation();
+  const known = ["open","matched","in_progress","completed","cancelled","invited","accepted","declined","expired"];
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-gold">
       <span className="size-1.5 rounded-full bg-brass-gold" />
-      {map[status] ?? status}
+      {known.includes(status) ? t(`status.${status}`) : status}
     </span>
   );
 };
