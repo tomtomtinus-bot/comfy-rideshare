@@ -139,6 +139,16 @@ const InvoicesInner = () => {
         .order("created_at", { ascending: false });
       const platList = (plat ?? []) as PlatformInvoice[];
       setPlatformInvoices(platList);
+      const platClientIds = [...new Set(platList.map((i) => i.client_id))];
+      if (platClientIds.length) {
+        const { data: pc } = await supabase
+          .from("profiles")
+          .select("id, billing_country")
+          .in("id", platClientIds);
+        const map: Record<string, string | null> = {};
+        (pc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
+        setClientCountries((prev) => ({ ...prev, ...map }));
+      }
       if (platList.length) {
         const { data: pit } = await supabase
           .from("platform_invoice_items")
