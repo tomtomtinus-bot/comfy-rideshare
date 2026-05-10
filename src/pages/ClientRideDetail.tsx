@@ -6,6 +6,7 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { MiniMap } from "@/components/site/MiniMap";
 import { openPermitPdf } from "@/lib/openPermitPdf";
+import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -99,6 +100,11 @@ const Inner = () => {
   const [error, setError] = useState<string | null>(null);
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -314,6 +320,13 @@ const Inner = () => {
                       </button>
                     </div>
                   </div>
+                )}
+                {e.status === "accepted" && userId && (
+                  <AssignmentChat
+                    assignmentId={e.assignment_id}
+                    currentUserId={userId}
+                    counterpartyLabel={`begeleider #${e.anonymous_id ?? "—"}`}
+                  />
                 )}
               </li>
               );

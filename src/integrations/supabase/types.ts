@@ -349,6 +349,41 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          assignment_id: string
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          assignment_id: string
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          assignment_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "ride_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string
@@ -991,6 +1026,10 @@ export type Database = {
       is_approved: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_escort: {
         Args: { _ride_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_assignment_participant: {
+        Args: { _assignment_id: string; _user_id: string }
         Returns: boolean
       }
       is_ride_client: {

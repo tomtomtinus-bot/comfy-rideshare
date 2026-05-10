@@ -6,6 +6,7 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { MiniMap } from "@/components/site/MiniMap";
 import { openPermitPdf } from "@/lib/openPermitPdf";
+import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -104,6 +105,7 @@ const Inner = () => {
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const load = async () => {
     if (!id) return;
@@ -122,6 +124,7 @@ const Inner = () => {
 
     const { data: u } = await supabase.auth.getUser();
     if (u?.user) {
+      setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
         .select("id, cancel_request_status, cancel_request_reason")
@@ -242,6 +245,16 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
         )}
       </Section>
+      )}
+
+      {!isInvited && myAssignment && userId && (
+        <Section title="Berichten">
+          <AssignmentChat
+            assignmentId={myAssignment.id}
+            currentUserId={userId}
+            counterpartyLabel="opdrachtgever"
+          />
+        </Section>
       )}
 
       {!isInvited && (() => {
