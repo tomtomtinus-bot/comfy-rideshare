@@ -336,7 +336,7 @@ const RequestRideInner = () => {
     setBusy(false);
     if (aErr) return toast.error(aErr.message);
 
-    toast.success("Rit geboekt");
+    toast.success(t("request.rideBooked"));
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
     navigate("/dashboard");
   };
