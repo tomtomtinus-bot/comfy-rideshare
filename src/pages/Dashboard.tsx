@@ -609,6 +609,15 @@ const EscortDashboard = () => {
     if (!isApproved) {
       return toast.error("Je account moet eerst worden goedgekeurd door de beheerder.");
     }
+    if (accept) {
+      const it = items.find((x) => x.id === id);
+      if (it && hasGoogleConflict(it.ride.scheduled_at)) {
+        const ok = window.confirm(
+          "Let op: je hebt op dit moment al een afspraak in je Google Agenda. Toch accepteren?",
+        );
+        if (!ok) return;
+      }
+    }
     const { error } = await supabase
       .from("ride_assignments")
       .update({
