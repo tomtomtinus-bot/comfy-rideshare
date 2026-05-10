@@ -234,11 +234,12 @@ const RequestRideInner = () => {
     };
 
     const ranked: MatchedEscort[] = (data ?? [])
-      .filter((e) =>
-        pickupCountries.some((c) => (e.countries ?? []).includes(c)) &&
-        dropoffCountries.some((c) => (e.countries ?? []).includes(c)) &&
-        escortHasBeQualification((e as any).categories ?? [])
-      )
+      .filter((e) => {
+        const ec = (e.countries ?? []) as string[];
+        const involved = [...pickupCountries, ...dropoffCountries];
+        // Begeleider moet minstens één van de betrokken landen dekken (NL-begeleider mag NL→BE rit doen, mits BE-kwalificatie aanwezig is)
+        return involved.some((c) => ec.includes(c)) && escortHasBeQualification((e as any).categories ?? []);
+      })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
