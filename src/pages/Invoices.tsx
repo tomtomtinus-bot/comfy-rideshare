@@ -69,6 +69,8 @@ const InvoicesInner = () => {
   const [platformItems, setPlatformItems] = useState<Record<string, PlatformItem[]>>({});
   const [billingFrequency, setBillingFrequency] = useState<"weekly" | "monthly">("monthly");
   const [wero, setWero] = useState<{ enabled: boolean; handle: string | null; fee: number }>({ enabled: false, handle: null, fee: 0 });
+  const [escortCountries, setEscortCountries] = useState<Record<string, string | null>>({});
+  const [clientCountries, setClientCountries] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
