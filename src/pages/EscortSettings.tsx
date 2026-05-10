@@ -11,12 +11,23 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 
 const COUNTRY_CERTS = [
-  { id: "nl", label: "Nederland" },
-  { id: "be-1", label: "België type 1" },
-  { id: "be-2", label: "België type 2" },
-  { id: "de", label: "Duitsland" },
-  { id: "fr", label: "Frankrijk" },
+  { id: "nl", label: "Nederland", country: "Nederland" },
+  { id: "be-1", label: "België type 1", country: "België" },
+  { id: "be-2", label: "België type 2", country: "België" },
+  { id: "de", label: "Duitsland", country: "Duitsland" },
+  { id: "fr", label: "Frankrijk", country: "Frankrijk" },
+  { id: "lu", label: "Luxemburg", country: "Luxemburg" },
 ] as const;
+
+// Leid het countries-veld af uit de gekozen certificeringen
+const countriesFromCategories = (cats: string[]): string[] => {
+  const set = new Set<string>();
+  for (const c of cats) {
+    const found = COUNTRY_CERTS.find((cc) => cc.id === c);
+    if (found) set.add(found.country);
+  }
+  return Array.from(set);
+};
 
 const schema = z.object({
   baseAddress: z.string().trim().min(3, "Vul straat + huisnummer in").max(160),
@@ -24,6 +35,10 @@ const schema = z.object({
   baseCity: z.string().trim().min(1, "Plaats kon niet worden bepaald"),
   hourlyRate: z.coerce.number().min(15).max(200).multipleOf(0.01),
   hourlyRateBe: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateDe: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateFr: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  hourlyRateLu: z.coerce.number().min(15).max(200).multipleOf(0.01),
+  kmRateDe: z.union([z.coerce.number().min(0).max(10), z.literal("")]).optional(),
   minBillableHours: z.coerce.number().min(0).max(24).multipleOf(0.25),
   vehicleType: z.string().trim().min(2).max(120),
   certNumber: z.string().trim().max(60).optional().or(z.literal("")),
@@ -220,6 +235,10 @@ const Inner = () => {
       baseCity: city,
       hourlyRate: num("hourlyRate", "0"),
       hourlyRateBe: num("hourlyRateBe", "0"),
+      hourlyRateDe: num("hourlyRateDe", "0"),
+      hourlyRateFr: num("hourlyRateFr", "0"),
+      hourlyRateLu: num("hourlyRateLu", "0"),
+      kmRateDe: num("kmRateDe", ""),
       minBillableHours: num("minBillableHours", "0"),
       vehicleType: fd.get("vehicleType"),
       certNumber: fd.get("certNumber") ?? "",
@@ -229,6 +248,11 @@ const Inner = () => {
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     if (!coords) return toast.error("Locatie niet bepaald — controleer postcode");
     if (categories.length === 0) return toast.error("Kies minimaal één land/certificering");
+
+    const derivedCountries = countriesFromCategories(categories);
+    if (derivedCountries.length === 0) {
+      return toast.error("Kies minimaal één land/certificering");
+    }
 
     setBusy(true);
     const { error } = await supabase
@@ -241,6 +265,14 @@ const Inner = () => {
         base_postcode: parsed.data.basePostcode,
         hourly_rate: parsed.data.hourlyRate,
         hourly_rate_be: parsed.data.hourlyRateBe,
+        hourly_rate_de: parsed.data.hourlyRateDe,
+        hourly_rate_fr: parsed.data.hourlyRateFr,
+        hourly_rate_lu: parsed.data.hourlyRateLu,
+        km_rate_de:
+          parsed.data.kmRateDe === "" || parsed.data.kmRateDe == null
+            ? null
+            : Number(parsed.data.kmRateDe),
+        countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         cert_number: parsed.data.certNumber || null,
@@ -325,6 +357,25 @@ const Inner = () => {
                   </div>
                   <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
                   <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55)} />
+                  <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
+                  <div>
+                    <Input
+                      name="kmRateDe"
+                      type="number"
+                      step="0.01"
+                      label="Km-tarief Duitsland (€/km, optioneel)"
+                      defaultValue={
+                        (profile as any)?.km_rate_de == null
+                          ? ""
+                          : String((profile as any).km_rate_de)
+                      }
+                    />
+                    <p className="text-[10px] text-brass-deep/50 mt-1">
+                      Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
+                    </p>
+                  </div>
                   <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
                   <Input
                     name="vehicleType"

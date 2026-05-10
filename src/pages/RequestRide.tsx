@@ -46,8 +46,16 @@ interface MatchedEscort {
   base_lng: number;
   hourly_rate: number;
   hourly_rate_be: number;
+  hourly_rate_de: number;
+  hourly_rate_fr: number;
+  hourly_rate_lu: number;
+  km_rate_de: number | null;
   effective_rate: number;
   is_be_ride: boolean;
+  is_de_ride: boolean;
+  is_fr_ride: boolean;
+  is_lu_ride: boolean;
+  de_km_mode: boolean;
   rating: number;
   rides_completed: number;
   countries: string[];
@@ -192,14 +200,14 @@ const RequestRideInner = () => {
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, rating, rides_completed, countries, available")
+      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, available")
       .eq("available", true);
     setBusy(false);
     if (error) return toast.error(error.message);
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
-      const map: Record<string, string> = { NL: "Nederland", BE: "België", DE: "Duitsland", FR: "Frankrijk" };
+      const map: Record<string, string> = { NL: "Nederland", BE: "België", DE: "Duitsland", FR: "Frankrijk", LU: "Luxemburg" };
       return c.split("/").map((p) => map[p.trim()] ?? p.trim());
     };
     const pickupCountries = expandCountries(pickupGeo.country);
@@ -212,21 +220,41 @@ const RequestRideInner = () => {
 
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) =>
-        pickupCountries.some((c) => e.countries.includes(c)) &&
-        dropoffCountries.some((c) => e.countries.includes(c))
+        pickupCountries.some((c) => (e.countries ?? []).includes(c)) &&
+        dropoffCountries.some((c) => (e.countries ?? []).includes(c))
       )
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
-        const isBe = pickupGeo.country.includes("BE") || dropoffGeo.country.includes("BE");
+        const allCountries = [...pickupCountries, ...dropoffCountries];
+        const isBe = allCountries.includes("België");
+        const isDe = allCountries.includes("Duitsland");
+        const isFr = allCountries.includes("Frankrijk");
+        const isLu = allCountries.includes("Luxemburg");
+        const kmRateDe = (e as any).km_rate_de == null ? null : Number((e as any).km_rate_de);
+        const deKmMode = isDe && kmRateDe != null && kmRateDe > 0;
+        // Volgorde: meest specifiek land bepaalt het tarief
+        let rate = Number(e.hourly_rate);
+        if (isLu) rate = Number((e as any).hourly_rate_lu ?? e.hourly_rate);
+        else if (isFr) rate = Number((e as any).hourly_rate_fr ?? e.hourly_rate);
+        else if (isDe) rate = deKmMode ? Number(kmRateDe) : Number((e as any).hourly_rate_de ?? e.hourly_rate);
+        else if (isBe) rate = Number(e.hourly_rate_be ?? e.hourly_rate);
         return {
           ...e,
+          hourly_rate_de: Number((e as any).hourly_rate_de ?? e.hourly_rate),
+          hourly_rate_fr: Number((e as any).hourly_rate_fr ?? e.hourly_rate),
+          hourly_rate_lu: Number((e as any).hourly_rate_lu ?? e.hourly_rate),
+          km_rate_de: kmRateDe,
           distanceToPickup: dPickup,
           distanceFromDropoff: dDropoff,
           travelToPickupMin: emptyTravelMinutes(dPickup),
           travelBackHomeMin: emptyTravelMinutes(dDropoff),
           is_be_ride: isBe,
-          effective_rate: isBe ? Number(e.hourly_rate_be ?? e.hourly_rate) : Number(e.hourly_rate),
+          is_de_ride: isDe,
+          is_fr_ride: isFr,
+          is_lu_ride: isLu,
+          de_km_mode: deKmMode,
+          effective_rate: rate,
           conflict: null,
         } as MatchedEscort;
       })

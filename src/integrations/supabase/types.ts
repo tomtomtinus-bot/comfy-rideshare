@@ -98,9 +98,13 @@ export type Database = {
           fuel_surcharge: Json
           hourly_rate: number
           hourly_rate_be: number
+          hourly_rate_de: number
+          hourly_rate_fr: number
+          hourly_rate_lu: number
           iban: string | null
           id: string
           insurance_policy: string | null
+          km_rate_de: number | null
           kvk_number: string | null
           languages: string[]
           min_billable_hours: number
@@ -144,9 +148,13 @@ export type Database = {
           fuel_surcharge?: Json
           hourly_rate?: number
           hourly_rate_be?: number
+          hourly_rate_de?: number
+          hourly_rate_fr?: number
+          hourly_rate_lu?: number
           iban?: string | null
           id: string
           insurance_policy?: string | null
+          km_rate_de?: number | null
           kvk_number?: string | null
           languages?: string[]
           min_billable_hours?: number
@@ -190,9 +198,13 @@ export type Database = {
           fuel_surcharge?: Json
           hourly_rate?: number
           hourly_rate_be?: number
+          hourly_rate_de?: number
+          hourly_rate_fr?: number
+          hourly_rate_lu?: number
           iban?: string | null
           id?: string
           insurance_policy?: string | null
+          km_rate_de?: number | null
           kvk_number?: string | null
           languages?: string[]
           min_billable_hours?: number
