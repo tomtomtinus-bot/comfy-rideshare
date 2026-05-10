@@ -197,6 +197,10 @@ const RequestRideInner = () => {
     if (!pickupGeo || !dropoffGeo) return toast.error(t("request.postcodesPending"));
     const [hh, mm] = form.scheduled_time.split(":").map(Number);
     if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error(t("request.startQuarter"));
+    const scheduledDate = new Date(`${form.scheduled_date}T${form.scheduled_time}`);
+    if (isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
+      return toast.error(t("request.pastNotAllowed", { defaultValue: "Starttijd moet in de toekomst liggen." }));
+    }
 
     setBusy(true);
     const { data, error } = await supabase
