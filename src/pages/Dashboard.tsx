@@ -80,16 +80,16 @@ interface AssignmentRow {
   responded_at: string | null;
 }
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleString("nl-NL", { dateStyle: "medium", timeStyle: "short" });
+const fmtDate = (d: string, lang = "nl") =>
+  new Date(d).toLocaleString(localeFromI18n(lang), { dateStyle: "medium", timeStyle: "short" });
 
 type DateBucketKey = "vandaag" | "morgen" | "deze_week" | "later" | "eerder";
-const DATE_BUCKET_LABELS: Record<DateBucketKey, string> = {
-  vandaag: "Vandaag",
-  morgen: "Morgen",
-  deze_week: "Deze week",
-  later: "Later",
-  eerder: "Eerder",
+const DATE_BUCKET_TKEYS: Record<DateBucketKey, string> = {
+  vandaag: "bucket.today",
+  morgen: "bucket.tomorrow",
+  deze_week: "bucket.thisWeek",
+  later: "bucket.later",
+  eerder: "bucket.earlier",
 };
 const DATE_BUCKET_ORDER: DateBucketKey[] = ["vandaag", "morgen", "deze_week", "later", "eerder"];
 
