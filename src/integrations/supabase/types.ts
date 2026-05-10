@@ -399,6 +399,7 @@ export type Database = {
           id: string
           invoice_number: string
           paid_at: string | null
+          pdf_path: string | null
           period_end: string
           period_start: string
           status: Database["public"]["Enums"]["invoice_status"]
@@ -413,6 +414,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           paid_at?: string | null
+          pdf_path?: string | null
           period_end: string
           period_start: string
           status?: Database["public"]["Enums"]["invoice_status"]
@@ -427,6 +429,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           paid_at?: string | null
+          pdf_path?: string | null
           period_end?: string
           period_start?: string
           status?: Database["public"]["Enums"]["invoice_status"]
@@ -650,6 +653,7 @@ export type Database = {
           id: string
           invoice_number: string
           paid_at: string | null
+          pdf_path: string | null
           period_end: string
           period_start: string
           status: string
@@ -663,6 +667,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           paid_at?: string | null
+          pdf_path?: string | null
           period_end: string
           period_start: string
           status?: string
@@ -676,6 +681,7 @@ export type Database = {
           id?: string
           invoice_number?: string
           paid_at?: string | null
+          pdf_path?: string | null
           period_end?: string
           period_start?: string
           status?: string
