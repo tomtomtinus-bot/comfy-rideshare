@@ -166,22 +166,18 @@ const Inner = () => {
         <div>
           <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">Adressen</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs text-brass-deep/60 block mb-1">Vertrek</label>
-              <AddressAutocomplete
-                value={pickupAddr}
-                onChange={setPickupAddr}
-                onSelect={(r: AddressResult) => { setPickupAddr(r.display); setPickupGeo({ city: r.city, lat: r.lat, lng: r.lng }); }}
-              />
-            </div>
-            <div>
-              <label className="text-xs text-brass-deep/60 block mb-1">Bestemming</label>
-              <AddressAutocomplete
-                value={dropoffAddr}
-                onChange={setDropoffAddr}
-                onSelect={(r: AddressResult) => { setDropoffAddr(r.display); setDropoffGeo({ city: r.city, lat: r.lat, lng: r.lng }); }}
-              />
-            </div>
+            <AddressAutocomplete
+              label="Vertrek"
+              value={pickupAddr}
+              onChange={setPickupAddr}
+              onSelect={(r: AddressResult) => { setPickupAddr(r.display); setPickupGeo({ city: r.city, lat: r.lat, lng: r.lng }); }}
+            />
+            <AddressAutocomplete
+              label="Bestemming"
+              value={dropoffAddr}
+              onChange={setDropoffAddr}
+              onSelect={(r: AddressResult) => { setDropoffAddr(r.display); setDropoffGeo({ city: r.city, lat: r.lat, lng: r.lng }); }}
+            />
           </div>
         </div>
 
