@@ -46,6 +46,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // "Blijf ingelogd" handling: if user opted out, sign them out at the start
+    // of every new browser session (sessionStorage is cleared on tab/browser close).
+    try {
+      const remember = localStorage.getItem("viacust_remember");
+      const sessionMarker = sessionStorage.getItem("viacust_session_active");
+      if (remember === "false" && !sessionMarker) {
+        supabase.auth.signOut();
+      }
+      sessionStorage.setItem("viacust_session_active", "1");
+    } catch {
+      // ignore storage errors (e.g. private mode)
+    }
+
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
