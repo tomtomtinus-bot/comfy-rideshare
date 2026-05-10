@@ -279,9 +279,9 @@ const ClientDashboard = () => {
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Opdrachtgever
+            {t("dash.clientKicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn ritten</h1>
+          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("dash.myRides")}</h1>
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
@@ -289,13 +289,13 @@ const ClientDashboard = () => {
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
           >
-            Download Excel
+            {t("dash.downloadExcel")}
           </button>
           <Link
             to="/aanvragen"
             className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
           >
-            Nieuwe rit aanvragen
+            {t("dash.newRequest")}
           </Link>
         </div>
       </header>
@@ -303,7 +303,7 @@ const ClientDashboard = () => {
       {exportOpen && (
         <div className="bg-card shadow-etched p-6 flex flex-wrap items-end gap-4">
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Van</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.from")}</label>
             <input
               type="date"
               value={exportFrom}
@@ -312,7 +312,7 @@ const ClientDashboard = () => {
             />
           </div>
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Tot</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.to")}</label>
             <input
               type="date"
               value={exportTo}
@@ -324,25 +324,25 @@ const ClientDashboard = () => {
             onClick={() => { setExportFrom(""); setExportTo(""); }}
             className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep"
           >
-            Wissen
+            {t("common.clear")}
           </button>
           <button
             onClick={exportXlsx}
             className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
           >
-            Exporteren
+            {t("dash.export")}
           </button>
-          <p className="text-xs text-brass-deep/50 ml-auto">Laat leeg voor alle ritten</p>
+          <p className="text-xs text-brass-deep/50 ml-auto">{t("dash.exportEmptyHint")}</p>
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
       ) : rides.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60 mb-6">U heeft nog geen ritten aangevraagd.</p>
+          <p className="text-brass-deep/60 mb-6">{t("dash.noRidesYet")}</p>
           <Link to="/aanvragen" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
-            Vraag uw eerste rit aan →
+            {t("dash.requestFirst")}
           </Link>
         </div>
       ) : (() => {
@@ -362,10 +362,10 @@ const ClientDashboard = () => {
 
         const renderList = (list: RideRow[], bucketKey: "openstaand" | "geaccepteerd" | "afgerond") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">Geen ritten in deze categorie.</p>;
+            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order);
+          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order, t);
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
@@ -376,7 +376,7 @@ const ClientDashboard = () => {
                   className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
                 >
                   <div className="w-28 shrink-0">
-                    <p className="font-medium tabular-nums text-sm">{fmtDate(r.scheduled_at)}</p>
+                    <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">
@@ -388,7 +388,7 @@ const ClientDashboard = () => {
                   <div className="shrink-0 hidden sm:flex items-center gap-3">
                     {acceptedCount > 0 && (
                       <span className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-semibold tabular-nums">
-                        {acceptedCount}/{r.num_escorts ?? ass.length} begeleider{acceptedCount === 1 ? "" : "s"}
+                        {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
                       </span>
                     )}
                     <StatusBadge status={r.status} />
@@ -405,7 +405,7 @@ const ClientDashboard = () => {
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
-                      {g.items.length} rit{g.items.length === 1 ? "" : "ten"}
+                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
@@ -418,9 +418,9 @@ const ClientDashboard = () => {
         return (
           <Tabs defaultValue="openstaand" className="w-full">
             <TabsList className="grid grid-cols-3 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">Openstaand ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">Geaccepteerd ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">Afgerond ({buckets.afgerond.length})</TabsTrigger>
+              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
+              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
+              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
             <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
