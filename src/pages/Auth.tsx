@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,30 +9,31 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { CITIES, geocode } from "@/lib/geo";
 
-const signupSchema = z.object({
-  email: z.string().trim().email("Ongeldig e-mailadres").max(255),
-  password: z.string().min(8, "Minimaal 8 tekens").max(72),
-  fullName: z.string().trim().min(2, "Naam vereist").max(100),
-  phone: z.string().trim().min(6).max(30),
-  role: z.enum(["opdrachtgever", "begeleider"]),
-  baseCity: z.string().optional(),
-});
-
-const loginSchema = z.object({
-  email: z.string().trim().email().max(255),
-  password: z.string().min(1).max(72),
-});
-
 const Auth = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
   const [busy, setBusy] = useState(false);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
+
+  const signupSchema = z.object({
+    email: z.string().trim().email(t("auth.err.invalidEmail")).max(255),
+    password: z.string().min(8, t("auth.err.minPassword")).max(72),
+    fullName: z.string().trim().min(2, t("auth.err.nameRequired")).max(100),
+    phone: z.string().trim().min(6).max(30),
+    role: z.enum(["opdrachtgever", "begeleider"]),
+    baseCity: z.string().optional(),
+  });
+
+  const loginSchema = z.object({
+    email: z.string().trim().email().max(255),
+    password: z.string().min(1).max(72),
+  });
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +80,7 @@ const Auth = () => {
     };
     if (d.role === "begeleider") {
       const geo = geocode(d.baseCity || "Utrecht");
-      if (!geo) return toast.error("Standplaats niet herkend, kies een stad uit de lijst");
+      if (!geo) return toast.error(t("auth.err.cityNotRecognised"));
       meta.base_city = geo.city;
       meta.base_lat = geo.lat;
       meta.base_lng = geo.lng;
@@ -92,7 +94,7 @@ const Auth = () => {
     setBusy(false);
     if (error) return toast.error(error.message);
 
-    toast.success("Account aangemaakt — vul uw profiel aan in het dashboard");
+    toast.success(t("auth.accountCreated"));
     navigate("/dashboard");
   };
 
@@ -102,10 +104,10 @@ const Auth = () => {
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            {mode === "login" ? "Inloggen" : "Registreer"}
+            {mode === "login" ? t("auth.login") : t("auth.signup")}
           </p>
           <h1 className="font-display text-4xl text-brass-deep italic mb-8">
-            {mode === "login" ? "Welkom terug." : "Sluit u aan."}
+            {mode === "login" ? t("auth.welcomeBack") : t("auth.join")}
           </h1>
 
           {mode === "signup" && (
@@ -119,7 +121,7 @@ const Auth = () => {
                     role === r ? "bg-brass-deep text-parchment" : "bg-card text-brass-deep/60"
                   }`}
                 >
-                  {r === "opdrachtgever" ? "Opdrachtgever" : "Begeleider"}
+                  {r === "opdrachtgever" ? t("auth.client") : t("auth.escort")}
                 </button>
               ))}
             </div>
@@ -128,18 +130,18 @@ const Auth = () => {
           <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
             {mode === "signup" && (
               <>
-                <Field name="fullName" label="Volledige naam" required />
-                <Field name="phone" label="Telefoon" required />
+                <Field name="fullName" label={t("auth.fullName")} required />
+                <Field name="phone" label={t("auth.phone")} required />
               </>
             )}
-            <Field name="email" type="email" label="E-mail" required />
-            <Field name="password" type="password" label="Wachtwoord" required />
+            <Field name="email" type="email" label={t("auth.email")} required />
+            <Field name="password" type="password" label={t("auth.password")} required />
 
             {mode === "signup" && role === "begeleider" && (
               <>
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                    Standplaats (stad)
+                    {t("auth.baseCity")}
                   </label>
                   <select
                     name="baseCity"
@@ -154,7 +156,7 @@ const Auth = () => {
                   </select>
                 </div>
                 <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
-                  Tarieven, voertuigspecificaties, certificaten en categorieën vult u na registratie in via uw persoonlijke profiel in het dashboard.
+                  {t("auth.escortHint")}
                 </p>
               </>
             )}
@@ -163,7 +165,7 @@ const Auth = () => {
               disabled={busy}
               className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
-              {busy ? "Bezig…" : mode === "login" ? "Inloggen" : "Registreer"}
+              {busy ? t("auth.busy") : mode === "login" ? t("auth.login") : t("auth.signup")}
             </button>
           </form>
 
@@ -171,7 +173,7 @@ const Auth = () => {
             onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
           >
-            {mode === "login" ? "Nog geen account? Registreer" : "Al een account? Inloggen"}
+            {mode === "login" ? t("auth.noAccount") : t("auth.hasAccount")}
           </button>
         </div>
       </main>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 
 const DEMO_PASSWORD = "Demo1234!";
@@ -19,6 +20,7 @@ const DEMO_ACCOUNTS = [
 export const DemoSwitcher = () => {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const switchTo = async (email: string) => {
     setBusy(email);
@@ -27,11 +29,12 @@ export const DemoSwitcher = () => {
     setBusy(null);
     setOpen(false);
     if (error) return toast.error(error.message);
-    toast.success(`Ingelogd als ${email}`);
+    toast.success(t("demo.loggedInAs", { email }));
     window.location.href = "/dashboard";
   };
 
   const groups = ["Opdrachtgevers", "Begeleiders"] as const;
+  const groupLabel = (g: typeof groups[number]) => g === "Opdrachtgevers" ? t("demo.clients") : t("demo.escorts");
 
   return (
     <div className="relative">
@@ -39,22 +42,22 @@ export const DemoSwitcher = () => {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2 px-3 py-2 border border-brass-gold/40 bg-brass-gold/10 text-brass-deep text-[10px] uppercase tracking-widest font-bold hover:bg-brass-gold hover:text-parchment transition-colors"
-        title="Demo-accounts"
+        title={t("demo.title")}
       >
         <Users className="size-3.5" />
-        <span className="hidden sm:inline">Demo</span>
+        <span className="hidden sm:inline">{t("demo.label")}</span>
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 mt-2 w-72 bg-card border border-brass-deep/15 shadow-etched z-50 max-h-[80vh] overflow-auto">
             <div className="px-4 py-3 border-b border-brass-deep/10 bg-parchment/60">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">Demo-modus</p>
-              <p className="text-xs text-brass-deep/60 mt-1">Klik om in te loggen als testaccount</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("demo.mode")}</p>
+              <p className="text-xs text-brass-deep/60 mt-1">{t("demo.sub")}</p>
             </div>
             {groups.map((g) => (
               <div key={g}>
-                <p className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">{g}</p>
+                <p className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">{groupLabel(g)}</p>
                 {DEMO_ACCOUNTS.filter((a) => a.group === g).map((a) => (
                   <button
                     key={a.email}
@@ -64,13 +67,13 @@ export const DemoSwitcher = () => {
                   >
                     <p className="text-sm font-semibold text-brass-deep">{a.label}</p>
                     <p className="text-[11px] text-brass-deep/55">{a.sub}</p>
-                    {busy === a.email && <p className="text-[10px] text-brass-gold mt-1">Inloggen…</p>}
+                    {busy === a.email && <p className="text-[10px] text-brass-gold mt-1">{t("demo.signingIn")}</p>}
                   </button>
                 ))}
               </div>
             ))}
             <div className="px-4 py-3 border-t border-brass-deep/10 bg-parchment/40">
-              <p className="text-[10px] text-brass-deep/55">Wachtwoord: <code className="font-mono">{DEMO_PASSWORD}</code></p>
+              <p className="text-[10px] text-brass-deep/55">{t("demo.password")}: <code className="font-mono">{DEMO_PASSWORD}</code></p>
             </div>
           </div>
         </>
