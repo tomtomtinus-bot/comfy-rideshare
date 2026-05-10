@@ -185,9 +185,19 @@ const Inner = () => {
           ← Terug naar mijn ritten
         </Link>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">Ritdetails</p>
-        <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
-          {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
+            {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
+          </h1>
+          {ride.status !== "cancelled" && (
+            <Link
+              to={`/rit/${ride.id}/bewerk`}
+              className="px-4 py-2 border border-brass-deep/30 uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
+            >
+              Bewerken
+            </Link>
+          )}
+        </div>
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
 
