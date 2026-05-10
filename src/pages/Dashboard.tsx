@@ -685,7 +685,7 @@ const EscortDashboard = () => {
       .map((e) => ({ description: (e.description ?? "").trim(), amount: Number(e.amount) || 0 }))
       .filter((e) => e.description.length > 0 || e.amount > 0);
     if (extras.some((e) => !e.description || e.amount <= 0)) {
-      return toast.error("Vul voor elke extra kostenregel een omschrijving en een bedrag groter dan 0 in");
+      return toast.error(t("dash.extraCostsValid"));
     }
     const extrasTotal = +extras.reduce((s, e) => s + e.amount, 0).toFixed(2);
     const cost = +(baseCost + extrasTotal).toFixed(2);
