@@ -777,7 +777,7 @@ const EscortDashboard = () => {
             >
               <div className="flex items-center gap-4 px-5 py-4">
                 <div className="w-28 shrink-0">
-                  <p className="font-medium tabular-nums text-sm">{fmtDate(a.ride.scheduled_at)}</p>
+                  <p className="font-medium tabular-nums text-sm">{fd2(a.ride.scheduled_at)}</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">
