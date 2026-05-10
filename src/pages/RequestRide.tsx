@@ -46,8 +46,16 @@ interface MatchedEscort {
   base_lng: number;
   hourly_rate: number;
   hourly_rate_be: number;
+  hourly_rate_de: number;
+  hourly_rate_fr: number;
+  hourly_rate_lu: number;
+  km_rate_de: number | null;
   effective_rate: number;
   is_be_ride: boolean;
+  is_de_ride: boolean;
+  is_fr_ride: boolean;
+  is_lu_ride: boolean;
+  de_km_mode: boolean;
   rating: number;
   rides_completed: number;
   countries: string[];
