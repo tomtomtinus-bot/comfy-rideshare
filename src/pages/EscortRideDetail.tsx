@@ -247,6 +247,16 @@ const Inner = () => {
       </Section>
       )}
 
+      {!isInvited && myAssignment && userId && (
+        <Section title="Berichten">
+          <AssignmentChat
+            assignmentId={myAssignment.id}
+            currentUserId={userId}
+            counterpartyLabel="opdrachtgever"
+          />
+        </Section>
+      )}
+
       {!isInvited && (() => {
         const drivers = ride.drivers ?? [];
         const plates = ride.license_plates ?? [];
