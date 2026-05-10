@@ -596,11 +596,11 @@ const EscortDashboard = () => {
         { event: "INSERT", schema: "public", table: "ride_assignments", filter: `escort_id=eq.${user.id}` },
         () => {
           if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("Nieuwe rituitnodiging", {
-              body: "U heeft 10 minuten om te accepteren.",
+            new Notification(t("dash.newInvitation"), {
+              body: t("dash.newInvitationBody"),
             });
           }
-          toast.info("Nieuwe rituitnodiging ontvangen");
+          toast.info(t("dash.newInvitationToast"));
           load();
         }
       )
