@@ -14,7 +14,7 @@ export const ValueEscort = () => {
     },
   ];
   return (
-    <section className="py-20 md:py-28 px-5 md:px-8 border-b border-brass-deep/10 bg-parchment/40">
+    <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10 bg-parchment/40">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-12">
         <div className="col-span-12 lg:col-span-7 order-2 lg:order-1 grid sm:grid-cols-3 gap-px bg-brass-deep/10">
           {items.map((it) => (

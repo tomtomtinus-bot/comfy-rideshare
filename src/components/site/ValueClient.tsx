@@ -14,7 +14,7 @@ export const ValueClient = () => {
     },
   ];
   return (
-    <section className="py-20 md:py-28 px-5 md:px-8 border-b border-brass-deep/10 bg-card">
+    <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10 bg-card">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-12">
         <div className="col-span-12 lg:col-span-5">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">

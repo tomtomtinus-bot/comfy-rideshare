@@ -17,9 +17,9 @@ export const HowItWorks = () => {
     },
   ];
   return (
-    <section className="py-20 md:py-28 px-5 md:px-8 border-b border-brass-deep/10 bg-card">
+    <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10 bg-card">
       <div className="max-w-7xl mx-auto">
-        <div className="max-w-2xl mb-12 md:mb-16">
+        <div className="max-w-2xl mb-8 md:mb-10">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
             Stappenplan
           </p>
