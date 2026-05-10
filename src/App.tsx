@@ -40,6 +40,7 @@ const App = () => (
         <AuthProvider>
           <NotificationsListener />
           <PendingApprovalBanner />
+          <CookieConsent />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
