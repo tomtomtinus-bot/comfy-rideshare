@@ -13,11 +13,11 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
 
-const schema = z.object({
+const makeSchema = (t: (k: string) => string) => z.object({
   pickup_address: z.string().trim().min(2).max(200),
   dropoff_address: z.string().trim().min(2).max(200),
-  scheduled_date: z.string().min(1, "Datum vereist"),
-  scheduled_time: z.string().min(1, "Tijd vereist"),
+  scheduled_date: z.string().min(1, t("request.dateRequired")),
+  scheduled_time: z.string().min(1, t("request.timeRequired")),
   num_escorts: z.coerce.number().int().min(1),
   notes: z.string().trim().max(500).optional(),
   cargo_length_m: z.preprocess((v) => { if (v === "" || v == null) return undefined; const n = Number(String(v).replace(",", ".")); return Number.isNaN(n) ? undefined : n; }, z.number().min(0).max(120).optional()),
