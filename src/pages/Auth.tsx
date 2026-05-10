@@ -110,6 +110,23 @@ const Auth = () => {
     navigate("/dashboard");
   };
 
+  const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const email = String(fd.get("email") ?? "").trim();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return toast.error("Ongeldig e-mailadres");
+    }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Als dit e-mailadres bestaat, is er een herstellink verstuurd.");
+    setMode("login");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
