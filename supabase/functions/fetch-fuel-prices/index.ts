@@ -87,9 +87,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Dedupe per week_start (laatste voorkomen wint)
+    const dedupedMap = new Map<string, { week_start: string; eur_per_liter: number; source: string }>();
+    for (const u of upserts) dedupedMap.set(u.week_start, u);
+    const deduped = Array.from(dedupedMap.values());
+
     const { error } = await admin
       .from("weekly_fuel_prices")
-      .upsert(upserts, { onConflict: "week_start" });
+      .upsert(deduped, { onConflict: "week_start" });
     if (error) throw error;
 
     return new Response(
