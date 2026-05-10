@@ -157,14 +157,6 @@ const Inner = () => {
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
 
-      if (av) {
-        const dates = new Set<string>();
-        av.forEach((a: any) => {
-          if (a.date) dates.add(a.date);
-        });
-        setUnavailable(dates);
-      }
-
       if (assigns) {
         const map: Record<string, RideItem> = {};
         assigns.forEach((a: any) => {
