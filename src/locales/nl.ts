@@ -122,6 +122,12 @@ const nl = {
     oauthFail: "Kon OAuth niet starten",
     couplingFail: "Koppeling mislukt: {{error}}",
     unknownError: "onbekende fout",
+    syncNow: "Nu synchroniseren",
+    syncing: "Synchroniseren…",
+    disconnect: "Loskoppelen",
+    disconnecting: "Loskoppelen…",
+    connectGoogle: "Verbinden met Google",
+    connecting: "Bezig…",
   },
 };
 export default nl;
