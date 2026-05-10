@@ -18,6 +18,7 @@ const Auth = () => {
   const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
   const [busy, setBusy] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
@@ -74,12 +75,17 @@ const Auth = () => {
       toast.error("Je moet de algemene voorwaarden accepteren om door te gaan.");
       return;
     }
+    if (!acceptedPrivacy) {
+      toast.error("Je moet de privacyverklaring accepteren om door te gaan.");
+      return;
+    }
     const d = parsed.data;
     const meta: Record<string, string | number> = {
       full_name: d.fullName,
       phone: d.phone,
       role: d.role,
       terms_accepted: "true",
+      privacy_accepted: "true",
     };
     setBusy(true);
     const { error } = await supabase.auth.signUp({
@@ -140,26 +146,48 @@ const Auth = () => {
             )}
 
             {mode === "signup" && (
-              <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 accent-brass-deep"
-                />
-                <span>
-                  Ik ga akkoord met de{" "}
-                  <Link
-                    to="/voorwaarden"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brass-gold underline hover:text-brass-deep"
-                  >
-                    algemene voorwaarden
-                  </Link>
-                  .
-                </span>
-              </label>
+              <div className="space-y-2">
+                <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 accent-brass-deep"
+                  />
+                  <span>
+                    Ik ga akkoord met de{" "}
+                    <Link
+                      to="/voorwaarden"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brass-gold underline hover:text-brass-deep"
+                    >
+                      algemene voorwaarden
+                    </Link>
+                    .
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedPrivacy}
+                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                    className="mt-0.5 accent-brass-deep"
+                  />
+                  <span>
+                    Ik ga akkoord met de{" "}
+                    <Link
+                      to="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brass-gold underline hover:text-brass-deep"
+                    >
+                      privacyverklaring
+                    </Link>
+                    .
+                  </span>
+                </label>
+              </div>
             )}
 
             <button
