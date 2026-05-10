@@ -1,27 +1,27 @@
 const steps = [
   {
     n: "01",
-    title: "Aanvraag",
+    title: "Aanvraag in 1 minuut",
     body:
-      "Geef afmetingen, gewicht, route, vergunningnummer en tijdvenster door. Het systeem berekent het verplichte aantal begeleiders.",
+      "Voer afmetingen, gewicht, route, vergunning en tijdvenster in. Het systeem berekent automatisch het verplichte aantal begeleiders en pilotvoertuigen volgens NL-, BE-, DE- en FR-richtlijnen.",
   },
   {
     n: "02",
-    title: "Matching",
+    title: "Slimme matching",
     body:
-      "Wij vinden de dichtstbijzijnde begeleiders met het juiste certificaat, pilotvoertuig en categorie voor uw transport.",
+      "Alleen begeleiders met het juiste certificaat, de juiste categorie en een vrije agenda krijgen een uitnodiging. Google Agenda-koppeling voorkomt dubbele boekingen.",
   },
   {
     n: "03",
-    title: "Bevestiging",
+    title: "Bevestiging binnen 30 min",
     body:
-      "De begeleider heeft 30 minuten om de opdracht te aanvaarden. U ontvangt automatisch bevestiging zodra dat gebeurt.",
+      "Begeleiders accepteren via app of pushmelding. U ziet live wie bevestigt en ontvangt automatisch de definitieve bemanning, contactgegevens en routedetails.",
   },
   {
     n: "04",
-    title: "Uitvoering & afrekening",
+    title: "Uitvoering & facturatie",
     body:
-      "Na afloop registreert de begeleider de uren vanaf vertrek standplaats tot terugkeer. U ziet direct de definitieve kosten.",
+      "Uren lopen automatisch vanaf vertrek standplaats tot terugkeer. Na afloop staat de factuur klaar — transparant per begeleider, per kilometer en per uur.",
   },
 ];
 
