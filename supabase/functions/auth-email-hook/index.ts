@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Bevestig je e-mailadres',
+  invite: 'Je bent uitgenodigd',
+  magiclink: 'Je inloglink',
+  recovery: 'Wachtwoord opnieuw instellen',
+  email_change: 'Bevestig je nieuwe e-mailadres',
+  reauthentication: 'Je verificatiecode',
 }
 
 // Template mapping
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "comfy-rideshare"
+const SITE_NAME = "ViaCust"
 const SENDER_DOMAIN = "notify.viacust.com"
 const ROOT_DOMAIN = "viacust.com"
 const FROM_DOMAIN = "viacust.com" // Domain shown in From address (may be root or sender subdomain)
