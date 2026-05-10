@@ -108,8 +108,7 @@ const Inner = () => {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [lookupBusy, setLookupBusy] = useState(false);
 
-  // Agenda
-  const [unavailable, setUnavailable] = useState<Set<string>>(new Set()); // YYYY-MM-DD
+  // Ritten op de planner-kaart (alleen voor weergave elders)
   const [rides, setRides] = useState<Record<string, RideItem>>({});
 
   useEffect(() => {
