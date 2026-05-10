@@ -26,7 +26,6 @@ const Auth = () => {
     fullName: z.string().trim().min(2, t("auth.err.nameRequired")).max(100),
     phone: z.string().trim().min(6).max(30),
     role: z.enum(["opdrachtgever", "begeleider"]),
-    baseCity: z.string().optional(),
   });
 
   const loginSchema = z.object({
