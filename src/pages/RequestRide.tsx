@@ -197,6 +197,10 @@ const RequestRideInner = () => {
     if (!pickupGeo || !dropoffGeo) return toast.error(t("request.postcodesPending"));
     const [hh, mm] = form.scheduled_time.split(":").map(Number);
     if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error(t("request.startQuarter"));
+    const scheduledDate = new Date(`${form.scheduled_date}T${form.scheduled_time}`);
+    if (isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
+      return toast.error(t("request.pastNotAllowed", { defaultValue: "Starttijd moet in de toekomst liggen." }));
+    }
 
     setBusy(true);
     const { data, error } = await supabase
@@ -704,7 +708,7 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label={t("common.date")} type="date" value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label={t("common.date")} type="date" min={new Date().toISOString().slice(0,10)} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
                   <select
@@ -820,7 +824,7 @@ const Matches = ({
 };
 
 const Input = ({
-  label, value, onChange, type = "text", placeholder, step, inputMode,
+  label, value, onChange, type = "text", placeholder, step, inputMode, min,
 }: {
   label: string;
   value: string;
@@ -829,11 +833,12 @@ const Input = ({
   placeholder?: string;
   step?: string;
   inputMode?: "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url" | "none";
+  min?: string;
 }) => (
   <div>
     <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
     <input
-      type={type} value={value} placeholder={placeholder} step={step} inputMode={inputMode}
+      type={type} value={value} placeholder={placeholder} step={step} inputMode={inputMode} min={min}
       onChange={(e) => onChange(e.target.value)}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
