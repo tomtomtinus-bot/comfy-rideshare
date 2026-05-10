@@ -59,10 +59,33 @@ const ymd = (d: Date) =>
 const niceDay = (d: Date) =>
   d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
 
-// Simple postcode geocoder using free zippopotam API
+// PDOK Locatieserver: NL postcode + huisnummer → straat, plaats, lat/lng
+async function lookupAddressNL(postcode: string, huisnummer: string) {
+  const pc = postcode.replace(/\s+/g, "").toUpperCase();
+  const hn = huisnummer.trim();
+  if (!pc || !hn) return null;
+  try {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?fq=type:adres&q=postcode:${encodeURIComponent(pc)}%20AND%20huisnummer:${encodeURIComponent(hn)}&rows=1`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const doc = data?.response?.docs?.[0];
+    if (!doc) return null;
+    const m = String(doc.centroide_ll ?? "").match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+    return {
+      street: doc.straatnaam as string,
+      city: doc.woonplaatsnaam as string,
+      lng: m ? parseFloat(m[1]) : null,
+      lat: m ? parseFloat(m[2]) : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Fallback: alleen postcode → plaats + coords (BE/DE/FR via zippopotam)
 async function lookupPostcode(postcode: string, country: "nl" | "be" | "de" | "fr" = "nl") {
   const raw = postcode.replace(/\s+/g, "").toUpperCase();
-  // Zippopotam verwacht voor NL alleen de 4 cijfers (geen letters)
   const candidates: string[] = [];
   if (country === "nl") {
     const digits = raw.match(/^\d{4}/)?.[0];
@@ -96,6 +119,14 @@ function detectCountry(postcode: string): "nl" | "be" | "de" | "fr" {
   if (/^\d{4}$/.test(c)) return "be";
   if (/^\d{5}$/.test(c)) return "de";
   return "nl";
+}
+
+// Split "Straatnaam 12A" → { street: "Straatnaam", number: "12A" }
+function splitAddress(addr: string): { street: string; number: string } {
+  const s = (addr ?? "").trim();
+  const m = s.match(/^(.*?)[\s,]+(\d+\s*[A-Za-z]?(?:[-/]\d+\s*[A-Za-z]?)?)\s*$/);
+  if (m) return { street: m[1].trim(), number: m[2].replace(/\s+/g, "") };
+  return { street: s, number: "" };
 }
 
 const Inner = () => {
