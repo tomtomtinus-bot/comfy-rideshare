@@ -1,33 +1,42 @@
-import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { Check } from "lucide-react";
+
+const points = [
+  { strong: "Onbeperkt:", text: "Voor een vast laag bedrag van € 2,50 per maand accepteert u onbeperkt ritten." },
+  { strong: "Brandstoftoeslag:", text: "Stel uw eigen toeslagen in; het systeem berekent dit automatisch voor u." },
+  { strong: "Professioneel:", text: "Facturen worden automatisch namens u opgesteld en verstuurd. U hoeft enkel te rijden." },
+];
 
 export const ValueEscort = () => {
-  const { t } = useTranslation();
-  const items = [
-    { title: t("home.escort.i1Title"), body: t("home.escort.i1Body") },
-    { title: t("home.escort.i2Title"), body: t("home.escort.i2Body") },
-    { title: t("home.escort.i3Title"), body: t("home.escort.i3Body") },
-  ];
   return (
-    <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10 bg-parchment/40">
-      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-12">
-        <div className="col-span-12 lg:col-span-7 order-2 lg:order-1 grid sm:grid-cols-3 gap-px bg-brass-deep/10">
-          {items.map((it) => (
-            <div key={it.title} className="bg-card p-6 md:p-8">
-              <p className="font-display text-xl text-brass-deep italic mb-3">{it.title}</p>
-              <p className="text-sm text-brass-deep/70 leading-relaxed">{it.body}</p>
-            </div>
-          ))}
-        </div>
-        <div className="col-span-12 lg:col-span-5 order-1 lg:order-2">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-            {t("home.escort.kicker")}
+    <section className="py-16 md:py-28 px-5 md:px-8 bg-parchment border-b border-brass-deep/10">
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-8 md:gap-16 items-start">
+        <div className="col-span-12 lg:col-span-5">
+          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-[10px] md:text-xs mb-4">
+            Voor de Begeleider
           </p>
-          <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight mb-6">
-            {t("home.escort.title")}
+          <h2 className="font-display text-3xl md:text-5xl italic text-brass-deep leading-tight">
+            Haal meer uit uw werkdag. Laat de techniek de rest doen.
           </h2>
-          <p className="text-brass-deep/75 leading-relaxed max-w-prose">
-            {t("home.escort.body")}
+        </div>
+        <div className="col-span-12 lg:col-span-7 space-y-6">
+          <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed">
+            U bent het liefst op de weg, niet achter uw bureau. ViaCust is de backoffice die u altijd al wilde hebben.
           </p>
+          <ul className="space-y-3">
+            {points.map((p) => (
+              <li key={p.strong} className="flex items-start gap-3 text-brass-deep/85">
+                <Check className="size-5 mt-0.5 text-brass-gold shrink-0" />
+                <span className="text-sm md:text-base"><strong className="text-brass-deep">{p.strong}</strong> {p.text}</span>
+              </li>
+            ))}
+          </ul>
+          <Link
+            to="/auth?role=begeleider"
+            className="inline-block mt-2 px-7 py-4 border-2 border-brass-deep text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
+          >
+            Ik ben een begeleider
+          </Link>
         </div>
       </div>
     </section>
