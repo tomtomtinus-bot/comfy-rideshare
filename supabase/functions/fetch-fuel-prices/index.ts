@@ -88,6 +88,47 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Aanvulling vanuit de "prijzen"-sheet (dagprijzen).
+    // TLN publiceert het weekgemiddelde in de hoofd-sheet pas later in de week,
+    // maar de dagprijzen-sheet bevat doorgaans wel de prijzen t/m de laatst
+    // voltooide zondag. We berekenen daaruit zelf het gemiddelde van de
+    // laatst voltooide ISO-week (ma t/m zo) en voegen het toe.
+    try {
+      const dagSheetName =
+        wb.SheetNames.find((n) => n.toLowerCase().startsWith("prijzen")) ?? null;
+      if (dagSheetName) {
+        const wsd = wb.Sheets[dagSheetName];
+        const drows = XLSX.utils.sheet_to_json<any[]>(wsd, { header: 1, raw: true });
+        // Map ISO weekstart -> [prijzen]
+        const buckets = new Map<string, number[]>();
+        for (const row of drows) {
+          if (!Array.isArray(row)) continue;
+          const dateCell = row[0];
+          const price = row[1];
+          if (!(dateCell instanceof Date) || typeof price !== "number") continue;
+          if (!isFinite(price) || price <= 0) continue;
+          const ws = isoMonday(dateCell);
+          (buckets.get(ws) ?? buckets.set(ws, []).get(ws)!).push(price);
+        }
+        // Bepaal de laatst voltooide week (ma t/m zo) op basis van vandaag.
+        const today = new Date();
+        const todayMonday = isoMonday(today);
+        for (const [ws, prices] of buckets.entries()) {
+          if (ws >= todayMonday) continue; // huidige of toekomstige week overslaan
+          if (prices.length < 7) continue; // alleen volledige weken
+          const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+          upserts.push({
+            week_start: ws,
+            eur_per_liter: +avg.toFixed(4),
+            source: "TLN-dag",
+            country: "NL",
+          } as any);
+        }
+      }
+    } catch (e) {
+      console.error("dagprijzen parse warn:", e);
+    }
+
     // Fallback wanneer parse niets oplevert
     if (upserts.length === 0) {
       upserts.push({
