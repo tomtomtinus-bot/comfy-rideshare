@@ -1,0 +1,1 @@
+ALTER TABLE public.permits ALTER COLUMN permit_number DROP NOT NULL;

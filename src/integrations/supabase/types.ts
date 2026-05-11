@@ -560,7 +560,7 @@ export type Database = {
           max_weight_kg: number | null
           max_width_m: number | null
           pdf_path: string | null
-          permit_number: string
+          permit_number: string | null
           raw_data: Json | null
           reference: string | null
           updated_at: string
@@ -578,7 +578,7 @@ export type Database = {
           max_weight_kg?: number | null
           max_width_m?: number | null
           pdf_path?: string | null
-          permit_number: string
+          permit_number?: string | null
           raw_data?: Json | null
           reference?: string | null
           updated_at?: string
@@ -596,7 +596,7 @@ export type Database = {
           max_weight_kg?: number | null
           max_width_m?: number | null
           pdf_path?: string | null
-          permit_number?: string
+          permit_number?: string | null
           raw_data?: Json | null
           reference?: string | null
           updated_at?: string
