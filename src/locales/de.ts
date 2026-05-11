@@ -196,6 +196,7 @@ const de: Dict = {
     permitLabel: "RDW-Genehmigung (PDF)", permitParsing: "Wird hochgeladen…",
     permitDrop: "RDW-Genehmigungs-PDF auswählen oder ablegen",
     permitAttached: "PDF wird mit dieser Fahrt verknüpft",
+    permitUploadHint: "Stellen Sie sicher, dass die Genehmigungsnummer im Dateinamen steht, oder geben Sie sie manuell ein",
     permitRemove: "Genehmigung entfernen", permitRead: "Genehmigung wird hochgeladen…",
     permitUploaded: "Genehmigung {{nr}} angehängt",
     uploadFail: "Upload fehlgeschlagen",

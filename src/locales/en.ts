@@ -268,6 +268,7 @@ const en: Dict = {
     permitParsing: "Uploading…",
     permitDrop: "Pick or drop an RDW permit PDF to attach",
     permitAttached: "PDF will be linked to this ride",
+    permitUploadHint: "Make sure the permit number is in the file name or enter it manually",
     permitRemove: "Remove permit",
     permitRead: "Uploading permit…",
     permitUploaded: "Permit {{nr}} attached",

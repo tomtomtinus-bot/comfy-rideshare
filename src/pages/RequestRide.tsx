@@ -161,16 +161,14 @@ const RequestRideInner = () => {
 
   const extractPermitNumberFromFilename = (filename: string): string => {
     const base = filename.replace(/\.[^.]+$/, "");
-    // Zoek patronen zoals 2024-12345, 12345-2024, of lange cijferreeksen (min 5 cijfers)
+    // Alleen cijferreeksen (minstens 5 cijfers), geen letters
     const patterns = [
-      /\b\d{4}[-_]\d{4,}\b/,
-      /\b\d{4,}[-_]\d{4}\b/,
-      /\b[A-Z]{1,4}[-_ ]?\d{5,}\b/i,
+      /\b\d{4}[-_]?\d{4,}\b/,
       /\b\d{6,}\b/,
     ];
     for (const re of patterns) {
       const m = base.match(re);
-      if (m) return m[0].replace(/[_\s]/g, "-");
+      if (m) return m[0].replace(/[_\s]/g, "").replace(/-/g, "");
     }
     return "";
   };
@@ -593,6 +591,7 @@ const RequestRideInner = () => {
                   </div>
                 )}
               </div>
+              <p className="text-[11px] text-brass-deep/50 mt-1">{t("request.permitUploadHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
                 <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />

@@ -266,6 +266,7 @@ const nl = {
     permitParsing: "Bezig met uploaden…",
     permitDrop: "Kies of sleep een RDW ontheffing-PDF om bij te voegen",
     permitAttached: "PDF wordt aan deze rit gekoppeld",
+    permitUploadHint: "Zorg dat het ontheffingsnummer in de bestandsnaam staat of voer het handmatig in",
     permitRemove: "Ontheffing verwijderen",
     permitRead: "Ontheffing wordt geüpload…",
     permitUploaded: "Ontheffing {{nr}} bijgevoegd",
