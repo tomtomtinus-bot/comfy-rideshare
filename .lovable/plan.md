@@ -1,41 +1,76 @@
-## Google Agenda koppeling voor begeleiders (twee-richting)
+## Fase B — Broadcast venster + bundeling
 
-### Wat we bouwen
+### 1) 5-minuten broadcast venster (beste match wint)
 
-**1. Database**
-- Nieuwe tabel `google_calendar_tokens` (escort_id, access_token, refresh_token, expiry, calendar_id, scope, connected_at) met RLS — alleen eigen rij leesbaar/schrijfbaar.
-- Kolom `google_event_id` op `ride_assignments` om gepushte events bij te houden (voor update/verwijder).
+**Wat verandert er voor de begeleider**
+- Knop "✓ Accepteren" wordt **"Ik ben beschikbaar"** (in app + e-mail magic link).
+- Tekst onder de knop: "Je bent beschikbaar gemeld. Binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen. Je krijgt direct bericht."
+- Zodra het venster sluit krijgt elke deelnemer push + e-mail: gewonnen of net niet.
 
-**2. Secrets**
-Je voegt twee secrets toe in Lovable Cloud:
-- `GOOGLE_OAUTH_CLIENT_ID`
-- `GOOGLE_OAUTH_CLIENT_SECRET`
+**Wat verandert er voor de opdrachtgever**
+- Op het dashboard zie je nu: **"3 begeleiders beschikbaar gemeld — selectie over 02:14"** met progressie-balk.
+- Na het venster: badge "X / Y bevestigd" zoals nu.
 
-In Google Cloud Console moet je de **Authorized redirect URI** instellen op de callback van onze edge function (krijg je na deploy).
+**Database (migratie)**
+- `ride_assignments.interest_expressed_at timestamptz null`
+- `ride_assignments.interest_score numeric null` (hoger = beter)
+- `ride_assignments.broadcast_closes_at timestamptz null` — gezet wanneer eerste interesse binnenkomt = `now() + 5 min` (gemaximeerd op `responds_by`)
+- `responds_by` default verlaagd naar **10 min** (blijft hetzelfde) zodat we binnen de venstertijd ruimte houden
 
-**3. Edge functions**
-- `google-oauth-start` — genereert OAuth URL met scopes `calendar.events` + `calendar.readonly`, met state = user id.
-- `google-oauth-callback` — wisselt code in voor tokens, slaat op in `google_calendar_tokens`, redirect terug naar `/escort-instellingen`.
-- `google-calendar-sync` — voor de ingelogde begeleider:
-  - **Push**: voor elke geaccepteerde rit (komende 30 dagen) maakt of update een event in Google Agenda; verwijdert events van geannuleerde ritten.
-  - **Pull**: leest busy-windows van Google (FreeBusy API) voor de komende 7 dagen.
-- `google-calendar-disconnect` — revoke + verwijder tokens.
+**Selectie-score (server-side)**
+```
+score = 100
+      − afstand_km_van_basis_tot_pickup × 1.5
+      + rating × 10
+      + min(eerdere_samenwerkingen_met_klant, 5) × 4
+```
+Hoogste N (N = `rides.num_escorts`) wint.
 
-**4. UI wijzigingen**
-- **EscortSettings**: nieuw blok "Google Agenda" met status (verbonden/niet), "Verbinden"-knop, "Nu synchroniseren"-knop, "Loskoppelen"-knop, en laatst-gesynchroniseerd timestamp.
-- **AgendaPlanner**: extra read-only laag — half-uur slots die overlappen met Google busy worden lichtgrijs gestreept getoond met tooltip "Bezet volgens Google Agenda" (niet aanpasbaar, niet opgeslagen in DB). Busy-windows worden bij mount opgehaald via de sync-functie.
-- Automatisch pushen: na rit-acceptatie roepen we sync aan (best-effort, faalt stil als niet gekoppeld).
+**Edge functions**
+- Nieuwe: `express-ride-interest` (begeleider, of via signed magic link in e-mail) — zet `interest_expressed_at`, berekent `interest_score`, zet `broadcast_closes_at` als nog niet gezet.
+- Nieuwe: `close-ride-broadcasts` — cron (elke minuut): voor elke rit waar `broadcast_closes_at < now()` én er is minimaal 1 interesse:
+  - top-N krijgt `status='accepted'`, rest krijgt `status='declined'`
+  - notificaties + e-mail: "Je bent gekozen" / "Net niet gekozen"
+  - cliënt-notificatie: "X begeleiders bevestigd"
+- Aanpassen: `accept-ride-invitation` (huidige one-click) → wordt `express-ride-interest` (zelfde route, ander gedrag + tekst).
+- Aanpassen: `auto-release-invitations` blijft, maar slaat nu uitnodigingen over die `interest_expressed_at` hebben.
 
-### Technische details
+**Front-end**
+- `EscortRideDetail.tsx`: knop label/handler aanpassen, nieuwe statusweergave ("beschikbaar gemeld — wacht op selectie / gekozen / niet gekozen").
+- `Dashboard.tsx` (cliënt): nieuwe badge tijdens broadcast venster.
+- E-mail template `ride-invitation.tsx`: tekst & button label.
 
-- OAuth flow: `access_type=offline&prompt=consent` zodat we altijd een refresh_token krijgen.
-- Tokens worden ververst in de sync-functie wanneer expiry < 60s.
-- Events bevatten: titel "Begeleiding {pickup} → {dropoff}", locatie pickup, beschrijving met rit-id en cargo, start = `scheduled_at`, duur = `estimated_hours` of 3u default.
-- Idempotent: gebruikt `google_event_id` om bestaand event te updaten i.p.v. dubbel aanmaken.
-- FreeBusy query op `primary` agenda — geen events worden gelezen, alleen busy-blokken (privacy-vriendelijk).
+---
 
-### Wat jij moet doen
+### 2) Bundeling door opdrachtgever (handmatig)
 
-1. OAuth Client ID + Secret van Google klaarhebben.
-2. Na deploy: redirect URI in Google Console toevoegen (URL toon ik na deploy).
-3. Secrets invullen wanneer ik er om vraag.
+**UX**
+- Op het dashboard krijgt elke open rit een checkbox. Onderin verschijnt "Bundel geselecteerde ritten (2 of meer)". Klik → modal "Pakket-uitnodiging: begeleiders mogen alle ritten in één klik accepteren of weigeren".
+- Voor begeleiders: in de uitnodigings-e-mail en EscortRideDetail krijgt de rit een banner "📦 Pakket: 3 ritten" met overzicht. Eén knop "Accepteer alle 3" of "Alleen deze rit".
+
+**Database**
+- `rides.bundle_id uuid null` — gedeeld voor ritten in hetzelfde pakket
+- `rides.bundle_label text null` (bv. "ZW-corridor di+wo")
+
+**Logica**
+- Bij beschikbaar-melden op een bundle-rit: client kan kiezen "alleen deze" of "alle in pakket" — bij "alle" worden parallel `interest_expressed_at` voor de andere bundle-ritten gezet (mits begeleider uitgenodigd is voor die ritten — als niet, dan auto-uitnodigen).
+- Selectie-cron behandelt elke rit zelfstandig (geen "all-or-nothing" garantie — risico te groot).
+
+**Front-end**
+- `Dashboard.tsx` (cliënt): selectie-checkboxes + bulk-actie knop + modal.
+- `EscortRideDetail.tsx`: pakket-banner + "alle accepteren" knop wanneer `bundle_id` is gevuld.
+- Nieuwe edge function `bundle-rides` (cliënt-side actie).
+
+---
+
+### Volgorde van uitvoeren
+1. Migratie: nieuwe kolommen.
+2. Edge functions vervangen/toevoegen + cron `close-ride-broadcasts` aansluiten.
+3. Begeleider-UX aanpassen (knop, statussen).
+4. Cliënt-UX (broadcast badge + bundel-selectie).
+5. E-mail templates bijwerken.
+
+### Wat ik aan jou vraag voor we beginnen
+1. Akkoord met de scoreformule (afstand × 1.5 / rating × 10 / herhaal-klant × 4)? Of een andere weging?
+2. Akkoord dat bundel-acceptatie geen "alles-of-niets" is (te veel risico op deadlock)?
+3. Mag het venster ook **vroegtijdig** sluiten als alle uitgenodigde begeleiders interesse hebben getoond, ook al zijn de 5 min nog niet om?
