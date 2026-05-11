@@ -23,6 +23,7 @@ export const Nav = () => {
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
     { to: "/facturatiegegevens", label: t("nav.billing"), show: !!user },
     { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/beveiliging", label: "Beveiliging", show: !!user },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
