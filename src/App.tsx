@@ -32,6 +32,7 @@ import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
 import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
+import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
