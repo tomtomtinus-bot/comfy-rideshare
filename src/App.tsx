@@ -76,6 +76,7 @@ const App = () => (
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />
+            <Route path="/beveiliging" element={<Security />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
