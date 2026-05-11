@@ -59,6 +59,7 @@ interface MatchedEscort {
   rating: number;
   rides_completed: number;
   countries: string[];
+  categories: string[];
   distanceToPickup: number;
   distanceFromDropoff: number;
   travelToPickupMin: number;
@@ -233,12 +234,23 @@ const RequestRideInner = () => {
       return c.includes("be-1") || c.includes("be-2");
     };
 
+    const escortCountrySet = (e: { countries?: string[] | null; categories?: string[] | null }) => {
+      const set = new Set((e.countries ?? []) as string[]);
+      const cats = (e.categories ?? []) as string[];
+      if (cats.includes("nl")) set.add("Nederland");
+      if (cats.includes("be-1") || cats.includes("be-2")) set.add("België");
+      if (cats.includes("de")) set.add("Duitsland");
+      if (cats.includes("fr")) set.add("Frankrijk");
+      if (cats.includes("lu")) set.add("Luxemburg");
+      return set;
+    };
+
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
-        const ec = (e.countries ?? []) as string[];
+        const ec = escortCountrySet(e as any);
         const involved = [...pickupCountries, ...dropoffCountries];
         // Begeleider moet minstens één van de betrokken landen dekken (NL-begeleider mag NL→BE rit doen, mits BE-kwalificatie aanwezig is)
-        return involved.some((c) => ec.includes(c)) && escortHasBeQualification((e as any).categories ?? []);
+        return involved.some((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
@@ -248,17 +260,16 @@ const RequestRideInner = () => {
         const isDe = allCountries.includes("Duitsland");
         const isFr = allCountries.includes("Frankrijk");
         const isLu = allCountries.includes("Luxemburg");
-        const escortCountries = (e.countries ?? []) as string[];
+        const escortCountries = escortCountrySet(e as any);
         const kmRateDe = (e as any).km_rate_de == null ? null : Number((e as any).km_rate_de);
-        const deKmMode = isDe && escortCountries.includes("Duitsland") && kmRateDe != null && kmRateDe > 0;
-        // Volgorde: meest specifiek land bepaalt het tarief.
-        // Alleen het landtarief gebruiken als de begeleider dat land daadwerkelijk dekt;
-        // anders terugvallen op het NL-uurtarief van de begeleider.
+        const deKmMode = isDe && escortCountries.has("Duitsland") && kmRateDe != null && kmRateDe > 0;
+        // Volgorde: meest specifiek betrokken land bepaalt het tarief uit het profiel.
+        // De profiel-certificeringen/categories tellen mee, zodat oude countries-data geen tarief kan blokkeren.
         let rate = Number(e.hourly_rate);
-        if (isLu && escortCountries.includes("Luxemburg")) rate = Number((e as any).hourly_rate_lu ?? e.hourly_rate);
-        else if (isFr && escortCountries.includes("Frankrijk")) rate = Number((e as any).hourly_rate_fr ?? e.hourly_rate);
-        else if (isDe && escortCountries.includes("Duitsland")) rate = deKmMode ? Number(kmRateDe) : Number((e as any).hourly_rate_de ?? e.hourly_rate);
-        else if (isBe && escortCountries.includes("België")) rate = Number(e.hourly_rate_be ?? e.hourly_rate);
+        if (isLu && escortCountries.has("Luxemburg")) rate = Number((e as any).hourly_rate_lu ?? e.hourly_rate);
+        else if (isFr && escortCountries.has("Frankrijk")) rate = Number((e as any).hourly_rate_fr ?? e.hourly_rate);
+        else if (isDe && escortCountries.has("Duitsland")) rate = deKmMode ? Number(kmRateDe) : Number((e as any).hourly_rate_de ?? e.hourly_rate);
+        else if (isBe && escortCountries.has("België")) rate = Number(e.hourly_rate_be ?? e.hourly_rate);
         return {
           ...e,
           hourly_rate_de: Number((e as any).hourly_rate_de ?? e.hourly_rate),
