@@ -128,6 +128,15 @@ const Inner = () => {
     const detail = res as unknown as RideDetail;
     setData(detail);
 
+    if (detail?.ride?.bundle_id) {
+      const { data: sibs } = await supabase.rpc("get_bundle_rides_for_escort", {
+        _bundle_id: detail.ride.bundle_id,
+      });
+      setBundleSiblings(((sibs as any[]) ?? []).filter((s) => s.ride_id !== detail.ride.id));
+    } else {
+      setBundleSiblings([]);
+    }
+
     if (detail?.permit?.pdf_path) {
       const { data: signed } = await supabase.storage
         .from("permits")
