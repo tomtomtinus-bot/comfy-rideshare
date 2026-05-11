@@ -26,31 +26,25 @@ const RideInvitationEmail = ({
 }: RideInvitationProps) => (
   <Html lang="nl" dir="ltr">
     <Head />
-    <Preview>Nieuwe rit-uitnodiging — reageer binnen 10 minuten</Preview>
+    <Preview>Nieuwe rit-uitnodiging — meld je beschikbaar binnen 10 minuten</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
           {name ? `Hoi ${name}, een nieuwe rit voor jou` : 'Nieuwe rit-uitnodiging'}
         </Heading>
         <Text style={text}>
-          Je bent uitgenodigd voor een konvooi-begeleiding. Bevestig of weiger binnen <strong>10 minuten</strong> in je dashboard — daarna verloopt de uitnodiging automatisch.
+          Je bent uitgenodigd voor een konvooi-begeleiding. Meld je <strong>beschikbaar</strong>; binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen.
         </Text>
 
         <Section style={card}>
-          {pickup && (
-            <Text style={row}><strong>Vertrek:</strong> {pickup}</Text>
-          )}
-          {dropoff && (
-            <Text style={row}><strong>Bestemming:</strong> {dropoff}</Text>
-          )}
-          {plannedAt && (
-            <Text style={row}><strong>Starttijd:</strong> {plannedAt}</Text>
-          )}
+          {pickup && (<Text style={row}><strong>Vertrek:</strong> {pickup}</Text>)}
+          {dropoff && (<Text style={row}><strong>Bestemming:</strong> {dropoff}</Text>)}
+          {plannedAt && (<Text style={row}><strong>Starttijd:</strong> {plannedAt}</Text>)}
         </Section>
 
         {acceptUrl && (
           <Button style={acceptButton} href={acceptUrl}>
-            ✓ Direct accepteren
+            ✓ Ik ben beschikbaar
           </Button>
         )}
         {rideUrl && (
@@ -59,12 +53,10 @@ const RideInvitationEmail = ({
           </Button>
         )}
         <Text style={hint}>
-          Tip: gebruik "Direct accepteren" om in één klik te bevestigen — geen inlog nodig.
+          Tip: gebruik "Ik ben beschikbaar" om in één klik te reageren — geen inlog nodig.
         </Text>
 
-        <Text style={footer}>
-          — Het {SITE_NAME}-team
-        </Text>
+        <Text style={footer}>— Het {SITE_NAME}-team</Text>
       </Container>
     </Body>
   </Html>
@@ -72,7 +64,7 @@ const RideInvitationEmail = ({
 
 export const template = {
   component: RideInvitationEmail,
-  subject: 'Nieuwe rit-uitnodiging — reageer binnen 10 minuten',
+  subject: 'Nieuwe rit-uitnodiging — meld je beschikbaar',
   displayName: 'Rit-uitnodiging (begeleider)',
   previewData: {
     name: 'Sven',

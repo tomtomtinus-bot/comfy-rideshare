@@ -773,6 +773,7 @@ export type Database = {
         Row: {
           actual_cost: number | null
           actual_hours: number | null
+          broadcast_closes_at: string | null
           cancel_decided_at: string | null
           cancel_request_reason: string | null
           cancel_request_status: string
@@ -789,6 +790,8 @@ export type Database = {
           hours_notes: string | null
           hours_submitted_at: string | null
           id: string
+          interest_expressed_at: string | null
+          interest_score: number | null
           invited_at: string
           invoice_id: string | null
           invoiced_at: string | null
@@ -805,6 +808,7 @@ export type Database = {
         Insert: {
           actual_cost?: number | null
           actual_hours?: number | null
+          broadcast_closes_at?: string | null
           cancel_decided_at?: string | null
           cancel_request_reason?: string | null
           cancel_request_status?: string
@@ -821,6 +825,8 @@ export type Database = {
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
+          interest_expressed_at?: string | null
+          interest_score?: number | null
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
@@ -837,6 +843,7 @@ export type Database = {
         Update: {
           actual_cost?: number | null
           actual_hours?: number | null
+          broadcast_closes_at?: string | null
           cancel_decided_at?: string | null
           cancel_request_reason?: string | null
           cancel_request_status?: string
@@ -853,6 +860,8 @@ export type Database = {
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
+          interest_expressed_at?: string | null
+          interest_score?: number | null
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
@@ -887,6 +896,8 @@ export type Database = {
         Row: {
           app_fee: number
           be_escort_type: string | null
+          bundle_id: string | null
+          bundle_label: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -923,6 +934,8 @@ export type Database = {
         Insert: {
           app_fee?: number
           be_escort_type?: string | null
+          bundle_id?: string | null
+          bundle_label?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -959,6 +972,8 @@ export type Database = {
         Update: {
           app_fee?: number
           be_escort_type?: string | null
+          bundle_id?: string | null
+          bundle_label?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1129,6 +1144,7 @@ export type Database = {
         Args: { _assignment_id: string; _reason: string }
         Returns: undefined
       }
+      express_ride_interest: { Args: { _assignment_id: string }; Returns: Json }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_counterparty_name: {
