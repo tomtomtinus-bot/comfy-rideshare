@@ -387,8 +387,17 @@ const ClientDashboard = () => {
                     </p>
                   </div>
                   <div className="shrink-0 hidden sm:flex items-center gap-3">
-                    {acceptedCount > 0 && (
-                      <span className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-semibold tabular-nums">
+                    {(r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
+                      <span
+                        className={
+                          "text-[10px] uppercase tracking-widest font-semibold tabular-nums " +
+                          (acceptedCount >= (r.num_escorts ?? ass.length)
+                            ? "text-emerald-700"
+                            : acceptedCount > 0
+                              ? "text-brass-deep/70"
+                              : "text-amber-700")
+                        }
+                      >
                         {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
                       </span>
                     )}

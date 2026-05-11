@@ -13,6 +13,7 @@ interface RideInvitationProps {
   dropoff?: string
   plannedAt?: string
   rideUrl?: string
+  acceptUrl?: string
 }
 
 const RideInvitationEmail = ({
@@ -21,6 +22,7 @@ const RideInvitationEmail = ({
   dropoff,
   plannedAt,
   rideUrl,
+  acceptUrl,
 }: RideInvitationProps) => (
   <Html lang="nl" dir="ltr">
     <Head />
@@ -46,11 +48,19 @@ const RideInvitationEmail = ({
           )}
         </Section>
 
+        {acceptUrl && (
+          <Button style={acceptButton} href={acceptUrl}>
+            ✓ Direct accepteren
+          </Button>
+        )}
         {rideUrl && (
           <Button style={button} href={rideUrl}>
             Open uitnodiging
           </Button>
         )}
+        <Text style={hint}>
+          Tip: gebruik "Direct accepteren" om in één klik te bevestigen — geen inlog nodig.
+        </Text>
 
         <Text style={footer}>
           — Het {SITE_NAME}-team
@@ -70,6 +80,7 @@ export const template = {
     dropoff: 'Havenweg 8, Rotterdam',
     plannedAt: '15 januari 2026, 08:30',
     rideUrl: 'https://viacust.com',
+    acceptUrl: 'https://viacust.com',
   },
 } satisfies TemplateEntry
 
@@ -93,3 +104,14 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0', lineHeight: '1.5' }
+const acceptButton = {
+  backgroundColor: '#1f8a4c',
+  color: '#ffffff',
+  fontSize: '14px',
+  fontWeight: 'bold' as const,
+  borderRadius: '2px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+  marginRight: '10px',
+}
+const hint = { fontSize: '12px', color: '#888', margin: '14px 0 0', lineHeight: '1.5' }
