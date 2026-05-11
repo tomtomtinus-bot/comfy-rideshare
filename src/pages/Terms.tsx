@@ -54,48 +54,45 @@ const Terms = () => {
 
 const TermsNL = () => (
   <>
-    <h2>1. Toepasselijkheid en Reikwijdte</h2>
-    <p>Deze voorwaarden zijn van toepassing op alle diensten geleverd door <strong>ViaCust</strong> binnen de Europese Unie. Door gebruik te maken van het Platform gaat de Gebruiker akkoord met deze voorwaarden.</p>
-
-    <h2>2. Dienstverlening (Bemiddeling)</h2>
+    <h2>Artikel 1: Definities</h2>
     <ul>
-      <li>Het Platform functioneert uitsluitend als een digitale marktplaats die Opdrachtgevers en Begeleiders samenbrengt.</li>
-      <li>De overeenkomst voor de feitelijke transportbegeleiding komt rechtstreeks tot stand tussen de Opdrachtgever en de Begeleider.</li>
-      <li><strong>ViaCust</strong> is nimmer partij bij deze overeenkomst en aanvaardt geen aansprakelijkheid voor de kwaliteit, veiligheid of rechtmatigheid van de geleverde begeleidingsdiensten.</li>
+      <li><strong>ViaCust:</strong> Het platform, de software en de handelsnaam waaronder de diensten worden aangeboden.</li>
+      <li><strong>Gebruiker:</strong> Iedere partij (Opdrachtgever of Begeleider) die gebruikmaakt van het platform.</li>
+      <li><strong>Opdrachtgever:</strong> De partij (doorgaans een transportonderneming) die een opdracht voor transportbegeleiding plaatst.</li>
+      <li><strong>Begeleider:</strong> De zelfstandige professional (VVB-er of escort) die de opdracht accepteert en uitvoert.</li>
     </ul>
 
-    <h2>3. Toegang en EU-Sancties</h2>
-    <ul>
-      <li>Gebruikers verklaren dat zij niet voorkomen op relevante EU-sanctielijsten.</li>
-      <li>Begeleiders verklaren dat zij voldoen aan alle lokale Europese regelgeving met betrekking tot transportbegeleiding (zoals EU-verordening nr. 1071/2009 indien van toepassing).</li>
-    </ul>
+    <h2>Artikel 2: De Rol van ViaCust</h2>
+    <ol className="list-decimal pl-5 space-y-1">
+      <li>ViaCust exploiteert uitsluitend een digitaal platform (SaaS) dat vraag en aanbod in de transportbegeleiding samenbrengt en administratieve processen automatiseert.</li>
+      <li>ViaCust is nadrukkelijk geen partij bij de overeenkomst tussen Opdrachtgever en Begeleider. Er ontstaat door het gebruik van het platform geen arbeidsovereenkomst, agentuurovereenkomst of bemiddelingsovereenkomst tussen ViaCust en de Gebruiker.</li>
+      <li>ViaCust is geen transportonderneming en verricht zelf geen begeleidingsdiensten.</li>
+    </ol>
 
-    <h2>4. Herroepingsrecht en Digitale Inhoud</h2>
-    <p>Indien de Gebruiker handelt als consument: door akkoord te gaan met de start van de dienst (goedkeuring van het account) doet de Gebruiker afstand van zijn recht op ontbinding (herroepingsrecht) zodra de uitvoering van de digitale dienst is begonnen.</p>
+    <h2>Artikel 3: Uitsluiting van Aansprakelijkheid</h2>
+    <ol className="list-decimal pl-5 space-y-1">
+      <li><strong>Uitvoering van diensten:</strong> ViaCust draagt geen enkele verantwoordelijkheid voor de kwaliteit, veiligheid, tijdigheid of rechtmatigheid van de door de Begeleider uitgevoerde diensten.</li>
+      <li><strong>Schade en Claims:</strong> ViaCust is niet aansprakelijk voor enige schade (direct, indirect, gevolgschade of boetes) die voortvloeit uit ritten die via het platform tot stand zijn gekomen. Dit geldt ook voor schade aan voertuigen, lading, derden of letselschade.</li>
+      <li><strong>Niet-nakoming:</strong> ViaCust is niet aansprakelijk indien een Begeleider niet verschijnt op een opdracht of indien een Opdrachtgever een rit annuleert.</li>
+      <li><strong>Vergunningen:</strong> Gebruikers zijn zelf verantwoordelijk voor het bezitten en controleren van de wettelijk vereiste vergunningen, certificaten en verzekeringen.</li>
+    </ol>
 
-    <h2>5. Betalingen en Btw (Tax Compliance)</h2>
-    <ul>
-      <li>Tenzij anders vermeld zijn alle prijzen op het platform exclusief btw.</li>
-      <li>Bij grensoverschrijdende diensten binnen de EU is de <strong>verleggingsregeling (Reverse Charge)</strong> voor btw van toepassing. Gebruikers zijn zelf verantwoordelijk voor een correcte btw-aangifte in hun eigen lidstaat.</li>
-    </ul>
+    <h2>Artikel 4: Automatische Facturatie en Betalingen</h2>
+    <ol className="list-decimal pl-5 space-y-1">
+      <li>ViaCust faciliteert de techniek achter het genereren van wekelijkse verzamelfacturen. De Begeleider is en blijft echter de juridische verzender van de factuur en is verantwoordelijk voor de juistheid van de data (uren, brandstoftoeslag, onkosten).</li>
+      <li>ViaCust is niet aansprakelijk voor fouten in facturen of vertragingen in betalingen tussen Gebruikers.</li>
+      <li>ViaCust is geen incassobureau. Indien een Opdrachtgever een factuur niet voldoet, dient de Begeleider dit zelfstandig op te lossen met de Opdrachtgever.</li>
+      <li>De vergoeding voor het gebruik van het platform (abonnement en commissie) wordt automatisch geïncasseerd. Bij gebreke van betaling heeft ViaCust het recht het account per direct te schorsen.</li>
+    </ol>
 
-    <h2>6. Aansprakelijkheidsbeperking</h2>
-    <ul>
-      <li>Onze aansprakelijkheid is beperkt tot directe schade en gemaximeerd tot het bedrag aan servicekosten dat door de gebruiker is betaald in de drie maanden voorafgaand aan het schadevoorval.</li>
-      <li>Wij zijn niet aansprakelijk voor indirecte schade, gevolgschade, winstderving of schade door foutieve Google Agenda-synchronisaties.</li>
-    </ul>
+    <h2>Artikel 5: Techniek en Overmacht</h2>
+    <ol className="list-decimal pl-5 space-y-1">
+      <li>ViaCust streeft naar een hoge beschikbaarheid van het platform, maar garandeert geen 100% uptime. ViaCust is niet aansprakelijk voor storingen in de software, de Google Agenda-koppeling of internetverbindingen.</li>
+      <li>Gebruikers zijn zelf verantwoordelijk voor een werkende internetverbinding en de benodigde hardware onderweg.</li>
+    </ol>
 
-    <h2>7. Intellectueel Eigendom en Data</h2>
-    <ul>
-      <li>Alle software en algoritmes zijn eigendom van <strong>ViaCust</strong>.</li>
-      <li>Het verzamelen van data van andere gebruikers ("scraping") is strikt verboden.</li>
-    </ul>
-
-    <h2>8. Geschillenbeslechting (EU Online Dispute Resolution)</h2>
-    <p>Conform EU-verordening nr. 524/2013 wijzen wij u op het platform voor online geschillenbeslechting van de Europese Commissie: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>.</p>
-
-    <h2>9. Toepasselijk recht en Forumkeuze</h2>
-    <p>Op deze overeenkomst is het Nederlands recht van toepassing. Eventuele geschillen zullen bij uitsluiting worden voorgelegd aan de bevoegde rechter in het arrondissement waar <strong>ViaCust</strong> gevestigd is, tenzij dwingend EU-recht anders voorschrijft.</p>
+    <h2>Artikel 6: Vrijwaring</h2>
+    <p>De Gebruiker vrijwaart ViaCust tegen alle aanspraken van derden die verband houden met het gebruik van de diensten en de uitvoering van de via het platform overeengekomen opdrachten.</p>
   </>
 );
 
