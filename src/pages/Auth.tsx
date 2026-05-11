@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -7,6 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import {
+  biometricAvailable,
+  hasStoredCredentials,
+  saveBiometricCredentials,
+  unlockWithBiometrics,
+  isNative,
+} from "@/lib/biometric";
 
 const Auth = () => {
   const { user, loading } = useAuth();
