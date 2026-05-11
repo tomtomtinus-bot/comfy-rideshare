@@ -195,18 +195,36 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Verzamel alle linkIDs in volgorde, met richting
+    // Verzamel segmenten (links + start/eind RD-punten voor exact trimmen)
     type Step = { linkId: number; direction: number };
-    const steps: Step[] = [];
+    type Segment = {
+      links: Step[];
+      startPt: [number, number] | null;
+      endPt: [number, number] | null;
+    };
+    const segments: Segment[] = [];
+    const ptOf = (g: any): [number, number] | null => {
+      const p = g?.sdo_point;
+      if (!p || typeof p.X !== "number" || typeof p.Y !== "number") return null;
+      return [p.X, p.Y];
+    };
     for (const rp of routesJson.value) {
       for (const rpl of rp.routePathList ?? []) {
         for (const seg of rpl.routeSegmentList ?? []) {
-          for (const rl of seg.routeLinkList ?? []) {
-            steps.push({ linkId: rl.linkId, direction: rl.direction ?? 0 });
-          }
+          const links: Step[] = (seg.routeLinkList ?? []).map((rl: any) => ({
+            linkId: rl.linkId,
+            direction: rl.direction ?? 0,
+          }));
+          if (!links.length) continue;
+          segments.push({
+            links,
+            startPt: ptOf(seg.startPointGeometry),
+            endPt: ptOf(seg.endPointGeometry),
+          });
         }
       }
     }
+    const steps: Step[] = segments.flatMap((s) => s.links);
     if (!steps.length) {
       return new Response(
         JSON.stringify({ error: "Route bevat geen wegsegmenten." }),
