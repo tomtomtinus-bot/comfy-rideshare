@@ -126,13 +126,13 @@ const HoeWerktViaCust = () => {
                 to="/auth?role=begeleider"
                 className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
               >
-                Aanmelden als begeleider
+                Meld aan als begeleider
               </Link>
               <Link
-                to="/aanvragen"
+                to="/auth?role=opdrachtgever"
                 className="inline-block px-7 py-4 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:border-brass-gold hover:text-brass-gold transition-colors text-center"
               >
-                Rit aanvragen
+                Meld aan als opdrachtgever
               </Link>
             </div>
           </div>
