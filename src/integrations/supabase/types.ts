@@ -921,6 +921,7 @@ export type Database = {
           dropoff_lat: number
           dropoff_lng: number
           escort_type_required: string
+          excluded_escort_ids: string[]
           id: string
           license_plates: string[]
           notes: string | null
@@ -960,6 +961,7 @@ export type Database = {
           dropoff_lat: number
           dropoff_lng: number
           escort_type_required?: string
+          excluded_escort_ids?: string[]
           id?: string
           license_plates?: string[]
           notes?: string | null
@@ -999,6 +1001,7 @@ export type Database = {
           dropoff_lat?: number
           dropoff_lng?: number
           escort_type_required?: string
+          excluded_escort_ids?: string[]
           id?: string
           license_plates?: string[]
           notes?: string | null
@@ -1149,10 +1152,19 @@ export type Database = {
         Args: { _reason?: string; _ride_id: string }
         Returns: Json
       }
-      client_decide_cancellation: {
-        Args: { _approve: boolean; _assignment_id: string }
-        Returns: undefined
-      }
+      client_decide_cancellation:
+        | {
+            Args: { _approve: boolean; _assignment_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _approve: boolean
+              _assignment_id: string
+              _search_replacement?: boolean
+            }
+            Returns: Json
+          }
       compute_fuel_surcharge: {
         Args: {
           p_base_amount: number
@@ -1221,6 +1233,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      invite_replacement_escorts: {
+        Args: { _limit?: number; _ride_id: string }
+        Returns: number
       }
       is_approved: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_escort: {
