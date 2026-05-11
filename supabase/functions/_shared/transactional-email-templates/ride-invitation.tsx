@@ -80,6 +80,7 @@ export const template = {
     dropoff: 'Havenweg 8, Rotterdam',
     plannedAt: '15 januari 2026, 08:30',
     rideUrl: 'https://viacust.com',
+    acceptUrl: 'https://viacust.com',
   },
 } satisfies TemplateEntry
 
@@ -103,3 +104,14 @@ const button = {
   textDecoration: 'none',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0', lineHeight: '1.5' }
+const acceptButton = {
+  backgroundColor: '#1f8a4c',
+  color: '#ffffff',
+  fontSize: '14px',
+  fontWeight: 'bold' as const,
+  borderRadius: '2px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+  marginRight: '10px',
+}
+const hint = { fontSize: '12px', color: '#888', margin: '14px 0 0', lineHeight: '1.5' }
