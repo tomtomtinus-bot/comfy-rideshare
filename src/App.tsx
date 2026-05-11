@@ -22,7 +22,7 @@ import ClientRideDetail from "./pages/ClientRideDetail.tsx";
 import EditRide from "./pages/EditRide.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Terms from "./pages/Terms.tsx";
-import Pricing from "./pages/Pricing.tsx";
+
 import Privacy from "./pages/Privacy.tsx";
 import Unsubscribe from "./pages/Unsubscribe.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
