@@ -48,7 +48,13 @@ interface PageItem {
 }
 
 async function readPdfItems(file: ArrayBuffer): Promise<PageItem[]> {
-  const pdf = await pdfjsLib.getDocument({ data: file }).promise;
+  const pdf = await pdfjsLib.getDocument({
+    data: new Uint8Array(file),
+    disableStream: true,
+    disableAutoFetch: true,
+    isEvalSupported: false,
+    useSystemFonts: true,
+  }).promise;
   const items: PageItem[] = [];
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
