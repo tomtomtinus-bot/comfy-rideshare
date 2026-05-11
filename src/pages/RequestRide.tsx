@@ -92,6 +92,12 @@ const RequestRideInner = () => {
   const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const bundleCtx = useMemo(() => {
+    const id = searchParams.get("bundle");
+    const label = searchParams.get("label");
+    return id && label ? { id, label } : null;
+  }, [searchParams]);
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
 
