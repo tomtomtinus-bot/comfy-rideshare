@@ -219,9 +219,9 @@ const Auth = () => {
                     <span>
                       Ik ga akkoord met de{" "}
                       <Link to="/voorwaarden" target="_blank" rel="noopener noreferrer" className="text-brass-gold underline hover:text-brass-deep">
-                        algemene voorwaarden
-                      </Link>
-                      .
+                        Algemene Voorwaarden
+                      </Link>{" "}
+                      en erken dat ViaCust uitsluitend optreedt als software-facilitator en nimmer aansprakelijk is voor de uitvoering of betaling van de ritten.
                     </span>
                   </label>
                   <label className="flex items-start gap-2 text-xs text-brass-deep/80 leading-relaxed cursor-pointer">
