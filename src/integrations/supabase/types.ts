@@ -1144,6 +1144,7 @@ export type Database = {
         Args: { _assignment_id: string; _reason: string }
         Returns: undefined
       }
+      express_ride_interest: { Args: { _assignment_id: string }; Returns: Json }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_counterparty_name: {
