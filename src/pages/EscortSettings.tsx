@@ -206,6 +206,7 @@ const Inner = () => {
         setProfile(p);
         setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
+        setLanguages((((p as any).languages ?? ["Nederlands"]) as string[]));
         setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
           label: String(s.label ?? ""),
           amount: String(s.amount ?? ""),
