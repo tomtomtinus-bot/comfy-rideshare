@@ -306,6 +306,7 @@ const Auth = () => {
                 {busy ? t("auth.busy") : mode === "login" ? t("auth.login") : t("auth.signup")}
               </button>
             </form>
+            </>
           )}
 
           <button
