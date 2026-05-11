@@ -31,7 +31,31 @@ const EXTRA: GeoPoint[] = [
   { city: "Zutphensestraat", country: "Nederland", lat: 52.180, lng: 6.042 },
 ];
 
-const ALL = [...EXTRA, ...CITIES];
+// Bekende grensovergangen NL ↔ DE / BE. Deze worden vóór losse plaatsen gematched
+// zodat 'Tegelen / Kaldenkirchen' niet in Tegelen op de kaart belandt.
+const BORDER_CROSSINGS: GeoPoint[] = [
+  { city: "Tegelen Kaldenkirchen", country: "Grens NL/DE", lat: 51.328, lng: 6.187 },
+  { city: "Venlo Kaldenkirchen", country: "Grens NL/DE", lat: 51.346, lng: 6.198 },
+  { city: "De Lutte Bad Bentheim", country: "Grens NL/DE", lat: 52.310, lng: 7.034 },
+  { city: "Oldenzaal Bad Bentheim", country: "Grens NL/DE", lat: 52.310, lng: 7.034 },
+  { city: "Denekamp Nordhorn", country: "Grens NL/DE", lat: 52.391, lng: 7.024 },
+  { city: "Enschede Gronau", country: "Grens NL/DE", lat: 52.218, lng: 6.971 },
+  { city: "Winterswijk Vreden", country: "Grens NL/DE", lat: 51.971, lng: 6.762 },
+  { city: "Zevenaar Elten", country: "Grens NL/DE", lat: 51.880, lng: 6.131 },
+  { city: "Beek Wyler", country: "Grens NL/DE", lat: 51.829, lng: 5.982 },
+  { city: "Heerlen Aachen", country: "Grens NL/DE", lat: 50.866, lng: 6.026 },
+  { city: "Vaals Aachen", country: "Grens NL/DE", lat: 50.776, lng: 6.045 },
+  { city: "Hazeldonk Meer", country: "Grens NL/BE", lat: 51.448, lng: 4.737 },
+  { city: "Wuustwezel Hazeldonk", country: "Grens NL/BE", lat: 51.448, lng: 4.737 },
+  { city: "Putte Stabroek", country: "Grens NL/BE", lat: 51.379, lng: 4.401 },
+  { city: "Hoogerheide Putte", country: "Grens NL/BE", lat: 51.378, lng: 4.398 },
+  { city: "Eijsden Visé", country: "Grens NL/BE", lat: 50.781, lng: 5.700 },
+  { city: "Maastricht Visé", country: "Grens NL/BE", lat: 50.781, lng: 5.700 },
+  { city: "Wernhout Brecht", country: "Grens NL/BE", lat: 51.456, lng: 4.690 },
+  { city: "Hulst Antwerpen", country: "Grens NL/BE", lat: 51.279, lng: 4.054 },
+];
+
+const ALL = [...BORDER_CROSSINGS, ...EXTRA, ...CITIES];
 
 // Probeer een snelweg-naam te herkennen — we tonen geen losse snelweg op de kaart maar
 // wel de plaatsen die er aan grenzen via de andere waypoints.
@@ -41,14 +65,29 @@ export function isHighwayName(s: string): boolean {
   return HIGHWAY_RE.test(s.trim());
 }
 
+// Normaliseer scheidingstekens (/, -, –, en) naar spaties zodat we
+// 'Tegelen/Kaldenkirchen', 'Tegelen - Kaldenkirchen' enz. herkennen.
+const normalize = (s: string) =>
+  s.toLowerCase().replace(/[\/\-–—]|(\b(en|and)\b)/g, " ").replace(/\s+/g, " ").trim();
+
 export function geocodeWaypoint(name: string): GeoPoint | null {
   if (!name) return null;
-  const q = name.trim().toLowerCase();
-  // exact eerst
+  const q = normalize(name);
+
+  // 1) Grensovergangen eerst — exact of als beide plaatsnamen voorkomen
+  for (const bc of BORDER_CROSSINGS) {
+    const parts = bc.city.toLowerCase().split(" ").filter(Boolean);
+    if (parts.length >= 2 && parts.every((p) => q.includes(p))) return bc;
+  }
+
+  // 2) Exacte plaatsnaam
   const exact = ALL.find((c) => c.city.toLowerCase() === q);
   if (exact) return exact;
-  // bevat een bekende plaats
-  const partial = ALL.find((c) => q.includes(c.city.toLowerCase()));
+
+  // 3) Bevat een bekende plaats (langste match eerst → vermijdt 'Tegelen' in 'Tegelen Kaldenkirchen')
+  const sorted = [...ALL].sort((a, b) => b.city.length - a.city.length);
+  const partial = sorted.find((c) => q.includes(c.city.toLowerCase()));
   if (partial) return partial;
+
   return geocodeCity(name);
 }
