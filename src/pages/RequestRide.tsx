@@ -159,16 +159,39 @@ const RequestRideInner = () => {
     setForm((f) => ({ ...f, permit_number: uploadedPermit.permit_number }));
   }, [uploadedPermit]);
 
+  const extractPermitNumberFromFilename = (filename: string): string => {
+    const base = filename.replace(/\.[^.]+$/, "");
+    // Zoek patronen zoals 2024-12345, 12345-2024, of lange cijferreeksen (min 5 cijfers)
+    const patterns = [
+      /\b\d{4}[-_]\d{4,}\b/,
+      /\b\d{4,}[-_]\d{4}\b/,
+      /\b[A-Z]{1,4}[-_ ]?\d{5,}\b/i,
+      /\b\d{6,}\b/,
+    ];
+    for (const re of patterns) {
+      const m = base.match(re);
+      if (m) return m[0].replace(/[_\s]/g, "-");
+    }
+    return "";
+  };
+
   const handlePermitFile = async (file: File | null) => {
     if (!file || !user) return;
-    const permitNumber = form.permit_number.trim();
+    let permitNumber = form.permit_number.trim();
+    if (!permitNumber) {
+      const guessed = extractPermitNumberFromFilename(file.name);
+      if (guessed) {
+        permitNumber = guessed;
+        setForm((f) => ({ ...f, permit_number: guessed }));
+      }
+    }
 
     setPermitUploading(true);
     try {
       toast.info(t("request.permitRead"));
       const up = await uploadPermitPdf(file, user.id, permitNumber);
       setUploadedPermit(up);
-      toast.success(t("request.permitUploaded", { nr: up.permit_number }));
+      toast.success(t("request.permitUploaded", { nr: up.permit_number || file.name }));
     } catch (e: any) {
       toast.error(e?.message ?? t("request.uploadFail"));
     } finally {
