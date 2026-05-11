@@ -648,9 +648,20 @@ const RequestRideInner = () => {
                 </div>
               </div>
               {(() => {
-                const beInvolved =
-                  (pickupGeo?.country?.includes("BE") || pickupGeo?.country?.includes("België")) ||
-                  (dropoffGeo?.country?.includes("BE") || dropoffGeo?.country?.includes("België"));
+                const expand = (c?: string): string[] => {
+                  if (!c) return [];
+                  const map: Record<string, string> = { NL: "Nederland", BE: "België", DE: "Duitsland", FR: "Frankrijk", LU: "Luxemburg" };
+                  return c.split("/").map((p) => map[p.trim()] ?? p.trim());
+                };
+                const pu = expand(pickupGeo?.country);
+                const dr = expand(dropoffGeo?.country);
+                const overlap = pu.filter((c) => dr.includes(c));
+                let drive: string[];
+                if (pu.length > 1 && dr.length > 1) drive = overlap.length ? overlap : Array.from(new Set([...pu, ...dr]));
+                else if (pu.length > 1) drive = overlap.length ? overlap : dr;
+                else if (dr.length > 1) drive = overlap.length ? overlap : pu;
+                else drive = Array.from(new Set([...pu, ...dr]));
+                const beInvolved = drive.includes("België");
                 if (!beInvolved) return null;
                 return (
                   <div className="mt-4 p-4 border border-brass-gold/40 bg-brass-gold/5">
