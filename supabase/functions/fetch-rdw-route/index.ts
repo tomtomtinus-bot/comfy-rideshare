@@ -274,14 +274,72 @@ Deno.serve(async (req) => {
       await Promise.all(batches.slice(i, i + CONCURRENCY).map(fetchBatch));
     }
 
-    // 7) Stitch in routevolgorde + RD->WGS84
+    // 7) Stitch per segment, trim head/tail naar exacte start/eind, dan RD->WGS84
+    const projectOnPolyline = (
+      poly: Array<[number, number]>,
+      P: [number, number],
+    ) => {
+      let best = { edge: 0, t: 0, pt: poly[0] as [number, number], dist: Infinity };
+      for (let i = 0; i < poly.length - 1; i++) {
+        const [ax, ay] = poly[i];
+        const [bx, by] = poly[i + 1];
+        const dx = bx - ax, dy = by - ay;
+        const len2 = dx * dx + dy * dy;
+        let t = len2 === 0 ? 0 : ((P[0] - ax) * dx + (P[1] - ay) * dy) / len2;
+        if (t < 0) t = 0;
+        else if (t > 1) t = 1;
+        const sx = ax + t * dx, sy = ay + t * dy;
+        const ddx = P[0] - sx, ddy = P[1] - sy;
+        const d = ddx * ddx + ddy * ddy;
+        if (d < best.dist) best = { edge: i, t, pt: [sx, sy], dist: d };
+      }
+      return best;
+    };
+
+    const trimSegment = (
+      poly: Array<[number, number]>,
+      startPt: [number, number] | null,
+      endPt: [number, number] | null,
+    ): Array<[number, number]> => {
+      if (poly.length < 2) return poly;
+      let s = { edge: 0, t: 0, pt: poly[0] as [number, number] };
+      let e = { edge: poly.length - 2, t: 1, pt: poly[poly.length - 1] as [number, number] };
+      if (startPt) {
+        const p = projectOnPolyline(poly, startPt);
+        s = { edge: p.edge, t: p.t, pt: p.pt };
+      }
+      if (endPt) {
+        const p = projectOnPolyline(poly, endPt);
+        e = { edge: p.edge, t: p.t, pt: p.pt };
+        if (e.edge < s.edge || (e.edge === s.edge && e.t < s.t)) {
+          e = { edge: poly.length - 2, t: 1, pt: poly[poly.length - 1] as [number, number] };
+        }
+      }
+      const out: Array<[number, number]> = [s.pt];
+      for (let i = s.edge + 1; i <= e.edge; i++) out.push(poly[i]);
+      out.push(e.pt);
+      return out;
+    };
+
     const out: Array<[number, number]> = [];
     let lastKey = "";
-    for (const step of steps) {
-      const rd = geomMap.get(step.linkId);
-      if (!rd) continue;
-      const ordered = step.direction === 1 ? [...rd].reverse() : rd;
-      for (const [x, y] of ordered) {
+    for (const seg of segments) {
+      const segPoly: Array<[number, number]> = [];
+      let prevKey = "";
+      for (const step of seg.links) {
+        const rd = geomMap.get(step.linkId);
+        if (!rd || rd.length === 0) continue;
+        const ordered = step.direction === 1 ? [...rd].reverse() : rd;
+        for (const [x, y] of ordered) {
+          const k = `${x.toFixed(3)},${y.toFixed(3)}`;
+          if (k === prevKey) continue;
+          segPoly.push([x, y]);
+          prevKey = k;
+        }
+      }
+      if (segPoly.length === 0) continue;
+      const trimmed = trimSegment(segPoly, seg.startPt, seg.endPt);
+      for (const [x, y] of trimmed) {
         const [lon, lat] = rdToWgs84(x, y);
         const key = `${lon.toFixed(6)},${lat.toFixed(6)}`;
         if (key === lastKey) continue;
@@ -305,6 +363,7 @@ Deno.serve(async (req) => {
         points: out.length,
         linksFetched: geomMap.size,
         linksTotal: uniqueIds.length,
+        segments: segments.length,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
