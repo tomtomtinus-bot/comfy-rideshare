@@ -23,38 +23,60 @@ export const Footer = () => {
           </div>
           <p className="text-sm leading-relaxed">{t("home.footer.tagline")}</p>
         </div>
-        <div className="grid grid-cols-2 gap-12 md:gap-16">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 md:gap-16">
+          <div className="space-y-4">
+            <p className="text-parchment font-bold uppercase tracking-widest text-xs">
+              ViaCust
+            </p>
+            <ul className="text-sm space-y-2">
+              <li>
+                <Link to="/hoe-werkt-viacust" className="hover:text-brass-gold transition-colors">
+                  Over ViaCust
+                </Link>
+              </li>
+              <li>
+                <Link to="/hoe-werkt-viacust" className="hover:text-brass-gold transition-colors">
+                  Hoe werkt het?
+                </Link>
+              </li>
+              <li>
+                <Link to="/wat-kost-viacust" className="hover:text-brass-gold transition-colors">
+                  Tarieven
+                </Link>
+              </li>
+            </ul>
+          </div>
           <div className="space-y-4">
             <p className="text-parchment font-bold uppercase tracking-widest text-xs">
               {t("home.footer.legal")}
             </p>
             <ul className="text-sm space-y-2">
               <li>
-                <Link to="/privacy" className="hover:text-brass-gold transition-colors">
-                  {t("home.footer.privacy")}
+                <Link to="/voorwaarden" className="hover:text-brass-gold transition-colors">
+                  Algemene Voorwaarden
                 </Link>
               </li>
               <li>
-                <Link to="/voorwaarden" className="hover:text-brass-gold transition-colors">
-                  {t("home.footer.terms")}
+                <Link to="/privacy" className="hover:text-brass-gold transition-colors">
+                  Privacybeleid
                 </Link>
               </li>
               <li>
                 <a href="mailto:contact@viacust.com" className="hover:text-brass-gold transition-colors">
-                  {t("home.footer.contact")}
+                  Contact
                 </a>
               </li>
             </ul>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-2 md:col-span-1">
             <p className="text-parchment font-bold uppercase tracking-widest text-xs">
               {t("home.footer.activeIn")}
             </p>
             <ul className="text-sm space-y-2 tabular-nums">
-              <li>{t("home.footer.nl")}</li>
-              <li>{t("home.footer.be")}</li>
-              <li>{t("home.footer.de")}</li>
-              <li>{t("home.footer.fr")}</li>
+              <li>🇳🇱 Nederland</li>
+              <li>🇧🇪 België</li>
+              <li>🇩🇪 Duitsland</li>
+              <li>🇫🇷 Frankrijk</li>
             </ul>
           </div>
         </div>
