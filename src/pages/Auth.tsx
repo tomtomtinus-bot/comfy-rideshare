@@ -216,6 +216,17 @@ const Auth = () => {
               </button>
             </form>
           ) : (
+            <>
+            {mode === "login" && bioReady && (
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={busy}
+                className="w-full mb-4 px-6 py-4 border-2 border-brass-deep text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-60"
+              >
+                🔒 Inloggen met vingerafdruk / Face ID
+              </button>
+            )}
             <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
               {mode === "signup" && (
                 <>
