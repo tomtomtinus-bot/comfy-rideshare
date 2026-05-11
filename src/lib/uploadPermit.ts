@@ -1,8 +1,7 @@
-// Upload + parse RDW ontheffing PDF en sla op in storage + permits + permit_routes.
+// Upload RDW ontheffing PDF en sla het handmatig ingevulde ontheffingnummer op.
 // Hergebruikt vanuit RequestRide (inline upload) en Permits-pagina.
 
 import { supabase } from "@/integrations/supabase/client";
-import { parsePermitPdf, type ParsedPermit } from "@/lib/permitParser";
 
 export interface UploadedPermit {
   id: string;
@@ -12,16 +11,15 @@ export interface UploadedPermit {
   routes_count: number;
 }
 
-export async function uploadPermitPdf(file: File, userId: string): Promise<UploadedPermit> {
-  // Lees bestand één keer in als ArrayBuffer. Op oudere iOS Safari versies
-  // crasht het direct gebruik van een File-object (ReadableStream async iterator
-  // niet ondersteund) bij zowel pdfjs als supabase storage upload.
-  const arrayBuffer = await file.arrayBuffer();
-  const parsed: ParsedPermit = await parsePermitPdf(arrayBuffer);
-  if (!parsed.permitNumber) {
-    throw new Error("Geen ontheffingnummer gevonden in PDF");
+export async function uploadPermitPdf(file: File, userId: string, permitNumber: string): Promise<UploadedPermit> {
+  const cleanPermitNumber = permitNumber.trim();
+  if (!cleanPermitNumber) {
+    throw new Error("Vul eerst het ontheffingnummer in");
   }
 
+  // Lees bestand één keer in als ArrayBuffer zodat oudere iOS Safari versies
+  // geen File/ReadableStream pad hoeven te gebruiken bij de upload.
+  const arrayBuffer = await file.arrayBuffer();
   const safeName = file.name
     .normalize("NFKD")
     .replace(/[^\w.\-]+/g, "_")
@@ -41,18 +39,14 @@ export async function uploadPermitPdf(file: File, userId: string): Promise<Uploa
     .from("permits")
     .insert({
       client_id: userId,
-      permit_number: parsed.permitNumber,
-      reference: parsed.reference,
-      carrier: parsed.carrier,
-      cargo: parsed.cargo,
-      valid_from: parsed.validFrom,
-      valid_to: parsed.validTo,
-      max_length_m: parsed.maxLengthM,
-      max_width_m: parsed.maxWidthM,
-      max_height_m: parsed.maxHeightM,
-      max_weight_kg: parsed.maxWeightKg,
+      permit_number: cleanPermitNumber,
       pdf_path: path,
-      raw_data: parsed as any,
+      raw_data: {
+        upload_only: true,
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type || "application/pdf",
+      } as any,
     })
     .select()
     .single();
@@ -62,23 +56,11 @@ export async function uploadPermitPdf(file: File, userId: string): Promise<Uploa
     throw insErr;
   }
 
-  if (parsed.routes.length > 0) {
-    const rowsToInsert = parsed.routes.map((r) => ({
-      permit_id: ins.id,
-      route_index: r.routeIndex,
-      loaded: r.loaded,
-      origin: r.origin,
-      destination: r.destination,
-      waypoints: r.waypoints as any,
-    }));
-    await supabase.from("permit_routes").insert(rowsToInsert);
-  }
-
   return {
     id: ins.id,
-    permit_number: parsed.permitNumber,
-    carrier: parsed.carrier ?? null,
+    permit_number: cleanPermitNumber,
+    carrier: null,
     pdf_path: path,
-    routes_count: parsed.routes.length,
+    routes_count: 0,
   };
 }
