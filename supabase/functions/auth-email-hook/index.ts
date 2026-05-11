@@ -248,6 +248,16 @@ async function handleWebhook(req: Request): Promise<Response> {
     newEmail: payload.data.new_email,
   }
 
+  if (emailType === 'recovery') {
+    console.log('Built recovery URL', {
+      email: payload.data.email,
+      hasTokenHash: Boolean(payload.data.token_hash),
+      hasToken: Boolean(payload.data.token),
+      usesDirectRecoveryUrl: templateProps.confirmationUrl.includes('token_hash=') && templateProps.confirmationUrl.includes('type=recovery'),
+      run_id,
+    })
+  }
+
   // Render React Email to HTML and plain text
   const html = await renderAsync(React.createElement(EmailTemplate, templateProps))
   const text = await renderAsync(React.createElement(EmailTemplate, templateProps), {
