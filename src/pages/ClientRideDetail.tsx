@@ -43,6 +43,8 @@ interface RideDetail {
     phone: string | null;
     base_city: string | null;
     vehicle_type: string | null;
+    cert_verified_countries: string[] | null;
+    languages: string[] | null;
   }>;
   permit: {
     id: string;
