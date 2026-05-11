@@ -175,48 +175,10 @@ const ClientDashboard = () => {
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
   const [escortNames, setEscortNames] = useState<Record<string, string>>({});
-  const [bundleMode, setBundleMode] = useState(false);
-  const [selectedRides, setSelectedRides] = useState<Set<string>>(new Set());
-  const [bundleModalOpen, setBundleModalOpen] = useState(false);
-  const [bundleLabel, setBundleLabel] = useState("");
-  const [bundling, setBundling] = useState(false);
-
-  const toggleSelected = (id: string) =>
-    setSelectedRides((s) => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-
-  const submitBundle = async () => {
-    if (selectedRides.size < 2) return toast.error("Selecteer minstens 2 ritten");
-    if (bundleLabel.trim().length < 2) return toast.error("Geef het pakket een naam");
-    setBundling(true);
-    const ids = Array.from(selectedRides);
-    const { data, error } = await supabase.rpc("bundle_rides", {
-      _ride_ids: ids,
-      _label: bundleLabel.trim(),
-    });
-    setBundling(false);
-    if (error) return toast.error(error.message);
-    const newBundleId = data as unknown as string;
-    setRides((prev) =>
-      prev.map((r) =>
-        ids.includes(r.id) ? { ...r, bundle_id: newBundleId, bundle_label: bundleLabel.trim() } : r,
-      ),
-    );
-    toast.success(`Pakket "${bundleLabel.trim()}" aangemaakt (${ids.length} ritten)`);
-    setBundleModalOpen(false);
-    setBundleMode(false);
-    setSelectedRides(new Set());
-    setBundleLabel("");
-  };
-
-  const removeFromBundle = async (rideId: string) => {
-    const { error } = await supabase.rpc("unbundle_ride", { _ride_id: rideId });
-    if (error) return toast.error(error.message);
-    setRides((prev) => prev.map((r) => (r.id === rideId ? { ...r, bundle_id: null, bundle_label: null } : r)));
-    toast.success("Rit uit pakket gehaald");
+  const navigate = useNavigate();
+  const addRideToBundle = (r: RideRow) => {
+    if (!r.bundle_id || !r.bundle_label) return;
+    navigate(`/aanvragen?bundle=${r.bundle_id}&label=${encodeURIComponent(r.bundle_label)}`);
   };
 
   useEffect(() => {
