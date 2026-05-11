@@ -33,6 +33,8 @@ interface RideDetail {
     num_escorts: number;
     drivers: { name: string; phone: string }[] | null;
     license_plates: string[] | null;
+    bundle_id?: string | null;
+    bundle_label?: string | null;
   };
   client: {
     full_name: string | null;
@@ -106,6 +108,17 @@ const Inner = () => {
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [bundleSiblings, setBundleSiblings] = useState<Array<{
+    ride_id: string;
+    assignment_id: string;
+    assignment_status: string;
+    pickup_city: string;
+    dropoff_city: string;
+    scheduled_at: string;
+    interest_expressed_at: string | null;
+    broadcast_closes_at: string | null;
+  }>>([]);
+  const [bundleBusy, setBundleBusy] = useState(false);
 
   const load = async () => {
     if (!id) return;
@@ -114,6 +127,15 @@ const Inner = () => {
     if (error) { setError(error.message); setLoading(false); return; }
     const detail = res as unknown as RideDetail;
     setData(detail);
+
+    if (detail?.ride?.bundle_id) {
+      const { data: sibs } = await supabase.rpc("get_bundle_rides_for_escort", {
+        _bundle_id: detail.ride.bundle_id,
+      });
+      setBundleSiblings(((sibs as any[]) ?? []).filter((s) => s.ride_id !== detail.ride.id));
+    } else {
+      setBundleSiblings([]);
+    }
 
     if (detail?.permit?.pdf_path) {
       const { data: signed } = await supabase.storage
@@ -195,6 +217,100 @@ const Inner = () => {
         </h1>
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
+
+      {ride.bundle_id && ride.bundle_label && (
+        (() => {
+          const allInvited = [
+            ...(myAssignment ? [{
+              ride_id: ride.id,
+              assignment_id: myAssignment.id,
+              assignment_status: viewer_status ?? "invited",
+              pickup_city: ride.pickup_city,
+              dropoff_city: ride.dropoff_city,
+              scheduled_at: ride.scheduled_at,
+              interest_expressed_at: null as string | null,
+            }] : []),
+            ...bundleSiblings,
+          ];
+          const pendingInvites = allInvited.filter(
+            (a) => a.assignment_status === "invited" && !a.interest_expressed_at,
+          );
+          const handleAcceptAll = async () => {
+            setBundleBusy(true);
+            let okCount = 0;
+            for (const a of pendingInvites) {
+              const { error } = await supabase.rpc("express_ride_interest", {
+                _assignment_id: a.assignment_id,
+              });
+              if (!error) okCount++;
+            }
+            setBundleBusy(false);
+            if (okCount > 0) toast.success(`Beschikbaar gemeld voor ${okCount} ritten in dit pakket.`);
+            else toast.error("Geen ritten beschikbaar om te melden.");
+            load();
+          };
+          return (
+            <section className="bg-brass-gold/10 border-l-4 border-brass-gold p-5 md:p-6">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">
+                    📦 Onderdeel van pakket
+                  </p>
+                  <h2 className="font-display text-xl text-brass-deep italic mb-1">{ride.bundle_label}</h2>
+                  <p className="text-sm text-brass-deep/70">
+                    Deze rit hoort bij {bundleSiblings.length + 1} ritten van dezelfde opdrachtgever. U kunt zich los of voor het hele pakket beschikbaar melden.
+                  </p>
+                </div>
+                {pendingInvites.length >= 2 && (
+                  <button
+                    onClick={handleAcceptAll}
+                    disabled={bundleBusy}
+                    className="px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold hover:text-brass-deep transition-colors disabled:opacity-50 shrink-0"
+                  >
+                    {bundleBusy ? "Bezig…" : `Meld beschikbaar voor hele pakket (${pendingInvites.length})`}
+                  </button>
+                )}
+              </div>
+              {bundleSiblings.length > 0 && (
+                <ul className="mt-4 grid gap-2">
+                  {bundleSiblings.map((s) => (
+                    <li key={s.assignment_id}>
+                      <Link
+                        to={`/opdracht/${s.ride_id}`}
+                        className="flex items-center gap-3 bg-card px-4 py-3 hover:bg-parchment/40 transition-colors"
+                      >
+                        <span className="text-xs tabular-nums text-brass-deep/70 w-32 shrink-0">
+                          {new Date(s.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                        </span>
+                        <span className="flex-1 truncate text-sm font-medium">
+                          {s.pickup_city} <span className="text-brass-gold mx-1">→</span> {s.dropoff_city}
+                        </span>
+                        <span
+                          className={
+                            "text-[10px] uppercase tracking-widest font-semibold " +
+                            (s.assignment_status === "accepted"
+                              ? "text-emerald-700"
+                              : s.interest_expressed_at
+                                ? "text-brass-gold"
+                                : "text-amber-700")
+                          }
+                        >
+                          {s.assignment_status === "accepted"
+                            ? "geaccepteerd"
+                            : s.interest_expressed_at
+                              ? "beschikbaar gemeld"
+                              : "uitgenodigd"}
+                        </span>
+                        <span className="text-brass-gold shrink-0">›</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          );
+        })()
+      )}
 
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
