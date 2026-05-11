@@ -1,9 +1,9 @@
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/site/Hero";
+import { ThreePillars } from "@/components/site/ThreePillars";
 import { ValueClient } from "@/components/site/ValueClient";
 import { ValueEscort } from "@/components/site/ValueEscort";
-import { UspGoogle } from "@/components/site/UspGoogle";
-import { HowItWorks } from "@/components/site/HowItWorks";
+import { SocialProof } from "@/components/site/SocialProof";
 import { Footer } from "@/components/site/Footer";
 
 const Index = () => {
@@ -12,10 +12,10 @@ const Index = () => {
       <Nav />
       <main>
         <Hero />
+        <ThreePillars />
         <ValueClient />
         <ValueEscort />
-        <UspGoogle />
-        <HowItWorks />
+        <SocialProof />
       </main>
       <Footer />
     </div>
