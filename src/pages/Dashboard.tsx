@@ -791,10 +791,14 @@ const EscortDashboard = () => {
         const renderItem = (a: typeof items[number]) => {
           const submitted = !!a.hours_submitted_at;
           const isInvited = a.status === "invited";
+          const expressed = !!a.interest_expressed_at;
           const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
-          const expired = isInvited && minsLeft === 0;
+          const expired = isInvited && minsLeft === 0 && !expressed;
           const accepted = a.status === "accepted";
           const clickable = accepted || isInvited;
+          const closesInMin = expressed && a.broadcast_closes_at
+            ? Math.max(0, Math.ceil((new Date(a.broadcast_closes_at).getTime() - Date.now()) / 60000))
+            : 0;
           return (
             <li
               key={a.id}
@@ -816,7 +820,11 @@ const EscortDashboard = () => {
                   <StatusBadge status={a.status} />
                 </div>
                 <div className="shrink-0">
-                  {isInvited && !expired ? (
+                  {isInvited && expressed ? (
+                    <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap tabular-nums">
+                      ✓ Beschikbaar gemeld · selectie {closesInMin > 0 ? `binnen ${closesInMin} min` : "nu"}
+                    </span>
+                  ) : isInvited && !expired ? (
                     <div className="flex items-center gap-2">
                       {hasGoogleConflict(a.ride.scheduled_at) && (
                         <span
@@ -832,8 +840,9 @@ const EscortDashboard = () => {
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
                         className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                        title="Binnen 5 min wordt de beste match gekozen"
                       >
-                        {t("dash.accept")}
+                        Ik ben beschikbaar
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
