@@ -74,7 +74,11 @@ export function MiniMap({ address, label, className, lat, lng }: Props) {
           {error ? <span className="text-destructive">{error}</span> : <span className="truncate">{address}</span>}
         </div>
         <a
-          href={googleMapsDirectionsUrl(mapsTarget, mapsTarget)}
+          href={
+            lat != null && lng != null
+              ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+              : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+          }
           target="_blank"
           rel="noopener noreferrer"
           className="text-[10px] uppercase tracking-widest text-brass-gold font-bold hover:underline shrink-0 ml-2"
