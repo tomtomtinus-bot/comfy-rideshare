@@ -175,48 +175,10 @@ const ClientDashboard = () => {
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
   const [escortNames, setEscortNames] = useState<Record<string, string>>({});
-  const [bundleMode, setBundleMode] = useState(false);
-  const [selectedRides, setSelectedRides] = useState<Set<string>>(new Set());
-  const [bundleModalOpen, setBundleModalOpen] = useState(false);
-  const [bundleLabel, setBundleLabel] = useState("");
-  const [bundling, setBundling] = useState(false);
-
-  const toggleSelected = (id: string) =>
-    setSelectedRides((s) => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-
-  const submitBundle = async () => {
-    if (selectedRides.size < 2) return toast.error("Selecteer minstens 2 ritten");
-    if (bundleLabel.trim().length < 2) return toast.error("Geef het pakket een naam");
-    setBundling(true);
-    const ids = Array.from(selectedRides);
-    const { data, error } = await supabase.rpc("bundle_rides", {
-      _ride_ids: ids,
-      _label: bundleLabel.trim(),
-    });
-    setBundling(false);
-    if (error) return toast.error(error.message);
-    const newBundleId = data as unknown as string;
-    setRides((prev) =>
-      prev.map((r) =>
-        ids.includes(r.id) ? { ...r, bundle_id: newBundleId, bundle_label: bundleLabel.trim() } : r,
-      ),
-    );
-    toast.success(`Pakket "${bundleLabel.trim()}" aangemaakt (${ids.length} ritten)`);
-    setBundleModalOpen(false);
-    setBundleMode(false);
-    setSelectedRides(new Set());
-    setBundleLabel("");
-  };
-
-  const removeFromBundle = async (rideId: string) => {
-    const { error } = await supabase.rpc("unbundle_ride", { _ride_id: rideId });
-    if (error) return toast.error(error.message);
-    setRides((prev) => prev.map((r) => (r.id === rideId ? { ...r, bundle_id: null, bundle_label: null } : r)));
-    toast.success("Rit uit pakket gehaald");
+  const navigate = useNavigate();
+  const addRideToBundle = (r: RideRow) => {
+    if (!r.bundle_id || !r.bundle_label) return;
+    navigate(`/aanvragen?bundle=${r.bundle_id}&label=${encodeURIComponent(r.bundle_label)}`);
   };
 
   useEffect(() => {
@@ -334,21 +296,6 @@ const ClientDashboard = () => {
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
-            onClick={() => {
-              setBundleMode((v) => !v);
-              setSelectedRides(new Set());
-            }}
-            disabled={rides.length === 0}
-            className={
-              "px-6 py-3 uppercase tracking-widest text-xs font-semibold transition-colors disabled:opacity-50 " +
-              (bundleMode
-                ? "bg-brass-gold text-brass-deep border border-brass-gold"
-                : "border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment")
-            }
-          >
-            {bundleMode ? "Bundelen annuleren" : "Bundel ritten"}
-          </button>
-          <button
             onClick={() => setExportOpen((v) => !v)}
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
@@ -433,38 +380,13 @@ const ClientDashboard = () => {
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
-            const showCheckbox = bundleMode && bucketKey === "openstaand";
-            const checked = selectedRides.has(r.id);
             const inBundle = !!r.bundle_id;
+            const canExtendBundle = inBundle && (bucketKey === "openstaand" || bucketKey === "geaccepteerd");
             return (
               <li key={r.id} className="relative">
-                {showCheckbox && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleSelected(r.id);
-                    }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-6 h-6 border-2 border-brass-deep flex items-center justify-center bg-card"
-                    aria-label="Selecteer voor pakket"
-                  >
-                    {checked && <span className="text-brass-deep font-bold leading-none">✓</span>}
-                  </button>
-                )}
                 <Link
                   to={`/rit/${r.id}`}
-                  onClick={(e) => {
-                    if (showCheckbox) {
-                      e.preventDefault();
-                      toggleSelected(r.id);
-                    }
-                  }}
-                  className={
-                    "flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors " +
-                    (showCheckbox ? "pl-12 " : "") +
-                    (checked ? "ring-2 ring-brass-gold" : "")
-                  }
+                  className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
                 >
                   <div className="w-28 shrink-0">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
@@ -480,17 +402,17 @@ const ClientDashboard = () => {
                         <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
                           📦 {r.bundle_label}
                         </span>
-                        {!showCheckbox && bucketKey === "openstaand" && (
+                        {canExtendBundle && (
                           <button
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              removeFromBundle(r.id);
+                              addRideToBundle(r);
                             }}
-                            className="text-[10px] uppercase tracking-widest text-brass-deep/50 hover:text-brass-deep underline"
+                            className="text-[10px] uppercase tracking-widest text-brass-gold hover:text-brass-deep underline font-semibold"
                           >
-                            uit pakket
+                            + extra rit aan pakket
                           </button>
                         )}
                       </p>
@@ -549,82 +471,6 @@ const ClientDashboard = () => {
         );
       })()}
 
-      {bundleMode && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-brass-deep text-parchment shadow-2xl">
-          <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
-            <p className="text-sm">
-              <span className="font-semibold tabular-nums">{selectedRides.size}</span> rit
-              {selectedRides.size === 1 ? "" : "ten"} geselecteerd voor pakket
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setBundleMode(false);
-                  setSelectedRides(new Set());
-                }}
-                className="px-5 py-2 text-xs uppercase tracking-widest font-semibold border border-parchment/40 hover:bg-parchment/10"
-              >
-                Annuleer
-              </button>
-              <button
-                disabled={selectedRides.size < 2}
-                onClick={() => setBundleModalOpen(true)}
-                className="px-6 py-2 text-xs uppercase tracking-widest font-semibold bg-brass-gold text-brass-deep hover:bg-parchment disabled:opacity-40"
-              >
-                Bundel {selectedRides.size > 0 ? selectedRides.size : ""} ritten
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {bundleModalOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-brass-deep/60 flex items-center justify-center p-4"
-          onClick={() => !bundling && setBundleModalOpen(false)}
-        >
-          <div
-            className="bg-card w-full max-w-md p-6 shadow-etched"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="font-display text-2xl text-brass-deep italic mb-2">Pakket aanmaken</h2>
-            <p className="text-sm text-brass-deep/70 mb-5">
-              Geef het pakket een herkenbare naam (bijv. transportreferentie, klant of project). Begeleiders zien dat deze ritten bij elkaar horen.
-            </p>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
-              Pakketnaam
-            </label>
-            <input
-              type="text"
-              value={bundleLabel}
-              onChange={(e) => setBundleLabel(e.target.value)}
-              placeholder="bijv. Transport TX-1042"
-              maxLength={80}
-              autoFocus
-              className="w-full border border-brass-deep/30 px-3 py-2 text-sm bg-background mb-4"
-            />
-            <p className="text-xs text-brass-deep/60 mb-5">
-              {selectedRides.size} ritten worden gekoppeld aan dit pakket.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setBundleModalOpen(false)}
-                disabled={bundling}
-                className="px-5 py-2 text-xs uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-deep"
-              >
-                Annuleer
-              </button>
-              <button
-                onClick={submitBundle}
-                disabled={bundling}
-                className="px-6 py-2 text-xs uppercase tracking-widest font-semibold bg-brass-deep text-parchment hover:bg-brass-gold disabled:opacity-50"
-              >
-                {bundling ? "Bezig…" : "Bevestig pakket"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

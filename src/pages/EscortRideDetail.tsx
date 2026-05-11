@@ -103,7 +103,9 @@ const Inner = () => {
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null } | null>(null);
+  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null; bundle_priority_offer: boolean; responds_by: string; status: string } | null>(null);
+  const [declineReason, setDeclineReason] = useState("");
+  const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -149,7 +151,7 @@ const Inner = () => {
       setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
-        .select("id, cancel_request_status, cancel_request_reason")
+        .select("id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status")
         .eq("ride_id", id)
         .eq("escort_id", u.user.id)
         .maybeSingle();
@@ -157,6 +159,9 @@ const Inner = () => {
         id: ra.id,
         cancel_request_status: (ra as any).cancel_request_status ?? "none",
         cancel_request_reason: (ra as any).cancel_request_reason ?? null,
+        bundle_priority_offer: (ra as any).bundle_priority_offer ?? false,
+        responds_by: (ra as any).responds_by,
+        status: (ra as any).status,
       });
     }
     setLoading(false);
@@ -218,99 +223,94 @@ const Inner = () => {
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
 
-      {ride.bundle_id && ride.bundle_label && (
-        (() => {
-          const allInvited = [
-            ...(myAssignment ? [{
-              ride_id: ride.id,
-              assignment_id: myAssignment.id,
-              assignment_status: viewer_status ?? "invited",
-              pickup_city: ride.pickup_city,
-              dropoff_city: ride.dropoff_city,
-              scheduled_at: ride.scheduled_at,
-              interest_expressed_at: null as string | null,
-            }] : []),
-            ...bundleSiblings,
-          ];
-          const pendingInvites = allInvited.filter(
-            (a) => a.assignment_status === "invited" && !a.interest_expressed_at,
-          );
-          const handleAcceptAll = async () => {
-            setBundleBusy(true);
-            let okCount = 0;
-            for (const a of pendingInvites) {
-              const { error } = await supabase.rpc("express_ride_interest", {
-                _assignment_id: a.assignment_id,
-              });
-              if (!error) okCount++;
-            }
-            setBundleBusy(false);
-            if (okCount > 0) toast.success(`Beschikbaar gemeld voor ${okCount} ritten in dit pakket.`);
-            else toast.error("Geen ritten beschikbaar om te melden.");
-            load();
-          };
-          return (
-            <section className="bg-brass-gold/10 border-l-4 border-brass-gold p-5 md:p-6">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">
-                    📦 Onderdeel van pakket
-                  </p>
-                  <h2 className="font-display text-xl text-brass-deep italic mb-1">{ride.bundle_label}</h2>
-                  <p className="text-sm text-brass-deep/70">
-                    Deze rit hoort bij {bundleSiblings.length + 1} ritten van dezelfde opdrachtgever. U kunt zich los of voor het hele pakket beschikbaar melden.
-                  </p>
-                </div>
-                {pendingInvites.length >= 2 && (
-                  <button
-                    onClick={handleAcceptAll}
-                    disabled={bundleBusy}
-                    className="px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold hover:text-brass-deep transition-colors disabled:opacity-50 shrink-0"
-                  >
-                    {bundleBusy ? "Bezig…" : `Meld beschikbaar voor hele pakket (${pendingInvites.length})`}
-                  </button>
+      {ride.bundle_id && ride.bundle_label && (() => {
+        const isPriority = !!myAssignment?.bundle_priority_offer && myAssignment.status === "invited";
+        const expired = myAssignment?.responds_by ? new Date(myAssignment.responds_by).getTime() < Date.now() : false;
+        const acceptOffer = async () => {
+          if (!myAssignment) return;
+          setBundleBusy(true);
+          const { error } = await supabase.rpc("accept_bundle_priority_offer", { _assignment_id: myAssignment.id });
+          setBundleBusy(false);
+          if (error) return toast.error(error.message);
+          toast.success("Vervolgrit geaccepteerd.");
+          load();
+        };
+        const declineOffer = async () => {
+          if (!myAssignment) return;
+          setBundleBusy(true);
+          const { error } = await supabase.rpc("decline_bundle_priority_offer", {
+            _assignment_id: myAssignment.id,
+            _reason: declineReason.trim() || null,
+          });
+          setBundleBusy(false);
+          if (error) return toast.error(error.message);
+          toast.success("Geweigerd. Uw andere ritten in dit pakket blijven staan.");
+          setShowDeclineForm(false);
+          setDeclineReason("");
+          load();
+        };
+        return (
+          <section className="bg-brass-gold/10 border-l-4 border-brass-gold p-5 md:p-6">
+            <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">
+              📦 {isPriority ? "Vervolgrit binnen pakket" : "Onderdeel van pakket"}
+            </p>
+            <h2 className="font-display text-xl text-brass-deep italic mb-2">{ride.bundle_label}</h2>
+            {isPriority ? (
+              <>
+                <p className="text-sm text-brass-deep/80 mb-4">
+                  U heeft al een geaccepteerde rit in dit pakket. Daarom krijgt u deze vervolgrit eerst exclusief aangeboden
+                  {!expired && myAssignment?.responds_by && (
+                    <> tot <span className="font-semibold tabular-nums">{new Date(myAssignment.responds_by).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</span></>
+                  )}.
+                  Daarna gaat het naar andere begeleiders. <strong>Weigeren of niets doen raakt uw andere geaccepteerde ritten in dit pakket niet.</strong>
+                </p>
+                {expired ? (
+                  <p className="text-sm text-amber-800">Aanbod verlopen.</p>
+                ) : !showDeclineForm ? (
+                  <div className="flex gap-3 flex-wrap">
+                    <button
+                      onClick={acceptOffer}
+                      disabled={bundleBusy}
+                      className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
+                    >
+                      ✓ Accepteer vervolgrit
+                    </button>
+                    <button
+                      onClick={() => setShowDeclineForm(true)}
+                      disabled={bundleBusy}
+                      className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
+                    >
+                      ✗ Niet voor mij
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <textarea
+                      value={declineReason}
+                      onChange={(e) => setDeclineReason(e.target.value)}
+                      rows={2}
+                      placeholder="Reden (optioneel)…"
+                      className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={declineOffer} disabled={bundleBusy} className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50">
+                        Weigeren bevestigen
+                      </button>
+                      <button onClick={() => { setShowDeclineForm(false); setDeclineReason(""); }} className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5">
+                        Terug
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </div>
-              {bundleSiblings.length > 0 && (
-                <ul className="mt-4 grid gap-2">
-                  {bundleSiblings.map((s) => (
-                    <li key={s.assignment_id}>
-                      <Link
-                        to={`/opdracht/${s.ride_id}`}
-                        className="flex items-center gap-3 bg-card px-4 py-3 hover:bg-parchment/40 transition-colors"
-                      >
-                        <span className="text-xs tabular-nums text-brass-deep/70 w-32 shrink-0">
-                          {new Date(s.scheduled_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
-                        </span>
-                        <span className="flex-1 truncate text-sm font-medium">
-                          {s.pickup_city} <span className="text-brass-gold mx-1">→</span> {s.dropoff_city}
-                        </span>
-                        <span
-                          className={
-                            "text-[10px] uppercase tracking-widest font-semibold " +
-                            (s.assignment_status === "accepted"
-                              ? "text-emerald-700"
-                              : s.interest_expressed_at
-                                ? "text-brass-gold"
-                                : "text-amber-700")
-                          }
-                        >
-                          {s.assignment_status === "accepted"
-                            ? "geaccepteerd"
-                            : s.interest_expressed_at
-                              ? "beschikbaar gemeld"
-                              : "uitgenodigd"}
-                        </span>
-                        <span className="text-brass-gold shrink-0">›</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          );
-        })()
-      )}
+              </>
+            ) : (
+              <p className="text-sm text-brass-deep/70">
+                Deze rit hoort bij een groter pakket van dezelfde opdrachtgever. Mogelijk komen er nog meer vervolgritten — die krijgt u dan eerst exclusief aangeboden.
+              </p>
+            )}
+          </section>
+        );
+      })()}
 
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

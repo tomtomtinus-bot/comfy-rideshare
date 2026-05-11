@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Trans, useTranslation } from "react-i18next";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -92,6 +92,12 @@ const RequestRideInner = () => {
   const { t } = useTranslation();
   const { user, isApproved } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const bundleCtx = useMemo(() => {
+    const id = searchParams.get("bundle");
+    const label = searchParams.get("label");
+    return id && label ? { id, label } : null;
+  }, [searchParams]);
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
 
