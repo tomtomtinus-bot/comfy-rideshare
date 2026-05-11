@@ -161,12 +161,18 @@ const RequestRideInner = () => {
 
   const handlePermitFile = async (file: File | null) => {
     if (!file || !user) return;
+    const permitNumber = form.permit_number.trim();
+    if (!permitNumber) {
+      toast.error(t("request.permitNumberRequired"));
+      return;
+    }
+
     setPermitUploading(true);
     try {
       toast.info(t("request.permitRead"));
-      const up = await uploadPermitPdf(file, user.id);
+      const up = await uploadPermitPdf(file, user.id, permitNumber);
       setUploadedPermit(up);
-      toast.success(t("request.permitUploaded", { nr: up.permit_number, n: up.routes_count }));
+      toast.success(t("request.permitUploaded", { nr: up.permit_number }));
     } catch (e: any) {
       toast.error(e?.message ?? t("request.uploadFail"));
     } finally {
@@ -554,7 +560,7 @@ const RequestRideInner = () => {
                         {uploadedPermit.carrier ? ` · ${uploadedPermit.carrier}` : ""}
                       </p>
                       <p className="text-[11px] text-brass-deep/60">
-                        {t("request.permitAttached", { n: uploadedPermit.routes_count })}
+                        {t("request.permitAttached")}
                       </p>
                     </div>
                     <button
