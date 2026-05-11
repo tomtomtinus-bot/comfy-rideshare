@@ -49,6 +49,7 @@ const App = () => (
           <CookieConsent />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/aanvragen" element={<RequestRide />} />
