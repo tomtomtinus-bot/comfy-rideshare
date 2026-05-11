@@ -849,7 +849,7 @@ const EscortDashboard = () => {
                 <div className="shrink-0 hidden sm:block">
                   <StatusBadge status={a.status} />
                 </div>
-                <div className="shrink-0 w-full sm:w-auto sm:ml-auto flex justify-end"></div>
+                <div className="shrink-0 w-full sm:w-auto sm:ml-auto flex justify-end">
                   {isInvited && expressed ? (
                     <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap tabular-nums">
                       ✓ Beschikbaar gemeld · selectie {closesInMin > 0 ? `binnen ${closesInMin} min` : "nu"}
