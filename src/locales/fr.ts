@@ -202,6 +202,7 @@ const fr: Dict = {
     permitLabel: "Autorisation RDW (PDF)", permitParsing: "Téléversement en cours…",
     permitDrop: "Sélectionnez ou déposez un PDF d'autorisation RDW",
     permitAttached: "Le PDF sera lié à ce transport",
+    permitUploadHint: "Assurez-vous que le numéro d'autorisation figure dans le nom du fichier ou saisissez-le manuellement",
     permitRemove: "Supprimer l'autorisation", permitRead: "Téléversement de l'autorisation…",
     permitUploaded: "Autorisation {{nr}} jointe",
     uploadFail: "Échec du téléversement",
