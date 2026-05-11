@@ -18,18 +18,12 @@ export const Hero = () => {
           <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[40ch] mb-6 md:mb-8">
             {t("home.hero.body")}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex">
             <Link
-              to="/auth?role=begeleider"
+              to="/hoe-werkt-viacust"
               className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
             >
-              {t("home.hero.ctaEscort")}
-            </Link>
-            <Link
-              to="/aanvragen"
-              className="inline-block px-7 py-4 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:border-brass-gold hover:text-brass-gold transition-colors text-center"
-            >
-              {t("home.hero.ctaRequest")}
+              Hoe werkt ViaCust?
             </Link>
           </div>
         </div>
