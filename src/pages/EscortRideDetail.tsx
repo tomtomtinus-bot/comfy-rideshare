@@ -151,7 +151,7 @@ const Inner = () => {
       setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
-        .select("id, cancel_request_status, cancel_request_reason")
+        .select("id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status")
         .eq("ride_id", id)
         .eq("escort_id", u.user.id)
         .maybeSingle();
@@ -159,6 +159,9 @@ const Inner = () => {
         id: ra.id,
         cancel_request_status: (ra as any).cancel_request_status ?? "none",
         cancel_request_reason: (ra as any).cancel_request_reason ?? null,
+        bundle_priority_offer: (ra as any).bundle_priority_offer ?? false,
+        responds_by: (ra as any).responds_by,
+        status: (ra as any).status,
       });
     }
     setLoading(false);
