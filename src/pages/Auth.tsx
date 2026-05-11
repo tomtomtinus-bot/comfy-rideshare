@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -7,6 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import {
+  biometricAvailable,
+  hasStoredCredentials,
+  saveBiometricCredentials,
+  unlockWithBiometrics,
+  isNative,
+} from "@/lib/biometric";
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -23,6 +30,15 @@ const Auth = () => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("viacust_remember") !== "false";
   });
+  const [bioReady, setBioReady] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (!isNative()) return;
+      const ok = (await biometricAvailable()) && (await hasStoredCredentials());
+      setBioReady(ok);
+    })();
+  }, []);
 
   if (!loading && user) return <Navigate to={redirectTo} replace />;
 
@@ -39,6 +55,17 @@ const Auth = () => {
     password: z.string().min(1).max(72),
   });
 
+  const doSignIn = async (email: string, password: string) => {
+    try {
+      localStorage.setItem("viacust_remember", rememberMe ? "true" : "false");
+      sessionStorage.setItem("viacust_session_active", "1");
+    } catch {
+      // ignore storage errors
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return error;
+  };
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -48,20 +75,39 @@ const Auth = () => {
       return;
     }
     setBusy(true);
-    try {
-      localStorage.setItem("viacust_remember", rememberMe ? "true" : "false");
-      sessionStorage.setItem("viacust_session_active", "1");
-    } catch {
-      // ignore storage errors
+    const error = await doSignIn(parsed.data.email, parsed.data.password);
+    if (error) {
+      setBusy(false);
+      return toast.error(error.message);
     }
-    const { error } = await supabase.auth.signInWithPassword({
-      email: parsed.data.email,
-      password: parsed.data.password,
-    });
+    // Bied biometrische opslag aan op native apparaten
+    if (isNative() && (await biometricAvailable())) {
+      if (confirm("Voortaan inloggen met vingerafdruk of Face ID?")) {
+        try {
+          await saveBiometricCredentials(parsed.data.email, parsed.data.password);
+          toast.success("Biometrische login geactiveerd");
+        } catch {
+          // ignore
+        }
+      }
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
     navigate(redirectTo);
   };
+
+  const handleBiometricLogin = async () => {
+    setBusy(true);
+    const creds = await unlockWithBiometrics();
+    if (!creds) {
+      setBusy(false);
+      return;
+    }
+    const error = await doSignIn(creds.email, creds.password);
+    setBusy(false);
+    if (error) return toast.error("Login mislukt — log opnieuw in met je wachtwoord.");
+    navigate(redirectTo);
+  };
+
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -170,6 +216,17 @@ const Auth = () => {
               </button>
             </form>
           ) : (
+            <>
+            {mode === "login" && bioReady && (
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={busy}
+                className="w-full mb-4 px-6 py-4 border-2 border-brass-deep text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-60"
+              >
+                🔒 Inloggen met vingerafdruk / Face ID
+              </button>
+            )}
             <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
               {mode === "signup" && (
                 <>
@@ -249,6 +306,7 @@ const Auth = () => {
                 {busy ? t("auth.busy") : mode === "login" ? t("auth.login") : t("auth.signup")}
               </button>
             </form>
+            </>
           )}
 
           <button
