@@ -13,6 +13,7 @@ interface RideInvitationProps {
   dropoff?: string
   plannedAt?: string
   rideUrl?: string
+  acceptUrl?: string
 }
 
 const RideInvitationEmail = ({
@@ -21,6 +22,7 @@ const RideInvitationEmail = ({
   dropoff,
   plannedAt,
   rideUrl,
+  acceptUrl,
 }: RideInvitationProps) => (
   <Html lang="nl" dir="ltr">
     <Head />
@@ -46,11 +48,19 @@ const RideInvitationEmail = ({
           )}
         </Section>
 
+        {acceptUrl && (
+          <Button style={acceptButton} href={acceptUrl}>
+            ✓ Direct accepteren
+          </Button>
+        )}
         {rideUrl && (
           <Button style={button} href={rideUrl}>
             Open uitnodiging
           </Button>
         )}
+        <Text style={hint}>
+          Tip: gebruik "Direct accepteren" om in één klik te bevestigen — geen inlog nodig.
+        </Text>
 
         <Text style={footer}>
           — Het {SITE_NAME}-team
