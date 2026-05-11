@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Terms from "./pages/Terms.tsx";
 
 import Privacy from "./pages/Privacy.tsx";
+import Security from "./pages/Security.tsx";
 import Unsubscribe from "./pages/Unsubscribe.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
@@ -75,6 +76,7 @@ const App = () => (
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />
+            <Route path="/beveiliging" element={<Security />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
