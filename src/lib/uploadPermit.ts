@@ -13,7 +13,11 @@ export interface UploadedPermit {
 }
 
 export async function uploadPermitPdf(file: File, userId: string): Promise<UploadedPermit> {
-  const parsed: ParsedPermit = await parsePermitPdf(file);
+  // Lees bestand één keer in als ArrayBuffer. Op oudere iOS Safari versies
+  // crasht het direct gebruik van een File-object (ReadableStream async iterator
+  // niet ondersteund) bij zowel pdfjs als supabase storage upload.
+  const arrayBuffer = await file.arrayBuffer();
+  const parsed: ParsedPermit = await parsePermitPdf(arrayBuffer);
   if (!parsed.permitNumber) {
     throw new Error("Geen ontheffingnummer gevonden in PDF");
   }
@@ -26,7 +30,8 @@ export async function uploadPermitPdf(file: File, userId: string): Promise<Uploa
     .slice(-120);
   const path = `${userId}/${Date.now()}-${safeName || "ontheffing.pdf"}`;
 
-  const { error: upErr } = await supabase.storage.from("permits").upload(path, file, {
+  const pdfBlob = new Blob([arrayBuffer], { type: "application/pdf" });
+  const { error: upErr } = await supabase.storage.from("permits").upload(path, pdfBlob, {
     contentType: "application/pdf",
     upsert: false,
   });
