@@ -160,6 +160,7 @@ const Inner = () => {
   }>({ enabled: false, kind: "per_uur", tiers: [{ from: "0", to: "1.60", value: "0" }] });
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
+  const [languages, setLanguages] = useState<string[]>(["Nederlands"]);
 
   // Persoonlijk
   const [fullName, setFullName] = useState("");
