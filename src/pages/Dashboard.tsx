@@ -433,11 +433,38 @@ const ClientDashboard = () => {
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+            const showCheckbox = bundleMode && bucketKey === "openstaand";
+            const checked = selectedRides.has(r.id);
+            const inBundle = !!r.bundle_id;
             return (
-              <li key={r.id}>
+              <li key={r.id} className="relative">
+                {showCheckbox && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleSelected(r.id);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-6 h-6 border-2 border-brass-deep flex items-center justify-center bg-card"
+                    aria-label="Selecteer voor pakket"
+                  >
+                    {checked && <span className="text-brass-deep font-bold leading-none">✓</span>}
+                  </button>
+                )}
                 <Link
                   to={`/rit/${r.id}`}
-                  className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
+                  onClick={(e) => {
+                    if (showCheckbox) {
+                      e.preventDefault();
+                      toggleSelected(r.id);
+                    }
+                  }}
+                  className={
+                    "flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors " +
+                    (showCheckbox ? "pl-12 " : "") +
+                    (checked ? "ring-2 ring-brass-gold" : "")
+                  }
                 >
                   <div className="w-28 shrink-0">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
@@ -448,6 +475,26 @@ const ClientDashboard = () => {
                       <span className="text-brass-gold mx-2">→</span>
                       {r.dropoff_city}
                     </p>
+                    {inBundle && (
+                      <p className="mt-1 flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
+                          📦 {r.bundle_label}
+                        </span>
+                        {!showCheckbox && bucketKey === "openstaand" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeFromBundle(r.id);
+                            }}
+                            className="text-[10px] uppercase tracking-widest text-brass-deep/50 hover:text-brass-deep underline"
+                          >
+                            uit pakket
+                          </button>
+                        )}
+                      </p>
+                    )}
                   </div>
                   <div className="shrink-0 hidden sm:flex items-center gap-3">
                     {(r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
