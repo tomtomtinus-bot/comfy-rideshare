@@ -69,19 +69,25 @@ const FuelPrices = () => {
               const current = list[0];
               return (
                 <TabsContent key={c} value={c} className="mt-6">
-                  {current && (
-                    <div className="bg-brass-deep text-parchment p-6 mb-6 border border-brass-gold/30">
-                      <div className="text-xs uppercase tracking-widest opacity-70 mb-2">
-                        Huidige week — {LABEL[c]}
+                  {current && (() => {
+                    const ws = new Date(current.week_start);
+                    const we = new Date(ws);
+                    we.setDate(we.getDate() + 6);
+                    const fmt = (d: Date) => d.toLocaleDateString("nl-NL", { day: "2-digit", month: "short" });
+                    return (
+                      <div className="bg-brass-deep text-parchment p-6 mb-6 border border-brass-gold/30">
+                        <div className="text-xs uppercase tracking-widest opacity-70 mb-2">
+                          Afgelopen week ({fmt(ws)} — {fmt(we)}) · {LABEL[c]}
+                        </div>
+                        <div className="font-display text-4xl">
+                          € {Number(current.eur_per_liter).toFixed(3)}/L
+                        </div>
+                        <div className="text-xs opacity-70 mt-2">
+                          Gemiddelde van ma t/m zo · bron {current.source}
+                        </div>
                       </div>
-                      <div className="font-display text-4xl">
-                        € {Number(current.eur_per_liter).toFixed(3)}/L
-                      </div>
-                      <div className="text-xs opacity-70 mt-2">
-                        Weekstart {current.week_start} · bron {current.source}
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
