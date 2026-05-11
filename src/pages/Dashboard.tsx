@@ -835,11 +835,11 @@ const EscortDashboard = () => {
               onClick={clickable ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
               className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${clickable ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
             >
-              <div className="flex items-center gap-4 px-5 py-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4">
                 <div className="w-28 shrink-0">
                   <p className="font-medium tabular-nums text-sm">{fd2(a.ride.scheduled_at)}</p>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-[140px]">
                   <p className="font-medium truncate">
                     {a.ride.pickup_city}
                     <span className="text-brass-gold mx-2">→</span>
@@ -849,7 +849,7 @@ const EscortDashboard = () => {
                 <div className="shrink-0 hidden sm:block">
                   <StatusBadge status={a.status} />
                 </div>
-                <div className="shrink-0">
+                <div className="shrink-0 w-full sm:w-auto sm:ml-auto flex justify-end">
                   {isInvited && expressed ? (
                     <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap tabular-nums">
                       ✓ Beschikbaar gemeld · selectie {closesInMin > 0 ? `binnen ${closesInMin} min` : "nu"}
