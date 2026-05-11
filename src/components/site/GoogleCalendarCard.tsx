@@ -103,6 +103,45 @@ export const GoogleCalendarCard = () => {
     refresh();
   };
 
+  if (loading) return null;
+
+  if (status.connected) {
+    return (
+      <div className="flex items-center justify-between gap-3 flex-wrap border border-brass-deep/15 bg-card/60 px-4 py-2.5 mb-6 rounded-sm">
+        <div className="flex items-center gap-2 text-[11px] text-brass-deep/70">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-brass-gold shrink-0">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span className="font-semibold">Google Agenda</span>
+          {status.last_sync_at && (
+            <span className="text-brass-deep/45">
+              · laatst gesynchroniseerd {new Date(status.last_sync_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => sync(false)}
+            disabled={busy !== null}
+            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/55 hover:text-brass-deep transition-colors disabled:opacity-50"
+          >
+            {busy === "sync" ? t("google.syncing") : t("google.syncNow")}
+          </button>
+          <span className="text-brass-deep/20">·</span>
+          <button
+            type="button"
+            onClick={disconnect}
+            disabled={busy !== null}
+            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/45 hover:text-brass-deep transition-colors disabled:opacity-50"
+          >
+            {busy === "disconnect" ? t("google.disconnecting") : t("google.disconnect")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="border border-brass-deep/15 bg-card/60 p-4 md:p-5 mb-6 rounded-sm">
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -114,50 +153,15 @@ export const GoogleCalendarCard = () => {
           <p className="text-[11px] text-brass-deep/55 mt-1.5 max-w-xl leading-relaxed">
             {t("google.cardBody")}
           </p>
-          {!loading && status.connected && (
-            <p className="text-[10px] text-brass-deep/45 mt-2">
-              {t("google.connectedOn", {
-                date: status.connected_at ? t("google.onDate", { date: new Date(status.connected_at).toLocaleDateString(locale) }) : "",
-              })}
-              {status.last_sync_at && (
-                <>{t("google.lastSync", { date: new Date(status.last_sync_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" }) })}</>
-              )}
-            </p>
-          )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {loading ? (
-            <p className="text-[10px] text-brass-deep/40">{t("google.loading")}</p>
-          ) : status.connected ? (
-            <>
-              <button
-                type="button"
-                onClick={() => sync(false)}
-                disabled={busy !== null}
-                className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold transition-colors disabled:opacity-50"
-              >
-                {busy === "sync" ? t("google.syncing") : t("google.syncNow")}
-              </button>
-              <button
-                type="button"
-                onClick={disconnect}
-                disabled={busy !== null}
-                className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold text-brass-deep/55 hover:text-brass-deep transition-colors disabled:opacity-50"
-              >
-                {busy === "disconnect" ? t("google.disconnecting") : t("google.disconnect")}
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={connect}
-              disabled={busy !== null}
-              className="px-3 py-1.5 border border-brass-deep/25 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-parchment transition-colors disabled:opacity-50"
-            >
-              {busy === "connect" ? t("google.connecting") : t("google.connectGoogle")}
-            </button>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={connect}
+          disabled={busy !== null}
+          className="px-3 py-1.5 border border-brass-deep/25 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-parchment transition-colors disabled:opacity-50 shrink-0"
+        >
+          {busy === "connect" ? t("google.connecting") : t("google.connectGoogle")}
+        </button>
       </div>
     </div>
   );
