@@ -49,7 +49,19 @@ const ResetPassword = () => {
       return;
     }
 
-    // 2) PKCE flow: ?code=...
+    // 2) Direct recovery token from the email template. This avoids the
+    // redirect/hash race where the auth client logs in but this page misses it.
+    const tokenHash = search.get("token_hash") || hash.get("token_hash");
+    const type = search.get("type") || hash.get("type");
+    if (tokenHash && type === "recovery") {
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ error }) => {
+        if (error) finish(false, "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
+        else finish(true);
+      });
+      return;
+    }
+
+    // 3) PKCE flow: ?code=...
     const code = search.get("code");
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
@@ -59,7 +71,7 @@ const ResetPassword = () => {
       return;
     }
 
-    // 3) Implicit flow: #access_token=...&type=recovery
+    // 4) Implicit flow: #access_token=...&type=recovery
     const accessToken = hash.get("access_token");
     const refreshToken = hash.get("refresh_token");
     if (accessToken && refreshToken) {
@@ -72,7 +84,7 @@ const ResetPassword = () => {
       return;
     }
 
-    // 4) The Supabase client can consume the recovery URL before this page renders.
+    // 5) The Supabase client can consume the recovery URL before this page renders.
     // Give that async session handoff a moment instead of immediately marking the link invalid.
     waitForRecoverySession();
 

@@ -80,6 +80,18 @@ const SAMPLE_DATA: Record<string, object> = {
   },
 }
 
+function buildConfirmationUrl(data: any) {
+  if (data.action_type !== 'recovery' || !data.token_hash) {
+    return data.url
+  }
+
+  const redirectTo = data.redirect_to || data.url
+  const recoveryUrl = new URL(redirectTo)
+  recoveryUrl.searchParams.set('token_hash', data.token_hash)
+  recoveryUrl.searchParams.set('type', 'recovery')
+  return recoveryUrl.toString()
+}
+
 // Preview endpoint handler - returns rendered HTML without sending email
 async function handlePreview(req: Request): Promise<Response> {
   const previewCorsHeaders = {
@@ -223,7 +235,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteName: SITE_NAME,
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
-    confirmationUrl: payload.data.url,
+    confirmationUrl: buildConfirmationUrl(payload.data),
     token: payload.data.token,
     email: payload.data.email,
     oldEmail: payload.data.old_email,
