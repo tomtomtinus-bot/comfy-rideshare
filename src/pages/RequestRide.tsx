@@ -440,6 +440,11 @@ const RequestRideInner = () => {
       }).catch((err) => console.error("ride-confirmation email failed", err));
     }
 
+    // Send ride invitation emails (with one-click accept link) to all invited escorts (best-effort)
+    supabase.functions.invoke("send-ride-invitations", {
+      body: { rideId: ride.id, origin: window.location.origin },
+    }).catch((err) => console.error("send-ride-invitations failed", err));
+
     toast.success(t("request.rideBooked"));
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
     navigate("/dashboard");
