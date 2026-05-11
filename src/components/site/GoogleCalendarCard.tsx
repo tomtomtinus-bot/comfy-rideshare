@@ -104,14 +104,18 @@ export const GoogleCalendarCard = () => {
   };
 
   return (
-    <div className="bg-card shadow-etched p-6 md:p-8 mb-8">
+    <div className="border border-brass-deep/15 bg-card/60 p-4 md:p-5 mb-6 rounded-sm">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("google.integration")}</p>
-          <h2 className="font-display text-2xl text-brass-deep italic mt-1">Google Agenda</h2>
-          <p className="text-[12px] text-brass-deep/70 mt-2 max-w-xl">{t("google.cardBody")}</p>
+          <p className="text-[9px] uppercase tracking-widest text-brass-deep/45 font-semibold">
+            {t("google.integration")}
+          </p>
+          <h3 className="font-display text-base text-brass-deep mt-0.5">Google Agenda</h3>
+          <p className="text-[11px] text-brass-deep/55 mt-1.5 max-w-xl leading-relaxed">
+            {t("google.cardBody")}
+          </p>
           {!loading && status.connected && (
-            <p className="text-[11px] text-brass-deep/60 mt-3">
+            <p className="text-[10px] text-brass-deep/45 mt-2">
               {t("google.connectedOn", {
                 date: status.connected_at ? t("google.onDate", { date: new Date(status.connected_at).toLocaleDateString(locale) }) : "",
               })}
@@ -121,16 +125,16 @@ export const GoogleCalendarCard = () => {
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-2 min-w-[180px]">
+        <div className="flex items-center gap-2 shrink-0">
           {loading ? (
-            <p className="text-[11px] text-brass-deep/50">{t("google.loading")}</p>
+            <p className="text-[10px] text-brass-deep/40">{t("google.loading")}</p>
           ) : status.connected ? (
             <>
               <button
                 type="button"
                 onClick={() => sync(false)}
                 disabled={busy !== null}
-                className="px-4 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold transition-colors disabled:opacity-50"
               >
                 {busy === "sync" ? t("google.syncing") : t("google.syncNow")}
               </button>
@@ -138,7 +142,7 @@ export const GoogleCalendarCard = () => {
                 type="button"
                 onClick={disconnect}
                 disabled={busy !== null}
-                className="px-4 py-2.5 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-parchment transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-[10px] uppercase tracking-widest font-semibold text-brass-deep/55 hover:text-brass-deep transition-colors disabled:opacity-50"
               >
                 {busy === "disconnect" ? t("google.disconnecting") : t("google.disconnect")}
               </button>
@@ -148,7 +152,7 @@ export const GoogleCalendarCard = () => {
               type="button"
               onClick={connect}
               disabled={busy !== null}
-              className="px-4 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 border border-brass-deep/25 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-parchment transition-colors disabled:opacity-50"
             >
               {busy === "connect" ? t("google.connecting") : t("google.connectGoogle")}
             </button>
