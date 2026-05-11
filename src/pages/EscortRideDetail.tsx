@@ -33,6 +33,8 @@ interface RideDetail {
     num_escorts: number;
     drivers: { name: string; phone: string }[] | null;
     license_plates: string[] | null;
+    bundle_id?: string | null;
+    bundle_label?: string | null;
   };
   client: {
     full_name: string | null;
