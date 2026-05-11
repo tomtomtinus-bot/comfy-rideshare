@@ -58,7 +58,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         path.startsWith("/reset-password") ||
         hash.includes("type=recovery") ||
         hash.includes("access_token=") ||
-        search.includes("code=");
+        search.includes("code=") ||
+        search.includes("type=recovery") ||
+        search.includes("token_hash=");
       const remember = localStorage.getItem("viacust_remember");
       const sessionMarker = sessionStorage.getItem("viacust_session_active");
       if (!isRecoveryFlow && remember === "false" && !sessionMarker) {
@@ -72,6 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+      if (s?.user) setLoading(false);
       if (s?.user) {
         setTimeout(() => {
           fetchRole(s.user.id);

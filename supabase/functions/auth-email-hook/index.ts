@@ -82,12 +82,18 @@ const SAMPLE_DATA: Record<string, object> = {
 
 function buildConfirmationUrl(data: any) {
   if (data.action_type !== 'recovery' || !data.token_hash) {
-    return data.url
+    if (data.action_type !== 'recovery') return data.url
   }
 
-  const redirectTo = data.redirect_to || data.url
+  const originalUrl = data.url ? new URL(data.url) : null
+  const redirectTo = data.redirect_to || originalUrl?.searchParams.get('redirect_to') || data.url
+  const tokenHash = data.token_hash || originalUrl?.searchParams.get('token_hash') || originalUrl?.searchParams.get('token')
+  if (!redirectTo || !tokenHash) return data.url
+
   const recoveryUrl = new URL(redirectTo)
-  recoveryUrl.searchParams.set('token_hash', data.token_hash)
+  recoveryUrl.hash = ''
+  recoveryUrl.searchParams.delete('code')
+  recoveryUrl.searchParams.set('token_hash', tokenHash)
   recoveryUrl.searchParams.set('type', 'recovery')
   return recoveryUrl.toString()
 }
@@ -240,6 +246,16 @@ async function handleWebhook(req: Request): Promise<Response> {
     email: payload.data.email,
     oldEmail: payload.data.old_email,
     newEmail: payload.data.new_email,
+  }
+
+  if (emailType === 'recovery') {
+    console.log('Built recovery URL', {
+      email: payload.data.email,
+      hasTokenHash: Boolean(payload.data.token_hash),
+      hasToken: Boolean(payload.data.token),
+      usesDirectRecoveryUrl: templateProps.confirmationUrl.includes('token_hash=') && templateProps.confirmationUrl.includes('type=recovery'),
+      run_id,
+    })
   }
 
   // Render React Email to HTML and plain text

@@ -19,9 +19,18 @@ const ResetPassword = () => {
       if (cancelled) return;
       if (retryTimer) window.clearTimeout(retryTimer);
       if (ok) {
+        console.info("Password recovery ready", {
+          search: window.location.search,
+          hashKeys: window.location.hash ? Array.from(new URLSearchParams(window.location.hash.slice(1)).keys()) : [],
+        });
         setError(null);
         setReady(true);
       } else {
+        console.warn("Password recovery not ready", {
+          message: msg,
+          search: window.location.search,
+          hash: window.location.hash,
+        });
         setReady(false);
         setError(msg ?? "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
       }
@@ -55,8 +64,13 @@ const ResetPassword = () => {
     const type = search.get("type") || hash.get("type");
     if (tokenHash && type === "recovery") {
       supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" }).then(({ error }) => {
-        if (error) finish(false, "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
-        else finish(true);
+        if (error) {
+          console.warn("verifyOtp recovery failed", { message: error.message, name: error.name });
+          waitForRecoverySession();
+        } else {
+          window.history.replaceState(window.history.state, "", "/reset-password");
+          finish(true);
+        }
       });
       return;
     }
