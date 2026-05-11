@@ -1,6 +1,7 @@
-// One-click acceptance of a ride invitation via signed magic link in email.
+// One-click "Ik ben beschikbaar" via signed magic link in email.
 // GET /accept-ride-invitation?t=<token>
-// Token is a base64url-encoded "<assignmentId>.<expiresAtMs>.<hmacSig>".
+// Token: base64url("<assignmentId>.<expiresAtMs>.<hmacSig>").
+// Behaviour: expresses interest in the 5-min broadcast window.
 
 import { createClient } from 'npm:@supabase/supabase-js@2.95.0'
 
@@ -20,11 +21,8 @@ function b64urlDecode(s: string): string {
 
 async function hmac(message: string): Promise<string> {
   const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(SECRET),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
+    'raw', new TextEncoder().encode(SECRET),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   )
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message))
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
@@ -42,6 +40,17 @@ small{display:block;margin-top:24px;font-size:11px;color:#999}
 </style></head><body><div class="card"><h1>${title}</h1><p>${message}</p>
 ${ctaUrl ? `<a class="btn" href="${ctaUrl}">${ctaText ?? 'Open dashboard'}</a>` : ''}
 <small>ViaCust</small></div></body></html>`
+}
+
+function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const R = 6371
+  const dLat = toRad(bLat - aLat)
+  const dLng = toRad(bLng - aLng)
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.asin(Math.sqrt(x))
 }
 
 Deno.serve(async (req) => {
@@ -71,89 +80,122 @@ Deno.serve(async (req) => {
     })
   }
 
-  const expectedSig = await hmac(`${assignmentId}.${expiresAt}`)
-  if (expectedSig !== sig) {
+  if (await hmac(`${assignmentId}.${expiresAt}`) !== sig) {
     return new Response(htmlPage('Ongeldige link', 'De handtekening klopt niet.'), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
-
   if (Date.now() > expiresAt) {
-    return new Response(htmlPage('Link verlopen', 'Deze acceptatielink is verlopen. Open je dashboard om de actuele status te zien.', `${origin}/dashboard`, 'Open dashboard'), {
+    return new Response(htmlPage('Link verlopen', 'Deze link is verlopen. Open je dashboard voor de actuele status.', `${origin}/dashboard`, 'Open dashboard'), {
       status: 410, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
 
   const supabase = createClient(SUPABASE_URL, SECRET, { auth: { persistSession: false } })
 
-  const { data: assn, error: aErr } = await supabase
+  const { data: assn } = await supabase
     .from('ride_assignments')
-    .select('id, status, ride_id, escort_id, responds_by')
+    .select('id, status, ride_id, escort_id, responds_by, interest_expressed_at, broadcast_closes_at')
     .eq('id', assignmentId)
     .maybeSingle()
 
-  if (aErr || !assn) {
+  if (!assn) {
     return new Response(htmlPage('Niet gevonden', 'Deze toewijzing bestaat niet meer.', `${origin}/dashboard`, 'Open dashboard'), {
       status: 404, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
 
   if (assn.status === 'accepted') {
-    return new Response(htmlPage('Al geaccepteerd', 'Je hebt deze rit al bevestigd.', `${origin}/rit/${assn.ride_id}`, 'Open rit'), {
+    return new Response(htmlPage('Al gekozen ✓', 'Je bent al geselecteerd voor deze rit.', `${origin}/opdracht/${assn.ride_id}`, 'Open rit'), {
+      headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  if (assn.status !== 'invited') {
+    return new Response(htmlPage('Niet meer beschikbaar', `Deze uitnodiging heeft status "${assn.status}".`, `${origin}/dashboard`, 'Open dashboard'), {
+      status: 410, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  if (assn.responds_by && new Date(assn.responds_by).getTime() < Date.now()) {
+    return new Response(htmlPage('Uitnodiging verlopen', 'De responstijd is verstreken.', `${origin}/dashboard`, 'Open dashboard'), {
+      status: 410, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
+  if (assn.interest_expressed_at) {
+    return new Response(htmlPage('Beschikbaarheid genoteerd ✓', 'Je hebt je al beschikbaar gemeld. Binnen enkele minuten wordt de beste match gekozen — je krijgt direct bericht.', `${origin}/dashboard`, 'Open dashboard'), {
       headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
 
-  if (assn.status !== 'invited') {
-    return new Response(htmlPage('Niet meer beschikbaar', `Deze uitnodiging heeft status "${assn.status}" en kan niet meer geaccepteerd worden.`, `${origin}/dashboard`, 'Open dashboard'), {
+  // Compute score (same formula as RPC)
+  const { data: ride } = await supabase
+    .from('rides')
+    .select('id, client_id, pickup_lat, pickup_lng, pickup_city, dropoff_city, status')
+    .eq('id', assn.ride_id).maybeSingle()
+  if (!ride || ride.status === 'cancelled') {
+    return new Response(htmlPage('Rit niet meer beschikbaar', 'De rit is geannuleerd of niet langer beschikbaar.', `${origin}/dashboard`, 'Open dashboard'), {
       status: 410, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
-
-  if (assn.responds_by && new Date(assn.responds_by).getTime() < Date.now()) {
-    return new Response(htmlPage('Uitnodiging verlopen', 'De responstijd voor deze uitnodiging is verstreken.', `${origin}/dashboard`, 'Open dashboard'), {
-      status: 410, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
-    })
-  }
-
-  const { error: uErr } = await supabase
+  const { data: escort } = await supabase
+    .from('escort_profiles')
+    .select('base_lat, base_lng, rating')
+    .eq('id', assn.escort_id).maybeSingle()
+  const distKm = escort
+    ? haversineKm(escort.base_lat, escort.base_lng, ride.pickup_lat, ride.pickup_lng)
+    : 0
+  const { count: repeatCount } = await supabase
     .from('ride_assignments')
-    .update({ status: 'accepted', responded_at: new Date().toISOString() })
+    .select('id', { count: 'exact', head: true })
+    .eq('escort_id', assn.escort_id)
+    .eq('status', 'accepted')
+    .neq('id', assignmentId)
+  // Repeat is *with same client* — fetch via join
+  const { data: repeats } = await supabase
+    .from('ride_assignments')
+    .select('id, ride:rides!inner(client_id)')
+    .eq('escort_id', assn.escort_id)
+    .eq('status', 'accepted')
+    .neq('id', assignmentId)
+  const sameClient = (repeats ?? []).filter((r: any) => r.ride?.client_id === ride.client_id).length
+  const score = 100 - (distKm * 1.5) + ((escort?.rating ?? 5) * 10) + (Math.min(sameClient, 5) * 4)
+  void repeatCount
+
+  const closesAt = new Date(Math.min(
+    Date.now() + 5 * 60_000,
+    new Date(assn.responds_by).getTime(),
+  )).toISOString()
+
+  await supabase
+    .from('ride_assignments')
+    .update({
+      interest_expressed_at: new Date().toISOString(),
+      interest_score: score,
+      broadcast_closes_at: assn.broadcast_closes_at ?? closesAt,
+    })
     .eq('id', assignmentId)
     .eq('status', 'invited')
 
-  if (uErr) {
-    return new Response(htmlPage('Acceptatie mislukt', uErr.message, `${origin}/rit/${assn.ride_id}`, 'Open rit'), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
-    })
+  // Early close if all invited have expressed
+  const { count: pending } = await supabase
+    .from('ride_assignments')
+    .select('id', { count: 'exact', head: true })
+    .eq('ride_id', assn.ride_id)
+    .eq('status', 'invited')
+    .is('interest_expressed_at', null)
+  if ((pending ?? 0) === 0) {
+    await supabase
+      .from('ride_assignments')
+      .update({ broadcast_closes_at: new Date().toISOString() })
+      .eq('ride_id', assn.ride_id)
+      .eq('status', 'invited')
   }
 
-  // Best-effort: notify the client (uses existing security definer RPC that infers caller; we use service role so bypass)
-  try {
-    const { data: ride } = await supabase
-      .from('rides')
-      .select('client_id, pickup_city, dropoff_city, scheduled_at')
-      .eq('id', assn.ride_id)
-      .maybeSingle()
-    if (ride) {
-      const { data: ep } = await supabase
-        .from('escort_profiles')
-        .select('anonymous_id')
-        .eq('id', assn.escort_id)
-        .maybeSingle()
-      const when = new Date(ride.scheduled_at).toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' })
-      // notifications has no INSERT policy for users; service role bypasses RLS.
-      await supabase.from('notifications').insert({
-        user_id: ride.client_id,
-        type: 'ride_confirmed',
-        title: 'Rit bevestigd (via e-mail)',
-        body: `Begeleider #${ep?.anonymous_id ?? '????'} heeft uw rit ${ride.pickup_city} → ${ride.dropoff_city} op ${when} bevestigd.`,
-        ride_assignment_id: assignmentId,
-      })
-    }
-  } catch (_) { /* non-fatal */ }
-
-  return new Response(htmlPage('Rit bevestigd ✓', 'Bedankt — je bevestiging is geregistreerd. Open de rit in je dashboard voor adres, contactgegevens en chat.', `${origin}/rit/${assn.ride_id}`, 'Open rit'), {
+  return new Response(htmlPage(
+    'Beschikbaarheid genoteerd ✓',
+    'Bedankt — je staat genoteerd. Binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen. Je krijgt direct bericht of je gekozen bent.',
+    `${origin}/dashboard`,
+    'Open dashboard',
+  ), {
     headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
   })
 })

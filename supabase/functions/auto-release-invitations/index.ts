@@ -20,10 +20,13 @@ Deno.serve(async (req) => {
   const nowIso = new Date().toISOString()
 
   // Pull expired invitations (limit batch)
+  // Skip assignments where the escort has already expressed interest — those
+  // are handled by the close-ride-broadcasts cron.
   const { data: expired, error: fErr } = await supabase
     .from('ride_assignments')
     .select('id, ride_id, escort_id')
     .eq('status', 'invited')
+    .is('interest_expressed_at', null)
     .lt('responds_by', nowIso)
     .limit(200)
 
