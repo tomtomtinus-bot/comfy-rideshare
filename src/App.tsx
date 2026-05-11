@@ -33,6 +33,7 @@ import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
 import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
+import WatKostViaCust from "./pages/WatKostViaCust.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
+            <Route path="/wat-kost-viacust" element={<WatKostViaCust />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/aanvragen" element={<RequestRide />} />

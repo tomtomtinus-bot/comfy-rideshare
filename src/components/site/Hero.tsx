@@ -18,12 +18,18 @@ export const Hero = () => {
           <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[40ch] mb-6 md:mb-8">
             {t("home.hero.body")}
           </p>
-          <div className="flex">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Link
               to="/hoe-werkt-viacust"
               className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
             >
               Hoe werkt ViaCust?
+            </Link>
+            <Link
+              to="/wat-kost-viacust"
+              className="inline-block px-7 py-4 border-2 border-brass-deep text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-brass-deep hover:text-parchment transition-colors text-center"
+            >
+              Wat kost ViaCust?
             </Link>
           </div>
         </div>
