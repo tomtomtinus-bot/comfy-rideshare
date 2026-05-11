@@ -177,6 +177,7 @@ export type Database = {
           categories: string[]
           cert_expires_on: string | null
           cert_number: string | null
+          cert_verified_countries: string[]
           certificate_files: string[]
           company_name: string | null
           countries: string[]
@@ -227,6 +228,7 @@ export type Database = {
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
+          cert_verified_countries?: string[]
           certificate_files?: string[]
           company_name?: string | null
           countries?: string[]
@@ -277,6 +279,7 @@ export type Database = {
           categories?: string[]
           cert_expires_on?: string | null
           cert_number?: string | null
+          cert_verified_countries?: string[]
           certificate_files?: string[]
           company_name?: string | null
           countries?: string[]
@@ -1127,6 +1130,10 @@ export type Database = {
         Returns: undefined
       }
       admin_revoke_admin: { Args: { _user_id: string }; Returns: undefined }
+      admin_set_cert_verified_countries: {
+        Args: { _countries: string[]; _escort_id: string }
+        Returns: undefined
+      }
       admin_set_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
