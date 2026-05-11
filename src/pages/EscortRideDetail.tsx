@@ -351,15 +351,47 @@ const Inner = () => {
                 </p>
               </div>
             </div>
-            {permit.pdf_path && (
-              <button
-                type="button"
-                onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
-                className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
-              >
-                PDF openen
-              </button>
-            )}
+            <div className="flex flex-wrap gap-3">
+              {permit.pdf_path && (
+                <button
+                  type="button"
+                  onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
+                  className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
+                >
+                  PDF openen
+                </button>
+              )}
+              {permit.permit_number && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const tid = toast.loading("Route ophalen van RDW…");
+                    try {
+                      const { data, error } = await supabase.functions.invoke("fetch-rdw-route", {
+                        body: { exemptionId: permit.permit_number },
+                      });
+                      if (error) throw error;
+                      if (!data?.gpx) throw new Error(data?.error ?? "Geen GPX ontvangen");
+                      const blob = new Blob([data.gpx], { type: "application/gpx+xml" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = data.filename ?? `rdw-route-${permit.permit_number}.gpx`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                      toast.success(`GPX gedownload (${data.points} punten)`, { id: tid });
+                    } catch (e: any) {
+                      toast.error(`GPX ophalen mislukt: ${e?.message ?? e}`, { id: tid });
+                    }
+                  }}
+                  className="inline-block px-6 py-3 border-2 border-brass-deep text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
+                >
+                  GPX van RDW-route
+                </button>
+              )}
+            </div>
           </div>
         ) : ride.permit_number ? (
           <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
