@@ -161,16 +161,9 @@ const RequestRideInner = () => {
 
   const extractPermitNumberFromFilename = (filename: string): string => {
     const base = filename.replace(/\.[^.]+$/, "");
-    // Alleen cijferreeksen (minstens 5 cijfers), geen letters
-    const patterns = [
-      /\b\d{4}[-_]?\d{4,}\b/,
-      /\b\d{6,}\b/,
-    ];
-    for (const re of patterns) {
-      const m = base.match(re);
-      if (m) return m[0].replace(/[_\s]/g, "").replace(/-/g, "");
-    }
-    return "";
+    // Onthffingsnummer is altijd 10 cijfers, beginnend met 20
+    const m = base.match(/\b20\d{8}\b/);
+    return m ? m[0] : "";
   };
 
   const handlePermitFile = async (file: File | null) => {
