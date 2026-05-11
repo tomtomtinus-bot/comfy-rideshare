@@ -162,11 +162,32 @@ const Inner = () => {
   };
 
   const handleDecide = async (assignmentId: string, approve: boolean) => {
+    let searchReplacement = false;
+    if (approve) {
+      searchReplacement = confirm(
+        "Annulering goedkeuren.\n\nWil je automatisch een nieuwe begeleider zoeken?\n\n• OK = Ja, stuur uitnodigingen naar passende begeleiders (excl. de annulator)\n• Annuleer = Nee, rit wordt afgerond als er geen begeleiders meer over zijn"
+      );
+    }
     setBusy(true);
-    const { error } = await supabase.rpc("client_decide_cancellation", { _assignment_id: assignmentId, _approve: approve });
+    const { data: res, error } = await supabase.rpc("client_decide_cancellation", {
+      _assignment_id: assignmentId,
+      _approve: approve,
+      _search_replacement: searchReplacement,
+    } as any);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success(approve ? "Annulering goedgekeurd." : "Verzoek afgewezen.");
+    if (!approve) {
+      toast.success("Verzoek afgewezen.");
+    } else {
+      const r = res as any;
+      if (r?.replacement) {
+        toast.success(`Annulering goedgekeurd. ${r.invited ?? 0} nieuwe begeleider(s) uitgenodigd.`);
+      } else if (r?.remaining_accepted === 0) {
+        toast.success("Annulering goedgekeurd. Rit is afgerond.");
+      } else {
+        toast.success("Annulering goedgekeurd.");
+      }
+    }
     load();
   };
 
