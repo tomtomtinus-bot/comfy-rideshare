@@ -334,6 +334,21 @@ const ClientDashboard = () => {
         </div>
         <div className="flex gap-3 flex-wrap">
           <button
+            onClick={() => {
+              setBundleMode((v) => !v);
+              setSelectedRides(new Set());
+            }}
+            disabled={rides.length === 0}
+            className={
+              "px-6 py-3 uppercase tracking-widest text-xs font-semibold transition-colors disabled:opacity-50 " +
+              (bundleMode
+                ? "bg-brass-gold text-brass-deep border border-brass-gold"
+                : "border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment")
+            }
+          >
+            {bundleMode ? "Bundelen annuleren" : "Bundel ritten"}
+          </button>
+          <button
             onClick={() => setExportOpen((v) => !v)}
             disabled={rides.length === 0}
             className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
