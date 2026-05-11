@@ -267,7 +267,7 @@ const RequestRideInner = () => {
     const rideStartMs = new Date(scheduledISO).getTime();
 
     // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
-    const beInvolved = [...pickupCountries, ...dropoffCountries].includes("België");
+    const beInvolved = driveCountries.includes("België");
     const beTypeRequired = beInvolved ? form.be_escort_type : null;
     const escortHasBeQualification = (cats: string[] | null): boolean => {
       const c = cats ?? [];
