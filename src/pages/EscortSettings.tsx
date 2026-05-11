@@ -537,6 +537,24 @@ const Inner = () => {
                 </div>
               </section>
 
+              <section>
+                <Label>Talen die ik spreek</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-2">
+                  Selecteer alle talen waarin je opdrachtgevers en chauffeurs te woord kunt staan.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGES.map((l) => (
+                    <Toggle
+                      key={l}
+                      on={languages.includes(l)}
+                      onClick={() => setLanguages((s) => toggle(s, l))}
+                    >
+                      {l}
+                    </Toggle>
+                  ))}
+                </div>
+              </section>
+
               {(() => {
                 const baseCountry = detectCountry(postcode || "");
                 if (baseCountry === "be" || baseCountry === "fr") return null;
