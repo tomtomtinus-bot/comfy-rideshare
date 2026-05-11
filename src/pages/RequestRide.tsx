@@ -290,18 +290,17 @@ const RequestRideInner = () => {
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
         const ec = escortCountrySet(e as any);
-        const involved = [...pickupCountries, ...dropoffCountries];
-        // Begeleider moet minstens één van de betrokken landen dekken (NL-begeleider mag NL→BE rit doen, mits BE-kwalificatie aanwezig is)
-        return involved.some((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
+        // Begeleider moet ALLE landen dekken waarin daadwerkelijk gereden wordt.
+        // Bij grensovergangen telt alleen het land aan de gereden zijde mee.
+        return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
-        const allCountries = [...pickupCountries, ...dropoffCountries];
-        const isBe = allCountries.includes("België");
-        const isDe = allCountries.includes("Duitsland");
-        const isFr = allCountries.includes("Frankrijk");
-        const isLu = allCountries.includes("Luxemburg");
+        const isBe = driveCountries.includes("België");
+        const isDe = driveCountries.includes("Duitsland");
+        const isFr = driveCountries.includes("Frankrijk");
+        const isLu = driveCountries.includes("Luxemburg");
         const escortCountries = escortCountrySet(e as any);
         const kmRateDe = (e as any).km_rate_de == null ? null : Number((e as any).km_rate_de);
         const deKmMode = isDe && escortCountries.has("Duitsland") && kmRateDe != null && kmRateDe > 0;
