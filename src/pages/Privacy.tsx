@@ -6,10 +6,10 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
-  nl: { kicker: "Privacy", title: "Privacyverklaring", updated: "Laatst bijgewerkt: 10 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
-  en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 10, 2026", back: "← Back", toTerms: "Terms and Conditions" },
-  de: { kicker: "Datenschutz", title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: 10. Mai 2026", back: "← Zurück", toTerms: "AGB" },
-  fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 10 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
+  nl: { kicker: "Privacy", title: "Privacyverklaring", updated: "Laatst bijgewerkt: 11 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
+  en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 11, 2026", back: "← Back", toTerms: "Terms and Conditions" },
+  de: { kicker: "Datenschutz", title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: 11. Mai 2026", back: "← Zurück", toTerms: "AGB" },
+  fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 11 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
 };
 
 const Privacy = () => {
@@ -54,49 +54,46 @@ const Privacy = () => {
 
 const PrivacyNL = () => (
   <>
-    <h2>1. Inleiding</h2>
-    <p>ViaCust (hierna: "wij") biedt een digitaal platform voor de planning en het beheer van transportbegeleiding. Wij zetten ons in voor de bescherming van de privacy van onze gebruikers (Opdrachtgevers en Begeleiders) en verwerken persoonsgegevens in strikte overeenstemming met de Algemene Verordening Gegevensbescherming (AVG).</p>
-
-    <h2>2. Welke gegevens verzamelen wij?</h2>
+    <h2>1. Welke gegevens verzamelen wij?</h2>
+    <p>Wij verwerken persoonsgegevens van Opdrachtgevers en Begeleiders die noodzakelijk zijn voor de kernfunctionaliteit van ons platform:</p>
     <ul>
-      <li><strong>Accountgegevens:</strong> Naam, e-mailadres, telefoonnummer en inloggegevens.</li>
-      <li><strong>Profielgegevens:</strong> Bedrijfsnaam, voertuiggegevens en persoonlijke identificatie voor administratieve goedkeuring.</li>
-      <li><strong>Ritgegevens:</strong> Startlocaties, bestemmingen, tijdstippen en statussen van transportritten.</li>
-      <li><strong>Google Agenda Data:</strong> Indien u de Google-koppeling activeert, verwerken wij tijdelijke tokens om uw beschikbaarheid te lezen en ritten in uw agenda te plaatsen.</li>
+      <li><strong>Accountgegevens:</strong> Naam, bedrijfsnaam, adres, e-mailadres en telefoonnummer.</li>
+      <li><strong>Zakelijke gegevens:</strong> BTW-nummer, KVK-nummer en bankrekeningnummer (IBAN) voor facturatie en automatische incasso.</li>
+      <li><strong>Locatiegegevens:</strong> Tijdens actieve ritten verwerken wij locatiegegevens om de voortgang van de opdracht te monitoren en brandstoftoeslagen te berekenen.</li>
+      <li><strong>Google Gebruikersgegevens:</strong> Indien u uw Google Agenda koppelt aan ViaCust, verwerken wij specifieke data via de Google API-services.</li>
     </ul>
 
-    <h2>3. Doel en Rechtsgrondslag</h2>
+    <h2>2. Gebruik van Google API-gegevens (Google Agenda)</h2>
+    <p>ViaCust biedt een synchronisatiefunctie met Google Agenda om uw planning te automatiseren.</p>
     <ul>
-      <li><strong>Uitvoering van de overeenkomst:</strong> Om ritten te plannen, begeleiders toe te wijzen en de communicatie tussen partijen mogelijk te maken.</li>
-      <li><strong>Toestemming:</strong> Voor de optionele koppeling met Google Agenda. U kunt deze toestemming op elk moment intrekken door de verbinding te verbreken.</li>
-      <li><strong>Gerechtvaardigd belang:</strong> Voor het beveiligen van het platform en de handmatige controle van nieuwe accounts door de beheerder.</li>
+      <li><strong>Welke data gebruiken wij?</strong> Wij hebben uitsluitend toegang tot uw agenda-afspraken (lezen) en de mogelijkheid om nieuwe afspraken aan te maken (schrijven).</li>
+      <li><strong>Doel:</strong> Wij lezen uw agenda uitsluitend om uw beschikbaarheid te bepalen (zonder de inhoud van privé-afspraken te delen met derden). Wij schrijven uitsluitend geaccepteerde transportopdrachten naar uw agenda.</li>
+      <li><strong>Limited Use Policy:</strong> Het gebruik en de overdracht van informatie ontvangen via Google API's door ViaCust voldoet aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, inclusief de vereisten voor 'Limited Use'.</li>
+      <li><strong>Geen advertenties:</strong> Google-gebruikersgegevens worden onder geen beding gebruikt voor advertentiedoeleinden of gedeeld met externe partijen die niet noodzakelijk zijn voor de werking van de app.</li>
     </ul>
 
-    <h2>4. Google API Gebruiksbeleid</h2>
-    <p>Het gebruik van informatie die is ontvangen via Google API's voldoet aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, inclusief de vereisten voor 'Limited Use'. Wij delen Google-agendagegevens nooit met derden voor marketingdoeleinden.</p>
-
-    <h2>5. Cookies en Opslag</h2>
-    <p>Wij maken gebruik van functionele cookies en <code>browser local storage</code> om uw inlogsessie veilig te beheren en uw gebruikersvoorkeuren te onthouden. Deze zijn technisch essentieel voor de werking van het platform.</p>
-
-    <h2>6. Gegevensdeling met Derden</h2>
-    <p>Wij verkopen geen gegevens aan derden. Uw gegevens worden alleen gedeeld met:</p>
+    <h2>3. Waarom verzamelen wij deze gegevens?</h2>
+    <p>Wij gebruiken uw gegevens voor de volgende doeleinden:</p>
     <ul>
-      <li><strong>Onze cloud-infrastructuurpartner:</strong> data-opslag vindt plaats binnen de EU.</li>
-      <li><strong>Tussen Gebruikers:</strong> Gegevens zoals contactinformatie en ritdetails worden gedeeld tussen de opdrachtgever en de toegewezen begeleider voor de correcte uitvoering van de rit.</li>
+      <li>Het koppelen van opdrachtgevers aan beschikbare begeleiders.</li>
+      <li>Het genereren van automatische wekelijkse verzamelfacturen.</li>
+      <li>Het berekenen van brandstoftoeslagen en verwerken van onkosten.</li>
+      <li>Het verifiëren van identiteit en vereiste vakbekwaamheidsdocumenten.</li>
     </ul>
 
-    <h2>7. Beveiliging</h2>
+    <h2>4. Delen van gegevens met derden</h2>
+    <p>Wij verkopen uw gegevens nooit. Gegevens worden alleen gedeeld met:</p>
     <ul>
-      <li><strong>Row Level Security (RLS):</strong> Zorgt ervoor dat gebruikers alleen toegang hebben tot hun eigen data.</li>
-      <li><strong>OAuth2-protocollen:</strong> Voor veilige authenticatie zonder dat wij uw wachtwoorden inzien.</li>
-      <li><strong>Versleuteling:</strong> Alle dataverkeer vindt plaats via beveiligde SSL/TLS-verbindingen.</li>
+      <li><strong>De wederpartij:</strong> Zodra een rit is geaccepteerd, worden noodzakelijke contactgegevens gedeeld tussen Opdrachtgever en Begeleider.</li>
+      <li><strong>Stripe:</strong> Onze betaalprovider voor de verwerking van abonnementen en commissies.</li>
+      <li><strong>Cloud-infrastructuur:</strong> Uw data wordt veilig opgeslagen op versleutelde servers (SSL/HTTPS).</li>
     </ul>
 
-    <h2>8. Uw Rechten</h2>
-    <p>U heeft het recht op inzage, correctie of verwijdering van uw persoonsgegevens. Daarnaast heeft u het recht op dataportabiliteit en kunt u bezwaar maken tegen de verwerking. Voor het uitoefenen van deze rechten of het intrekken van toestemming kunt u terecht in uw accountinstellingen of contact met ons opnemen.</p>
+    <h2>5. Bewaartermijnen</h2>
+    <p>Wij bewaren gegevens niet langer dan noodzakelijk. Facturatiegegevens worden conform de wettelijke fiscale bewaarplicht 7 jaar bewaard. Accountgegevens worden verwijderd op het moment dat u uw account beëindigt.</p>
 
-    <h2>9. Contact</h2>
-    <p>Voor vragen over deze privacyverklaring: <a href="mailto:info@viacust.com">info@viacust.com</a></p>
+    <h2>6. Toegang intrekken en Verwijderen</h2>
+    <p>U heeft te allen tijde het recht om uw gegevens in te zien of te laten verwijderen. U kunt uw Google-koppeling op elk moment intrekken via <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google-beveiligingsinstellingen</a>.</p>
   </>
 );
 
