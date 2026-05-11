@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface EscortRow {
@@ -14,8 +15,13 @@ interface EscortRow {
   cert_number: string | null;
   vca_number: string | null;
   anonymous_id: string;
+  countries: string[];
+  cert_verified_countries: string[];
+  languages: string[];
   full_name?: string;
 }
+
+const ALL_COUNTRIES = ["Nederland", "België", "Duitsland", "Frankrijk", "Luxemburg"] as const;
 
 const fmt = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" }) : "—";
@@ -28,7 +34,7 @@ const AdminEscorts = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("escort_profiles")
-      .select("id, company_name, base_city, hourly_rate, rating, rides_completed, available, cert_expires_on, cert_number, vca_number, anonymous_id")
+      .select("id, company_name, base_city, hourly_rate, rating, rides_completed, available, cert_expires_on, cert_number, vca_number, anonymous_id, countries, cert_verified_countries, languages")
       .order("rating", { ascending: false });
     if (error) {
       toast.error(error.message);
@@ -57,6 +63,25 @@ const AdminEscorts = () => {
     }
   };
 
+  const toggleCertCountry = async (escort: EscortRow, country: string) => {
+    const current = escort.cert_verified_countries ?? [];
+    const next = current.includes(country)
+      ? current.filter((c) => c !== country)
+      : [...current, country];
+    // Optimistic
+    setList((l) => l.map((e) => (e.id === escort.id ? { ...e, cert_verified_countries: next } : e)));
+    const { error } = await supabase.rpc("admin_set_cert_verified_countries", {
+      _escort_id: escort.id,
+      _countries: next,
+    });
+    if (error) {
+      toast.error(error.message);
+      load();
+    } else {
+      toast.success(`${country}: ${next.includes(country) ? "geverifieerd" : "verificatie ingetrokken"}`);
+    }
+  };
+
   const expired = (d: string | null) => d && new Date(d) < new Date();
 
   return (
@@ -64,7 +89,7 @@ const AdminEscorts = () => {
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Begeleiders</h2>
         <p className="text-sm text-brass-deep/60 mt-1">
-          {list.length} profiel{list.length === 1 ? "" : "en"} · modereer beschikbaarheid en certificering.
+          {list.length} profiel{list.length === 1 ? "" : "en"} · modereer beschikbaarheid en certificering per land.
         </p>
       </header>
 
@@ -77,7 +102,7 @@ const AdminEscorts = () => {
           {list.map((e) => (
             <li key={e.id} className="bg-card p-4 md:p-5">
               <div className="grid grid-cols-12 gap-3 items-start">
-                <div className="col-span-12 md:col-span-4">
+                <div className="col-span-12 md:col-span-3">
                   <p className="font-medium">{e.full_name || e.company_name || "—"}</p>
                   <p className="text-[10px] text-brass-deep/55 mt-1 tabular-nums">
                     #{e.anonymous_id} · {e.base_city}
@@ -85,14 +110,20 @@ const AdminEscorts = () => {
                   {e.company_name && e.full_name && (
                     <p className="text-[10px] text-brass-deep/45 mt-1">{e.company_name}</p>
                   )}
+                  {e.languages && e.languages.length > 0 && (
+                    <p className="text-[10px] text-brass-deep/55 mt-2">
+                      <span className="uppercase tracking-widest font-bold">Talen:</span>{" "}
+                      {e.languages.join(", ")}
+                    </p>
+                  )}
                 </div>
-                <div className="col-span-6 md:col-span-3 text-xs">
+                <div className="col-span-6 md:col-span-2 text-xs">
                   <p className="text-brass-deep/55">Tarief</p>
                   <p className="tabular-nums">€{Number(e.hourly_rate).toFixed(2)}/u</p>
                   <p className="mt-2 text-brass-deep/55">Ritten</p>
                   <p className="tabular-nums">{e.rides_completed} · ★ {Number(e.rating).toFixed(1)}</p>
                 </div>
-                <div className="col-span-6 md:col-span-3 text-xs">
+                <div className="col-span-6 md:col-span-2 text-xs">
                   <p className="text-brass-deep/55">Certificaat</p>
                   <p className="tabular-nums">
                     {e.cert_number || "—"}
@@ -104,6 +135,35 @@ const AdminEscorts = () => {
                     )}
                   </p>
                   {e.vca_number && <p className="mt-1 text-[10px] text-brass-deep/55">VCA {e.vca_number}</p>}
+                </div>
+                <div className="col-span-12 md:col-span-3">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+                    Geverifieerd per land
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ALL_COUNTRIES.map((c) => {
+                      const verified = (e.cert_verified_countries ?? []).includes(c);
+                      const offers = (e.countries ?? []).includes(c);
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => toggleCertCountry(e, c)}
+                          title={offers ? "Begeleider werkt in dit land" : "Begeleider heeft dit land niet aangevinkt"}
+                          className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-widest font-semibold border transition-colors ${
+                            verified
+                              ? "bg-brass-gold text-brass-deep border-brass-gold"
+                              : offers
+                                ? "bg-card text-brass-deep/70 border-brass-deep/20 hover:bg-parchment"
+                                : "bg-card text-brass-deep/40 border-brass-deep/10 hover:bg-parchment"
+                          }`}
+                        >
+                          {verified && <Check className="size-3" strokeWidth={3} />}
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="col-span-12 md:col-span-2 md:text-right space-y-2">
                   <p className={`text-[10px] uppercase tracking-widest font-bold ${e.available ? "text-brass-gold" : "text-brass-deep/40"}`}>
