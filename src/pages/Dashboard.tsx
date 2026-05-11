@@ -79,6 +79,9 @@ interface AssignmentRow {
   invited_at: string;
   responds_by: string;
   responded_at: string | null;
+  interest_expressed_at: string | null;
+  interest_score: number | null;
+  broadcast_closes_at: string | null;
 }
 
 const fmtDate = (d: string, lang = "nl") =>
@@ -641,20 +644,15 @@ const EscortDashboard = () => {
         const ok = window.confirm(t("dash.googleConfirm"));
         if (!ok) return;
       }
-    }
-    const { error } = await supabase
-      .from("ride_assignments")
-      .update({
-        status: accept ? "accepted" : "declined",
-        responded_at: new Date().toISOString(),
-      })
-      .eq("id", id);
-    if (error) return toast.error(error.message);
-    if (accept) {
-      const { error: nErr } = await supabase.rpc("notify_ride_confirmed", { _assignment_id: id });
-      if (nErr) console.warn("notify_ride_confirmed:", nErr.message);
-      toast.success(t("dash.rideConfirmed"));
+      const { error } = await supabase.rpc("express_ride_interest", { _assignment_id: id });
+      if (error) return toast.error(error.message);
+      toast.success("Beschikbaar gemeld — selectie binnen 5 min.");
     } else {
+      const { error } = await supabase
+        .from("ride_assignments")
+        .update({ status: "declined", responded_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) return toast.error(error.message);
       toast.success(t("dash.rideDeclined"));
     }
     load();
