@@ -13,9 +13,6 @@ export interface UploadedPermit {
 
 export async function uploadPermitPdf(file: File, userId: string, permitNumber: string): Promise<UploadedPermit> {
   const cleanPermitNumber = permitNumber.trim();
-  if (!cleanPermitNumber) {
-    throw new Error("Vul eerst het ontheffingnummer in");
-  }
 
   // Lees bestand één keer in als ArrayBuffer zodat oudere iOS Safari versies
   // geen File/ReadableStream pad hoeven te gebruiken bij de upload.
@@ -39,7 +36,7 @@ export async function uploadPermitPdf(file: File, userId: string, permitNumber: 
     .from("permits")
     .insert({
       client_id: userId,
-      permit_number: cleanPermitNumber,
+      permit_number: cleanPermitNumber || null,
       pdf_path: path,
       raw_data: {
         upload_only: true,
@@ -58,7 +55,7 @@ export async function uploadPermitPdf(file: File, userId: string, permitNumber: 
 
   return {
     id: ins.id,
-    permit_number: cleanPermitNumber,
+    permit_number: cleanPermitNumber || "",
     carrier: null,
     pdf_path: path,
     routes_count: 0,

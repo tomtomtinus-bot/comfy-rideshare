@@ -162,10 +162,6 @@ const RequestRideInner = () => {
   const handlePermitFile = async (file: File | null) => {
     if (!file || !user) return;
     const permitNumber = form.permit_number.trim();
-    if (!permitNumber) {
-      toast.error(t("request.permitNumberRequired"));
-      return;
-    }
 
     setPermitUploading(true);
     try {
