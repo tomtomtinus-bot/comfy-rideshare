@@ -276,7 +276,7 @@ const RequestRideInner = () => {
         } as MatchedEscort;
       })
       .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
-      .slice(0, 8);
+      .slice(0, 25);
 
     if (ranked.length === 0) return toast.error(t("request.noEscorts"));
 
