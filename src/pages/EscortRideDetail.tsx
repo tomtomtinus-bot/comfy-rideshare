@@ -108,6 +108,17 @@ const Inner = () => {
   const [cancelReason, setCancelReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [bundleSiblings, setBundleSiblings] = useState<Array<{
+    ride_id: string;
+    assignment_id: string;
+    assignment_status: string;
+    pickup_city: string;
+    dropoff_city: string;
+    scheduled_at: string;
+    interest_expressed_at: string | null;
+    broadcast_closes_at: string | null;
+  }>>([]);
+  const [bundleBusy, setBundleBusy] = useState(false);
 
   const load = async () => {
     if (!id) return;
