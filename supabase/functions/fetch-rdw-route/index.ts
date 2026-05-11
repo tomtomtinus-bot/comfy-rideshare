@@ -71,8 +71,14 @@ async function rdwFetch(
   headers.set("User-Agent", UA);
   if (init.cookies) headers.set("Cookie", init.cookies);
   const res = await fetch(url, { ...init, headers, redirect: "manual" });
-  // Combine existing cookies with new Set-Cookie
-  const setCookies = res.headers.getSetCookie?.() ?? [];
+  // Combine existing cookies with new Set-Cookie (defensief: getSetCookie + raw entries)
+  const setCookies: string[] = [];
+  const fn = (res.headers as any).getSetCookie;
+  if (typeof fn === "function") setCookies.push(...fn.call(res.headers));
+  for (const [k, v] of res.headers.entries()) {
+    if (k.toLowerCase() === "set-cookie" && !setCookies.includes(v)) setCookies.push(v);
+  }
+  console.log(`[rdw] ${init.method ?? "GET"} ${url.split("?")[0]} -> ${res.status}, set-cookies: ${setCookies.length}`);
   const jar = new Map<string, string>();
   if (init.cookies) {
     for (const part of init.cookies.split(";")) {
