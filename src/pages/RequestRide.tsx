@@ -161,9 +161,14 @@ const RequestRideInner = () => {
 
   const extractPermitNumberFromFilename = (filename: string): string => {
     const base = filename.replace(/\.[^.]+$/, "");
-    // Onthffingsnummer is altijd 10 cijfers, beginnend met 20
-    const m = base.match(/\b20\d{8}\b/);
-    return m ? m[0] : "";
+    // Onthffingsnummer is altijd 10 cijfers, beginnend met 20.
+    // Verwijder alle niet-cijfers en zoek de eerste 10-cijferige reeks die met 20 begint.
+    const digitsOnly = base.replace(/\D/g, "");
+    for (let i = 0; i <= digitsOnly.length - 10; i++) {
+      const candidate = digitsOnly.slice(i, i + 10);
+      if (candidate.startsWith("20")) return candidate;
+    }
+    return "";
   };
 
   const handlePermitFile = async (file: File | null) => {
