@@ -392,6 +392,10 @@ const Inner = () => {
                 </button>
               )}
             </div>
+            <p className="text-xs text-brass-deep/50 mt-2">
+              Let op: gebruik dit enkel als hulpmiddel. De begeleider is zelf verantwoordelijk voor de route.
+              ViaCust is op geen enkele manier aansprakelijk voor een verkeerde route en alles wat daaruit voortvloeit.
+            </p>
           </div>
         ) : ride.permit_number ? (
           <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
