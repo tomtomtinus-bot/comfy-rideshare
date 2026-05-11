@@ -17,6 +17,17 @@ const COUNTRY_CERTS = [
   { id: "de", label: "Duitsland", country: "Duitsland" },
   { id: "fr", label: "Frankrijk", country: "Frankrijk" },
   { id: "lu", label: "Luxemburg", country: "Luxemburg" },
+  ] as const;
+
+const LANGUAGES = [
+  "Nederlands",
+  "Engels",
+  "Duits",
+  "Frans",
+  "Spaans",
+  "Italiaans",
+  "Pools",
+  "Russisch",
 ] as const;
 
 // Leid het countries-veld af uit de gekozen certificeringen
@@ -149,6 +160,7 @@ const Inner = () => {
   }>({ enabled: false, kind: "per_uur", tiers: [{ from: "0", to: "1.60", value: "0" }] });
   const [fuelParsing, setFuelParsing] = useState(false);
   const [currentFuel, setCurrentFuel] = useState<{ week_start: string; eur_per_liter: number } | null>(null);
+  const [languages, setLanguages] = useState<string[]>(["Nederlands"]);
 
   // Persoonlijk
   const [fullName, setFullName] = useState("");
@@ -194,6 +206,7 @@ const Inner = () => {
         setProfile(p);
         setCategories(((p as any).categories ?? []) as string[]);
         setFiles(((p as any).certificate_files ?? []) as string[]);
+        setLanguages((((p as any).languages ?? ["Nederlands"]) as string[]));
         setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
           label: String(s.label ?? ""),
           amount: String(s.amount ?? ""),
@@ -341,6 +354,7 @@ const Inner = () => {
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         categories,
+        languages: languages.length ? languages : ["Nederlands"],
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
         fuel_surcharge: ((): any => {
           const baseCountry = detectCountry(parsed.data.basePostcode || "");
@@ -518,6 +532,24 @@ const Inner = () => {
                   {COUNTRY_CERTS.map((c) => (
                     <Toggle key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((s) => toggle(s, c.id))}>
                       {c.label}
+                    </Toggle>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <Label>Talen die ik spreek</Label>
+                <p className="text-[11px] text-brass-deep/60 mt-1 mb-2">
+                  Selecteer alle talen waarin je opdrachtgevers en chauffeurs te woord kunt staan.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGES.map((l) => (
+                    <Toggle
+                      key={l}
+                      on={languages.includes(l)}
+                      onClick={() => setLanguages((s) => toggle(s, l))}
+                    >
+                      {l}
                     </Toggle>
                   ))}
                 </div>

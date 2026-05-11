@@ -43,6 +43,8 @@ interface RideDetail {
     phone: string | null;
     base_city: string | null;
     vehicle_type: string | null;
+    cert_verified_countries: string[] | null;
+    languages: string[] | null;
   }>;
   permit: {
     id: string;
@@ -295,7 +297,25 @@ const Inner = () => {
                   <div className="text-sm">
                     <TelLink phone={e.phone} />
                   </div>
-                  <div className="text-xs text-brass-deep/55">{e.vehicle_type ?? ""}</div>
+                  <div className="text-xs text-brass-deep/55 space-y-1">
+                    <p>{e.vehicle_type ?? ""}</p>
+                    {e.cert_verified_countries && e.cert_verified_countries.length > 0 && (
+                      <p className="flex flex-wrap gap-1">
+                        {e.cert_verified_countries.map((c) => (
+                          <span
+                            key={c}
+                            title="Certificaat geverifieerd door ViaCust"
+                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-brass-gold/20 text-brass-deep text-[10px] uppercase tracking-widest font-bold"
+                          >
+                            ✓ {c}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                    {e.languages && e.languages.length > 0 && (
+                      <p className="text-[10px]">Talen: {e.languages.join(", ")}</p>
+                    )}
+                  </div>
                 </div>
                 {cr?.status === "pending" && (
                   <div className="bg-brass-gold/10 border border-brass-gold/40 p-3 space-y-2">
