@@ -112,16 +112,22 @@ export async function buildGpx(
 
   const rtepts = points
     .map(
-      (p) => `    <rtept lat="${p.lat}" lon="${p.lng}">
-      <name>${escapeXml(p.name)}</name>${p.desc ? `\n      <desc>${escapeXml(p.desc)}</desc>` : ""}
-    </rtept>`,
+      (p) => `      <rtept lat="${p.lat.toFixed(6)}" lon="${p.lng.toFixed(6)}">
+        <name>${escapeXml(p.name)}</name>${p.desc ? `\n        <desc>${escapeXml(p.desc)}</desc>` : ""}
+      </rtept>`,
+    )
+    .join("\n");
+
+  const trkpts = points
+    .map(
+      (p) => `        <trkpt lat="${p.lat.toFixed(6)}" lon="${p.lng.toFixed(6)}">
+          <name>${escapeXml(p.name)}</name>
+        </trkpt>`,
     )
     .join("\n");
 
   const gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="ViaCust" xmlns="http://www.topografix.com/GPX/1/1"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<gpx version="1.1" creator="ViaCust" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
   <metadata>
     <name>${escapeXml(routeName)}</name>
     <time>${now}</time>
@@ -131,6 +137,12 @@ ${wpts}
     <name>${escapeXml(routeName)}</name>
 ${rtepts}
   </rte>
+  <trk>
+    <name>${escapeXml(routeName)}</name>
+    <trkseg>
+${trkpts}
+    </trkseg>
+  </trk>
 </gpx>`;
 
   return { gpx, pointCount: points.length, skipped };
