@@ -13,12 +13,30 @@ const ResetPassword = () => {
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer: number | null = null;
 
     const finish = (ok: boolean, msg?: string) => {
       if (cancelled) return;
-      if (ok) setReady(true);
-      else setError(msg ?? "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
+      if (retryTimer) window.clearTimeout(retryTimer);
+      if (ok) {
+        setError(null);
+        setReady(true);
+      } else {
+        setReady(false);
+        setError(msg ?? "Herstellink ongeldig of verlopen. Vraag een nieuwe aan.");
+      }
     };
+
+    const waitForRecoverySession = async (attempt = 0) => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return finish(true);
+      if (attempt >= 12) return finish(false);
+      retryTimer = window.setTimeout(() => waitForRecoverySession(attempt + 1), 300);
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) finish(true);
+    });
 
     // 1) Errors in hash/query (e.g. expired link)
     const hash = window.location.hash.startsWith("#")
@@ -35,7 +53,7 @@ const ResetPassword = () => {
     const code = search.get("code");
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) finish(false, error.message);
+        if (error) waitForRecoverySession();
         else finish(true);
       });
       return;
@@ -54,18 +72,13 @@ const ResetPassword = () => {
       return;
     }
 
-    // 4) Already signed in (e.g. recovery already processed)
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) finish(true);
-      else finish(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") finish(true);
-    });
+    // 4) The Supabase client can consume the recovery URL before this page renders.
+    // Give that async session handoff a moment instead of immediately marking the link invalid.
+    waitForRecoverySession();
 
     return () => {
       cancelled = true;
+      if (retryTimer) window.clearTimeout(retryTimer);
       sub.subscription.unsubscribe();
     };
   }, []);
