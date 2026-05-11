@@ -48,10 +48,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // "Blijf ingelogd" handling: if user opted out, sign them out at the start
     // of every new browser session (sessionStorage is cleared on tab/browser close).
+    // Skip on the password-reset route — opening the recovery link in a new tab
+    // would otherwise destroy the recovery session before the user can set a new password.
     try {
+      const path = window.location.pathname;
+      const hash = window.location.hash || "";
+      const search = window.location.search || "";
+      const isRecoveryFlow =
+        path.startsWith("/reset-password") ||
+        hash.includes("type=recovery") ||
+        hash.includes("access_token=") ||
+        search.includes("code=");
       const remember = localStorage.getItem("viacust_remember");
       const sessionMarker = sessionStorage.getItem("viacust_session_active");
-      if (remember === "false" && !sessionMarker) {
+      if (!isRecoveryFlow && remember === "false" && !sessionMarker) {
         supabase.auth.signOut();
       }
       sessionStorage.setItem("viacust_session_active", "1");
