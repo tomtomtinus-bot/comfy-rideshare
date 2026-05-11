@@ -246,13 +246,28 @@ const RequestRideInner = () => {
     const pickupCountries = expandCountries(pickupGeo.country);
     const dropoffCountries = expandCountries(dropoffGeo.country);
 
+    // Bij een grensovergang (meerdere landen in één locatie) telt alleen het land
+    // waarin de begeleider daadwerkelijk rijdt. Dat is het land dat door beide
+    // eindpunten wordt gedeeld; bij één enkel grenspunt nemen we het land van het
+    // andere (binnenlandse) eindpunt.
+    const deriveDriveCountries = (pu: string[], dr: string[]): string[] => {
+      const overlap = pu.filter((c) => dr.includes(c));
+      if (pu.length > 1 && dr.length > 1) {
+        return overlap.length ? overlap : Array.from(new Set([...pu, ...dr]));
+      }
+      if (pu.length > 1) return overlap.length ? overlap : dr;
+      if (dr.length > 1) return overlap.length ? overlap : pu;
+      return Array.from(new Set([...pu, ...dr]));
+    };
+    const driveCountries = deriveDriveCountries(pickupCountries, dropoffCountries);
+
     const rideKm = distanceKm(pickupGeo, dropoffGeo);
     const rideMin = travelMinutes(rideKm);
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
     const rideStartMs = new Date(scheduledISO).getTime();
 
     // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
-    const beInvolved = [...pickupCountries, ...dropoffCountries].includes("België");
+    const beInvolved = driveCountries.includes("België");
     const beTypeRequired = beInvolved ? form.be_escort_type : null;
     const escortHasBeQualification = (cats: string[] | null): boolean => {
       const c = cats ?? [];
@@ -275,18 +290,17 @@ const RequestRideInner = () => {
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
         const ec = escortCountrySet(e as any);
-        const involved = [...pickupCountries, ...dropoffCountries];
-        // Begeleider moet minstens één van de betrokken landen dekken (NL-begeleider mag NL→BE rit doen, mits BE-kwalificatie aanwezig is)
-        return involved.some((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
+        // Begeleider moet ALLE landen dekken waarin daadwerkelijk gereden wordt.
+        // Bij grensovergangen telt alleen het land aan de gereden zijde mee.
+        return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
-        const allCountries = [...pickupCountries, ...dropoffCountries];
-        const isBe = allCountries.includes("België");
-        const isDe = allCountries.includes("Duitsland");
-        const isFr = allCountries.includes("Frankrijk");
-        const isLu = allCountries.includes("Luxemburg");
+        const isBe = driveCountries.includes("België");
+        const isDe = driveCountries.includes("Duitsland");
+        const isFr = driveCountries.includes("Frankrijk");
+        const isLu = driveCountries.includes("Luxemburg");
         const escortCountries = escortCountrySet(e as any);
         const kmRateDe = (e as any).km_rate_de == null ? null : Number((e as any).km_rate_de);
         const deKmMode = isDe && escortCountries.has("Duitsland") && kmRateDe != null && kmRateDe > 0;
