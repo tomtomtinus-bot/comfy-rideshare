@@ -774,6 +774,7 @@ export type Database = {
           actual_cost: number | null
           actual_hours: number | null
           broadcast_closes_at: string | null
+          bundle_priority_offer: boolean
           cancel_decided_at: string | null
           cancel_request_reason: string | null
           cancel_request_status: string
@@ -809,6 +810,7 @@ export type Database = {
           actual_cost?: number | null
           actual_hours?: number | null
           broadcast_closes_at?: string | null
+          bundle_priority_offer?: boolean
           cancel_decided_at?: string | null
           cancel_request_reason?: string | null
           cancel_request_status?: string
@@ -844,6 +846,7 @@ export type Database = {
           actual_cost?: number | null
           actual_hours?: number | null
           broadcast_closes_at?: string | null
+          bundle_priority_offer?: boolean
           cancel_decided_at?: string | null
           cancel_request_reason?: string | null
           cancel_request_status?: string
@@ -898,6 +901,7 @@ export type Database = {
           be_escort_type: string | null
           bundle_id: string | null
           bundle_label: string | null
+          bundle_open_for_extension: boolean
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -936,6 +940,7 @@ export type Database = {
           be_escort_type?: string | null
           bundle_id?: string | null
           bundle_label?: string | null
+          bundle_open_for_extension?: boolean
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -974,6 +979,7 @@ export type Database = {
           be_escort_type?: string | null
           bundle_id?: string | null
           bundle_label?: string | null
+          bundle_open_for_extension?: boolean
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -1094,6 +1100,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_bundle_priority_offer: {
+        Args: { _assignment_id: string }
+        Returns: undefined
+      }
       admin_approve_user: { Args: { _user_id: string }; Returns: undefined }
       admin_list_users: {
         Args: never
@@ -1134,6 +1144,14 @@ export type Database = {
       }
       client_decide_cancellation: {
         Args: { _approve: boolean; _assignment_id: string }
+        Returns: undefined
+      }
+      create_priority_assignments_for_bundle_ride: {
+        Args: { _ride_id: string }
+        Returns: number
+      }
+      decline_bundle_priority_offer: {
+        Args: { _assignment_id: string; _reason?: string }
         Returns: undefined
       }
       delete_email: {
