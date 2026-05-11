@@ -1124,6 +1124,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      bundle_rides: {
+        Args: { _label: string; _ride_ids: string[] }
+        Returns: string
+      }
       client_cancel_ride: {
         Args: { _reason?: string; _ride_id: string }
         Returns: Json
@@ -1147,6 +1151,19 @@ export type Database = {
       express_ride_interest: { Args: { _assignment_id: string }; Returns: Json }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
+      get_bundle_rides_for_escort: {
+        Args: { _bundle_id: string }
+        Returns: {
+          assignment_id: string
+          assignment_status: string
+          broadcast_closes_at: string
+          dropoff_city: string
+          interest_expressed_at: string
+          pickup_city: string
+          ride_id: string
+          scheduled_at: string
+        }[]
+      }
       get_counterparty_name: {
         Args: { _assignment_id: string }
         Returns: {
@@ -1208,6 +1225,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      unbundle_ride: { Args: { _ride_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "opdrachtgever" | "begeleider" | "admin"
