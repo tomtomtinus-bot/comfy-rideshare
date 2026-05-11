@@ -52,9 +52,8 @@ async function readPdfItems(file: ArrayBuffer): Promise<PageItem[]> {
     data: new Uint8Array(file),
     disableStream: true,
     disableAutoFetch: true,
-    isEvalSupported: false,
     useSystemFonts: true,
-  }).promise;
+  } as any).promise;
   const items: PageItem[] = [];
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
