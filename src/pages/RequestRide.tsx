@@ -248,14 +248,17 @@ const RequestRideInner = () => {
         const isDe = allCountries.includes("Duitsland");
         const isFr = allCountries.includes("Frankrijk");
         const isLu = allCountries.includes("Luxemburg");
+        const escortCountries = (e.countries ?? []) as string[];
         const kmRateDe = (e as any).km_rate_de == null ? null : Number((e as any).km_rate_de);
-        const deKmMode = isDe && kmRateDe != null && kmRateDe > 0;
-        // Volgorde: meest specifiek land bepaalt het tarief
+        const deKmMode = isDe && escortCountries.includes("Duitsland") && kmRateDe != null && kmRateDe > 0;
+        // Volgorde: meest specifiek land bepaalt het tarief.
+        // Alleen het landtarief gebruiken als de begeleider dat land daadwerkelijk dekt;
+        // anders terugvallen op het NL-uurtarief van de begeleider.
         let rate = Number(e.hourly_rate);
-        if (isLu) rate = Number((e as any).hourly_rate_lu ?? e.hourly_rate);
-        else if (isFr) rate = Number((e as any).hourly_rate_fr ?? e.hourly_rate);
-        else if (isDe) rate = deKmMode ? Number(kmRateDe) : Number((e as any).hourly_rate_de ?? e.hourly_rate);
-        else if (isBe) rate = Number(e.hourly_rate_be ?? e.hourly_rate);
+        if (isLu && escortCountries.includes("Luxemburg")) rate = Number((e as any).hourly_rate_lu ?? e.hourly_rate);
+        else if (isFr && escortCountries.includes("Frankrijk")) rate = Number((e as any).hourly_rate_fr ?? e.hourly_rate);
+        else if (isDe && escortCountries.includes("Duitsland")) rate = deKmMode ? Number(kmRateDe) : Number((e as any).hourly_rate_de ?? e.hourly_rate);
+        else if (isBe && escortCountries.includes("België")) rate = Number(e.hourly_rate_be ?? e.hourly_rate);
         return {
           ...e,
           hourly_rate_de: Number((e as any).hourly_rate_de ?? e.hourly_rate),
