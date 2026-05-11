@@ -354,6 +354,7 @@ const Inner = () => {
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
         categories,
+        languages: languages.length ? languages : ["Nederlands"],
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
         fuel_surcharge: ((): any => {
           const baseCountry = detectCountry(parsed.data.basePostcode || "");
