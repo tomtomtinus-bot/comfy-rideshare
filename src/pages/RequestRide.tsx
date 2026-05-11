@@ -246,6 +246,21 @@ const RequestRideInner = () => {
     const pickupCountries = expandCountries(pickupGeo.country);
     const dropoffCountries = expandCountries(dropoffGeo.country);
 
+    // Bij een grensovergang (meerdere landen in één locatie) telt alleen het land
+    // waarin de begeleider daadwerkelijk rijdt. Dat is het land dat door beide
+    // eindpunten wordt gedeeld; bij één enkel grenspunt nemen we het land van het
+    // andere (binnenlandse) eindpunt.
+    const deriveDriveCountries = (pu: string[], dr: string[]): string[] => {
+      const overlap = pu.filter((c) => dr.includes(c));
+      if (pu.length > 1 && dr.length > 1) {
+        return overlap.length ? overlap : Array.from(new Set([...pu, ...dr]));
+      }
+      if (pu.length > 1) return overlap.length ? overlap : dr;
+      if (dr.length > 1) return overlap.length ? overlap : pu;
+      return Array.from(new Set([...pu, ...dr]));
+    };
+    const driveCountries = deriveDriveCountries(pickupCountries, dropoffCountries);
+
     const rideKm = distanceKm(pickupGeo, dropoffGeo);
     const rideMin = travelMinutes(rideKm);
     const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
