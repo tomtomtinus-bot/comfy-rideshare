@@ -53,7 +53,7 @@ const ResetPassword = () => {
     const code = search.get("code");
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) finish(false, error.message);
+        if (error) waitForRecoverySession();
         else finish(true);
       });
       return;
