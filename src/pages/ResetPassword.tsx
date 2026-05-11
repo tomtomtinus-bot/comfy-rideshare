@@ -13,7 +13,7 @@ const ResetPassword = () => {
 
   useEffect(() => {
     let cancelled = false;
-    let retryTimer: ReturnType<typeof window.setTimeout> | null = null;
+    let retryTimer: number | null = null;
 
     const finish = (ok: boolean, msg?: string) => {
       if (cancelled) return;
