@@ -108,10 +108,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 1) Sessie opbouwen
-    let { cookies } = await rdwFetch(`${BASE}/Exemption/RegisterExemptionRoute`, {
-      method: "GET",
-    });
+    // 1) Sessie opbouwen — volg GET-redirects handmatig zodat alle cookies blijven
+    let cookies = "";
+    const initUrls = [
+      `${BASE}/`,
+      `${BASE}/ConsultRestrictions/ViewRestrictions`,
+      `${BASE}/Exemption/RegisterExemptionRoute`,
+    ];
+    for (const url of initUrls) {
+      let next: string | null = url;
+      for (let hop = 0; hop < 5 && next; hop++) {
+        const r = await rdwFetch(next, { method: "GET", cookies });
+        cookies = r.cookies;
+        await r.res.body?.cancel();
+        if (r.res.status >= 300 && r.res.status < 400) {
+          const loc = r.res.headers.get("location");
+          next = loc ? new URL(loc, next).toString() : null;
+        } else {
+          break;
+        }
+      }
+    }
 
     const xhrHeaders = {
       "X-Requested-With": "XMLHttpRequest",
