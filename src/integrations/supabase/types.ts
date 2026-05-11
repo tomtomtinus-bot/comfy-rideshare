@@ -1153,6 +1153,15 @@ export type Database = {
         Args: { _approve: boolean; _assignment_id: string }
         Returns: undefined
       }
+      compute_fuel_surcharge: {
+        Args: {
+          p_base_amount: number
+          p_escort_id: string
+          p_hours: number
+          p_ride_date: string
+        }
+        Returns: number
+      }
       create_priority_assignments_for_bundle_ride: {
         Args: { _ride_id: string }
         Returns: number
@@ -1174,6 +1183,7 @@ export type Database = {
         Returns: undefined
       }
       express_ride_interest: { Args: { _assignment_id: string }; Returns: Json }
+      fuel_country_code: { Args: { p_country: string }; Returns: string }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_bundle_rides_for_escort: {
