@@ -380,38 +380,13 @@ const ClientDashboard = () => {
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
-            const showCheckbox = bundleMode && bucketKey === "openstaand";
-            const checked = selectedRides.has(r.id);
             const inBundle = !!r.bundle_id;
+            const canExtendBundle = inBundle && (bucketKey === "openstaand" || bucketKey === "geaccepteerd");
             return (
               <li key={r.id} className="relative">
-                {showCheckbox && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleSelected(r.id);
-                    }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-6 h-6 border-2 border-brass-deep flex items-center justify-center bg-card"
-                    aria-label="Selecteer voor pakket"
-                  >
-                    {checked && <span className="text-brass-deep font-bold leading-none">✓</span>}
-                  </button>
-                )}
                 <Link
                   to={`/rit/${r.id}`}
-                  onClick={(e) => {
-                    if (showCheckbox) {
-                      e.preventDefault();
-                      toggleSelected(r.id);
-                    }
-                  }}
-                  className={
-                    "flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors " +
-                    (showCheckbox ? "pl-12 " : "") +
-                    (checked ? "ring-2 ring-brass-gold" : "")
-                  }
+                  className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
                 >
                   <div className="w-28 shrink-0">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
@@ -427,17 +402,17 @@ const ClientDashboard = () => {
                         <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
                           📦 {r.bundle_label}
                         </span>
-                        {!showCheckbox && bucketKey === "openstaand" && (
+                        {canExtendBundle && (
                           <button
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              removeFromBundle(r.id);
+                              addRideToBundle(r);
                             }}
-                            className="text-[10px] uppercase tracking-widest text-brass-deep/50 hover:text-brass-deep underline"
+                            className="text-[10px] uppercase tracking-widest text-brass-gold hover:text-brass-deep underline font-semibold"
                           >
-                            uit pakket
+                            + extra rit aan pakket
                           </button>
                         )}
                       </p>
