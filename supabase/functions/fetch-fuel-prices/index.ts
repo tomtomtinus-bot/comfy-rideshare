@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
     // Kolomstructuur (1-based in Excel, 0-based hier):
     // [A=null, B=week, C=weekgemiddelde, D=year (alleen op rij waar jaar wisselt)]
     let currentYear: number | null = null;
+    let prevWeek: number | null = null;
     const upserts: Array<{ week_start: string; eur_per_liter: number; source: string }> = [];
 
     for (const row of rows) {
@@ -69,6 +70,14 @@ Deno.serve(async (req) => {
       if (typeof week !== "number" || typeof price !== "number") continue;
       if (currentYear === null) continue;
       if (!isFinite(price) || price <= 0) continue;
+
+      // TLN markeert het jaar alleen op de eerste rij van een nieuw jaar in kolom D.
+      // Soms ontbreekt die markering (bijv. voor 2025/2026): dan rolt het weeknummer
+      // terug naar 1 zonder dat de jaar-cel is ingevuld. In dat geval bumpen we het jaar zelf.
+      if (prevWeek !== null && week < prevWeek && (typeof yearCell !== "number")) {
+        currentYear += 1;
+      }
+      prevWeek = week;
 
       const weekStart = isoWeekStartFromYearWeek(currentYear, week);
       upserts.push({
