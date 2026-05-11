@@ -17,6 +17,17 @@ const COUNTRY_CERTS = [
   { id: "de", label: "Duitsland", country: "Duitsland" },
   { id: "fr", label: "Frankrijk", country: "Frankrijk" },
   { id: "lu", label: "Luxemburg", country: "Luxemburg" },
+  ] as const;
+
+const LANGUAGES = [
+  "Nederlands",
+  "Engels",
+  "Duits",
+  "Frans",
+  "Spaans",
+  "Italiaans",
+  "Pools",
+  "Russisch",
 ] as const;
 
 // Leid het countries-veld af uit de gekozen certificeringen
