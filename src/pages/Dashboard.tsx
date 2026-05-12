@@ -1097,7 +1097,7 @@ const EscortDashboard = () => {
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderItem)}</ul>
+                  <ul className="flex flex-col gap-2">{g.items.map(renderItem)}</ul>
                 </section>
               ))}
             </div>
