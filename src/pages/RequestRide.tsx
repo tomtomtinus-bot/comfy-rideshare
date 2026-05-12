@@ -150,14 +150,23 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
+  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
 
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates,
+        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs,
       }));
     } catch {}
-  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates]);
+  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs]);
+
+  const addExtraLeg = () => setExtraLegs((l) => [...l, {
+    pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
+    scheduled_date: "", scheduled_time: "",
+  }]);
+  const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
+    setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeExtraLeg = (i: number) => setExtraLegs((l) => l.filter((_, idx) => idx !== i));
 
   const addDriver = () => setDrivers((d) => [...d, { name: "", phone: "" }]);
   const updateDriver = (i: number, patch: Partial<{ name: string; phone: string }>) =>
