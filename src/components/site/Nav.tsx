@@ -22,6 +22,7 @@ export const Nav = () => {
     { to: "/facturen", label: t("nav.invoices"), show: !!user },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
     { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
@@ -30,7 +31,6 @@ export const Nav = () => {
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
     { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
-    { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
     { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
   ];
 
