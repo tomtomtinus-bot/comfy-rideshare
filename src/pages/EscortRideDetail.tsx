@@ -348,6 +348,8 @@ const Inner = () => {
         </div>
       </Section>
 
+      <ExtraLegsList rideId={ride.id} />
+
       {isInvited ? (
         <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep">
           U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
