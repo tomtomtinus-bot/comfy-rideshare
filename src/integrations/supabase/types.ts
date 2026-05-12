@@ -1154,7 +1154,117 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      escort_profiles_public: {
+        Row: {
+          anonymous_id: string | null
+          available: boolean | null
+          base_city: string | null
+          base_lat: number | null
+          base_lng: number | null
+          billing_country: string | null
+          categories: string[] | null
+          cert_expires_on: string | null
+          cert_verified_countries: string[] | null
+          company_name: string | null
+          countries: string[] | null
+          created_at: string | null
+          escort_types: string[] | null
+          fuel_surcharge: Json | null
+          hourly_rate: number | null
+          hourly_rate_be: number | null
+          hourly_rate_de: number | null
+          hourly_rate_fr: number | null
+          hourly_rate_lu: number | null
+          id: string | null
+          km_rate_de: number | null
+          languages: string[] | null
+          min_billable_hours: number | null
+          rating: number | null
+          rides_completed: number | null
+          surcharges: Json | null
+          updated_at: string | null
+          vehicle_has_height_pole: boolean | null
+          vehicle_has_konvooi_sign: boolean | null
+          vehicle_has_lightbar: boolean | null
+          vehicle_type: string | null
+          wero_enabled: boolean | null
+          wero_fee: number | null
+          wero_handle: string | null
+        }
+        Insert: {
+          anonymous_id?: string | null
+          available?: boolean | null
+          base_city?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          billing_country?: string | null
+          categories?: string[] | null
+          cert_expires_on?: string | null
+          cert_verified_countries?: string[] | null
+          company_name?: string | null
+          countries?: string[] | null
+          created_at?: string | null
+          escort_types?: string[] | null
+          fuel_surcharge?: Json | null
+          hourly_rate?: number | null
+          hourly_rate_be?: number | null
+          hourly_rate_de?: number | null
+          hourly_rate_fr?: number | null
+          hourly_rate_lu?: number | null
+          id?: string | null
+          km_rate_de?: number | null
+          languages?: string[] | null
+          min_billable_hours?: number | null
+          rating?: number | null
+          rides_completed?: number | null
+          surcharges?: Json | null
+          updated_at?: string | null
+          vehicle_has_height_pole?: boolean | null
+          vehicle_has_konvooi_sign?: boolean | null
+          vehicle_has_lightbar?: boolean | null
+          vehicle_type?: string | null
+          wero_enabled?: boolean | null
+          wero_fee?: number | null
+          wero_handle?: string | null
+        }
+        Update: {
+          anonymous_id?: string | null
+          available?: boolean | null
+          base_city?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          billing_country?: string | null
+          categories?: string[] | null
+          cert_expires_on?: string | null
+          cert_verified_countries?: string[] | null
+          company_name?: string | null
+          countries?: string[] | null
+          created_at?: string | null
+          escort_types?: string[] | null
+          fuel_surcharge?: Json | null
+          hourly_rate?: number | null
+          hourly_rate_be?: number | null
+          hourly_rate_de?: number | null
+          hourly_rate_fr?: number | null
+          hourly_rate_lu?: number | null
+          id?: string | null
+          km_rate_de?: number | null
+          languages?: string[] | null
+          min_billable_hours?: number | null
+          rating?: number | null
+          rides_completed?: number | null
+          surcharges?: Json | null
+          updated_at?: string | null
+          vehicle_has_height_pole?: boolean | null
+          vehicle_has_konvooi_sign?: boolean | null
+          vehicle_has_lightbar?: boolean | null
+          vehicle_type?: string | null
+          wero_enabled?: boolean | null
+          wero_fee?: number | null
+          wero_handle?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_bundle_priority_offer: {
