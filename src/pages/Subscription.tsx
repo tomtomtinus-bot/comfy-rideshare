@@ -19,6 +19,7 @@ const PLANS = {
     description:
       "Toegang tot het ViaCust platform: ritten plannen, begeleiders boeken, vergunningen beheren. Plus 1,5% platform fee per rit (op de wekelijkse platformfactuur).",
     features: [
+      "30 dagen gratis proberen — opzegbaar tijdens de proefperiode",
       "Onbeperkt ritten plannen",
       "Toegang tot het volledige begeleidersnetwerk",
       "Vergunningen automatisch verwerken",
@@ -32,6 +33,7 @@ const PLANS = {
     period: "per maand",
     description: "Actief blijven op ViaCust: ritten ontvangen, agenda koppelen, automatische facturatie.",
     features: [
+      "30 dagen gratis proberen — opzegbaar tijdens de proefperiode",
       "Ritten ontvangen en accepteren",
       "Google Agenda-koppeling",
       "Automatische wekelijkse facturatie",
