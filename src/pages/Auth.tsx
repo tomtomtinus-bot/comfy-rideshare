@@ -162,7 +162,7 @@ const Auth = () => {
       privacy_accepted: "true",
     };
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: d.email,
       password: d.password,
       options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: meta },
@@ -170,8 +170,13 @@ const Auth = () => {
     setBusy(false);
     if (error) return toast.error(error.message);
 
-    toast.success(t("auth.accountCreated"));
-    navigate("/dashboard");
+    if (data.session) {
+      toast.success(t("auth.accountCreated"));
+      navigate("/dashboard");
+    } else {
+      toast.success("Check je e-mail! Klik op de bevestigingslink om je account te activeren.");
+      setMode("login");
+    }
   };
 
   const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
