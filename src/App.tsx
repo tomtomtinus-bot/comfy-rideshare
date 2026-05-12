@@ -33,6 +33,8 @@ import AdminRides from "./pages/admin/AdminRides.tsx";
 import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
 import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
+import AdminExcluded from "./pages/admin/AdminExcluded.tsx";
+import ExcludedEscorts from "./pages/ExcludedEscorts.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
 import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import WatKostViaCust from "./pages/WatKostViaCust.tsx";
