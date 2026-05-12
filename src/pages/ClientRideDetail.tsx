@@ -106,6 +106,8 @@ const Inner = () => {
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [swapFor, setSwapFor] = useState<{ assignmentId: string; anon: string | null } | null>(null);
+  const [swapTick, setSwapTick] = useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
