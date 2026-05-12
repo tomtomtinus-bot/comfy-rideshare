@@ -909,12 +909,20 @@ const EscortDashboard = () => {
                 {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
-              {openId === a.id && (
-                <form
+              <Dialog open={openId === a.id} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
+                <DialogContent
+                  className="max-w-2xl max-h-[90vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
-                  onSubmit={(e) => submitHours(a.id, e)}
-                  className="px-5 pb-5 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-brass-deep/10"
                 >
+                  <DialogHeader>
+                    <DialogTitle className="font-display italic text-2xl text-brass-deep">
+                      {t("dash.fillHours")}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form
+                    onSubmit={(e) => submitHours(a.id, e)}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
+                  >
                   <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
                     <div>
                       <strong>{t("dash.plannedTime")}</strong>{" "}
