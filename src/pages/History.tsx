@@ -121,7 +121,7 @@ const HistoryInner = () => {
         ]);
         const escortIds = [...new Set((ass ?? []).map((a: any) => a.escort_id))];
         const { data: escs } = escortIds.length
-          ? await supabase.from("escort_profiles").select("id, anonymous_id").in("id", escortIds)
+          ? await supabase.from("escort_profiles_public").select("id, anonymous_id").in("id", escortIds)
           : { data: [] as any[] };
         const escMap = new Map((escs ?? []).map((e: any) => [e.id, e.anonymous_id]));
         const invMap = new Map((invs ?? []).map((i: any) => [i.id, i.invoice_number]));
