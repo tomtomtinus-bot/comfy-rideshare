@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string }> = {
-  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden", updated: "Laatst bijgewerkt: 10 mei 2026", back: "← Terug" },
+  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden & Gebruiksvoorwaarden ViaCust", updated: "Versie 1.2 — Laatst bijgewerkt: 12 mei 2026", back: "← Terug" },
   en: { kicker: "Legal", title: "Terms and Conditions", updated: "Last updated: May 10, 2026", back: "← Back" },
   de: { kicker: "Rechtliches", title: "Allgemeine Geschäftsbedingungen", updated: "Zuletzt aktualisiert: 10. Mai 2026", back: "← Zurück" },
   fr: { kicker: "Mentions légales", title: "Conditions Générales d'Utilisation", updated: "Dernière mise à jour : 10 mai 2026", back: "← Retour" },
@@ -54,45 +54,67 @@ const Terms = () => {
 
 const TermsNL = () => (
   <>
-    <h2>Artikel 1: Definities</h2>
+    <h2>1. Toepasselijkheid en Reikwijdte</h2>
+    <p>Deze voorwaarden zijn van toepassing op alle diensten geleverd door <strong>ViaCust</strong> binnen de Europese Unie. Door gebruik te maken van het Platform, gaat de Gebruiker (Opdrachtgever dan wel Begeleider) onherroepelijk akkoord met deze voorwaarden en verklaart deze tevens de Privacyverklaring te hebben gelezen en geaccepteerd. Afwijkingen van deze voorwaarden zijn slechts geldig indien deze schriftelijk door ViaCust zijn bevestigd.</p>
+
+    <h2>2. De Rol van ViaCust (SaaS-Platform)</h2>
     <ul>
-      <li><strong>ViaCust:</strong> Het platform, de software en de handelsnaam waaronder de diensten worden aangeboden.</li>
-      <li><strong>Gebruiker:</strong> Iedere partij (Opdrachtgever of Begeleider) die gebruikmaakt van het platform.</li>
-      <li><strong>Opdrachtgever:</strong> De partij (doorgaans een transportonderneming) die een opdracht voor transportbegeleiding plaatst.</li>
-      <li><strong>Begeleider:</strong> De zelfstandige professional (VVB-er of escort) die de opdracht accepteert en uitvoert.</li>
+      <li><strong>Platformfunctie:</strong> ViaCust fungeert uitsluitend als een digitale infrastructuur (Software as a Service) die vraag en aanbod in de transportbegeleiding samenbrengt en administratieve processen automatiseert.</li>
+      <li><strong>Geen Bemiddeling:</strong> ViaCust treedt niet op als bemiddelaar, agent of tussenpersoon. De overeenkomst voor de feitelijke transportbegeleiding komt rechtstreeks tot stand tussen de Opdrachtgever en de Begeleider.</li>
+      <li><strong>Geen Dienstbetrekking:</strong> Het gebruik van het platform creëert nimmer een arbeidsrelatie tussen ViaCust en de Begeleider. De Begeleider voert de werkzaamheden uit als zelfstandig ondernemer voor eigen rekening en risico.</li>
     </ul>
 
-    <h2>Artikel 2: De Rol van ViaCust</h2>
-    <ol className="list-decimal pl-5 space-y-1">
-      <li>ViaCust exploiteert uitsluitend een digitaal platform (SaaS) dat vraag en aanbod in de transportbegeleiding samenbrengt en administratieve processen automatiseert.</li>
-      <li>ViaCust is nadrukkelijk geen partij bij de overeenkomst tussen Opdrachtgever en Begeleider. Er ontstaat door het gebruik van het platform geen arbeidsovereenkomst, agentuurovereenkomst of bemiddelingsovereenkomst tussen ViaCust en de Gebruiker.</li>
-      <li>ViaCust is geen transportonderneming en verricht zelf geen begeleidingsdiensten.</li>
-    </ol>
+    <h2>3. Google API-integraties, Kaarten en Synchronisatie</h2>
+    <ul>
+      <li><strong>Google Calendar:</strong> ViaCust faciliteert een koppeling met de Google Calendar API voor planning en conflict-detectie. Hoewel wij streven naar foutloze gegevensuitwisseling, blijft de Gebruiker te allen tijde zelf verantwoordelijk voor de controle van de eigen agenda. ViaCust is niet aansprakelijk voor schade door dubbele boekingen, foutieve synchronisatie of gemiste opdrachten.</li>
+      <li><strong>Google Maps & GPS:</strong> Afstanden, routes en locaties worden berekend via Google Maps API. Deze data dient als bindende basis voor de facturatie (zoals kilometer- en brandstoftoeslagen). ViaCust aanvaardt geen aansprakelijkheid voor (technische) onjuistheden in kaartmateriaal, routeberekeningen of GPS-afwijkingen.</li>
+    </ul>
 
-    <h2>Artikel 3: Uitsluiting van Aansprakelijkheid</h2>
-    <ol className="list-decimal pl-5 space-y-1">
-      <li><strong>Uitvoering van diensten:</strong> ViaCust draagt geen enkele verantwoordelijkheid voor de kwaliteit, veiligheid, tijdigheid of rechtmatigheid van de door de Begeleider uitgevoerde diensten.</li>
-      <li><strong>Schade en Claims:</strong> ViaCust is niet aansprakelijk voor enige schade (direct, indirect, gevolgschade of boetes) die voortvloeit uit ritten die via het platform tot stand zijn gekomen. Dit geldt ook voor schade aan voertuigen, lading, derden of letselschade.</li>
-      <li><strong>Niet-nakoming:</strong> ViaCust is niet aansprakelijk indien een Begeleider niet verschijnt op een opdracht of indien een Opdrachtgever een rit annuleert.</li>
-      <li><strong>Vergunningen:</strong> Gebruikers zijn zelf verantwoordelijk voor het bezitten en controleren van de wettelijk vereiste vergunningen, certificaten en verzekeringen.</li>
-    </ol>
+    <h2>4. Kwaliteitsbewaking, Beoordelingen en Voorkeurslijsten</h2>
+    <ul>
+      <li><strong>Beoordelingssysteem:</strong> Gebruikers kunnen elkaar na een rit beoordelen. Feedback dient feitelijk, professioneel en naar waarheid te zijn. ViaCust heeft het recht om reviews te modereren of te verwijderen indien deze in strijd zijn met de goede zeden of de wet.</li>
+      <li><strong>Uitsluitingslijsten (Pools):</strong> Opdrachtgevers hebben de mogelijkheid om een private "uitsluitingslijst" bij te houden. Begeleiders op deze lijst zullen geen ritaanvragen van de betreffende Opdrachtgever meer ontvangen. Deze lijst is vertrouwelijk en uitsluitend zichtbaar voor de betreffende Opdrachtgever en het systeembeheer van ViaCust.</li>
+      <li><strong>Schorsing bij Wangedrag:</strong> ViaCust behoudt zich het recht voor om een Gebruiker per direct (tijdelijk) te schorsen of het account definitief te beëindigen bij:
+        <ul>
+          <li>Herhaaldelijke negatieve beoordelingen of klachten over professionaliteit.</li>
+          <li>Het niet verschijnen op een geaccepteerde rit ('no-show').</li>
+          <li>Wanbetaling door de Opdrachtgever.</li>
+          <li>Het verstrekken van onjuiste (bedrijfs)gegevens of vervallen vergunningen.</li>
+        </ul>
+      </li>
+      <li><strong>Uitsluiting Aansprakelijkheid:</strong> ViaCust is nimmer aansprakelijk voor gederfde inkomsten of andere schade die voortvloeit uit een (terechte) schorsing of uitsluiting van het platform.</li>
+    </ul>
 
-    <h2>Artikel 4: Automatische Facturatie en Betalingen</h2>
-    <ol className="list-decimal pl-5 space-y-1">
-      <li>ViaCust faciliteert de techniek achter het genereren van wekelijkse verzamelfacturen. De Begeleider is en blijft echter de juridische verzender van de factuur en is verantwoordelijk voor de juistheid van de data (uren, brandstoftoeslag, onkosten).</li>
-      <li>ViaCust is niet aansprakelijk voor fouten in facturen of vertragingen in betalingen tussen Gebruikers.</li>
-      <li>ViaCust is geen incassobureau. Indien een Opdrachtgever een factuur niet voldoet, dient de Begeleider dit zelfstandig op te lossen met de Opdrachtgever.</li>
-      <li>De vergoeding voor het gebruik van het platform (abonnement en commissie) wordt automatisch geïncasseerd. Bij gebreke van betaling heeft ViaCust het recht het account per direct te schorsen.</li>
-    </ol>
+    <h2>5. Automatische Facturatie, Brandstof en Betaling</h2>
+    <ul>
+      <li><strong>Lastgeving:</strong> De Begeleider verleent ViaCust een onherroepelijke lastgeving om in naam en voor rekening van de Begeleider wekelijkse verzamelfacturen op te stellen.</li>
+      <li><strong>Input-verantwoordelijkheid:</strong> De Begeleider is exclusief verantwoordelijk voor de juistheid van de ingestelde brandstofpercentages, kilometerprijzen en onkosten. ViaCust voert geen inhoudelijke controle uit op deze bedragen.</li>
+      <li><strong>Betalingsplicht:</strong> De Opdrachtgever is juridisch verplicht de door ViaCust gegenereerde facturen binnen de gestelde termijn te voldoen aan de Begeleider. ViaCust faciliteert de facturatie, maar is geen incassobureau en draagt geen risico voor oninbare vorderingen.</li>
+    </ul>
 
-    <h2>Artikel 5: Techniek en Overmacht</h2>
-    <ol className="list-decimal pl-5 space-y-1">
-      <li>ViaCust streeft naar een hoge beschikbaarheid van het platform, maar garandeert geen 100% uptime. ViaCust is niet aansprakelijk voor storingen in de software, de Google Agenda-koppeling of internetverbindingen.</li>
-      <li>Gebruikers zijn zelf verantwoordelijk voor een werkende internetverbinding en de benodigde hardware onderweg.</li>
-    </ol>
+    <h2>6. Commissie, Abonnement en Btw</h2>
+    <ul>
+      <li><strong>Inhouding:</strong> De platformcommissie (1,5% per rit) en de maandelijkse abonnementskosten worden automatisch geïncasseerd via Stripe.</li>
+      <li><strong>Btw & Reverse Charge:</strong> Alle prijzen op het platform zijn exclusief btw. Voor grensoverschrijdende diensten binnen de EU past ViaCust de verleggingsregeling (Reverse Charge) toe waar wettelijk vereist. Gebruikers zijn zelf verantwoordelijk voor de correcte verwerking van btw in hun eigen boekhouding.</li>
+    </ul>
 
-    <h2>Artikel 6: Vrijwaring</h2>
-    <p>De Gebruiker vrijwaart ViaCust tegen alle aanspraken van derden die verband houden met het gebruik van de diensten en de uitvoering van de via het platform overeengekomen opdrachten.</p>
+    <h2>7. Verplichtingen en EU-Sancties</h2>
+    <ul>
+      <li><strong>Vergunningen:</strong> Begeleiders verklaren te beschikken over alle wettelijk vereiste certificaten (zoals vakbekwaamheidsbewijzen) en verzekeringen (WA, beroeps- en bedrijfsaansprakelijkheid).</li>
+      <li><strong>Sancties:</strong> Gebruikers verklaren dat zij, noch hun onderneming, voorkomen op EU-sanctielijsten.</li>
+    </ul>
+
+    <h2>8. Uitsluiting van Aansprakelijkheid (Algemeen)</h2>
+    <ul>
+      <li><strong>Uitvoering:</strong> ViaCust is niet aansprakelijk voor schade aan goederen, voertuigen of personen tijdens de uitvoering van een rit.</li>
+      <li><strong>Beschikbaarheid:</strong> ViaCust garandeert geen 100% uptime van de website of app. Schade door technische storingen is uitdrukkelijk uitgesloten.</li>
+    </ul>
+
+    <h2>9. Herroepingsrecht en Toepasselijk Recht</h2>
+    <ul>
+      <li><strong>Afstand Herroeping:</strong> Bij het koppelen van API-services of het accepteren van de eerste rit, erkent de Gebruiker dat de uitvoering van de digitale dienst direct begint en vervalt het wettelijke herroepingsrecht.</li>
+      <li><strong>Rechtskeuze:</strong> Op deze voorwaarden is uitsluitend het Nederlands recht van toepassing. Geschillen zullen worden voorgelegd aan de bevoegde rechter te 's-Hertogenbosch.</li>
+    </ul>
   </>
 );
 
