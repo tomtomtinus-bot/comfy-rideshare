@@ -97,7 +97,7 @@ const InvoicesInner = () => {
     const clientIds = [...new Set(list.map((i) => i.client_id))];
     if (escortIds.length) {
       const { data: ec } = await supabase
-        .from("escort_profiles")
+        .from("escort_profiles_public")
         .select("id, billing_country")
         .in("id", escortIds);
       const map: Record<string, string | null> = {};
