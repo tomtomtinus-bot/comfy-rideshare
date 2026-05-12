@@ -427,7 +427,7 @@ const RequestRideInner = () => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
       const [toPickup, backHome] = await Promise.all([
         fetchLegMin(base, pickupGeo),
-        fetchLegMin(dropoffGeo, base),
+        fetchLegMin(lastDropoffGeo, base),
       ]);
       return {
         ...m,
