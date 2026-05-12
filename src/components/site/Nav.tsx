@@ -31,7 +31,6 @@ export const Nav = () => {
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
     { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
     { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
-    { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
     { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
   ];
 
