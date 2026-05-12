@@ -20,21 +20,21 @@ export type Database = {
           created_at: string
           escort_id: string
           id: string
-          reason: string | null
+          reason: string
         }
         Insert: {
           client_id: string
           created_at?: string
           escort_id: string
           id?: string
-          reason?: string | null
+          reason: string
         }
         Update: {
           client_id?: string
           created_at?: string
           escort_id?: string
           id?: string
-          reason?: string | null
+          reason?: string
         }
         Relationships: []
       }
