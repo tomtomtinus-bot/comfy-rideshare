@@ -388,39 +388,38 @@ const ClientDashboard = () => {
               <li key={r.id} className="relative">
                 <Link
                   to={`/rit/${r.id}`}
-                  className="flex items-center gap-4 bg-card px-5 py-4 hover:bg-parchment/40 transition-colors"
+                  className="block bg-card px-4 py-3 hover:bg-parchment/40 transition-colors"
                 >
-                  <div className="w-28 shrink-0">
+                  <div className="flex items-start justify-between gap-2">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
+                    <span className="text-brass-gold text-lg leading-none shrink-0">›</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">
-                      {r.pickup_city}
-                      <span className="text-brass-gold mx-2">→</span>
-                      {r.dropoff_city}
+                  <p className="font-medium truncate text-sm mt-1">
+                    {r.pickup_city}
+                    <span className="text-brass-gold mx-2">→</span>
+                    {r.dropoff_city}
+                  </p>
+                  {inBundle && (
+                    <p className="mt-1 flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
+                        📦 {r.bundle_label}
+                      </span>
+                      {canExtendBundle && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addRideToBundle(r);
+                          }}
+                          className="text-[10px] uppercase tracking-widest text-brass-gold hover:text-brass-deep underline font-semibold"
+                        >
+                          + extra rit aan pakket
+                        </button>
+                      )}
                     </p>
-                    {inBundle && (
-                      <p className="mt-1 flex items-center gap-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
-                          📦 {r.bundle_label}
-                        </span>
-                        {canExtendBundle && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              addRideToBundle(r);
-                            }}
-                            className="text-[10px] uppercase tracking-widest text-brass-gold hover:text-brass-deep underline font-semibold"
-                          >
-                            + extra rit aan pakket
-                          </button>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                  <div className="shrink-0 hidden sm:flex items-center gap-3">
+                  )}
+                  <div className="mt-2 flex items-center gap-3 flex-wrap">
                     {(r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
                       <span
                         className={
@@ -437,7 +436,6 @@ const ClientDashboard = () => {
                     )}
                     <StatusBadge status={r.status} />
                   </div>
-                  <span className="text-brass-gold text-lg shrink-0">›</span>
                 </Link>
               </li>
             );
@@ -452,7 +450,7 @@ const ClientDashboard = () => {
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
+                  <ul className="grid grid-cols-1 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
                 </section>
               ))}
             </div>
