@@ -1106,18 +1106,21 @@ const EscortDashboard = () => {
         };
 
         return (
-          <Tabs defaultValue="openstaand" className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
-              <TabsTrigger value="verlopen">{t("dash.tabExpired")} ({buckets.verlopen.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
-            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
-            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond, "afgerond")}</TabsContent>
-            <TabsContent value="verlopen" className="mt-6">{renderList(buckets.verlopen, "verlopen")}</TabsContent>
-          </Tabs>
+          <div className="space-y-10">
+            {([
+              { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
+              { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
+              { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
+              { key: "verlopen" as const, label: t("dash.tabExpired"), list: buckets.verlopen },
+            ]).map((s) => (
+              <section key={s.key}>
+                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep/70 mb-3">
+                  {s.label} <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+                </h2>
+                {renderList(s.list, s.key)}
+              </section>
+            ))}
+          </div>
         );
       })()}
     </div>
