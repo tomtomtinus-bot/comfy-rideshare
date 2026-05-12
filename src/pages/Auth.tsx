@@ -79,6 +79,9 @@ const Auth = () => {
     const error = await doSignIn(parsed.data.email, parsed.data.password);
     if (error) {
       setBusy(false);
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        return toast.error("E-mailadres nog niet bevestigd. Check je inbox (en spam) voor de bevestigingslink.");
+      }
       return toast.error(error.message);
     }
     // Bied biometrische opslag aan op native apparaten
