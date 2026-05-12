@@ -153,6 +153,9 @@ export const GoogleCalendarCard = () => {
           <p className="text-[11px] text-brass-deep/55 mt-1.5 max-w-xl leading-relaxed">
             {t("google.cardBody")}
           </p>
+          <p className="text-[11px] text-brass-gold mt-1.5 font-semibold">
+            ⚠ Let op: zorg dat je browser pop-ups van deze site toestaat.
+          </p>
         </div>
         <button
           type="button"
