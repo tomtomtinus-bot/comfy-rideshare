@@ -335,8 +335,39 @@ const RequestRideInner = () => {
 
     if (ranked.length === 0) return toast.error(t("request.noEscorts"));
 
+    // Aanvoer- en afvoertijd via Google Maps (zonder verkeer = "schone" reistijd).
+    // departure_time wordt bewust niet meegegeven, zodat Google de statische duur
+    // teruggeeft en eventuele files buiten beschouwing blijven.
+    const roundQuarter = (sec: number) => Math.max(15, Math.ceil((sec / 60) / 15) * 15);
+    const fetchLegMin = async (
+      origin: { lat: number; lng: number },
+      destination: { lat: number; lng: number },
+    ): Promise<number | null> => {
+      try {
+        const { data, error } = await supabase.functions.invoke("google-directions", {
+          body: { origin, destination },
+        });
+        if (error || !data?.duration_s) return null;
+        return roundQuarter(Number(data.duration_s));
+      } catch {
+        return null;
+      }
+    };
+    const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
+      const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
+      const [toPickup, backHome] = await Promise.all([
+        fetchLegMin(base, pickupGeo),
+        fetchLegMin(dropoffGeo, base),
+      ]);
+      return {
+        ...m,
+        travelToPickupMin: toPickup ?? m.travelToPickupMin,
+        travelBackHomeMin: backHome ?? m.travelBackHomeMin,
+      };
+    }));
+
     // Bezetting: alleen pure ritvenster (zonder reistijd), alleen ViaCust-ritten.
-    const withConflicts = await Promise.all(ranked.map(async (m) => {
+    const withConflicts = await Promise.all(rankedWithDirections.map(async (m) => {
       const myStartMs = rideStartMs;
       const myEndMs = rideStartMs + rideMin * 60_000;
       const fromIso = new Date(myStartMs - 24 * 3600_000).toISOString();
