@@ -85,18 +85,6 @@ const en: Dict = {
     pending: "Account pending approval",
     pendingBody: "You can already complete your profile and billing details. Once an administrator approves your account, you can request or accept rides.",
   },
-  demo: {
-    title: "Demo accounts",
-    label: "Demo",
-    mode: "Demo mode",
-    sub: "Click to sign in as a test account",
-    clients: "Clients",
-    escorts: "Escorts",
-    signingIn: "Signing in…",
-    password: "Password",
-    loggedInAs: "Signed in as {{email}}",
-    notLoggedIn: "Not signed in",
-  },
   google: {
     checking: "Checking calendar…",
     connectTitle: "Connect your Google Calendar",

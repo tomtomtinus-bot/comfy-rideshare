@@ -85,18 +85,6 @@ const de: Dict = {
     pending: "Konto wartet auf Freigabe",
     pendingBody: "Sie können bereits Ihr Profil und Ihre Rechnungsdaten ergänzen. Sobald ein Administrator Ihr Konto freigibt, können Sie Fahrten anfragen oder annehmen.",
   },
-  demo: {
-    title: "Demo-Konten",
-    label: "Demo",
-    mode: "Demo-Modus",
-    sub: "Klicken Sie, um sich als Testkonto anzumelden",
-    clients: "Auftraggeber",
-    escorts: "Begleiter",
-    signingIn: "Anmelden…",
-    password: "Passwort",
-    loggedInAs: "Angemeldet als {{email}}",
-    notLoggedIn: "Nicht angemeldet",
-  },
   google: {
     checking: "Kalender wird geprüft…",
     connectTitle: "Google-Kalender verknüpfen",

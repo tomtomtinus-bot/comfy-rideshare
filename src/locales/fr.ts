@@ -85,18 +85,6 @@ const fr: Dict = {
     pending: "Compte en attente d'approbation",
     pendingBody: "Vous pouvez déjà compléter votre profil et vos coordonnées de facturation. Dès qu'un administrateur aura approuvé votre compte, vous pourrez demander ou accepter des transports.",
   },
-  demo: {
-    title: "Comptes démo",
-    label: "Démo",
-    mode: "Mode démo",
-    sub: "Cliquez pour vous connecter en tant que compte test",
-    clients: "Donneurs d'ordre",
-    escorts: "Accompagnateurs",
-    signingIn: "Connexion…",
-    password: "Mot de passe",
-    loggedInAs: "Connecté en tant que {{email}}",
-    notLoggedIn: "Non connecté",
-  },
   google: {
     checking: "Vérification de l'agenda…",
     connectTitle: "Connectez votre Google Agenda",

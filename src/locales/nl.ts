@@ -83,18 +83,6 @@ const nl = {
     pending: "Account in afwachting van goedkeuring",
     pendingBody: "Je kunt alvast je profiel en facturatiegegevens invullen. Zodra een beheerder je account goedkeurt, kun je ritten aanvragen of accepteren.",
   },
-  demo: {
-    title: "Demo-accounts",
-    label: "Demo",
-    mode: "Demo-modus",
-    sub: "Klik om in te loggen als testaccount",
-    clients: "Opdrachtgevers",
-    escorts: "Begeleiders",
-    signingIn: "Inloggen…",
-    password: "Wachtwoord",
-    loggedInAs: "Ingelogd als {{email}}",
-    notLoggedIn: "Niet ingelogd",
-  },
   google: {
     checking: "Agenda controleren…",
     connectTitle: "Koppel je Google Agenda",
