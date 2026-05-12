@@ -1083,7 +1083,11 @@ const EscortDashboard = () => {
 
         const renderList = (list: typeof items, bucketKey: "openstaand" | "geaccepteerd" | "afgerond" | "verlopen") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
+            return (
+              <div className="border border-dashed border-brass-deep/15 px-4 py-8 text-center">
+                <p className="text-xs text-brass-deep/45">{t("dash.noRidesInBucket")}</p>
+              </div>
+            );
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
           const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
