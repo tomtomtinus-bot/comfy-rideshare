@@ -1477,6 +1477,12 @@ export type Database = {
           last_interaction_at: string
         }[]
       }
+      escort_ids_excluding_client: {
+        Args: { _client_id: string }
+        Returns: {
+          escort_id: string
+        }[]
+      }
       escort_preferred_client_details: {
         Args: never
         Returns: {
