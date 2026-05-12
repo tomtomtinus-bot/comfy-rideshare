@@ -302,6 +302,7 @@ const RequestRideInner = () => {
 
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
+        if (excludedSet.has(e.id)) return false; // respecteer pool-uitsluitingen
         const ec = escortCountrySet(e as any);
         // Begeleider moet ALLE landen dekken waarin daadwerkelijk gereden wordt.
         // Bij grensovergangen telt alleen het land aan de gereden zijde mee.
