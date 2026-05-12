@@ -928,6 +928,11 @@ const Matches = ({
                     isSelected ? "bg-brass-gold" : "bg-patina"
                   }`} />
                   <p className="font-display text-lg text-brass-deep tabular-nums shrink-0">#{m.anonymous_id}</p>
+                  {m.is_favorite && (
+                    <span title="Favoriete begeleider" className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-gold text-parchment shrink-0">
+                      ★ Favoriet
+                    </span>
+                  )}
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
                     <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
                     <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
