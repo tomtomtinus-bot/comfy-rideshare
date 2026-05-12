@@ -92,6 +92,38 @@ export const Nav = () => {
                 {l.label}
               </Link>
             ))}
+            {user && settingsLinks.some((l) => l.show) && (
+              <div className="mt-2 pt-2 border-t border-brass-deep/10">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen((v) => !v)}
+                  aria-expanded={settingsOpen}
+                  className="w-full flex items-center justify-between px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings className="size-4" />
+                    Instellingen
+                  </span>
+                  <ChevronDown
+                    className={`size-4 transition-transform ${settingsOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {settingsOpen && (
+                  <div className="pl-4 flex flex-col">
+                    {settingsLinks.filter((l) => l.show).map((l) => (
+                      <Link
+                        key={l.to}
+                        to={l.to}
+                        onClick={close}
+                        className="px-3 py-2.5 text-xs uppercase tracking-widest font-semibold text-brass-deep/80 hover:bg-brass-deep hover:text-parchment transition-colors"
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10">
               {user ? (
                 <button
