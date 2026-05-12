@@ -237,6 +237,26 @@ const RequestRideInner = () => {
     setDropoffGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
 
+  // Build full leg list (main + extras) ordered as entered. Each leg has start/end ms.
+  const buildLegs = () => {
+    if (!pickupGeo || !dropoffGeo || !form.scheduled_date || !form.scheduled_time) return null;
+    const legs: Array<{ pickup: GeoPoint; dropoff: GeoPoint; startMs: number; durMin: number; endMs: number; }> = [];
+    const main = {
+      pickup: pickupGeo, dropoff: dropoffGeo,
+      startMs: new Date(`${form.scheduled_date}T${form.scheduled_time}`).getTime(),
+      durMin: travelMinutes(distanceKm(pickupGeo, dropoffGeo)),
+    };
+    legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
+    for (const ex of extraLegs) {
+      if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
+      const startMs = new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).getTime();
+      if (isNaN(startMs)) return null;
+      const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
+      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
+    }
+    return legs;
+  };
+
   const findMatches = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = makeSchema(t).safeParse(form);
@@ -247,6 +267,13 @@ const RequestRideInner = () => {
     const scheduledDate = new Date(`${form.scheduled_date}T${form.scheduled_time}`);
     if (isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
       return toast.error(t("request.pastNotAllowed", { defaultValue: "Starttijd moet in de toekomst liggen." }));
+    }
+    const legs = buildLegs();
+    if (!legs) return toast.error("Vul alle aansluitende ritten volledig in (adres + tijd).");
+    for (let i = 1; i < legs.length; i++) {
+      if (legs[i].startMs < legs[i - 1].endMs) {
+        return toast.error(`Aansluitende rit ${i + 1} start vóór het einde van de vorige rit.`);
+      }
     }
 
     setBusy(true);
