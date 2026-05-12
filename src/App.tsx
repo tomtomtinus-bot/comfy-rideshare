@@ -56,6 +56,7 @@ const App = () => (
         <AuthProvider>
           <NotificationsListener />
           <PendingApprovalBanner />
+          <SubscriptionBanner />
           <CookieConsent />
           <FloatingBackButton />
           <Routes>
