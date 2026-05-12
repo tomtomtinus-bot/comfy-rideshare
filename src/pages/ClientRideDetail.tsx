@@ -270,6 +270,8 @@ const Inner = () => {
         </div>
       </Section>
 
+      <ExtraLegsList rideId={ride.id} />
+
       <Section title={`Chauffeurs (${drivers.length})`}>
         {drivers.length === 0 ? (
           <p className="text-sm text-brass-deep/50">Geen chauffeurs opgegeven.</p>
