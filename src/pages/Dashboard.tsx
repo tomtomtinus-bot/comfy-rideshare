@@ -511,6 +511,7 @@ const EscortDashboard = () => {
   const [extraCosts, setExtraCosts] = useState<Record<string, ExtraCost[]>>({});
   const [googleBusy, setGoogleBusy] = useState<{ start: number; end: number }[]>([]);
   const [tick, setTick] = useState(0);
+  const [overdueDismissed, setOverdueDismissed] = useState(false);
 
   const hasGoogleConflict = (scheduledAt: string) => {
     const ts = new Date(scheduledAt).getTime();
