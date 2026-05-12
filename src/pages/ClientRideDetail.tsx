@@ -8,6 +8,8 @@ import { MiniMap } from "@/components/site/MiniMap";
 import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
+import { SwapRequestDialog } from "@/components/site/SwapRequestDialog";
+import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -104,6 +106,8 @@ const Inner = () => {
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [swapFor, setSwapFor] = useState<{ assignmentId: string; anon: string | null } | null>(null);
+  const [swapTick, setSwapTick] = useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -230,6 +234,10 @@ const Inner = () => {
         </div>
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
+
+      {userId && (
+        <SwapPendingBanner key={swapTick} rideId={ride.id} currentUserId={userId} onChanged={load} />
+      )}
 
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -363,6 +371,15 @@ const Inner = () => {
                     </div>
                   </div>
                 )}
+                {e.status === "accepted" && (
+                  <button
+                    type="button"
+                    onClick={() => setSwapFor({ assignmentId: e.assignment_id, anon: e.anonymous_id })}
+                    className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline-offset-4 hover:underline"
+                  >
+                    🔄 Verplaats naar andere rit
+                  </button>
+                )}
                 {e.status === "accepted" && userId && (
                   <AssignmentChat
                     assignmentId={e.assignment_id}
@@ -430,6 +447,15 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
         )}
       </Section>
+      {swapFor && (
+        <SwapRequestDialog
+          open={!!swapFor}
+          onOpenChange={(o) => { if (!o) setSwapFor(null); }}
+          sourceAssignmentId={swapFor.assignmentId}
+          escortAnon={swapFor.anon}
+          onCreated={() => { setSwapFor(null); setSwapTick((t) => t + 1); load(); }}
+        />
+      )}
     </div>
   );
 };

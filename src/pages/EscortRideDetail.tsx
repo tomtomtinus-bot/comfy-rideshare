@@ -8,6 +8,7 @@ import { MiniMap } from "@/components/site/MiniMap";
 import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
+import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -223,6 +224,10 @@ const Inner = () => {
         </h1>
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
+
+      {userId && (
+        <SwapPendingBanner rideId={ride.id} currentUserId={userId} onChanged={load} />
+      )}
 
       {ride.bundle_id && ride.bundle_label && (() => {
         const isPriority = !!myAssignment?.bundle_priority_offer && myAssignment.status === "invited";
