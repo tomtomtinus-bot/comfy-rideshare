@@ -460,15 +460,16 @@ const ClientDashboard = () => {
         };
 
         return (
-          <div className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             {([
               { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
               { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
               { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
             ]).map((s) => (
-              <section key={s.key}>
-                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep/70 mb-3">
-                  {s.label} <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+              <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
+                <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
+                  <span>{s.label}</span>
+                  <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
                 </h2>
                 {renderList(s.list, s.key)}
               </section>
