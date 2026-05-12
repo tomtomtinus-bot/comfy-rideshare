@@ -9,6 +9,7 @@ import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
+import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
 
 interface RideDetail {
