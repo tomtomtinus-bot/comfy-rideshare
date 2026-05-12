@@ -35,6 +35,7 @@ import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import AdminExcluded from "./pages/admin/AdminExcluded.tsx";
 import ExcludedEscorts from "./pages/ExcludedEscorts.tsx";
+import PreferredClients from "./pages/PreferredClients.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
 import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import WatKostViaCust from "./pages/WatKostViaCust.tsx";
@@ -68,6 +69,7 @@ const App = () => (
             
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
             <Route path="/uitgesloten-begeleiders" element={<ExcludedEscorts />} />
+            <Route path="/voorkeursopdrachtgevers" element={<PreferredClients />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
             <Route path="/rit/:id/bewerk" element={<EditRide />} />

@@ -22,6 +22,7 @@ export const Nav = () => {
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
     { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
     { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
+    { to: "/voorkeursopdrachtgevers", label: "Mijn Voorkeursopdrachtgevers", show: !!user && role === "begeleider" },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },

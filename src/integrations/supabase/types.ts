@@ -209,6 +209,30 @@ export type Database = {
         }
         Relationships: []
       }
+      escort_preferred_clients: {
+        Row: {
+          client_id: string
+          created_at: string
+          escort_id: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          escort_id: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          escort_id?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: []
+      }
       escort_profiles: {
         Row: {
           anonymous_id: string
@@ -230,6 +254,7 @@ export type Database = {
           cert_number: string | null
           cert_verified_countries: string[]
           certificate_files: string[]
+          client_filter_mode: string
           company_name: string | null
           countries: string[]
           created_at: string
@@ -281,6 +306,7 @@ export type Database = {
           cert_number?: string | null
           cert_verified_countries?: string[]
           certificate_files?: string[]
+          client_filter_mode?: string
           company_name?: string | null
           countries?: string[]
           created_at?: string
@@ -332,6 +358,7 @@ export type Database = {
           cert_number?: string | null
           cert_verified_countries?: string[]
           certificate_files?: string[]
+          client_filter_mode?: string
           company_name?: string | null
           countries?: string[]
           created_at?: string
@@ -1222,6 +1249,7 @@ export type Database = {
           categories: string[] | null
           cert_expires_on: string | null
           cert_verified_countries: string[] | null
+          client_filter_mode: string | null
           company_name: string | null
           countries: string[] | null
           created_at: string | null
@@ -1258,6 +1286,7 @@ export type Database = {
           categories?: string[] | null
           cert_expires_on?: string | null
           cert_verified_countries?: string[] | null
+          client_filter_mode?: string | null
           company_name?: string | null
           countries?: string[] | null
           created_at?: string | null
@@ -1294,6 +1323,7 @@ export type Database = {
           categories?: string[] | null
           cert_expires_on?: string | null
           cert_verified_countries?: string[] | null
+          client_filter_mode?: string | null
           company_name?: string | null
           countries?: string[] | null
           created_at?: string | null
@@ -1434,6 +1464,36 @@ export type Database = {
       escort_decide_swap: {
         Args: { _approve: boolean; _swap_id: string }
         Returns: Json
+      }
+      escort_eligible_clients: {
+        Args: never
+        Returns: {
+          accepted_count: number
+          anonymous_id: string
+          billing_city: string
+          company_name: string
+          id: string
+          interactions: number
+          last_interaction_at: string
+        }[]
+      }
+      escort_ids_excluding_client: {
+        Args: { _client_id: string }
+        Returns: {
+          escort_id: string
+        }[]
+      }
+      escort_preferred_client_details: {
+        Args: never
+        Returns: {
+          anonymous_id: string
+          billing_city: string
+          client_id: string
+          company_name: string
+          created_at: string
+          id: string
+          note: string
+        }[]
       }
       escort_request_cancellation: {
         Args: { _assignment_id: string; _reason: string }
