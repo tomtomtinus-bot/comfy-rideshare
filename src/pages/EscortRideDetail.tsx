@@ -225,6 +225,10 @@ const Inner = () => {
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
 
+      {userId && (
+        <SwapPendingBanner rideId={ride.id} currentUserId={userId} onChanged={load} />
+      )}
+
       {ride.bundle_id && ride.bundle_label && (() => {
         const isPriority = !!myAssignment?.bundle_priority_offer && myAssignment.status === "invited";
         const expired = myAssignment?.responds_by ? new Date(myAssignment.responds_by).getTime() < Date.now() : false;
