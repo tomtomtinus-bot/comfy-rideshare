@@ -67,6 +67,7 @@ const App = () => (
             <Route path="/geschiedenis" element={<History />} />
             
             <Route path="/brandstofprijzen" element={<FuelPrices />} />
+            <Route path="/uitgesloten-begeleiders" element={<ExcludedEscorts />} />
             <Route path="/opdracht/:id" element={<EscortRideDetail />} />
             <Route path="/rit/:id" element={<ClientRideDetail />} />
             <Route path="/rit/:id/bewerk" element={<EditRide />} />
