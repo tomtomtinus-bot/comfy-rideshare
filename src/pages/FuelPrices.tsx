@@ -50,10 +50,22 @@ const FuelPrices = () => {
       <Nav />
       <main className="flex-1 max-w-4xl mx-auto px-6 md:px-8 py-10 w-full">
         <h1 className="font-display text-3xl text-brass-deep mb-2">Brandstofprijzen</h1>
-        <p className="text-sm text-brass-deep/70 mb-8">
+        <p className="text-sm text-brass-deep/70 mb-4">
           Wekelijks gemiddelde dieselprijs (€/liter, exclusief btw). Buitenlandse prijzen
           zijn alleen zichtbaar voor begeleiders die in dat land wonen.
         </p>
+        <a
+          href="https://www.google.com/maps/search/gas+station/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mb-8"
+        >
+          <Button variant="outline" className="gap-2">
+            <Fuel className="size-4" />
+            Vind tankstation in de buurt
+            <ExternalLink className="size-3.5 opacity-60" />
+          </Button>
+        </a>
 
         {loading ? (
           <p className="text-sm text-brass-deep/50">Laden…</p>
