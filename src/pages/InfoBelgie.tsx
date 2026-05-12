@@ -51,26 +51,6 @@ const InfoBelgie = () => {
         <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10">
           <div className="max-w-5xl mx-auto space-y-12">
             <div>
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Aan te houden afmetingen
-              </h2>
-              <p className="text-sm text-brass-deep/70 mb-3 italic">
-                In hoofdzaak kunnen onderstaande schema&apos;s aangehouden worden.
-              </p>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr><Th>Lengte (m)</Th><Th>Breedte (m)</Th><Th>Hoogte (m)</Th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><Td>16m50 – 30m00</Td><Td>2m56 – 3m50</Td><Td>4m00 – 4m80</Td></tr>
-                    <tr><Td>30m01 – 35m00</Td><Td>3m51 – 4m50</Td><Td>—</Td></tr>
-                    <tr><Td>35m01 – 40m00</Td><Td>4m51 – 5m00</Td><Td>&gt; 4m80</Td></tr>
-                    <tr><Td>&gt; 40m00</Td><Td>&gt; 5m00</Td><Td>—</Td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
 
             <div>
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-6">
