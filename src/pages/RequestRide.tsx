@@ -80,6 +80,15 @@ interface GeoPoint {
   lng: number;
 }
 
+interface ExtraLeg {
+  pickup_address: string;
+  pickup: GeoPoint | null;
+  dropoff_address: string;
+  dropoff: GeoPoint | null;
+  scheduled_date: string;
+  scheduled_time: string;
+}
+
 const fmtHours = (min: number) => {
   const total = Math.ceil(min / 15) * 15;
   const h = Math.floor(total / 60);
