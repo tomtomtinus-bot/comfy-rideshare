@@ -474,13 +474,29 @@ const RequestRideInner = () => {
     if (selected.length !== form.num_escorts) {
       return toast.error(t("request.pickExact", { n: form.num_escorts }));
     }
-
-    const rideKm = distanceKm(pickupGeo, dropoffGeo);
-    const rideMin = travelMinutes(rideKm);
+    const legs = buildLegs();
+    if (!legs) return toast.error("Vul alle aansluitende ritten volledig in (adres + tijd).");
+    const firstLeg = legs[0];
+    const lastLeg = legs[legs.length - 1];
+    const lastDropoffGeo = lastLeg.dropoff;
+    const rideMin = Math.max(1, Math.round((lastLeg.endMs - firstLeg.startMs) / 60_000));
 
     setBusy(true);
-    
-    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
+
+    const scheduledISO = new Date(firstLeg.startMs).toISOString();
+    const lastEndISO = new Date(lastLeg.endMs).toISOString();
+    const extraLegsPayload = extraLegs.map((ex) => ({
+      pickup_address: ex.pickup_address,
+      pickup_city: ex.pickup!.city,
+      pickup_lat: ex.pickup!.lat,
+      pickup_lng: ex.pickup!.lng,
+      dropoff_address: ex.dropoff_address,
+      dropoff_city: ex.dropoff!.city,
+      dropoff_lat: ex.dropoff!.lat,
+      dropoff_lng: ex.dropoff!.lng,
+      scheduled_at: new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).toISOString(),
+    }));
+
     const { data: ride, error } = await supabase
       .from("rides")
       .insert({
@@ -506,7 +522,8 @@ const RequestRideInner = () => {
         permit_id: uploadedPermit?.id ?? null,
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
-        time_window_end: null,
+        time_window_end: extraLegsPayload.length > 0 ? lastEndISO : null,
+        extra_legs: extraLegsPayload as never,
         drivers: drivers
           .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
           .filter((d) => d.name || d.phone) as never,
