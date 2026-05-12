@@ -215,17 +215,19 @@ const ExcludedEscortsInner = () => {
                     </div>
                     <input
                       type="text"
+                      required
+                      maxLength={500}
                       value={reasonDraft[e.id] ?? ""}
                       onChange={(ev) =>
                         setReasonDraft((d) => ({ ...d, [e.id]: ev.target.value }))
                       }
-                      placeholder="Reden (optioneel, alleen voor jou)"
+                      placeholder="Reden (verplicht, alleen voor jou en admin)"
                       className="flex-1 min-w-[180px] bg-parchment border border-brass-deep/15 px-3 py-2 text-xs focus:outline-none focus:border-brass-gold"
                     />
                     <button
                       onClick={() => add(e.id)}
-                      disabled={busy === e.id}
-                      className="text-[10px] uppercase tracking-widest font-semibold px-3 py-2 bg-brass-deep text-parchment hover:bg-brass-gold transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                      disabled={busy === e.id || (reasonDraft[e.id] ?? "").trim().length < 3}
+                      className="text-[10px] uppercase tracking-widest font-semibold px-3 py-2 bg-brass-deep text-parchment hover:bg-brass-gold transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Plus className="size-3" /> Uitsluiten
                     </button>
