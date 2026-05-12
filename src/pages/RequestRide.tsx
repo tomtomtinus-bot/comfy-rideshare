@@ -669,6 +669,119 @@ const RequestRideInner = () => {
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                  Aansluitende ritten <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+                </p>
+                <button type="button" onClick={addExtraLeg} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
+                  + Rit toevoegen
+                </button>
+              </div>
+              {extraLegs.length === 0 ? (
+                <p className="text-xs text-brass-deep/55">
+                  Voeg vervolgritten toe als de begeleider direct aansluitend nog meer ritten doet. Dezelfde begeleider, dezelfde lading/vergunning. Begeleidingstijd loopt door van start rit 1 tot einde laatste rit.
+                </p>
+              ) : (
+                <ul className="space-y-4">
+                  {extraLegs.map((leg, i) => (
+                    <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
+                        <button
+                          type="button"
+                          onClick={() => removeExtraLeg(i)}
+                          className="text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                          aria-label="Verwijder rit"
+                        >×</button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Vertrek</p>
+                          <AddressAutocomplete
+                            label={t("request.addrLabel")}
+                            value={leg.pickup_address}
+                            onChange={(v) => updateExtraLeg(i, { pickup_address: v })}
+                            onSelect={(r) => updateExtraLeg(i, {
+                              pickup_address: r.display,
+                              pickup: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+                            })}
+                            placeholder={t("request.pickupPlaceholder")}
+                          />
+                          {leg.pickup && (
+                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Bestemming</p>
+                          <AddressAutocomplete
+                            label={t("request.addrLabel")}
+                            value={leg.dropoff_address}
+                            onChange={(v) => updateExtraLeg(i, { dropoff_address: v })}
+                            onSelect={(r) => updateExtraLeg(i, {
+                              dropoff_address: r.display,
+                              dropoff: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+                            })}
+                            placeholder={t("request.dropoffPlaceholder")}
+                          />
+                          {leg.dropoff && (
+                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Input
+                          label="Datum"
+                          type="date"
+                          min={new Date().toISOString().slice(0, 10)}
+                          value={leg.scheduled_date}
+                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
+                        />
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd (kwartier)</label>
+                          <select
+                            value={leg.scheduled_time}
+                            onChange={(e) => updateExtraLeg(i, { scheduled_time: e.target.value })}
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          >
+                            <option value="" disabled>Kies een tijd</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {leg.pickup && leg.dropoff && (() => {
+                        const km = distanceKm(leg.pickup, leg.dropoff);
+                        const min = travelMinutes(km);
+                        return (
+                          <p className="mt-3 text-[11px] text-brass-deep/60">
+                            <strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(min)}</strong>
+                          </p>
+                        );
+                      })()}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(() => {
+                const legs = buildLegs();
+                if (!legs || legs.length < 2) return null;
+                const totalMin = Math.round((legs[legs.length - 1].endMs - legs[0].startMs) / 60_000);
+                return (
+                  <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                      Totale begeleidingstijd ({legs.length} ritten)
+                    </p>
+                    <p className="text-sm text-brass-deep">
+                      <strong className="tabular-nums">{fmtHours(totalMin)}</strong>{" "}
+                      <span className="text-brass-deep/55">van start rit 1 tot einde rit {legs.length} (excl. aanrij- en terugreistijd begeleider)</span>
+                    </p>
+                  </div>
+                );
+              })()}
+            </section>
+
+            <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Input label={t("request.length")} inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
