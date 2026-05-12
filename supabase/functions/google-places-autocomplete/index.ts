@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
       u.searchParams.set("key", apiKey);
       const r = await fetch(u);
       const j = await r.json();
+      console.log("[autocomplete] input=", input, "status=", j.status, "error=", j.error_message, "count=", (j.predictions ?? []).length);
       return new Response(JSON.stringify({
         predictions: (j.predictions ?? []).map((p: any) => ({
           place_id: p.place_id,
