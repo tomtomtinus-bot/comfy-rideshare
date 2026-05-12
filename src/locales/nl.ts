@@ -244,8 +244,8 @@ const nl = {
     nRidesShort: "{{count}} rit{{plural}}",
   },
   request: {
-    kicker: "Nieuwe konvooi-aanvraag",
-    title: "Van A naar B — vraag begeleiding aan.",
+    kicker: "Nieuwe viacust-aanvraag",
+    title: "Van A naar B — Vraag begeleiding aan.",
     pendingKicker: "Account in afwachting",
     pendingTitle: "Goedkeuring vereist",
     pendingBody: "Je kunt pas ritten aanvragen zodra een beheerder je account heeft goedgekeurd. Vul ondertussen je <0>facturatiegegevens</0> alvast in.",
