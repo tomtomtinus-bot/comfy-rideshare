@@ -949,6 +949,63 @@ export type Database = {
           },
         ]
       }
+      ride_swap_requests: {
+        Row: {
+          client_id: string
+          created_at: string
+          decided_at: string | null
+          expires_at: string
+          id: string
+          reason: string | null
+          source_assignment_id: string
+          source_escort_decision: string
+          source_escort_id: string
+          source_ride_id: string
+          status: string
+          target_assignment_id: string | null
+          target_escort_decision: string
+          target_escort_id: string | null
+          target_ride_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          decided_at?: string | null
+          expires_at?: string
+          id?: string
+          reason?: string | null
+          source_assignment_id: string
+          source_escort_decision?: string
+          source_escort_id: string
+          source_ride_id: string
+          status?: string
+          target_assignment_id?: string | null
+          target_escort_decision?: string
+          target_escort_id?: string | null
+          target_ride_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          decided_at?: string | null
+          expires_at?: string
+          id?: string
+          reason?: string | null
+          source_assignment_id?: string
+          source_escort_decision?: string
+          source_escort_id?: string
+          source_ride_id?: string
+          status?: string
+          target_assignment_id?: string | null
+          target_escort_decision?: string
+          target_escort_id?: string | null
+          target_ride_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rides: {
         Row: {
           app_fee: number
@@ -1313,6 +1370,7 @@ export type Database = {
         Args: { _reason?: string; _ride_id: string }
         Returns: Json
       }
+      client_cancel_swap: { Args: { _swap_id: string }; Returns: undefined }
       client_decide_cancellation:
         | {
             Args: { _approve: boolean; _assignment_id: string }
@@ -1340,6 +1398,14 @@ export type Database = {
           vehicle_type: string
         }[]
       }
+      client_request_swap: {
+        Args: {
+          _reason?: string
+          _source_assignment_id: string
+          _target_ride_id: string
+        }
+        Returns: string
+      }
       compute_fuel_surcharge: {
         Args: {
           p_base_amount: number
@@ -1364,6 +1430,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      escort_decide_swap: {
+        Args: { _approve: boolean; _swap_id: string }
+        Returns: Json
       }
       escort_request_cancellation: {
         Args: { _assignment_id: string; _reason: string }
@@ -1402,6 +1472,40 @@ export type Database = {
       }
       get_ride_details_for_client: { Args: { _ride_id: string }; Returns: Json }
       get_ride_details_for_escort: { Args: { _ride_id: string }; Returns: Json }
+      get_swap_options_for_assignment: {
+        Args: { _source_assignment_id: string }
+        Returns: {
+          dropoff_city: string
+          has_accepted_escort: boolean
+          pickup_city: string
+          ride_id: string
+          scheduled_at: string
+          status: string
+          target_escort_anon: string
+        }[]
+      }
+      get_swap_requests_for_ride: {
+        Args: { _ride_id: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_source_side: boolean
+          reason: string
+          source_assignment_id: string
+          source_decision: string
+          source_escort_anon: string
+          source_ride_id: string
+          source_route: string
+          source_scheduled_at: string
+          status: string
+          target_decision: string
+          target_escort_anon: string
+          target_ride_id: string
+          target_route: string
+          target_scheduled_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
