@@ -55,7 +55,7 @@ const FuelPrices = () => {
           zijn alleen zichtbaar voor begeleiders die in dat land wonen.
         </p>
         <a
-          href="https://www.google.com/maps/search/gas+station/"
+          href="https://www.google.com/maps/search/gas+station/@?api=1"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 mb-8"
