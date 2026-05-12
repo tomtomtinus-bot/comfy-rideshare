@@ -738,6 +738,8 @@ export type Database = {
           period_end: string
           period_start: string
           status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           total_amount: number
           total_escorts: number
           updated_at: string
@@ -752,6 +754,8 @@ export type Database = {
           period_end: string
           period_start: string
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           total_amount?: number
           total_escorts?: number
           updated_at?: string
@@ -766,6 +770,8 @@ export type Database = {
           period_end?: string
           period_start?: string
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           total_amount?: number
           total_escorts?: number
           updated_at?: string
@@ -1166,6 +1172,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       suppressed_emails: {
         Row: {
@@ -1568,6 +1622,10 @@ export type Database = {
           target_route: string
           target_scheduled_at: string
         }[]
+      }
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
       }
       has_role: {
         Args: {

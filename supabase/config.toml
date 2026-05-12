@@ -25,3 +25,15 @@ verify_jwt = false
 verify_jwt = false
   [functions.generate-invoice-pdf]
     verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.create-portal-session]
+verify_jwt = false
+
+[functions.create-platform-invoice-checkout]
+verify_jwt = false
+
+[functions.payments-webhook]
+verify_jwt = false

@@ -17,6 +17,7 @@ import EscortSettings from "./pages/EscortSettings.tsx";
 import Invoices from "./pages/Invoices.tsx";
 import BillingDetails from "./pages/BillingDetails.tsx";
 import History from "./pages/History.tsx";
+import Subscription from "./pages/Subscription.tsx";
 
 import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
@@ -91,6 +92,7 @@ const App = () => (
             <Route path="/beveiliging" element={<Security />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/abonnement" element={<Subscription />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

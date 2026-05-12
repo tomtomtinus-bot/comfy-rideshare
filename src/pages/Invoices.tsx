@@ -8,6 +8,8 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { vatRateFor, type BillingParty } from "@/lib/invoicePdf";
+import { CheckoutDialog } from "@/components/CheckoutDialog";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 interface PlatformInvoice {
   id: string;
@@ -78,6 +80,7 @@ const InvoicesInner = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
+  const [payInvoiceId, setPayInvoiceId] = useState<string | null>(null);
 
   const isEscort = role === "begeleider";
 
@@ -271,7 +274,7 @@ const InvoicesInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-
+      <PaymentTestModeBanner />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto space-y-12">
@@ -329,6 +332,15 @@ const InvoicesInner = () => {
         </div>
       </main>
       <Footer />
+      <CheckoutDialog
+        open={!!payInvoiceId}
+        onOpenChange={(v) => !v && setPayInvoiceId(null)}
+        title="Platformfactuur betalen"
+        platformInvoiceId={payInvoiceId ?? undefined}
+        customerEmail={user?.email}
+        userId={user?.id}
+        returnUrl={`${window.location.origin}/facturen?paid=1`}
+      />
     </div>
   );
 
@@ -384,10 +396,10 @@ const InvoicesInner = () => {
                 </button>
                 {inv.status !== "paid" && (
                   <button
-                    onClick={() => markPlatformPaid(inv.id)}
+                    onClick={() => setPayInvoiceId(inv.id)}
                     className="ml-auto px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                   >
-                    {t("invoices.markPaid")}
+                    Betaal nu
                   </button>
                 )}
               </div>
