@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { NotificationsListener } from "@/components/NotificationsListener";
 import { PendingApprovalBanner } from "@/components/PendingApprovalBanner";
+import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { CookieConsent } from "@/components/site/CookieConsent";
 import { FloatingBackButton } from "@/components/site/FloatingBackButton";
 import Index from "./pages/Index.tsx";
