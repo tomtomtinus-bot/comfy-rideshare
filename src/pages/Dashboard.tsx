@@ -783,8 +783,61 @@ const EscortDashboard = () => {
     load();
   };
 
+  const overdueItems = items.filter(
+    (i) =>
+      i.status === "accepted" &&
+      !i.hours_submitted_at &&
+      Date.now() - new Date(i.ride.scheduled_at).getTime() > 8 * 3600 * 1000,
+  );
+
   return (
     <div className="space-y-12">
+      <Dialog
+        open={overdueItems.length > 0 && !overdueDismissed && openId === null}
+        onOpenChange={(o) => { if (!o) setOverdueDismissed(true); }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display italic text-2xl text-brass-deep">
+              ⚠ Vul je gewerkte uren in
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-brass-deep/70">
+            Je hebt voor {overdueItems.length === 1 ? "deze rit" : `${overdueItems.length} ritten`} nog geen uren ingevuld terwijl de geplande starttijd meer dan 8 uur geleden is. Vul ze direct in zodat de opdrachtgever de rit kan afronden en de factuur kan worden opgemaakt.
+          </p>
+          <ul className="divide-y divide-brass-deep/10 border border-brass-deep/15 mt-2">
+            {overdueItems.map((a) => (
+              <li key={a.id} className="flex items-center gap-3 px-3 py-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {a.ride.pickup_city} <span className="text-brass-gold">→</span> {a.ride.dropoff_city}
+                  </p>
+                  <p className="text-xs text-brass-deep/60 tabular-nums">
+                    {new Date(a.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setOverdueDismissed(true); setOpenId(a.id); }}
+                  className="px-3 py-2 bg-brass-deep text-parchment text-[10px] uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+                >
+                  Vul nu in
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-end pt-2">
+            <button
+              type="button"
+              onClick={() => setOverdueDismissed(true)}
+              className="text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep font-semibold"
+            >
+              Later
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
