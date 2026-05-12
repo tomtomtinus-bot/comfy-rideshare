@@ -64,6 +64,7 @@ interface MatchedEscort {
   distanceFromDropoff: number;
   travelToPickupMin: number;
   travelBackHomeMin: number;
+  is_favorite?: boolean;
   conflict?: {
     rideStart: string; // ISO
     rideEnd: string;
