@@ -64,6 +64,7 @@ interface MatchedEscort {
   distanceFromDropoff: number;
   travelToPickupMin: number;
   travelBackHomeMin: number;
+  is_favorite?: boolean;
   conflict?: {
     rideStart: string; // ISO
     rideEnd: string;
@@ -231,12 +232,24 @@ const RequestRideInner = () => {
     }
 
     setBusy(true);
-    const { data, error } = await supabase
-      .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
-      .eq("available", true);
+    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }] = await Promise.all([
+      supabase
+        .from("escort_profiles")
+        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
+        .eq("available", true),
+      supabase
+        .from("client_excluded_escorts")
+        .select("escort_id")
+        .eq("client_id", user!.id),
+      supabase
+        .from("client_favorite_escorts")
+        .select("escort_id")
+        .eq("client_id", user!.id),
+    ]);
     setBusy(false);
     if (error) return toast.error(error.message);
+    const excludedSet = new Set((excludedRows ?? []).map((r: any) => r.escort_id));
+    const favoriteSet = new Set((favoriteRows ?? []).map((r: any) => r.escort_id));
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
@@ -289,6 +302,7 @@ const RequestRideInner = () => {
 
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
+        if (excludedSet.has(e.id)) return false; // respecteer pool-uitsluitingen
         const ec = escortCountrySet(e as any);
         // Begeleider moet ALLE landen dekken waarin daadwerkelijk gereden wordt.
         // Bij grensovergangen telt alleen het land aan de gereden zijde mee.
@@ -327,10 +341,15 @@ const RequestRideInner = () => {
           is_lu_ride: isLu,
           de_km_mode: deKmMode,
           effective_rate: rate,
+          is_favorite: favoriteSet.has(e.id),
           conflict: null,
         } as MatchedEscort;
       })
-      .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
+      .sort((a, b) => {
+        // Favorieten altijd bovenaan, daarna op kortste afstand
+        if (!!a.is_favorite !== !!b.is_favorite) return a.is_favorite ? -1 : 1;
+        return Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff);
+      })
       .slice(0, 25);
 
     if (ranked.length === 0) return toast.error(t("request.noEscorts"));
@@ -909,6 +928,11 @@ const Matches = ({
                     isSelected ? "bg-brass-gold" : "bg-patina"
                   }`} />
                   <p className="font-display text-lg text-brass-deep tabular-nums shrink-0">#{m.anonymous_id}</p>
+                  {m.is_favorite && (
+                    <span title="Favoriete begeleider" className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-gold text-parchment shrink-0">
+                      ★ Favoriet
+                    </span>
+                  )}
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
                     <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
                     <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
