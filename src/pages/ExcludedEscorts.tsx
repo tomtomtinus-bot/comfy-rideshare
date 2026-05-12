@@ -74,11 +74,20 @@ const ExcludedEscortsInner = () => {
 
   const add = async (escortId: string) => {
     if (!user) return;
+    const reason = (reasonDraft[escortId] ?? "").trim();
+    if (reason.length < 3) {
+      toast.error("Geef een korte reden op (min. 3 tekens)");
+      return;
+    }
+    if (reason.length > 500) {
+      toast.error("Reden is te lang (max 500 tekens)");
+      return;
+    }
     setBusy(escortId);
     const { error } = await supabase.from("client_excluded_escorts").insert({
       client_id: user.id,
       escort_id: escortId,
-      reason: reasonDraft[escortId]?.trim() || null,
+      reason,
     });
     setBusy(null);
     if (error) toast.error(error.message);
