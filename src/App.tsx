@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { NotificationsListener } from "@/components/NotificationsListener";
 import { PendingApprovalBanner } from "@/components/PendingApprovalBanner";
 import { CookieConsent } from "@/components/site/CookieConsent";
+import { FloatingBackButton } from "@/components/site/FloatingBackButton";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
@@ -49,6 +50,7 @@ const App = () => (
           <NotificationsListener />
           <PendingApprovalBanner />
           <CookieConsent />
+          <FloatingBackButton />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
