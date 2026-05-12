@@ -109,23 +109,6 @@ const InfoNederland = () => {
               </ul>
             </div>
 
-            <div className="border-t border-brass-deep/10 pt-8">
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Officiële bronnen
-              </h2>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="https://www.rdw.nl/zakelijk/branches/transportbedrijven/exceptioneel-transport" target="_blank" rel="noopener noreferrer" className="text-brass-gold hover:underline">
-                    RDW — Exceptioneel transport
-                  </a>
-                </li>
-                <li>
-                  <a href="https://www.rijkswaterstaat.nl/wegen/wegbeheer/exceptioneel-transport" target="_blank" rel="noopener noreferrer" className="text-brass-gold hover:underline">
-                    Rijkswaterstaat — Exceptioneel transport
-                  </a>
-                </li>
-              </ul>
-            </div>
           </div>
         </section>
       </main>
