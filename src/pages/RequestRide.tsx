@@ -361,7 +361,7 @@ const RequestRideInner = () => {
       })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
-        const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
+        const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, lastDropoffGeo);
         const isBe = driveCountries.includes("België");
         const isDe = driveCountries.includes("Duitsland");
         const isFr = driveCountries.includes("Frankrijk");
