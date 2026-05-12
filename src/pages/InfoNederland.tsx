@@ -107,9 +107,6 @@ const InfoNederland = () => {
                 <li>Lengte 50m01 en langer: van 10h00 – 15h00 en 20h00 en 06h00</li>
                 <li>Gewicht: vanaf 100.001 kg en zwaarder: van 10h00 – 15h00 en 20h00 en 06h00</li>
               </ul>
-              <p className="text-xs italic text-brass-deep/70 mt-3">
-                * Voor rijden op zaterdag of zondag is het advies van de wegbeheerder bepalend.
-              </p>
             </div>
 
             <div className="border-t border-brass-deep/10 pt-8">
