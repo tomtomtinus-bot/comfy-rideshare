@@ -203,7 +203,7 @@ const ClientDashboard = () => {
 
         const escortIds = [...new Set((ass ?? []).map((a) => a.escort_id))];
         const { data: escorts } = await supabase
-          .from("escort_profiles")
+          .from("escort_profiles_public")
           .select("id, anonymous_id, hourly_rate")
           .in("id", escortIds);
         const escortMap = new Map((escorts ?? []).map((e) => [e.id, e]));
