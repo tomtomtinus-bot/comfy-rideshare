@@ -62,6 +62,7 @@ const PrivacyNL = () => (
       <li><strong>Google Identity & OAuth 2.0:</strong> Veilig inloggen en autorisatie via tokens.</li>
       <li><strong>Google Calendar API (v3):</strong> Gebruik van <code>freeBusy</code> (beschikbaarheid) en <code>calendar.events</code> (synchronisatie van ritten). Gegevens worden niet gedeeld met derden.</li>
       <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript, Geocoding, Directions en Places API's voor routeberekening, adresvalidatie en kaartweergave.</li>
+      <li><strong>Maps SDK (mobiel):</strong> Voor onze mobiele applicaties maken wij gebruik van de Maps SDK voor iOS en Android om een optimale en veilige navigatie-ervaring te bieden.</li>
     </ul>
 
     <h2>2. Gegevensverwerking en Doeleinden</h2>
