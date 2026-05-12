@@ -50,6 +50,7 @@ const App = () => (
           <NotificationsListener />
           <PendingApprovalBanner />
           <CookieConsent />
+          <FloatingBackButton />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
