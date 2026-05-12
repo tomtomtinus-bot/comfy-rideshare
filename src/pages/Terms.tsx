@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string }> = {
-  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden", updated: "Laatst bijgewerkt: 10 mei 2026", back: "← Terug" },
+  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden & Gebruiksvoorwaarden ViaCust", updated: "Versie 1.2 — Laatst bijgewerkt: 12 mei 2026", back: "← Terug" },
   en: { kicker: "Legal", title: "Terms and Conditions", updated: "Last updated: May 10, 2026", back: "← Back" },
   de: { kicker: "Rechtliches", title: "Allgemeine Geschäftsbedingungen", updated: "Zuletzt aktualisiert: 10. Mai 2026", back: "← Zurück" },
   fr: { kicker: "Mentions légales", title: "Conditions Générales d'Utilisation", updated: "Dernière mise à jour : 10 mai 2026", back: "← Retour" },
