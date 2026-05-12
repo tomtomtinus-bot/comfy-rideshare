@@ -96,6 +96,23 @@ const Auth = () => {
     navigate(redirectTo);
   };
 
+  const handleGoogleSignIn = async () => {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    setBusy(false);
+    if (result.error) {
+      toast.error(result.error.message || "Google-inloggen mislukt");
+      return;
+    }
+    if (result.redirected) {
+      // Browser redirect happens automatically
+      return;
+    }
+    navigate(redirectTo);
+  };
+
   const handleBiometricLogin = async () => {
     setBusy(true);
     const creds = await unlockWithBiometrics();
