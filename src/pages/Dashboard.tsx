@@ -798,7 +798,7 @@ const EscortDashboard = () => {
         </Link>
       </header>
 
-      {user && !user.email?.endsWith("@viacust.demo") && <GoogleAgendaStatus />}
+      {user && <GoogleAgendaStatus />}
 
       {loading ? (
         <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
