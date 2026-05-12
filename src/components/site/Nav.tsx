@@ -1,4 +1,4 @@
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings, ChevronDown } from "lucide-react";
 import logo from "@/assets/viacust-logo.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export const Nav = () => {
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { user, role, isAdmin, signOut } = useAuth();
   const { t } = useTranslation();
 
@@ -18,15 +19,18 @@ export const Nav = () => {
   const links: { to: string; label: string; show: boolean }[] = [
     { to: "/dashboard", label: t("nav.dashboard"), show: !!user },
     { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
-    { to: "/profiel", label: t("nav.profile"), show: !!user && role === "begeleider" },
     { to: "/facturen", label: t("nav.invoices"), show: !!user },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
-    { to: "/facturatiegegevens", label: t("nav.billing"), show: !!user },
     { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
-    { to: "/beveiliging", label: "Beveiliging", show: !!user },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
+  ];
+
+  const settingsLinks: { to: string; label: string; show: boolean }[] = [
+    { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
+    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
+    { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
   ];
 
   return (
@@ -88,6 +92,38 @@ export const Nav = () => {
                 {l.label}
               </Link>
             ))}
+            {user && settingsLinks.some((l) => l.show) && (
+              <div className="mt-2 pt-2 border-t border-brass-deep/10">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen((v) => !v)}
+                  aria-expanded={settingsOpen}
+                  className="w-full flex items-center justify-between px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings className="size-4" />
+                    Instellingen
+                  </span>
+                  <ChevronDown
+                    className={`size-4 transition-transform ${settingsOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {settingsOpen && (
+                  <div className="pl-4 flex flex-col">
+                    {settingsLinks.filter((l) => l.show).map((l) => (
+                      <Link
+                        key={l.to}
+                        to={l.to}
+                        onClick={close}
+                        className="px-3 py-2.5 text-xs uppercase tracking-widest font-semibold text-brass-deep/80 hover:bg-brass-deep hover:text-parchment transition-colors"
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10">
               {user ? (
                 <button
