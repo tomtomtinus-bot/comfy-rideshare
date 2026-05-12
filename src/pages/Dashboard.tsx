@@ -360,6 +360,8 @@ const ClientDashboard = () => {
         const categorize = (r: RideRow) => {
           const ass = assignments[r.id] ?? [];
           const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
+          const allInvoiced = ass.length > 0 && ass.every((a) => (a as any).invoiced_at);
+          if (allInvoiced) return "history"; // verdwijnt naar geschiedenis
           if (r.status === "completed" || allSubmitted) return "afgerond";
           const hasAccepted = ass.some((a) => a.status === "accepted");
           if (hasAccepted) return "geaccepteerd";
