@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const apiKey = Deno.env.get("GOOGLE_MAPS_API_KEY")!;
+    const apiKey = (Deno.env.get("GOOGLE_MAPS_SERVER_KEY") ?? Deno.env.get("GOOGLE_MAPS_API_KEY"))!;
     const body = await req.json().catch(() => ({}));
     const action = body.action ?? "autocomplete";
 
