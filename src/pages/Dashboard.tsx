@@ -360,6 +360,8 @@ const ClientDashboard = () => {
         const categorize = (r: RideRow) => {
           const ass = assignments[r.id] ?? [];
           const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
+          const allInvoiced = ass.length > 0 && ass.every((a) => (a as any).invoiced_at);
+          if (allInvoiced) return "history"; // verdwijnt naar geschiedenis
           if (r.status === "completed" || allSubmitted) return "afgerond";
           const hasAccepted = ass.some((a) => a.status === "accepted");
           if (hasAccepted) return "geaccepteerd";
@@ -458,16 +460,20 @@ const ClientDashboard = () => {
         };
 
         return (
-          <Tabs defaultValue="openstaand" className="w-full">
-            <TabsList className="grid grid-cols-3 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
-            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
-            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond, "afgerond")}</TabsContent>
-          </Tabs>
+          <div className="space-y-10">
+            {([
+              { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
+              { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
+              { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
+            ]).map((s) => (
+              <section key={s.key}>
+                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep/70 mb-3">
+                  {s.label} <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+                </h2>
+                {renderList(s.list, s.key)}
+              </section>
+            ))}
+          </div>
         );
       })()}
 
@@ -1100,18 +1106,21 @@ const EscortDashboard = () => {
         };
 
         return (
-          <Tabs defaultValue="openstaand" className="w-full">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full md:w-auto md:inline-flex">
-              <TabsTrigger value="openstaand">{t("dash.tabOpen")} ({buckets.openstaand.length})</TabsTrigger>
-              <TabsTrigger value="geaccepteerd">{t("dash.tabAccepted")} ({buckets.geaccepteerd.length})</TabsTrigger>
-              <TabsTrigger value="afgerond">{t("dash.tabDone")} ({buckets.afgerond.length})</TabsTrigger>
-              <TabsTrigger value="verlopen">{t("dash.tabExpired")} ({buckets.verlopen.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="openstaand" className="mt-6">{renderList(buckets.openstaand, "openstaand")}</TabsContent>
-            <TabsContent value="geaccepteerd" className="mt-6">{renderList(buckets.geaccepteerd, "geaccepteerd")}</TabsContent>
-            <TabsContent value="afgerond" className="mt-6">{renderList(buckets.afgerond, "afgerond")}</TabsContent>
-            <TabsContent value="verlopen" className="mt-6">{renderList(buckets.verlopen, "verlopen")}</TabsContent>
-          </Tabs>
+          <div className="space-y-10">
+            {([
+              { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
+              { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
+              { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
+              { key: "verlopen" as const, label: t("dash.tabExpired"), list: buckets.verlopen },
+            ]).map((s) => (
+              <section key={s.key}>
+                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep/70 mb-3">
+                  {s.label} <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+                </h2>
+                {renderList(s.list, s.key)}
+              </section>
+            ))}
+          </div>
         );
       })()}
     </div>
