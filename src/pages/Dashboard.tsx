@@ -1084,8 +1084,9 @@ const EscortDashboard = () => {
                   <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
                     {t("dash.submit")}
                   </button>
-                </form>
-              )}
+                  </form>
+                </DialogContent>
+              </Dialog>
             </li>
           );
         };
