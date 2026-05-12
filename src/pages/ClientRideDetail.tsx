@@ -8,6 +8,8 @@ import { MiniMap } from "@/components/site/MiniMap";
 import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
+import { SwapRequestDialog } from "@/components/site/SwapRequestDialog";
+import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { toast } from "sonner";
 
 interface RideDetail {
