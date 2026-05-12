@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_excluded_escorts: {
+        Row: {
+          client_id: string
+          created_at: string
+          escort_id: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          escort_id: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          escort_id?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       device_push_tokens: {
         Row: {
           created_at: string

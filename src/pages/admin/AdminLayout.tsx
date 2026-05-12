@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { Users, Truck, Receipt, ShieldCheck, Fuel, ArrowLeft } from "lucide-react";
+import { Users, Truck, Receipt, ShieldCheck, Fuel, ArrowLeft, ShieldOff } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAdmin } from "@/components/site/RequireAdmin";
@@ -10,6 +10,7 @@ const items = [
   { to: "/admin/rides", label: "Ritten", icon: Truck },
   { to: "/admin/invoices", label: "Facturen", icon: Receipt },
   { to: "/admin/escorts", label: "Begeleiders", icon: ShieldCheck },
+  { to: "/admin/excluded", label: "Uitsluitingen", icon: ShieldOff },
   { to: "/admin/fuel", label: "Brandstof", icon: Fuel },
 ];
 
