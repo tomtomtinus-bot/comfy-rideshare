@@ -39,6 +39,8 @@ import PreferredClients from "./pages/PreferredClients.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
 import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import WatKostViaCust from "./pages/WatKostViaCust.tsx";
+import InfoNederland from "./pages/InfoNederland.tsx";
+import InfoBelgie from "./pages/InfoBelgie.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
