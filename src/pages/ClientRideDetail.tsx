@@ -233,8 +233,8 @@ const Inner = () => {
 
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field label="Vertrek" value={`${ride.pickup_address}, ${ride.pickup_city}`} />
-          <Field label="Bestemming" value={`${ride.dropoff_address}, ${ride.dropoff_city}`} />
+          <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
+          <Field label="Bestemming" value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
           <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
           <Field label="Aantal begeleiders" value={ride.num_escorts} />
           <Field label="Eigen referentie" value={ride.client_reference ?? "—"} />
