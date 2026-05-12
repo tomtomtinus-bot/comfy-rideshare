@@ -447,6 +447,15 @@ const Inner = () => {
           <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
         )}
       </Section>
+      {swapFor && (
+        <SwapRequestDialog
+          open={!!swapFor}
+          onOpenChange={(o) => { if (!o) setSwapFor(null); }}
+          sourceAssignmentId={swapFor.assignmentId}
+          escortAnon={swapFor.anon}
+          onCreated={() => { setSwapFor(null); setSwapTick((t) => t + 1); load(); }}
+        />
+      )}
     </div>
   );
 };
