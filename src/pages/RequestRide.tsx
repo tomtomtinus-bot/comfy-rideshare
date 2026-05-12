@@ -232,7 +232,7 @@ const RequestRideInner = () => {
     }
 
     setBusy(true);
-    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }] = await Promise.all([
+    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
         .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
@@ -245,11 +245,13 @@ const RequestRideInner = () => {
         .from("client_favorite_escorts")
         .select("escort_id")
         .eq("client_id", user!.id),
+      supabase.rpc("escort_ids_excluding_client", { _client_id: user!.id }),
     ]);
     setBusy(false);
     if (error) return toast.error(error.message);
     const excludedSet = new Set((excludedRows ?? []).map((r: any) => r.escort_id));
     const favoriteSet = new Set((favoriteRows ?? []).map((r: any) => r.escort_id));
+    const escortFilteredOut = new Set((filterRows ?? []).map((r: any) => r.escort_id));
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
@@ -303,6 +305,7 @@ const RequestRideInner = () => {
     const ranked: MatchedEscort[] = (data ?? [])
       .filter((e) => {
         if (excludedSet.has(e.id)) return false; // respecteer pool-uitsluitingen
+        if (escortFilteredOut.has(e.id)) return false; // begeleider heeft deze opdrachtgever uitgesloten
         const ec = escortCountrySet(e as any);
         // Begeleider moet ALLE landen dekken waarin daadwerkelijk gereden wordt.
         // Bij grensovergangen telt alleen het land aan de gereden zijde mee.
