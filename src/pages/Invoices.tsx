@@ -274,7 +274,7 @@ const InvoicesInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-
+      <PaymentTestModeBanner />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto space-y-12">
@@ -332,6 +332,15 @@ const InvoicesInner = () => {
         </div>
       </main>
       <Footer />
+      <CheckoutDialog
+        open={!!payInvoiceId}
+        onOpenChange={(v) => !v && setPayInvoiceId(null)}
+        title="Platformfactuur betalen"
+        platformInvoiceId={payInvoiceId ?? undefined}
+        customerEmail={user?.email}
+        userId={user?.id}
+        returnUrl={`${window.location.origin}/facturen?paid=1`}
+      />
     </div>
   );
 
