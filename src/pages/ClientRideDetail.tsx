@@ -10,6 +10,7 @@ import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapRequestDialog } from "@/components/site/SwapRequestDialog";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
+import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -268,6 +269,8 @@ const Inner = () => {
           <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
         </div>
       </Section>
+
+      <ExtraLegsList rideId={ride.id} />
 
       <Section title={`Chauffeurs (${drivers.length})`}>
         {drivers.length === 0 ? (

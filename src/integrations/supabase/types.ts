@@ -1057,6 +1057,7 @@ export type Database = {
           dropoff_lng: number
           escort_type_required: string
           excluded_escort_ids: string[]
+          extra_legs: Json
           id: string
           license_plates: string[]
           notes: string | null
@@ -1097,6 +1098,7 @@ export type Database = {
           dropoff_lng: number
           escort_type_required?: string
           excluded_escort_ids?: string[]
+          extra_legs?: Json
           id?: string
           license_plates?: string[]
           notes?: string | null
@@ -1137,6 +1139,7 @@ export type Database = {
           dropoff_lng?: number
           escort_type_required?: string
           excluded_escort_ids?: string[]
+          extra_legs?: Json
           id?: string
           license_plates?: string[]
           notes?: string | null

@@ -1,69 +1,63 @@
-## Doel
-Opdrachtgever kan een geboekte begeleider verplaatsen naar een andere eigen rit. Begeleider(s) moeten akkoord geven via in-app notificatie.
+# Aansluitende ritten in ritaanvraag
 
-## Twee scenario's
-1. **Vastzetten op open rit** — begeleider verhuist van rit A (waar hij geaccepteerd is) naar rit B (status `open`, nog geen begeleider). Alleen die ene begeleider hoeft akkoord te geven. Plek op rit A komt vrij (terug naar `open`, broadcast kan opnieuw).
-2. **1-op-1 ruil** — twee ritten van dezelfde opdrachtgever, beide met geaccepteerde begeleiders. Beide begeleiders moeten akkoord. Pas wanneer beiden goedkeuren wordt de wissel doorgevoerd.
+Onder het bestaande Route-blok komt een nieuwe sectie **"Aansluitende ritten"** waar een opdrachtgever extra deelritten (leg 2, 3, 4 …) kan toevoegen. De begeleider neemt het hele pakket aan, krijgt één tarief en één factuurregel. Begeleidingstijd loopt vanaf start rit 1 tot einde laatste rit (inclusief wachttijd), plus aanrij- en terugreistijd.
 
-Voorwaarde voor beide: opdrachtgever is `client_id` van beide ritten, beide ritten in de toekomst, geen `cancelled`/`completed` status.
+## Schema
 
-## Backend wijzigingen
-
-### Nieuwe tabel `ride_swap_requests`
+```text
+rides
+└── extra_legs  jsonb  (default '[]')
+       [
+         { pickup_address, pickup_city, pickup_lat, pickup_lng,
+           dropoff_address, dropoff_city, dropoff_lat, dropoff_lng,
+           scheduled_at  (ISO timestamp) }
+         …
+       ]
 ```
-id uuid pk
-client_id uuid                  -- aanvrager (= client van beide ritten)
-source_assignment_id uuid       -- de te verplaatsen toewijzing (geaccepteerd)
-source_ride_id uuid
-target_ride_id uuid             -- doelrit
-target_assignment_id uuid null  -- null = open rit; gevuld = 1-op-1 ruil
-source_escort_decision text     -- 'pending' | 'accepted' | 'declined'
-target_escort_decision text     -- 'pending' | 'accepted' | 'declined' | 'n_a' (open rit)
-status text                     -- 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired'
-reason text null                -- toelichting opdrachtgever
-expires_at timestamptz          -- bv. 24u
-decided_at timestamptz null
-created_at timestamptz default now()
-```
-RLS: client ziet/wijzigt eigen aanvragen; betrokken begeleiders zien hun eigen aanvragen; admins alles.
 
-### RPC's (security definer)
-- `client_request_swap(_source_assignment, _target_ride, _reason)` — valideert eigenaarschap, maakt swap-request, zet notificaties + assignment-flag, return id.
-- `escort_decide_swap(_swap_id, _approve)` — markeert source/target decision; als beide `accepted` → uitvoeren; als één `declined` → `declined` en cleanup.
-- `client_cancel_swap(_swap_id)` — opdrachtgever trekt aanvraag in.
+Eén rit-record blijft het anker. Lading, vergunning, kentekens, chauffeurs en de geboekte begeleider gelden voor het hele pakket. Geen wijziging aan `ride_assignments`.
 
-Uitvoering bij `accepted`:
-- Open-rit case: source ride wordt `open`, source assignment → `cancelled` (met reden "swapped"), nieuwe assignment op target ride met dezelfde escort, status `accepted`.
-- Ruil-case: beide assignments krijgen elkaars `ride_id` (of cancel + nieuwe accepted-assignment per escort).
-- Bij beide gevallen: notificaties naar betrokken escorts en client, Google Calendar opnieuw syncen wordt automatisch door triggers/edge gedaan indien aanwezig (anders no-op).
+## UI – RequestRide
 
-### Notificaties
-Insert in `notifications` (type `swap_request` / `swap_resolved`) per betrokken begeleider; bestaande `NotificationsListener` toont ze.
+Nieuwe sectie direct onder Route, boven Lading & vergunning:
 
-## UI wijzigingen
+- Knop **"+ Aansluitende rit toevoegen"**.
+- Per extra leg een kaart met:
+  - Vertrek-adres (AddressAutocomplete)
+  - Bestemming-adres (AddressAutocomplete)
+  - Datum + kwartiertijd (zelfde stijl als hoofdblok)
+  - Verwijderknop
+- Tijdvolgorde-validatie: elke leg-start moet ≥ einde vorige leg liggen (geschatte rijduur via `travelMinutes(distanceKm)`).
+- Onder de lijst een samenvattingsblok: totale begeleidingstijd = `lastLegEnd − leg1Start`, plus `+ aanrijden + terugreis` per begeleider.
 
-### `ClientRideDetail.tsx`
-Per geaccepteerde begeleider extra knop **"Verplaats naar andere rit"** → opent dialoog:
-- Lijst van eigen toekomstige ritten waar deze begeleider níet al op zit, gegroepeerd in:
-  - "Open ritten zonder begeleider"
-  - "Ritten met andere begeleider (ruil)"
-- Optioneel reden-veld, knop **Aanvraag versturen**.
-- Toont lopende swap-aanvragen voor deze rit (status + intrekken-knop).
+## Matching & boeking
 
-### `EscortRideDetail.tsx`
-Banner bovenaan wanneer er een openstaande swap-aanvraag is voor deze rit:
-- Toont info (van/naar, datum/route doelrit, evt. tegenpartij anoniem ID, reden).
-- Knoppen **Akkoord** / **Weigeren**.
-- Bij ruil: vermeldt "wacht op andere begeleider" als eigen besluit accepted is maar tegenpartij nog niet.
+- Aanrijden = vanaf basis begeleider naar pickup van **leg 1**.
+- Terugreis = vanaf dropoff van **laatste leg** terug naar basis.
+- Begeleidingstijd binnen pakket = `lastLegEnd − leg1Start` (incl. wachten).
+- Schatting per leg via bestaande `travelMinutes(distanceKm)`; eind = `legStart + duur`.
+- Conflict-check (`get_escort_busy_windows`) gebruikt venster `leg1Start … lastLegEnd`.
+- Bij boeken: `rides.scheduled_at = leg1.start`, `rides.time_window_end = lastLegEnd`, en `extra_legs` gevuld.
+- `ride_assignments.estimated_hours/estimated_cost` op basis van totale tijd.
 
-### Notifications
-Bestaande notificatiebel toont `swap_request` met deeplink naar de betreffende EscortRideDetail.
+## Weergave op detailpagina's
 
-## Bestanden
-- migration: nieuwe tabel + RLS + 3 RPC's
-- `src/pages/ClientRideDetail.tsx` — knop + dialoog + lopende aanvragen
-- `src/pages/EscortRideDetail.tsx` — banner met accept/decline
-- nieuwe component `src/components/site/SwapRequestDialog.tsx`
-- nieuwe component `src/components/site/SwapPendingBanner.tsx` (escort-zijde)
+Op `ClientRideDetail` en `EscortRideDetail` een chronologisch lijstje "Route":
+1. Pickup → Dropoff – starttijd
+2. Pickup → Dropoff – starttijd
+   …
 
-Geen edge functions nodig — alles via RPC's en bestaande notificatie-infrastructuur.
+Bestaande pickup/dropoff-velden tonen de eerste leg; extra legs eronder.
+
+## Wijzigingen
+
+- Migratie: `ALTER TABLE rides ADD COLUMN extra_legs jsonb NOT NULL DEFAULT '[]'`.
+- `src/pages/RequestRide.tsx`: nieuwe state `extraLegs`, UI-sectie, validatie, aangepaste `findMatches` (start/eind, ride-duur), aangepaste `bookEscorts` (insert).
+- `src/pages/ClientRideDetail.tsx` + `src/pages/EscortRideDetail.tsx`: leg-lijst tonen wanneer `extra_legs.length > 0`.
+
+## Buiten scope (later)
+
+- Bewerken van extra legs na boeking (`EditRide.tsx`).
+- Aparte facturatie per leg.
+- Per-leg lading of vergunning.
+- Bundle-flow / 1-op-1 voorrang voor losse vervolgritten (blijft beschikbaar voor wie meerdere losse rides wil maken).

@@ -9,6 +9,7 @@ import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
+import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
 
 interface RideDetail {
@@ -346,6 +347,8 @@ const Inner = () => {
           <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
         </div>
       </Section>
+
+      <ExtraLegsList rideId={ride.id} />
 
       {isInvited ? (
         <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep">

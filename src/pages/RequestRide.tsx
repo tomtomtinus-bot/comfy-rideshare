@@ -80,6 +80,15 @@ interface GeoPoint {
   lng: number;
 }
 
+interface ExtraLeg {
+  pickup_address: string;
+  pickup: GeoPoint | null;
+  dropoff_address: string;
+  dropoff: GeoPoint | null;
+  scheduled_date: string;
+  scheduled_time: string;
+}
+
 const fmtHours = (min: number) => {
   const total = Math.ceil(min / 15) * 15;
   const h = Math.floor(total / 60);
@@ -141,14 +150,23 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
+  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
 
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates,
+        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs,
       }));
     } catch {}
-  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates]);
+  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs]);
+
+  const addExtraLeg = () => setExtraLegs((l) => [...l, {
+    pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
+    scheduled_date: "", scheduled_time: "",
+  }]);
+  const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
+    setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeExtraLeg = (i: number) => setExtraLegs((l) => l.filter((_, idx) => idx !== i));
 
   const addDriver = () => setDrivers((d) => [...d, { name: "", phone: "" }]);
   const updateDriver = (i: number, patch: Partial<{ name: string; phone: string }>) =>
@@ -219,6 +237,26 @@ const RequestRideInner = () => {
     setDropoffGeo({ city: r.city, country: r.country, lat: r.lat, lng: r.lng });
   };
 
+  // Build full leg list (main + extras) ordered as entered. Each leg has start/end ms.
+  const buildLegs = () => {
+    if (!pickupGeo || !dropoffGeo || !form.scheduled_date || !form.scheduled_time) return null;
+    const legs: Array<{ pickup: GeoPoint; dropoff: GeoPoint; startMs: number; durMin: number; endMs: number; }> = [];
+    const main = {
+      pickup: pickupGeo, dropoff: dropoffGeo,
+      startMs: new Date(`${form.scheduled_date}T${form.scheduled_time}`).getTime(),
+      durMin: travelMinutes(distanceKm(pickupGeo, dropoffGeo)),
+    };
+    legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
+    for (const ex of extraLegs) {
+      if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
+      const startMs = new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).getTime();
+      if (isNaN(startMs)) return null;
+      const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
+      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
+    }
+    return legs;
+  };
+
   const findMatches = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = makeSchema(t).safeParse(form);
@@ -229,6 +267,13 @@ const RequestRideInner = () => {
     const scheduledDate = new Date(`${form.scheduled_date}T${form.scheduled_time}`);
     if (isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
       return toast.error(t("request.pastNotAllowed", { defaultValue: "Starttijd moet in de toekomst liggen." }));
+    }
+    const legs = buildLegs();
+    if (!legs) return toast.error("Vul alle aansluitende ritten volledig in (adres + tijd).");
+    for (let i = 1; i < legs.length; i++) {
+      if (legs[i].startMs < legs[i - 1].endMs) {
+        return toast.error(`Aansluitende rit ${i + 1} start vóór het einde van de vorige rit.`);
+      }
     }
 
     setBusy(true);
@@ -276,10 +321,13 @@ const RequestRideInner = () => {
     };
     const driveCountries = deriveDriveCountries(pickupCountries, dropoffCountries);
 
-    const rideKm = distanceKm(pickupGeo, dropoffGeo);
-    const rideMin = travelMinutes(rideKm);
-    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
-    const rideStartMs = new Date(scheduledISO).getTime();
+    // Begeleidingstijd loopt van start eerste leg tot einde laatste leg (incl. wachten).
+    const firstLeg = legs[0];
+    const lastLeg = legs[legs.length - 1];
+    const lastDropoffGeo = lastLeg.dropoff;
+    const rideMin = Math.max(1, Math.round((lastLeg.endMs - firstLeg.startMs) / 60_000));
+    const scheduledISO = new Date(firstLeg.startMs).toISOString();
+    const rideStartMs = firstLeg.startMs;
 
     // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
     const beInvolved = driveCountries.includes("België");
@@ -313,7 +361,7 @@ const RequestRideInner = () => {
       })
       .map((e) => {
         const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
-        const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, dropoffGeo);
+        const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, lastDropoffGeo);
         const isBe = driveCountries.includes("België");
         const isDe = driveCountries.includes("Duitsland");
         const isFr = driveCountries.includes("Frankrijk");
@@ -379,7 +427,7 @@ const RequestRideInner = () => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
       const [toPickup, backHome] = await Promise.all([
         fetchLegMin(base, pickupGeo),
-        fetchLegMin(dropoffGeo, base),
+        fetchLegMin(lastDropoffGeo, base),
       ]);
       return {
         ...m,
@@ -426,13 +474,29 @@ const RequestRideInner = () => {
     if (selected.length !== form.num_escorts) {
       return toast.error(t("request.pickExact", { n: form.num_escorts }));
     }
-
-    const rideKm = distanceKm(pickupGeo, dropoffGeo);
-    const rideMin = travelMinutes(rideKm);
+    const legs = buildLegs();
+    if (!legs) return toast.error("Vul alle aansluitende ritten volledig in (adres + tijd).");
+    const firstLeg = legs[0];
+    const lastLeg = legs[legs.length - 1];
+    const lastDropoffGeo = lastLeg.dropoff;
+    const rideMin = Math.max(1, Math.round((lastLeg.endMs - firstLeg.startMs) / 60_000));
 
     setBusy(true);
-    
-    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
+
+    const scheduledISO = new Date(firstLeg.startMs).toISOString();
+    const lastEndISO = new Date(lastLeg.endMs).toISOString();
+    const extraLegsPayload = extraLegs.map((ex) => ({
+      pickup_address: ex.pickup_address,
+      pickup_city: ex.pickup!.city,
+      pickup_lat: ex.pickup!.lat,
+      pickup_lng: ex.pickup!.lng,
+      dropoff_address: ex.dropoff_address,
+      dropoff_city: ex.dropoff!.city,
+      dropoff_lat: ex.dropoff!.lat,
+      dropoff_lng: ex.dropoff!.lng,
+      scheduled_at: new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).toISOString(),
+    }));
+
     const { data: ride, error } = await supabase
       .from("rides")
       .insert({
@@ -458,7 +522,8 @@ const RequestRideInner = () => {
         permit_id: uploadedPermit?.id ?? null,
         client_reference: form.client_reference || null,
         time_window_start: scheduledISO,
-        time_window_end: null,
+        time_window_end: extraLegsPayload.length > 0 ? lastEndISO : null,
+        extra_legs: extraLegsPayload as never,
         drivers: drivers
           .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
           .filter((d) => d.name || d.phone) as never,
@@ -597,6 +662,119 @@ const RequestRideInner = () => {
                       <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
                       <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
                       <span className="text-brass-deep/55">{t("request.speedHint")}</span>
+                    </p>
+                  </div>
+                );
+              })()}
+            </section>
+
+            <section className="border-t border-brass-deep/10 pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                  Aansluitende ritten <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+                </p>
+                <button type="button" onClick={addExtraLeg} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
+                  + Rit toevoegen
+                </button>
+              </div>
+              {extraLegs.length === 0 ? (
+                <p className="text-xs text-brass-deep/55">
+                  Voeg vervolgritten toe als de begeleider direct aansluitend nog meer ritten doet. Dezelfde begeleider, dezelfde lading/vergunning. Begeleidingstijd loopt door van start rit 1 tot einde laatste rit.
+                </p>
+              ) : (
+                <ul className="space-y-4">
+                  {extraLegs.map((leg, i) => (
+                    <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
+                        <button
+                          type="button"
+                          onClick={() => removeExtraLeg(i)}
+                          className="text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                          aria-label="Verwijder rit"
+                        >×</button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Vertrek</p>
+                          <AddressAutocomplete
+                            label={t("request.addrLabel")}
+                            value={leg.pickup_address}
+                            onChange={(v) => updateExtraLeg(i, { pickup_address: v })}
+                            onSelect={(r) => updateExtraLeg(i, {
+                              pickup_address: r.display,
+                              pickup: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+                            })}
+                            placeholder={t("request.pickupPlaceholder")}
+                          />
+                          {leg.pickup && (
+                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Bestemming</p>
+                          <AddressAutocomplete
+                            label={t("request.addrLabel")}
+                            value={leg.dropoff_address}
+                            onChange={(v) => updateExtraLeg(i, { dropoff_address: v })}
+                            onSelect={(r) => updateExtraLeg(i, {
+                              dropoff_address: r.display,
+                              dropoff: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+                            })}
+                            placeholder={t("request.dropoffPlaceholder")}
+                          />
+                          {leg.dropoff && (
+                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <Input
+                          label="Datum"
+                          type="date"
+                          min={new Date().toISOString().slice(0, 10)}
+                          value={leg.scheduled_date}
+                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
+                        />
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd (kwartier)</label>
+                          <select
+                            value={leg.scheduled_time}
+                            onChange={(e) => updateExtraLeg(i, { scheduled_time: e.target.value })}
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          >
+                            <option value="" disabled>Kies een tijd</option>
+                            {QUARTER_TIMES.map((qt) => (
+                              <option key={qt} value={qt}>{qt}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {leg.pickup && leg.dropoff && (() => {
+                        const km = distanceKm(leg.pickup, leg.dropoff);
+                        const min = travelMinutes(km);
+                        return (
+                          <p className="mt-3 text-[11px] text-brass-deep/60">
+                            <strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(min)}</strong>
+                          </p>
+                        );
+                      })()}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(() => {
+                const legs = buildLegs();
+                if (!legs || legs.length < 2) return null;
+                const totalMin = Math.round((legs[legs.length - 1].endMs - legs[0].startMs) / 60_000);
+                return (
+                  <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                      Totale begeleidingstijd ({legs.length} ritten)
+                    </p>
+                    <p className="text-sm text-brass-deep">
+                      <strong className="tabular-nums">{fmtHours(totalMin)}</strong>{" "}
+                      <span className="text-brass-deep/55">van start rit 1 tot einde rit {legs.length} (excl. aanrij- en terugreistijd begeleider)</span>
                     </p>
                   </div>
                 );
