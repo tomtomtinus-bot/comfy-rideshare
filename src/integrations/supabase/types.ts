@@ -21,6 +21,7 @@ export type Database = {
           escort_id: string
           id: string
           reason: string
+          reason_category: string
         }
         Insert: {
           client_id: string
@@ -28,6 +29,7 @@ export type Database = {
           escort_id: string
           id?: string
           reason: string
+          reason_category: string
         }
         Update: {
           client_id?: string
@@ -35,6 +37,31 @@ export type Database = {
           escort_id?: string
           id?: string
           reason?: string
+          reason_category?: string
+        }
+        Relationships: []
+      }
+      client_favorite_escorts: {
+        Row: {
+          client_id: string
+          created_at: string
+          escort_id: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          escort_id: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          escort_id?: string
+          id?: string
+          note?: string | null
         }
         Relationships: []
       }
@@ -1189,6 +1216,20 @@ export type Database = {
             }
             Returns: Json
           }
+      client_eligible_escorts: {
+        Args: never
+        Returns: {
+          accepted_count: number
+          anonymous_id: string
+          base_city: string
+          company_name: string
+          full_name: string
+          id: string
+          interactions: number
+          last_interaction_at: string
+          vehicle_type: string
+        }[]
+      }
       compute_fuel_surcharge: {
         Args: {
           p_base_amount: number
