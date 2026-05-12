@@ -38,15 +38,27 @@ Deno.serve(async (req) => {
       ? await resolveOrCreateCustomer(stripe, { email: customerEmail, userId })
       : undefined;
 
+    const SUBSCRIPTION_TRIALS: Record<string, number> = {
+      opdrachtgever_monthly: 30,
+      begeleider_monthly: 30,
+    };
+    const trialDays = isRecurring ? SUBSCRIPTION_TRIALS[priceId] : undefined;
+
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded_page",
       return_url: returnUrl,
       ...(customerId && { customer: customerId }),
+      ...(isRecurring && trialDays && {
+        subscription_data: {
+          trial_period_days: trialDays,
+          ...(userId && { metadata: { userId } }),
+        },
+      }),
       ...(userId && {
         metadata: { userId },
-        ...(isRecurring && { subscription_data: { metadata: { userId } } }),
+        ...(isRecurring && !trialDays && { subscription_data: { metadata: { userId } } }),
       }),
     });
 
