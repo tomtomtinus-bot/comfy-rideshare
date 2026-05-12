@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RoleSwitch } from "@/components/site/RoleSwitch";
-import { DemoSwitcher } from "@/components/site/DemoSwitcher";
 import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 
