@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Fuel, ExternalLink } from "lucide-react";
 
 interface FuelPrice {
   id: string;
