@@ -367,6 +367,15 @@ const Inner = () => {
                     </div>
                   </div>
                 )}
+                {e.status === "accepted" && (
+                  <button
+                    type="button"
+                    onClick={() => setSwapFor({ assignmentId: e.assignment_id, anon: e.anonymous_id })}
+                    className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline-offset-4 hover:underline"
+                  >
+                    🔄 Verplaats naar andere rit
+                  </button>
+                )}
                 {e.status === "accepted" && userId && (
                   <AssignmentChat
                     assignmentId={e.assignment_id}
