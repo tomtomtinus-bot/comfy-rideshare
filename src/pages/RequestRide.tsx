@@ -341,10 +341,15 @@ const RequestRideInner = () => {
           is_lu_ride: isLu,
           de_km_mode: deKmMode,
           effective_rate: rate,
+          is_favorite: favoriteSet.has(e.id),
           conflict: null,
         } as MatchedEscort;
       })
-      .sort((a, b) => Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff))
+      .sort((a, b) => {
+        // Favorieten altijd bovenaan, daarna op kortste afstand
+        if (!!a.is_favorite !== !!b.is_favorite) return a.is_favorite ? -1 : 1;
+        return Math.min(a.distanceToPickup, a.distanceFromDropoff) - Math.min(b.distanceToPickup, b.distanceFromDropoff);
+      })
       .slice(0, 25);
 
     if (ranked.length === 0) return toast.error(t("request.noEscorts"));
