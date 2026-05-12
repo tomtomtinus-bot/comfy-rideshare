@@ -321,10 +321,13 @@ const RequestRideInner = () => {
     };
     const driveCountries = deriveDriveCountries(pickupCountries, dropoffCountries);
 
-    const rideKm = distanceKm(pickupGeo, dropoffGeo);
-    const rideMin = travelMinutes(rideKm);
-    const scheduledISO = new Date(`${form.scheduled_date}T${form.scheduled_time}`).toISOString();
-    const rideStartMs = new Date(scheduledISO).getTime();
+    // Begeleidingstijd loopt van start eerste leg tot einde laatste leg (incl. wachten).
+    const firstLeg = legs[0];
+    const lastLeg = legs[legs.length - 1];
+    const lastDropoffGeo = lastLeg.dropoff;
+    const rideMin = Math.max(1, Math.round((lastLeg.endMs - firstLeg.startMs) / 60_000));
+    const scheduledISO = new Date(firstLeg.startMs).toISOString();
+    const rideStartMs = firstLeg.startMs;
 
     // België-vereiste: type 2 begeleider mag ook een type 1 rit doen, maar niet andersom
     const beInvolved = driveCountries.includes("België");
