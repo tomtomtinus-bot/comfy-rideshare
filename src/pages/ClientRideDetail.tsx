@@ -235,6 +235,10 @@ const Inner = () => {
         <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
 
+      {userId && (
+        <SwapPendingBanner key={swapTick} rideId={ride.id} currentUserId={userId} onChanged={load} />
+      )}
+
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
