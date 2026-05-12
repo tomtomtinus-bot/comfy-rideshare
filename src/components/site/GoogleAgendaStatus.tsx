@@ -43,6 +43,9 @@ export const GoogleAgendaStatus = () => {
           <div className="flex-1">
             <h3 className="font-display text-2xl text-brass-deep italic">{t("google.connectTitle")}</h3>
             <p className="text-sm text-brass-deep/70 mt-1">{t("google.connectBody")}</p>
+            <p className="text-xs text-brass-deep font-semibold mt-2">
+              ⚠ Let op: zorg dat je browser pop-ups van deze site toestaat.
+            </p>
             <Link
               to="/profiel"
               className="inline-block mt-4 px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors"
