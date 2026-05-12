@@ -9,6 +9,7 @@ import { distanceKm, travelMinutes, emptyTravelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { RequireSubscription } from "@/components/RequireSubscription";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
@@ -1159,7 +1160,9 @@ const Input = ({
 
 const RequestRide = () => (
   <RequireAuth>
-    <RequestRideInner />
+    <RequireSubscription action="ritten aan te maken">
+      <RequestRideInner />
+    </RequireSubscription>
   </RequireAuth>
 );
 
