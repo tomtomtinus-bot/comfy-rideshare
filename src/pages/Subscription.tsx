@@ -108,31 +108,55 @@ const SubscriptionInner = () => {
           {loading ? (
             <p className="text-sm text-brass-deep/50">Laden…</p>
           ) : isActive ? (
+            (() => {
+              const isTrial = subscription?.status === "trialing";
+              const endDate = subscription?.current_period_end
+                ? new Date(subscription.current_period_end)
+                : null;
+              const daysLeft = endDate
+                ? Math.max(0, Math.ceil((endDate.getTime() - Date.now()) / 86400000))
+                : null;
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block w-2 h-2 rounded-full ${isTrial ? "bg-amber-500" : "bg-emerald-500"}`} />
+                    <span className="text-sm font-semibold text-brass-deep">
+                      {isTrial
+                        ? `Proefperiode actief${daysLeft !== null ? ` — nog ${daysLeft} ${daysLeft === 1 ? "dag" : "dagen"}` : ""}`
+                        : "Actief"}
+                      {subscription?.cancel_at_period_end && endDate
+                        ? ` — eindigt op ${endDate.toLocaleDateString("nl-NL")}`
+                        : ""}
+                    </span>
+                  </div>
+                  {isTrial && endDate && (
+                    <p className="text-xs text-brass-deep/60">
+                      Eerste betaling op {endDate.toLocaleDateString("nl-NL")}. Je kunt nu zonder kosten opzeggen via "Beheer abonnement".
+                    </p>
+                  )}
+                  <button
+                    onClick={openPortal}
+                    disabled={portalLoading}
+                    className="px-5 py-2.5 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment disabled:opacity-50"
+                  >
+                    {portalLoading ? "Bezig…" : "Beheer abonnement"}
+                  </button>
+                </div>
+              );
+            })()
+          ) : (
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-sm font-semibold text-brass-deep">
-                  Actief
-                  {subscription?.cancel_at_period_end && subscription.current_period_end
-                    ? ` — eindigt op ${new Date(subscription.current_period_end).toLocaleDateString("nl-NL")}`
-                    : ""}
-                </span>
-              </div>
+              <p className="text-sm text-brass-deep/70">
+                <span className="font-semibold text-brass-deep">30 dagen gratis proberen.</span>{" "}
+                Geen kosten tijdens de proefperiode — opzeggen kan op elk moment.
+              </p>
               <button
-                onClick={openPortal}
-                disabled={portalLoading}
-                className="px-5 py-2.5 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment disabled:opacity-50"
+                onClick={() => setOpenCheckout(true)}
+                className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
               >
-                {portalLoading ? "Bezig…" : "Beheer abonnement"}
+                Start 30 dagen gratis
               </button>
             </div>
-          ) : (
-            <button
-              onClick={() => setOpenCheckout(true)}
-              className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-            >
-              Abonnement starten
-            </button>
           )}
         </div>
       </section>
