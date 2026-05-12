@@ -51,8 +51,6 @@ const InfoBelgie = () => {
         <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10">
           <div className="max-w-5xl mx-auto space-y-12">
             <div>
-
-            <div>
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-6">
                 Belgische netwerken &amp; route­planning
               </h2>
