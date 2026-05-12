@@ -44,6 +44,16 @@ export const Footer = () => {
                   Tarieven
                 </Link>
               </li>
+              <li>
+                <Link to="/info/nederland" className="hover:text-brass-gold transition-colors">
+                  Info Nederland
+                </Link>
+              </li>
+              <li>
+                <Link to="/info/belgie" className="hover:text-brass-gold transition-colors">
+                  Info België
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="space-y-4">
