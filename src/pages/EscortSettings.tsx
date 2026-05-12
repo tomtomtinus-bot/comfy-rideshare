@@ -453,6 +453,9 @@ const Inner = () => {
                 <p className="text-[11px] text-brass-deep/60">
                   Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
                 </p>
+                <p className="text-[11px] text-brass-deep/55 italic">
+                  Je standplaats wordt berekend op basis van je postcode en gebruikt om de aan- en afvoertijd (leegrijden naar pickup en terug) per rit te berekenen. Vul daarom je werkelijke vertreklocatie in.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Postcode</Label>
