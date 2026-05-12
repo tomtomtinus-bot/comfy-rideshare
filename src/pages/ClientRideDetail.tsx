@@ -10,6 +10,7 @@ import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapRequestDialog } from "@/components/site/SwapRequestDialog";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
+import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
 
 interface RideDetail {
