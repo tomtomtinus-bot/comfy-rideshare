@@ -232,12 +232,24 @@ const RequestRideInner = () => {
     }
 
     setBusy(true);
-    const { data, error } = await supabase
-      .from("escort_profiles")
-      .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
-      .eq("available", true);
+    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }] = await Promise.all([
+      supabase
+        .from("escort_profiles")
+        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
+        .eq("available", true),
+      supabase
+        .from("client_excluded_escorts")
+        .select("escort_id")
+        .eq("client_id", user!.id),
+      supabase
+        .from("client_favorite_escorts")
+        .select("escort_id")
+        .eq("client_id", user!.id),
+    ]);
     setBusy(false);
     if (error) return toast.error(error.message);
+    const excludedSet = new Set((excludedRows ?? []).map((r: any) => r.escort_id));
+    const favoriteSet = new Set((favoriteRows ?? []).map((r: any) => r.escort_id));
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
