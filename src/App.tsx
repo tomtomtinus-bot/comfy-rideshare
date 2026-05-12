@@ -78,6 +78,7 @@ const App = () => (
               <Route path="invoices" element={<AdminInvoices />} />
               <Route path="escorts" element={<AdminEscorts />} />
               <Route path="fuel" element={<AdminFuel />} />
+              <Route path="excluded" element={<AdminExcluded />} />
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />
