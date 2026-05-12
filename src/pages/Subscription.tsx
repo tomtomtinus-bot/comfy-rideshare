@@ -1,0 +1,160 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/site/Footer";
+import { RequireAuth } from "@/components/site/RequireAuth";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { CheckoutDialog } from "@/components/CheckoutDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { toast } from "sonner";
+
+const PLANS = {
+  opdrachtgever: {
+    priceId: "opdrachtgever_monthly",
+    title: "Opdrachtgever abonnement",
+    price: "€30,00",
+    period: "per maand",
+    description:
+      "Toegang tot het ViaCust platform: ritten plannen, begeleiders boeken, vergunningen beheren. Plus 1,5% platform fee per rit (op de wekelijkse platformfactuur).",
+    features: [
+      "Onbeperkt ritten plannen",
+      "Toegang tot het volledige begeleidersnetwerk",
+      "Vergunningen automatisch verwerken",
+      "Platform fee 1,5% per rit (verzameld per week)",
+    ],
+  },
+  begeleider: {
+    priceId: "begeleider_monthly",
+    title: "Begeleider abonnement",
+    price: "€2,50",
+    period: "per maand",
+    description: "Actief blijven op ViaCust: ritten ontvangen, agenda koppelen, automatische facturatie.",
+    features: [
+      "Ritten ontvangen en accepteren",
+      "Google Agenda-koppeling",
+      "Automatische wekelijkse facturatie",
+      "Volledige toegang tot het platform",
+    ],
+  },
+} as const;
+
+const SubscriptionInner = () => {
+  const { user, role } = useAuth();
+  const { subscription, isActive, loading } = useSubscription();
+  const [openCheckout, setOpenCheckout] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  if (!role) return null;
+  const plan = role === "begeleider" ? PLANS.begeleider : role === "opdrachtgever" ? PLANS.opdrachtgever : null;
+  if (!plan) {
+    return (
+      <main className="container mx-auto px-4 py-12">
+        <p className="text-brass-deep/60">Geen abonnement beschikbaar voor deze rol.</p>
+      </main>
+    );
+  }
+
+  const openPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-portal-session", {
+        body: {
+          returnUrl: `${window.location.origin}/abonnement`,
+          environment: getStripeEnvironment(),
+        },
+      });
+      if (error || !data?.url) throw new Error(error?.message || "Portal niet beschikbaar");
+      window.open(data.url, "_blank");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  return (
+    <main className="container mx-auto px-4 py-10 md:py-16 max-w-3xl">
+      <header className="mb-10">
+        <h1 className="font-display text-3xl md:text-4xl text-brass-deep">Abonnement</h1>
+        <p className="text-sm text-brass-deep/60 mt-2">Beheer je ViaCust abonnement.</p>
+      </header>
+
+      <section className="bg-card shadow-etched p-6 md:p-10 space-y-6">
+        <div className="flex items-baseline justify-between flex-wrap gap-3">
+          <div>
+            <h2 className="font-display text-2xl text-brass-deep">{plan.title}</h2>
+            <p className="text-sm text-brass-deep/60 mt-1">{plan.description}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-display text-3xl text-brass-gold tabular-nums">{plan.price}</p>
+            <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{plan.period}</p>
+          </div>
+        </div>
+
+        <ul className="space-y-2 text-sm">
+          {plan.features.map((f) => (
+            <li key={f} className="flex gap-2">
+              <span className="text-brass-gold">✓</span>
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="pt-4 border-t border-brass-deep/10">
+          {loading ? (
+            <p className="text-sm text-brass-deep/50">Laden…</p>
+          ) : isActive ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-sm font-semibold text-brass-deep">
+                  Actief
+                  {subscription?.cancel_at_period_end && subscription.current_period_end
+                    ? ` — eindigt op ${new Date(subscription.current_period_end).toLocaleDateString("nl-NL")}`
+                    : ""}
+                </span>
+              </div>
+              <button
+                onClick={openPortal}
+                disabled={portalLoading}
+                className="px-5 py-2.5 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment disabled:opacity-50"
+              >
+                {portalLoading ? "Bezig…" : "Beheer abonnement"}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setOpenCheckout(true)}
+              className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
+            >
+              Abonnement starten
+            </button>
+          )}
+        </div>
+      </section>
+
+      <CheckoutDialog
+        open={openCheckout}
+        onOpenChange={setOpenCheckout}
+        title={plan.title}
+        priceId={plan.priceId}
+        customerEmail={user?.email}
+        userId={user?.id}
+        returnUrl={`${window.location.origin}/abonnement?checkout=success&session_id={CHECKOUT_SESSION_ID}`}
+      />
+    </main>
+  );
+};
+
+const Subscription = () => (
+  <RequireAuth>
+    <PaymentTestModeBanner />
+    <Nav />
+    <SubscriptionInner />
+    <Footer />
+  </RequireAuth>
+);
+
+export default Subscription;
