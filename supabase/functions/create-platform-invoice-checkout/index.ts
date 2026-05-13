@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         quantity: 1,
       }],
       mode: "payment",
-      ui_mode: "embedded_page",
+      ui_mode: "embedded",
       return_url: returnUrl,
       payment_method_types: ["card", "ideal", "wero"],
       customer: customerId,
