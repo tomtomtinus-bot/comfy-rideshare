@@ -691,9 +691,20 @@ const RequestRideInner = () => {
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
             {t("request.kicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            {t("request.title")}
-          </h1>
+          <div className="flex items-start justify-between gap-4 mb-12">
+            <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95]">
+              {t("request.title")}
+            </h1>
+            {isApproved && (
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="shrink-0 text-xs uppercase tracking-[0.2em] font-semibold text-brass-deep/70 hover:text-brass-deep underline underline-offset-4 mt-2"
+              >
+                {t("request.startOver", { defaultValue: "Begin opnieuw" })}
+              </button>
+            )}
+          </div>
 
           {!isApproved ? (
             <div className="bg-card shadow-etched p-8 md:p-10 border-l-4 border-brass-gold">
