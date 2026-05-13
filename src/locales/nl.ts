@@ -5,7 +5,7 @@ const nl = {
     request: "Rit aanvragen",
     profile: "Profiel",
     permits: "Ontheffingen",
-    invoices: "​",
+    invoices: "Facturen",
     history: "Geschiedenis",
     billing: "Facturatiegegevens",
     admin: "Admin",
