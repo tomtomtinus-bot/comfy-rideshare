@@ -43,6 +43,7 @@ import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import WatKostViaCust from "./pages/WatKostViaCust.tsx";
 import InfoNederland from "./pages/InfoNederland.tsx";
 import InfoBelgie from "./pages/InfoBelgie.tsx";
+import Faq from "./pages/Faq.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
             <Route path="/wat-kost-viacust" element={<WatKostViaCust />} />
+            <Route path="/faq" element={<Faq />} />
             <Route path="/info/nederland" element={<InfoNederland />} />
             <Route path="/info/belgie" element={<InfoBelgie />} />
             <Route path="/auth" element={<Auth />} />
