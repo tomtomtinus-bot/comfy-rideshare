@@ -279,12 +279,20 @@ const ClientDashboard = () => {
         [t("xlsx.notes")]: r.notes ?? "",
       };
     });
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(k.length, 14) }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, t("dash.myRides"));
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(t("dash.myRides"));
+    const headers = Object.keys(rows[0]);
+    ws.columns = headers.map((k) => ({ header: k, key: k, width: Math.max(k.length, 14) }));
+    rows.forEach((r) => ws.addRow(r));
     const range = exportFrom || exportTo ? `-${exportFrom || "begin"}_tot_${exportTo || "eind"}` : "";
-    XLSX.writeFile(wb, `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const buf = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rittenadministratie${range}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
     toast.success(t("dash.excelDownloaded"));
     setExportOpen(false);
   };
