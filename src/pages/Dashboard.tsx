@@ -796,7 +796,7 @@ const EscortDashboard = () => {
         open={overdueItems.length > 0 && !overdueDismissed && openId === null}
         onOpenChange={(o) => { if (!o) setOverdueDismissed(true); }}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg w-[calc(100vw-1rem)] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="font-display italic text-2xl text-brass-deep">
               ⚠ Vul je gewerkte uren in
@@ -965,7 +965,7 @@ const EscortDashboard = () => {
 
               <Dialog open={openId === a.id} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
                 <DialogContent
-                  className="max-w-2xl max-h-[90vh] overflow-y-auto"
+                  className="max-w-2xl w-[calc(100vw-1rem)] max-h-[85vh] overflow-y-auto p-4 sm:p-6"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <DialogHeader>
