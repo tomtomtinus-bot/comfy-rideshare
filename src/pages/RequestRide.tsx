@@ -167,6 +167,7 @@ const RequestRideInner = () => {
     routes_count: number;
   } | null>(initial?.uploadedPermit ?? null);
   const [permitUploading, setPermitUploading] = useState(false);
+  const [confirmRemovePermit, setConfirmRemovePermit] = useState(false);
 
   const [form, setForm] = useState(initial?.form ?? {
     pickup_address: "",
