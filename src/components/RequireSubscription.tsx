@@ -38,6 +38,12 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
           >
             Start 30 dagen gratis
           </Link>
+          <p className="text-xs text-brass-deep/50">
+            Vragen?{" "}
+            <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+              support@viacust.com
+            </a>
+          </p>
         </div>
       </main>
       <Footer />

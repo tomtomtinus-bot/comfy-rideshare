@@ -81,6 +81,12 @@ const SubscriptionInner = () => {
       <header className="mb-10">
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep">Abonnement</h1>
         <p className="text-sm text-brass-deep/60 mt-2">Beheer je ViaCust abonnement.</p>
+        <p className="text-xs text-brass-deep/50 mt-1">
+          Vragen?{" "}
+          <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+            support@viacust.com
+          </a>
+        </p>
       </header>
 
       <section className="bg-card shadow-etched p-6 md:p-10 space-y-6">

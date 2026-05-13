@@ -44,7 +44,10 @@ export function SubscriptionBanner() {
   if (subscription?.status === "past_due") {
     return (
       <div className="bg-red-100 border-b border-red-300 text-red-900 px-4 py-2 text-sm text-center">
-        Je laatste betaling is mislukt. <Link to="/abonnement" className="underline font-semibold">Werk je betaalmethode bij</Link>
+        Je laatste betaling is mislukt.{" "}
+        <Link to="/abonnement" className="underline font-semibold">Werk je betaalmethode bij</Link>
+        <span className="mx-1">·</span>
+        <a href="mailto:support@viacust.com" className="underline font-semibold">support@viacust.com</a>
       </div>
     );
   }
