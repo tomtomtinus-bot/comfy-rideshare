@@ -127,7 +127,7 @@ const BillingDetailsInner = () => {
         .from(table)
         .select(
           "company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number" +
-            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee" : ""),
+            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee, self_billing_mandate_accepted_at" : ""),
         )
         .eq("id", user.id)
         .maybeSingle();
@@ -140,6 +140,7 @@ const BillingDetailsInner = () => {
             Object.entries(d).map(([k, v]) => {
               if (k === "wero_enabled") return [k, !!v];
               if (k === "wero_fee") return [k, v == null ? "0" : String(v)];
+              if (k === "self_billing_mandate_accepted_at") return ["self_billing_mandate", !!v];
               return [k, v ?? ""];
             }),
           ),
