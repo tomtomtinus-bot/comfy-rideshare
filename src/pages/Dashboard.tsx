@@ -965,7 +965,7 @@ const EscortDashboard = () => {
 
               <Dialog open={openId === a.id} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
                 <DialogContent
-                  className="max-w-2xl max-h-[90vh] overflow-y-auto"
+                  className="max-w-2xl w-[calc(100vw-1rem)] max-h-[85vh] overflow-y-auto p-4 sm:p-6"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <DialogHeader>
