@@ -330,6 +330,29 @@ const BillingDetailsInner = () => {
                 </section>
               )}
 
+              {isEscort && (
+                <section className="space-y-3 border-t border-brass-deep/10 pt-6">
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                    Factuurvolmacht (self-billing)
+                  </h2>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!form.self_billing_mandate}
+                      onChange={(e) => setBool("self_billing_mandate")(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 accent-brass-gold shrink-0"
+                    />
+                    <span className="text-sm text-brass-deep/85 leading-relaxed">
+                      Ik verleen ViaCust volmacht om namens mijn bedrijf facturen op te stellen
+                      voor de door mij uitgevoerde ritten.
+                    </span>
+                  </label>
+                  {errors.self_billing_mandate && (
+                    <p className="text-xs text-red-700">{errors.self_billing_mandate}</p>
+                  )}
+                </section>
+              )}
+
               <div className="flex justify-end">
                 <button
                   type="submit"
