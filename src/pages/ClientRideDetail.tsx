@@ -560,59 +560,6 @@ const Inner = () => {
           </Accordion>
         );
       })()}
-      {ride.status !== "cancelled" && ride.status !== "completed" && (
-        <Section title="Annulering">
-          <p className="text-sm text-brass-deep/70 mb-3">
-            Annulering binnen 4 uur voor aanvang: minimumtarief per geaccepteerde begeleider (minimum aantal factureerbare uren × hun uurtarief).
-          </p>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={handleCancelRide}
-            className="px-6 py-3 bg-red-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-red-800 transition-colors disabled:opacity-50"
-          >
-            Rit annuleren
-          </button>
-        </Section>
-      )}
-
-      {ride.status === "cancelled" && (
-        <div className="bg-red-50 border border-red-200 p-5 text-sm text-red-900">
-          Deze rit is geannuleerd.
-        </div>
-      )}
-
-      <Section title="Ontheffing">
-        {permit ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field label="Vergunningnummer" value={permit.permit_number} />
-              <Field label="Geldig van" value={permit.valid_from ?? "—"} />
-              <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
-              <div className="md:col-span-2">
-                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Maximale afmetingen</p>
-                <p className="text-sm font-medium tabular-nums">
-                  {permit.max_length_m ?? "—"}m × {permit.max_width_m ?? "—"}m × {permit.max_height_m ?? "—"}m ·{" "}
-                  {permit.max_weight_kg ? `${permit.max_weight_kg} kg` : "—"}
-                </p>
-              </div>
-            </div>
-            {permit.pdf_path && (
-              <button
-                type="button"
-                onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
-                className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
-              >
-                PDF openen
-              </button>
-            )}
-          </div>
-        ) : ride.permit_number ? (
-          <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
-        ) : (
-          <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
-        )}
-      </Section>
       {swapFor && (
         <SwapRequestDialog
           open={!!swapFor}
