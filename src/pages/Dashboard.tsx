@@ -78,6 +78,9 @@ interface AssignmentRow {
   actual_cost: number | null;
   hours_submitted_at: string | null;
   hours_notes: string | null;
+  hours_dispute_status?: string | null;
+  hours_dispute_reason?: string | null;
+  hours_disputed_at?: string | null;
   status: "invited" | "accepted" | "declined" | "expired" | "cancelled";
   invited_at: string;
   responds_by: string;
@@ -764,7 +767,9 @@ const EscortDashboard = () => {
         extra_costs_total: extrasTotal,
         hours_notes: parsed.data.hours_notes || null,
         hours_submitted_at: new Date().toISOString(),
-      })
+        hours_dispute_status: "none",
+        hours_dispute_reason: null,
+      } as never)
       .eq("id", id);
 
     if (error) return toast.error(error.message);
@@ -866,7 +871,9 @@ const EscortDashboard = () => {
           a.status === "invited" && new Date(a.responds_by).getTime() <= Date.now();
         const categorize = (a: typeof items[number]) => {
           if (a.status === "expired" || isExpired(a)) return "verlopen";
-          if (a.hours_submitted_at) return "afgerond";
+          const dis = (a as any).hours_dispute_status === "disputed";
+          if (a.hours_submitted_at && !dis) return "afgerond";
+          if (dis) return "geaccepteerd";
           if (a.status === "accepted") return "geaccepteerd";
           if (a.status === "invited") return "openstaand";
           return "afgerond"; // declined / cancelled bij historie
@@ -879,12 +886,14 @@ const EscortDashboard = () => {
         };
 
         const renderItem = (a: typeof items[number]) => {
-          const submitted = !!a.hours_submitted_at;
+          const disputed = (a as any).hours_dispute_status === "disputed";
+          const submitted = !!a.hours_submitted_at && !disputed;
           const isInvited = a.status === "invited";
           const expressed = !!a.interest_expressed_at;
           const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
           const expired = isInvited && minsLeft === 0 && !expressed;
           const accepted = a.status === "accepted";
+          const needsHours = accepted && !submitted;
           const clickable = accepted || isInvited;
           const closesInMin = expressed && a.broadcast_closes_at
             ? Math.max(0, Math.ceil((new Date(a.broadcast_closes_at).getTime() - Date.now()) / 60000))
@@ -949,6 +958,13 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
                       ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
                     </span>
+                  ) : disputed ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
+                      className="px-4 py-2 bg-destructive text-destructive-foreground text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      Uren aanpassen
+                    </button>
                   ) : accepted ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
@@ -960,6 +976,16 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
+                {disputed && (
+                  <div className="px-5 pb-3 -mt-1">
+                    <div className="bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive">
+                      <span className="font-bold uppercase tracking-widest">Uren afgewezen</span>
+                      {(a as any).hours_dispute_reason && (
+                        <span className="ml-2 italic opacity-90">"{(a as any).hours_dispute_reason}"</span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 

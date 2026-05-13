@@ -105,6 +105,9 @@ const Inner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
+  const [hoursMap, setHoursMap] = useState<Record<string, { actual_hours: number | null; actual_cost: number | null; hours_submitted_at: string | null; hours_notes: string | null; departed_base_at: string | null; returned_base_at: string | null; extra_costs: any; extra_costs_total: number | null; hours_dispute_status: string; hours_dispute_reason: string | null; }>>({});
+  const [disputeFor, setDisputeFor] = useState<string | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [swapFor, setSwapFor] = useState<{ assignmentId: string; anon: string | null } | null>(null);
@@ -131,16 +134,30 @@ const Inner = () => {
         .createSignedUrl(detail.permit.pdf_path, 3600);
       if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
     }
-    // Fetch cancel-request status per assignment
+    // Fetch cancel-request status + hours per assignment
     const { data: ras } = await supabase
       .from("ride_assignments")
-      .select("id, cancel_request_status, cancel_request_reason")
+      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason")
       .eq("ride_id", id);
     const map: Record<string, { status: string; reason: string | null }> = {};
+    const hmap: Record<string, any> = {};
     (ras ?? []).forEach((r: any) => {
       map[r.id] = { status: r.cancel_request_status ?? "none", reason: r.cancel_request_reason ?? null };
+      hmap[r.id] = {
+        actual_hours: r.actual_hours,
+        actual_cost: r.actual_cost,
+        hours_submitted_at: r.hours_submitted_at,
+        hours_notes: r.hours_notes,
+        departed_base_at: r.departed_base_at,
+        returned_base_at: r.returned_base_at,
+        extra_costs: r.extra_costs,
+        extra_costs_total: r.extra_costs_total,
+        hours_dispute_status: r.hours_dispute_status ?? "none",
+        hours_dispute_reason: r.hours_dispute_reason ?? null,
+      };
     });
     setCancelReqs(map);
+    setHoursMap(hmap);
     setLoading(false);
   }, [id]);
 
@@ -194,6 +211,27 @@ const Inner = () => {
         toast.success("Annulering goedgekeurd.");
       }
     }
+    load();
+  };
+
+  const submitDispute = async () => {
+    if (!disputeFor) return;
+    const reason = disputeReason.trim();
+    if (reason.length < 5) { toast.error("Geef een korte reden op (min. 5 tekens)."); return; }
+    setBusy(true);
+    const { error } = await supabase
+      .from("ride_assignments")
+      .update({
+        hours_dispute_status: "disputed",
+        hours_dispute_reason: reason,
+        hours_disputed_at: new Date().toISOString(),
+      } as never)
+      .eq("id", disputeFor);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Uren afgewezen. De begeleider is op de hoogte gebracht.");
+    setDisputeFor(null);
+    setDisputeReason("");
     load();
   };
 
@@ -380,6 +418,45 @@ const Inner = () => {
                     </div>
                   </div>
                 )}
+                {(() => {
+                  const h = hoursMap[e.assignment_id];
+                  if (!h?.hours_submitted_at) return null;
+                  const disputed = h.hours_dispute_status === "disputed";
+                  const fmt = (d: string | null) => d ? new Date(d).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" }) : "—";
+                  return (
+                    <div className={`p-3 border ${disputed ? "border-destructive/40 bg-destructive/5" : "border-brass-deep/15 bg-parchment/40"} space-y-2`}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                          Ingediende uren {disputed && <span className="text-destructive ml-2">· afgewezen</span>}
+                        </p>
+                        <p className="text-sm font-semibold tabular-nums">
+                          {h.actual_hours}u · €{Number(h.actual_cost ?? 0).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-brass-deep/70">
+                        <div><span className="opacity-60">Vertrek standplaats:</span> {fmt(h.departed_base_at)}</div>
+                        <div><span className="opacity-60">Terug standplaats:</span> {fmt(h.returned_base_at)}</div>
+                      </div>
+                      {h.extra_costs_total != null && Number(h.extra_costs_total) > 0 && (
+                        <p className="text-xs text-brass-deep/70">Extra kosten: €{Number(h.extra_costs_total).toFixed(2)}</p>
+                      )}
+                      {h.hours_notes && <p className="text-xs italic text-brass-deep/70">"{h.hours_notes}"</p>}
+                      {disputed ? (
+                        <p className="text-xs text-destructive">
+                          Afgewezen{h.hours_dispute_reason ? `: "${h.hours_dispute_reason}"` : ""}. Wacht op nieuwe indiening door begeleider.
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => { setDisputeFor(e.assignment_id); setDisputeReason(""); }}
+                          className="text-[10px] uppercase tracking-widest font-semibold text-destructive hover:underline"
+                        >
+                          Uren afwijzen
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
                 {e.status === "accepted" && (
                   <button
                     type="button"
@@ -464,6 +541,48 @@ const Inner = () => {
           escortAnon={swapFor.anon}
           onCreated={() => { setSwapFor(null); setSwapTick((t) => t + 1); load(); }}
         />
+      )}
+      {disputeFor && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !busy && setDisputeFor(null)}
+        >
+          <div
+            className="bg-card max-w-md w-full p-6 space-y-4 shadow-etched"
+            onClick={(ev) => ev.stopPropagation()}
+          >
+            <h3 className="font-display italic text-xl text-brass-deep">Uren afwijzen</h3>
+            <p className="text-sm text-brass-deep/70">
+              Geef aan waarom de ingediende uren niet kloppen. De begeleider ontvangt een melding en kan opnieuw indienen.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={(ev) => setDisputeReason(ev.target.value)}
+              maxLength={500}
+              rows={4}
+              placeholder="Bijv. starttijd was 09:00 i.p.v. 08:00"
+              className="w-full border border-brass-deep/20 bg-background px-3 py-2 text-sm"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setDisputeFor(null)}
+                className="px-4 py-2 border border-brass-deep/30 uppercase tracking-widest text-[10px] font-semibold disabled:opacity-50"
+              >
+                Annuleer
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={submitDispute}
+                className="px-4 py-2 bg-destructive text-destructive-foreground uppercase tracking-widest text-[10px] font-semibold disabled:opacity-50"
+              >
+                Afwijzen
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
