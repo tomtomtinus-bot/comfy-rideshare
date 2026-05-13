@@ -525,6 +525,32 @@ const RequestRideInner = () => {
 
     setBusy(true);
 
+    // #4 Race-revalidatie: controleer vlak vóór insert opnieuw of de geselecteerde
+    // begeleiders nog vrij zijn in het ritvenster. Voorkomt dubbele boekingen
+    // tussen "Zoek begeleiders" en "Boek".
+    const myStartMs = firstLeg.startMs;
+    const myEndMs = lastLeg.endMs;
+    const fromIso = new Date(myStartMs - 24 * 3600_000).toISOString();
+    const toIso = new Date(myEndMs + 24 * 3600_000).toISOString();
+    const conflicts: string[] = [];
+    await Promise.all(selected.map(async (e) => {
+      const { data: windows } = await supabase.rpc("get_escort_busy_windows", {
+        _escort_id: e.id, _from: fromIso, _to: toIso,
+      });
+      const overlap = (windows ?? []).find((w: any) => {
+        const ws = new Date(w.window_start).getTime();
+        const we = new Date(w.window_end).getTime();
+        return ws < myEndMs && we > myStartMs;
+      });
+      if (overlap) conflicts.push(e.anonymous_id);
+    }));
+    if (conflicts.length > 0) {
+      setBusy(false);
+      return toast.error(
+        `Begeleider${conflicts.length > 1 ? "s" : ""} #${conflicts.join(", #")} ${conflicts.length > 1 ? "zijn" : "is"} ondertussen geboekt. Zoek opnieuw.`,
+      );
+    }
+
     const scheduledISO = new Date(firstLeg.startMs).toISOString();
     const lastEndISO = new Date(lastLeg.endMs).toISOString();
     const extraLegsPayload = extraLegs.map((ex) => ({
