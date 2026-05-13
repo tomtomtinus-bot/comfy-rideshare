@@ -64,7 +64,7 @@ const Faq = () => {
               Veelgestelde Vragen
             </h1>
             <p className="text-brass-gold/70 text-sm tracking-wide italic mb-6">
-              ViaCust Digital Escort Solutions.
+              {" "}
             </p>
             <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
               Antwoorden op de meest gestelde vragen over werking, facturatie, privacy en kwaliteit van ons platform.

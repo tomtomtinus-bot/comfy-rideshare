@@ -27,7 +27,7 @@ const Terms = () => {
               {L.kicker}
             </p>
             <h1 className="font-display text-4xl text-brass-deep italic">{L.title}</h1>
-            <p className="text-sm text-brass-deep/50 italic mt-2">ViaCust Digital Escort Solutions.</p>
+            <p className="text-sm text-brass-deep/50 italic mt-2"> </p>
             <p className="text-sm text-brass-deep/55 mt-2">{L.updated}</p>
           </header>
 

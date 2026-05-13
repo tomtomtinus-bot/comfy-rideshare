@@ -36,7 +36,7 @@ const InfoBelgie = () => {
               Uitzonderlijk vervoer in België
             </h1>
             <p className="text-brass-gold/70 text-sm tracking-wide italic mb-4">
-              ViaCust Digital Escort Solutions.
+              {" "}
             </p>
             <p className="text-base md:text-lg text-brass-deep/80 max-w-3xl leading-relaxed">
               Praktische schema&apos;s voor afmetingen en de officiële netwerken (autosnelwegen,
