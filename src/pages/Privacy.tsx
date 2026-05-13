@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
-  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.3 — Laatst bijgewerkt op: 12 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
+  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.4 — Laatst bijgewerkt op: 13 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
   en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 11, 2026", back: "← Back", toTerms: "Terms and Conditions" },
   de: { kicker: "Datenschutz", title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: 11. Mai 2026", back: "← Zurück", toTerms: "AGB" },
   fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 11 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
@@ -58,43 +58,45 @@ const PrivacyNL = () => (
     <p>ViaCust (hierna: "wij", "ons" of "het platform") hecht grote waarde aan de bescherming van uw persoonsgegevens. In deze verklaring leggen wij uit welke gegevens wij verwerken via onze webapplicatie en de geïntegreerde Google Cloud-services, conform de AVG (GDPR) en het Google API Services User Data Policy.</p>
 
     <h2>1. Gebruik van Google API Services (Limited Use Policy)</h2>
-    <p>ViaCust maakt gebruik van diverse Google API-services om transportbegeleiding te automatiseren. Ons gebruik van informatie ontvangen via Google API's voldoet volledig aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <p>ViaCust maakt gebruik van Google API-services om transportbegeleiding te automatiseren. Ons gebruik van informatie ontvangen via Google API's voldoet aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
     <ul>
-      <li><strong>Google Identity & OAuth 2.0:</strong> Veilig inloggen en autorisatie via tokens. Wij ontvangen uw naam, e-mailadres en profielfoto voor accountpersonalisatie.</li>
+      <li><strong>Google Identity &amp; OAuth 2.0:</strong> Veilig inloggen en autorisatie. Wij ontvangen uw naam, e-mailadres en profielfoto voor accountpersonalisatie.</li>
       <li><strong>Google Calendar API (v3):</strong> Gebruik van <code>freeBusy</code> (beschikbaarheid) en <code>calendar.events</code> (synchronisatie van ritten). Gegevens worden niet gedeeld met derden.</li>
-      <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript API, SDK's voor iOS/Android, en Places/Routes API's voor navigatie, routeberekening, adresvalidatie en kaartweergave.</li>
+      <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript API voor adresvalidatie en kaartweergave.</li>
     </ul>
 
-    <h2>2. Gegevensverwerking en Doeleinden (Versie: Zero-Location)</h2>
+    <h2>2. Gegevensverwerking en Doeleinden</h2>
     <p>Wij verwerken gegevens uitsluitend voor de volgende doelen:</p>
     <ul>
-      <li><strong>Identificatie & Contact:</strong> Naam, bedrijfsgegevens, BTW/KVK-nummer, e-mail en telefoonnummer voor het beheren van uw account, facturatie en rit-notificaties.</li>
-      <li><strong>Administratieve Ritafhandeling:</strong> Gegevens over de geplande ritten, de status van de opdracht (bijv. "Gereserveerd" of "Voltooid") en door de begeleider ingevoerde onkosten ten behoeve van de facturatie en de berekening van de brandstoftoeslag. Wij verzamelen <strong>geen</strong> locatiegegevens of GPS-data van onze gebruikers.</li>
-      <li><strong>Kwaliteitsbewaking & Reviews:</strong> Beoordelingen en feedback die gebruikers over elkaar achterlaten om de betrouwbaarheid van het platform te waarborgen.</li>
-      <li><strong>Netwerkbeheer:</strong> Persoonlijke voorkeurslijsten waarmee opdrachtgevers en begeleiders hun eigen professionele netwerk binnen het platform kunnen filteren.</li>
+      <li><strong>Identificatie &amp; Contact:</strong> Naam, bedrijfsgegevens, BTW/KVK-nummer, e-mail en telefoonnummer voor het beheren van uw account, facturatie en rit-notificaties.</li>
+      <li><strong>Administratieve Ritafhandeling:</strong> Gegevens over geplande ritten, de status van de opdracht en door de begeleider ingevoerde onkosten ten behoeve van de facturatie. Wij verzamelen <strong>geen</strong> live GPS-locaties of actieve monitoringgegevens.</li>
+      <li><strong>Kwaliteitsbewaking &amp; Reviews:</strong> Wij verwerken beoordelingen en feedback die gebruikers over elkaar achterlaten op basis van ons gerechtvaardigd belang om de betrouwbaarheid van het platform te waarborgen.</li>
+      <li><strong>Netwerkbeheer en Voorkeurslijsten:</strong>
+        <ul>
+          <li>Opdrachtgevers: Kunnen persoonlijke uitsluitingslijsten bijhouden om specifieke begeleiders te filteren voor eigen ritten.</li>
+          <li>Begeleiders: Hebben het recht hun cliëntenportefeuille te beheren door voorkeuren aan te geven voor specifieke opdrachtgevers.</li>
+        </ul>
+      </li>
     </ul>
 
     <h2>3. Sub-verwerkers</h2>
-    <p>Voor de exploitatie maken wij gebruik van:</p>
+    <p>Wij maken gebruik van:</p>
     <ul>
-      <li><strong>Supabase / Vercel:</strong> Data-opslag en hosting (EU-servers).</li>
-      <li><strong>Stripe:</strong> Beveiligde betalingsverwerking.</li>
-      <li><strong>Google Cloud Platform:</strong> Kaartdiensten, mobiele SDK's en agenda-integratie.</li>
+      <li><strong>Supabase / Vercel:</strong> Data-opslag in de EU.</li>
+      <li><strong>Stripe:</strong> Betalingen.</li>
+      <li><strong>Google Cloud Platform:</strong> Kaartdiensten en login.</li>
     </ul>
 
     <h2>4. Bewaartermijnen</h2>
     <ul>
       <li><strong>Fiscale data:</strong> 7 jaar conform wettelijke administratieplicht.</li>
-      <li><strong>Beoordelingen & Dossiervorming:</strong> Zolang het account actief is. Bij uitsluiting kan data langer worden bewaard als bewijsvoering voor het handhaven van de platformkwaliteit.</li>
+      <li><strong>Beoordelingen:</strong> Zolang het account actief is.</li>
       <li><strong>OAuth-tokens:</strong> Onmiddellijke verwijdering na het verbreken van de koppeling.</li>
     </ul>
 
-    <h2>5. Beveiliging</h2>
-    <p>Wij passen strikte beveiliging toe: SSL/TLS-versleuteling (HTTPS), AES-256 encryptie van databasevelden, Row Level Security (RLS) en regelmatige controles op toegangsbeheer.</p>
-
-    <h2>6. Uw Rechten en Contact</h2>
-    <p>U heeft recht op inzage, correctie, dataportabiliteit en verwijdering van uw gegevens. Indien u op een uitsluitingslijst bent geplaatst of als uw account is geschorst, heeft u het recht op uitleg en bezwaar (hoor en wederhoor).</p>
-    <p><strong>Contactgegevens:</strong><br />ViaCust<br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland<br /><a href="mailto:privacy@viacust.com">privacy@viacust.com</a></p>
+    <h2>5. Uw Rechten en Contact</h2>
+    <p>U heeft recht op inzage, correctie en verwijdering van uw gegevens. Voor vragen: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland</p>
   </>
 );
 
