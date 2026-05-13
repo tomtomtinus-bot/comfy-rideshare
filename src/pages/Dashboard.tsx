@@ -245,7 +245,7 @@ const ClientDashboard = () => {
     })();
   }, [user]);
 
-  const exportXlsx = () => {
+  const exportXlsx = async () => {
     let filtered = rides;
     if (exportFrom) {
       const f = new Date(exportFrom).getTime();
