@@ -169,18 +169,33 @@ const SubscriptionInner = () => {
               );
             })()
           ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-brass-deep/70">
-                <span className="font-semibold text-brass-deep">30 dagen gratis proberen.</span>{" "}
-                Geen kosten tijdens de proefperiode — opzeggen kan op elk moment.
-              </p>
-              <button
-                onClick={() => setOpenCheckout(true)}
-                className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-              >
-                Start 30 dagen gratis
-              </button>
-            </div>
+            (() => {
+              const canStart = isAdmin || approvalStatus === "approved";
+              return (
+                <div className="space-y-3">
+                  <p className="text-sm text-brass-deep/70">
+                    <span className="font-semibold text-brass-deep">30 dagen gratis proberen.</span>{" "}
+                    Geen kosten tijdens de proefperiode — opzeggen kan op elk moment.
+                  </p>
+                  {!canStart && (
+                    <div className="bg-brass-gold/10 border-l-2 border-brass-gold p-3 text-xs text-brass-deep/80">
+                      <p className="font-semibold text-brass-deep">Account nog niet goedgekeurd</p>
+                      <p className="mt-1">
+                        Je kunt je proefperiode pas starten zodra ons team je account heeft geverifieerd.
+                        Zo voorkomen we dat de proefperiode verloopt voordat je het platform kunt gebruiken.
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setOpenCheckout(true)}
+                    disabled={!canStart}
+                    className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brass-deep"
+                  >
+                    Start 30 dagen gratis
+                  </button>
+                </div>
+              );
+            })()
           )}
         </div>
       </section>
