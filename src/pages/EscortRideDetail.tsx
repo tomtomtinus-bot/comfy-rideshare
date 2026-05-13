@@ -419,9 +419,9 @@ const Inner = () => {
           <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
           <Field label="Bestemming" value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
           <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
-          <Field label="Aantal begeleiders" value={ride.num_escorts} />
-          <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />
-          {(ride.cargo_length_m || ride.cargo_weight_t) && (
+          {!isCompleted && <Field label="Aantal begeleiders" value={ride.num_escorts} />}
+          {!isCompleted && <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />}
+          {!isCompleted && (ride.cargo_length_m || ride.cargo_weight_t) && (
             <div className="md:col-span-2">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
               <p className="text-sm font-medium tabular-nums">
@@ -437,10 +437,12 @@ const Inner = () => {
             </div>
           )}
         </div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
-          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
-        </div>
+        {!isCompleted && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+            <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
+          </div>
+        )}
       </Section>
 
       <ExtraLegsList rideId={ride.id} />
