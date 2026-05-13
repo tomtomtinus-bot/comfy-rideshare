@@ -906,7 +906,7 @@ const RequestRideInner = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={removeUploadedPermit}
+                      onClick={() => setConfirmRemovePermit(true)}
                       className="p-1.5 text-brass-deep/70 hover:text-brass-deep hover:bg-brass-deep/10"
                       aria-label={t("request.permitRemove")}
                     >
