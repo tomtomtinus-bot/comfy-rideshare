@@ -220,11 +220,33 @@ const RequestRideInner = () => {
     setLicensePlates((p) => p.map((x, idx) => (idx === i ? v.toUpperCase() : x)));
   const removePlate = (i: number) => setLicensePlates((p) => p.filter((_, idx) => idx !== i));
 
-  // Auto-fill vergunningnummer zodra een ontheffing is geüpload
+  // Auto-fill vergunningnummer alleen wanneer het veld nog leeg is — nooit
+  // een handmatig getypte waarde overschrijven na een nieuwe upload.
   useEffect(() => {
-    if (!uploadedPermit) return;
-    setForm((f) => ({ ...f, permit_number: uploadedPermit.permit_number }));
+    if (!uploadedPermit?.permit_number) return;
+    setForm((f) => (f.permit_number?.trim() ? f : { ...f, permit_number: uploadedPermit.permit_number }));
   }, [uploadedPermit]);
+
+  const [confirmReset, setConfirmReset] = useState(false);
+  const resetDraft = () => {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    setForm({
+      pickup_address: "", dropoff_address: "", scheduled_date: "", scheduled_time: "",
+      num_escorts: 1, notes: "",
+      cargo_length_m: "", cargo_width_m: "", cargo_height_m: "", cargo_weight_t: "",
+      permit_number: "", client_reference: "",
+      be_escort_type: "type1",
+    });
+    setPickupGeo(null);
+    setDropoffGeo(null);
+    setUploadedPermit(null);
+    setDrivers([]);
+    setLicensePlates([]);
+    setExtraLegs([]);
+    setMatches(null);
+    setConfirmReset(false);
+    toast.success(t("request.draftCleared", { defaultValue: "Concept gewist" }));
+  };
 
   const extractPermitNumberFromFilename = (filename: string): string => {
     const base = filename.replace(/\.[^.]+$/, "");
