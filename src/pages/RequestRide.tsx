@@ -153,6 +153,11 @@ const RequestRideInner = () => {
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
   const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
+  const [pickerTarget, setPickerTarget] = useState<
+    | { kind: "main-pickup" | "main-dropoff" }
+    | { kind: "extra-pickup" | "extra-dropoff"; index: number }
+    | null
+  >(null);
 
   useEffect(() => {
     try {
