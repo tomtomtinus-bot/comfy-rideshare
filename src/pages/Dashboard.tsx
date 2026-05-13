@@ -871,7 +871,9 @@ const EscortDashboard = () => {
           a.status === "invited" && new Date(a.responds_by).getTime() <= Date.now();
         const categorize = (a: typeof items[number]) => {
           if (a.status === "expired" || isExpired(a)) return "verlopen";
-          if (a.hours_submitted_at) return "afgerond";
+          const dis = (a as any).hours_dispute_status === "disputed";
+          if (a.hours_submitted_at && !dis) return "afgerond";
+          if (dis) return "geaccepteerd";
           if (a.status === "accepted") return "geaccepteerd";
           if (a.status === "invited") return "openstaand";
           return "afgerond"; // declined / cancelled bij historie
