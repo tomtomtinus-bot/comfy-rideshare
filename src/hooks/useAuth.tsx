@@ -45,6 +45,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchRole = async (uid: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid);
+    const all = ((data ?? []).map((r: any) => r.role)) as AppRole[];
+    setRoles(all);
+    const primary = all.find((r) => r !== "admin") ?? all[0] ?? null;
+    setRole(primary);
+  };
+
+  const fetchApproval = async (uid: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("approval_status, rejection_reason")
+      .eq("id", uid)
+      .maybeSingle();
+    if (data) {
+      setApprovalStatus(((data as any).approval_status ?? "pending") as ApprovalStatus);
+      setRejectionReason(((data as any).rejection_reason ?? null) as string | null);
+    }
+  };
+
+  const loadUserData = async (uid: string) => {
+    await Promise.all([fetchRole(uid), fetchApproval(uid)]);
+  };
+
   useEffect(() => {
     // "Blijf ingelogd" handling: if user opted out, sign them out at the start
     // of every new browser session (sessionStorage is cleared on tab/browser close).
@@ -74,55 +101,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) setLoading(false);
       if (s?.user) {
+        setLoading(true);
         setTimeout(() => {
-          fetchRole(s.user.id);
-          fetchApproval(s.user.id);
+          loadUserData(s.user.id).finally(() => setLoading(false));
         }, 0);
       } else {
         setRole(null);
         setRoles([]);
         setApprovalStatus("pending");
         setRejectionReason(null);
+        setLoading(false);
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
       if (data.session?.user) {
-        fetchRole(data.session.user.id);
-        fetchApproval(data.session.user.id);
+        await loadUserData(data.session.user.id);
       }
       setLoading(false);
     });
 
     return () => sub.subscription.unsubscribe();
   }, []);
-
-  const fetchRole = async (uid: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", uid);
-    const all = ((data ?? []).map((r: any) => r.role)) as AppRole[];
-    setRoles(all);
-    const primary = all.find((r) => r !== "admin") ?? all[0] ?? null;
-    setRole(primary);
-  };
-
-  const fetchApproval = async (uid: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("approval_status, rejection_reason")
-      .eq("id", uid)
-      .maybeSingle();
-    if (data) {
-      setApprovalStatus(((data as any).approval_status ?? "pending") as ApprovalStatus);
-      setRejectionReason(((data as any).rejection_reason ?? null) as string | null);
-    }
-  };
 
   const refreshApproval = async () => {
     if (user) await fetchApproval(user.id);
