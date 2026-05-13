@@ -423,7 +423,6 @@ const Inner = () => {
         <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
           <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Field label="Geschatte uren" value={myAssignment.estimated_hours ? `${myAssignment.estimated_hours} uur` : "—"} />
             <Field label="Geschatte kosten" value={myAssignment.estimated_cost ? `€ ${myAssignment.estimated_cost.toFixed(2)}` : "—"} />
             <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
             <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
