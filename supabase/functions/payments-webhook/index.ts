@@ -85,6 +85,20 @@ async function handleCheckoutCompleted(session: any) {
     .eq("id", invoiceId);
 }
 
+async function handlePaymentIntentSucceeded(intent: any) {
+  const invoiceId = intent.metadata?.platform_invoice_id;
+  if (!invoiceId) return;
+  await getSupabase()
+    .from("platform_invoices")
+    .update({
+      status: "paid",
+      paid_at: new Date().toISOString(),
+      stripe_payment_intent_id: intent.id,
+    })
+    .eq("id", invoiceId)
+    .neq("status", "paid");
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
   const rawEnv = new URL(req.url).searchParams.get("env");
@@ -108,6 +122,9 @@ Deno.serve(async (req) => {
         break;
       case "checkout.session.completed":
         await handleCheckoutCompleted(event.data.object);
+        break;
+      case "payment_intent.succeeded":
+        await handlePaymentIntentSucceeded(event.data.object);
         break;
       default:
         console.log("Unhandled event:", event.type);

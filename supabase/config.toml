@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.payments-webhook]
 verify_jwt = false
+
+[functions.charge-platform-invoice]
+verify_jwt = false
