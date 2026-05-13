@@ -958,6 +958,13 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
                       ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
                     </span>
+                  ) : disputed ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
+                      className="px-4 py-2 bg-destructive text-destructive-foreground text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      Uren aanpassen
+                    </button>
                   ) : accepted ? (
                     <button
                       onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
@@ -969,6 +976,16 @@ const EscortDashboard = () => {
                     <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
                   )}
                 </div>
+                {disputed && (
+                  <div className="px-5 pb-3 -mt-1">
+                    <div className="bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive">
+                      <span className="font-bold uppercase tracking-widest">Uren afgewezen</span>
+                      {(a as any).hours_dispute_reason && (
+                        <span className="ml-2 italic opacity-90">"{(a as any).hours_dispute_reason}"</span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
               </div>
 
