@@ -10,7 +10,7 @@ import {
 const faqs: { q: string; a: string }[] = [
   {
     q: "Hoe werkt de betaling en facturatie?",
-    a: "ViaCust automatiseert het volledige facturatieproces. Zodra een rit door de begeleider als voltooid is gemarkeerd, genereert het platform namens de begeleider een factuur voor de opdrachtgever. De betaling verloopt veilig via Stripe. Begeleiders hoeven dus niet zelf facturen te sturen; ViaCust regelt de administratieve afhandeling en zorgt voor een overzichtelijke uitbetaling.",
+    a: "ViaCust automatiseert het volledige facturatieproces. Zodra een rit door de begeleider als voltooid is gemarkeerd, genereert het platform namens de begeleider een factuur voor de opdrachtgever. Facturen worden iedere maandag automatisch aangemaakt en per e-mail verstuurd, zodat alle ritten van de afgelopen week in één overzichtelijke factuur worden gebundeld. De betaling verloopt veilig via Stripe. Begeleiders hoeven dus niet zelf facturen te sturen; ViaCust regelt de administratieve afhandeling en zorgt voor een overzichtelijke uitbetaling.",
   },
   {
     q: "Word ik als begeleider live gevolgd via GPS?",
