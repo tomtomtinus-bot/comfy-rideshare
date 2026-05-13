@@ -274,6 +274,7 @@ export type Database = {
           min_billable_hours: number
           rating: number
           rides_completed: number
+          self_billing_mandate_accepted_at: string | null
           surcharges: Json
           updated_at: string
           vat_number: string | null
@@ -326,6 +327,7 @@ export type Database = {
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
+          self_billing_mandate_accepted_at?: string | null
           surcharges?: Json
           updated_at?: string
           vat_number?: string | null
@@ -378,6 +380,7 @@ export type Database = {
           min_billable_hours?: number
           rating?: number
           rides_completed?: number
+          self_billing_mandate_accepted_at?: string | null
           surcharges?: Json
           updated_at?: string
           vat_number?: string | null
