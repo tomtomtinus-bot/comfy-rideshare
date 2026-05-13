@@ -14,6 +14,40 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 import { LocationPickerDialog } from "@/components/site/LocationPickerDialog";
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+/** Today as YYYY-MM-DD in the user's local timezone (not UTC). */
+const todayLocalDate = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * Convert a wall-clock date+time entered by the user (always meant as
+ * Europe/Amsterdam time) to a correct UTC ISO string, regardless of the
+ * browser's timezone. Two-pass refinement handles DST cleanly.
+ */
+const nlISO = (dateStr: string, timeStr: string): string => {
+  const wantedUtcMs = new Date(`${dateStr}T${timeStr}:00Z`).getTime();
+  let guess = new Date(wantedUtcMs);
+  for (let i = 0; i < 2; i++) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Amsterdam",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(guess);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+    const nlAsUtcMs = new Date(
+      `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}Z`
+    ).getTime();
+    guess = new Date(guess.getTime() + (wantedUtcMs - nlAsUtcMs));
+  }
+  return guess.toISOString();
+};
 
 const makeSchema = (t: (k: string) => string) => z.object({
   pickup_address: z.string().trim().min(2).max(200),
@@ -133,6 +167,7 @@ const RequestRideInner = () => {
     routes_count: number;
   } | null>(initial?.uploadedPermit ?? null);
   const [permitUploading, setPermitUploading] = useState(false);
+  const [confirmRemovePermit, setConfirmRemovePermit] = useState(false);
 
   const [form, setForm] = useState(initial?.form ?? {
     pickup_address: "",
@@ -250,13 +285,13 @@ const RequestRideInner = () => {
     const legs: Array<{ pickup: GeoPoint; dropoff: GeoPoint; startMs: number; durMin: number; endMs: number; }> = [];
     const main = {
       pickup: pickupGeo, dropoff: dropoffGeo,
-      startMs: new Date(`${form.scheduled_date}T${form.scheduled_time}`).getTime(),
+      startMs: new Date(nlISO(form.scheduled_date, form.scheduled_time)).getTime(),
       durMin: travelMinutes(distanceKm(pickupGeo, dropoffGeo)),
     };
     legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
     for (const ex of extraLegs) {
       if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
-      const startMs = new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).getTime();
+      const startMs = new Date(nlISO(ex.scheduled_date, ex.scheduled_time)).getTime();
       if (isNaN(startMs)) return null;
       const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
       legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
@@ -271,7 +306,7 @@ const RequestRideInner = () => {
     if (!pickupGeo || !dropoffGeo) return toast.error(t("request.postcodesPending"));
     const [hh, mm] = form.scheduled_time.split(":").map(Number);
     if (isNaN(hh) || isNaN(mm) || mm % 15 !== 0) return toast.error(t("request.startQuarter"));
-    const scheduledDate = new Date(`${form.scheduled_date}T${form.scheduled_time}`);
+    const scheduledDate = new Date(nlISO(form.scheduled_date, form.scheduled_time));
     if (isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
       return toast.error(t("request.pastNotAllowed", { defaultValue: "Starttijd moet in de toekomst liggen." }));
     }
@@ -490,6 +525,32 @@ const RequestRideInner = () => {
 
     setBusy(true);
 
+    // #4 Race-revalidatie: controleer vlak vóór insert opnieuw of de geselecteerde
+    // begeleiders nog vrij zijn in het ritvenster. Voorkomt dubbele boekingen
+    // tussen "Zoek begeleiders" en "Boek".
+    const myStartMs = firstLeg.startMs;
+    const myEndMs = lastLeg.endMs;
+    const fromIso = new Date(myStartMs - 24 * 3600_000).toISOString();
+    const toIso = new Date(myEndMs + 24 * 3600_000).toISOString();
+    const conflicts: string[] = [];
+    await Promise.all(selected.map(async (e) => {
+      const { data: windows } = await supabase.rpc("get_escort_busy_windows", {
+        _escort_id: e.id, _from: fromIso, _to: toIso,
+      });
+      const overlap = (windows ?? []).find((w: any) => {
+        const ws = new Date(w.window_start).getTime();
+        const we = new Date(w.window_end).getTime();
+        return ws < myEndMs && we > myStartMs;
+      });
+      if (overlap) conflicts.push(e.anonymous_id);
+    }));
+    if (conflicts.length > 0) {
+      setBusy(false);
+      return toast.error(
+        `Begeleider${conflicts.length > 1 ? "s" : ""} #${conflicts.join(", #")} ${conflicts.length > 1 ? "zijn" : "is"} ondertussen geboekt. Zoek opnieuw.`,
+      );
+    }
+
     const scheduledISO = new Date(firstLeg.startMs).toISOString();
     const lastEndISO = new Date(lastLeg.endMs).toISOString();
     const extraLegsPayload = extraLegs.map((ex) => ({
@@ -501,7 +562,7 @@ const RequestRideInner = () => {
       dropoff_city: ex.dropoff!.city,
       dropoff_lat: ex.dropoff!.lat,
       dropoff_lng: ex.dropoff!.lng,
-      scheduled_at: new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).toISOString(),
+      scheduled_at: nlISO(ex.scheduled_date, ex.scheduled_time),
     }));
 
     const { data: ride, error } = await supabase
@@ -559,8 +620,13 @@ const RequestRideInner = () => {
     });
 
     const { error: aErr } = await supabase.from("ride_assignments").insert(rows);
+    if (aErr) {
+      // #3 Rollback: voorkom een orphan rit zonder assignments.
+      await supabase.from("rides").delete().eq("id", ride.id);
+      setBusy(false);
+      return toast.error(aErr.message);
+    }
     setBusy(false);
-    if (aErr) return toast.error(aErr.message);
 
     // Send ride confirmation email to the client (best-effort; do not block on errors)
     if (user?.email) {
@@ -767,7 +833,7 @@ const RequestRideInner = () => {
                         <Input
                           label="Datum"
                           type="date"
-                          min={new Date().toISOString().slice(0, 10)}
+                          min={todayLocalDate()}
                           value={leg.scheduled_date}
                           onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
                         />
@@ -871,7 +937,7 @@ const RequestRideInner = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={removeUploadedPermit}
+                      onClick={() => setConfirmRemovePermit(true)}
                       className="p-1.5 text-brass-deep/70 hover:text-brass-deep hover:bg-brass-deep/10"
                       aria-label={t("request.permitRemove")}
                     >
@@ -1050,7 +1116,7 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label={t("common.date")} type="date" min={new Date().toISOString().slice(0,10)} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label={t("common.date")} type="date" min={todayLocalDate()} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
                   <select
@@ -1116,6 +1182,28 @@ const RequestRideInner = () => {
               });
             }}
           />
+
+          <AlertDialog open={confirmRemovePermit} onOpenChange={setConfirmRemovePermit}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Vergunning verwijderen?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  De PDF en alle ingelezen routes worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    setConfirmRemovePermit(false);
+                    await removeUploadedPermit();
+                  }}
+                >
+                  Verwijderen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {matches && pickupGeo && dropoffGeo && (
             <Matches
