@@ -11,7 +11,10 @@ export function SubscriptionBanner() {
 
   if (!isActive) {
     return (
-      <div className="bg-brass-deep text-parchment px-4 py-3 text-sm flex items-center justify-center gap-3 flex-wrap">
+      <div
+        className="bg-brass-deep text-parchment px-4 py-3 text-sm flex items-center justify-center gap-3 flex-wrap"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+      >
         <span>
           Je hebt nog geen actief abonnement.{" "}
           <strong>30 dagen gratis proberen</strong> — opzegbaar tijdens de proefperiode.
