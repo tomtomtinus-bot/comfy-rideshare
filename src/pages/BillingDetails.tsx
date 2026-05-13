@@ -50,6 +50,7 @@ type FormState = {
   wero_enabled: boolean;
   wero_handle: string;
   wero_fee: string;
+  self_billing_mandate: boolean;
 };
 
 const empty: FormState = {
@@ -67,6 +68,7 @@ const empty: FormState = {
   wero_enabled: false,
   wero_handle: "",
   wero_fee: "0",
+  self_billing_mandate: false,
 };
 
 const FieldImpl = ({
