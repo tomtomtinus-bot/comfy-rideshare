@@ -284,13 +284,13 @@ const RequestRideInner = () => {
     const legs: Array<{ pickup: GeoPoint; dropoff: GeoPoint; startMs: number; durMin: number; endMs: number; }> = [];
     const main = {
       pickup: pickupGeo, dropoff: dropoffGeo,
-      startMs: new Date(`${form.scheduled_date}T${form.scheduled_time}`).getTime(),
+      startMs: new Date(nlISO(form.scheduled_date, form.scheduled_time)).getTime(),
       durMin: travelMinutes(distanceKm(pickupGeo, dropoffGeo)),
     };
     legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
     for (const ex of extraLegs) {
       if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
-      const startMs = new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).getTime();
+      const startMs = new Date(nlISO(ex.scheduled_date, ex.scheduled_time)).getTime();
       if (isNaN(startMs)) return null;
       const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
       legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
