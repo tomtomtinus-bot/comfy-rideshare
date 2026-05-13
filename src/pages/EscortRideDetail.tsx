@@ -457,11 +457,15 @@ const Inner = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Bedrijf" value={client.company_name ?? "—"} />
             <Field label="Contactpersoon" value={client.billing_contact_name ?? client.full_name ?? "—"} />
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
-              <p className="text-sm"><TelLink phone={client.phone} /></p>
-            </div>
-            <Field label="E-mail" value={client.billing_email ?? "—"} />
+            {!isCompleted && (
+              <>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
+                  <p className="text-sm"><TelLink phone={client.phone} /></p>
+                </div>
+                <Field label="E-mail" value={client.billing_email ?? "—"} />
+              </>
+            )}
           </div>
         ) : (
           <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
