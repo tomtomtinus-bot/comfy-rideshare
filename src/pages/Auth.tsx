@@ -183,7 +183,7 @@ const Auth = () => {
     const { data, error } = await supabase.auth.signUp({
       email: d.email,
       password: d.password,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: meta },
+      options: { emailRedirectTo: `${window.location.origin}/abonnement`, data: meta },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
