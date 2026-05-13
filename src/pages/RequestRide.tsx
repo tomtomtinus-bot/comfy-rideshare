@@ -1095,7 +1095,15 @@ const Matches = ({
       </p>
 
       {availableMatches.length === 0 ? (
-        <p className="text-sm text-brass-deep/60">{t("request.noMatches")}</p>
+        <div className="space-y-2">
+          <p className="text-sm text-brass-deep/60">{t("request.noMatches")}</p>
+          <p className="text-xs text-brass-deep/50">
+            Geen geschikte begeleiders gevonden?{" "}
+            <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+              support@viacust.com
+            </a>
+          </p>
+        </div>
       ) : (
         <ul className="space-y-2">
           {availableMatches.map((m) => {
