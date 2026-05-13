@@ -22,7 +22,7 @@ export const Footer = () => {
             </span>
           </div>
           <p className="text-[10px] uppercase tracking-widest text-parchment/40 mb-4">
-            Digital Escort Solutions.
+            ViaCust Digital Escort Solutions.
           </p>
           <p className="text-sm leading-relaxed">{t("home.footer.tagline")}</p>
         </div>

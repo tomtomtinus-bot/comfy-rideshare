@@ -25,7 +25,7 @@ const InfoNederland = () => {
               Rij­tijden &amp; afmetingen exceptioneel transport
             </h1>
             <p className="text-brass-gold/70 text-sm tracking-wide italic mb-4">
-              Digital Escort Solutions.
+              ViaCust Digital Escort Solutions.
             </p>
             <p className="text-base md:text-lg text-brass-deep/80 max-w-3xl leading-relaxed">
               Overzicht van de toegestane afmetingen en rijtijden voor exceptioneel transport over
