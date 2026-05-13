@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded",
       return_url: returnUrl,
-      payment_method_types: ["card", "ideal", "wero"],
+      payment_method_types: ["card", "ideal"],
       ...(customerId && { customer: customerId }),
       ...(isRecurring && trialDays && {
         subscription_data: {

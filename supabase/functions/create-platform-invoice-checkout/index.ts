@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       mode: "payment",
       ui_mode: "embedded",
       return_url: returnUrl,
-      payment_method_types: ["card", "ideal", "wero"],
+      payment_method_types: ["card", "ideal"],
       customer: customerId,
       metadata: {
         userId: user.id,
