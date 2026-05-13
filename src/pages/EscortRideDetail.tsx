@@ -146,6 +146,7 @@ const Inner = () => {
     broadcast_closes_at: string | null;
   }>>([]);
   const [bundleBusy, setBundleBusy] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const load = async () => {
     if (!id) return;
