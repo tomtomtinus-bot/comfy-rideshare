@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
