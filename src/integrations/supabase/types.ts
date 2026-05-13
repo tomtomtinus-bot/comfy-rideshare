@@ -1191,6 +1191,8 @@ export type Database = {
           created_at: string | null
           current_period_end: string | null
           current_period_start: string | null
+          discount_ends_at: string | null
+          discount_reminder_sent_at: string | null
           environment: string
           id: string
           price_id: string
@@ -1206,6 +1208,8 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          discount_ends_at?: string | null
+          discount_reminder_sent_at?: string | null
           environment?: string
           id?: string
           price_id: string
@@ -1221,6 +1225,8 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          discount_ends_at?: string | null
+          discount_reminder_sent_at?: string | null
           environment?: string
           id?: string
           price_id?: string

@@ -26,6 +26,24 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
 
+  // Bepaal het einde van een terugkerende korting (bijv. eerstejaars 50% korting).
+  // Stripe geeft kortingen via subscription.discounts (nieuwe API) of subscription.discount (oud).
+  let discountEndsAt: string | null = null;
+  const discounts = subscription.discounts ?? (subscription.discount ? [subscription.discount] : []);
+  for (const d of discounts) {
+    const coupon = d?.coupon;
+    if (coupon?.duration === "repeating" && coupon?.duration_in_months) {
+      const startSec = d.start ?? subscription.start_date ?? subscription.created;
+      if (startSec) {
+        const start = new Date(startSec * 1000);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + coupon.duration_in_months);
+        discountEndsAt = end.toISOString();
+        break;
+      }
+    }
+  }
+
   await getSupabase().from("subscriptions").upsert(
     {
       user_id: userId,
@@ -38,6 +56,7 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
       current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
       cancel_at_period_end: subscription.cancel_at_period_end || false,
       environment: env,
+      discount_ends_at: discountEndsAt,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "stripe_subscription_id" },

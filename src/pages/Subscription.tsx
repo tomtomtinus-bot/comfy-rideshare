@@ -14,12 +14,13 @@ const PLANS = {
   opdrachtgever: {
     priceId: "opdrachtgever_monthly",
     title: "Opdrachtgever abonnement",
-    price: "€30,00",
+    price: "€50,00",
     period: "per maand · excl. BTW",
     description:
-      "Toegang tot het ViaCust platform: ritten plannen, begeleiders boeken, vergunningen beheren. Plus 1,5% platform fee per rit (op de wekelijkse platformfactuur).",
+      "Toegang tot het ViaCust platform: ritten plannen, begeleiders boeken, vergunningen beheren. Plus 1,5% platform fee per rit (op de wekelijkse platformfactuur). Het eerste jaar betaalt u slechts €25,00 per maand dankzij 50% korting.",
     features: [
       "30 dagen gratis proberen — opzegbaar tijdens de proefperiode",
+      "1e jaar 50% korting: €25,00 per maand i.p.v. €50,00",
       "Onbeperkt ritten plannen",
       "Toegang tot het volledige begeleidersnetwerk",
       "Vergunningen automatisch verwerken",
