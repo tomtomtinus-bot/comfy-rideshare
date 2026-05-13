@@ -1086,6 +1086,37 @@ const RequestRideInner = () => {
           </form>
           )}
 
+          <LocationPickerDialog
+            open={!!pickerTarget}
+            onOpenChange={(o) => { if (!o) setPickerTarget(null); }}
+            title={
+              pickerTarget?.kind === "main-pickup" ? "Vertrek kiezen" :
+              pickerTarget?.kind === "main-dropoff" ? "Bestemming kiezen" :
+              pickerTarget?.kind === "extra-pickup" ? "Vertrek vervolgrit kiezen" :
+              pickerTarget?.kind === "extra-dropoff" ? "Bestemming vervolgrit kiezen" : ""
+            }
+            initial={
+              pickerTarget?.kind === "main-pickup" ? (pickupGeo ? { lat: pickupGeo.lat, lng: pickupGeo.lng } : null) :
+              pickerTarget?.kind === "main-dropoff" ? (dropoffGeo ? { lat: dropoffGeo.lat, lng: dropoffGeo.lng } : null) :
+              pickerTarget?.kind === "extra-pickup" ? (extraLegs[pickerTarget.index]?.pickup ? { lat: extraLegs[pickerTarget.index].pickup!.lat, lng: extraLegs[pickerTarget.index].pickup!.lng } : null) :
+              pickerTarget?.kind === "extra-dropoff" ? (extraLegs[pickerTarget.index]?.dropoff ? { lat: extraLegs[pickerTarget.index].dropoff!.lat, lng: extraLegs[pickerTarget.index].dropoff!.lng } : null) :
+              null
+            }
+            onConfirm={(r) => {
+              if (!pickerTarget) return;
+              if (pickerTarget.kind === "main-pickup") onPickPickup(r);
+              else if (pickerTarget.kind === "main-dropoff") onPickDropoff(r);
+              else if (pickerTarget.kind === "extra-pickup") updateExtraLeg(pickerTarget.index, {
+                pickup_address: r.display,
+                pickup: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+              });
+              else if (pickerTarget.kind === "extra-dropoff") updateExtraLeg(pickerTarget.index, {
+                dropoff_address: r.display,
+                dropoff: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+              });
+            }}
+          />
+
           {matches && pickupGeo && dropoffGeo && (
             <Matches
               matches={matches}
