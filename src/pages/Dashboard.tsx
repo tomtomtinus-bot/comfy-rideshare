@@ -1199,12 +1199,11 @@ const EscortDashboard = () => {
         };
 
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
             {([
               { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
               { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
               { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
-              { key: "verlopen" as const, label: t("dash.tabExpired"), list: buckets.verlopen },
             ]).map((s) => (
               <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
                 <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
