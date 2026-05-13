@@ -364,6 +364,12 @@ const Auth = () => {
           >
             {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
           </button>
+          <p className="mt-4 text-center text-[10px] text-brass-deep/40">
+            Problemen?{" "}
+            <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+              support@viacust.com
+            </a>
+          </p>
         </div>
       </main>
       <Footer />

@@ -72,7 +72,7 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="mailto:contact@viacust.com" className="hover:text-brass-gold transition-colors">
+                <a href="mailto:support@viacust.com" className="hover:text-brass-gold transition-colors">
                   Contact
                 </a>
               </li>
