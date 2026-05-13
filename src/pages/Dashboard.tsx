@@ -884,12 +884,14 @@ const EscortDashboard = () => {
         };
 
         const renderItem = (a: typeof items[number]) => {
-          const submitted = !!a.hours_submitted_at;
+          const disputed = (a as any).hours_dispute_status === "disputed";
+          const submitted = !!a.hours_submitted_at && !disputed;
           const isInvited = a.status === "invited";
           const expressed = !!a.interest_expressed_at;
           const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
           const expired = isInvited && minsLeft === 0 && !expressed;
           const accepted = a.status === "accepted";
+          const needsHours = accepted && !submitted;
           const clickable = accepted || isInvited;
           const closesInMin = expressed && a.broadcast_closes_at
             ? Math.max(0, Math.ceil((new Date(a.broadcast_closes_at).getTime() - Date.now()) / 60000))
