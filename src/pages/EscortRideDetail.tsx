@@ -208,6 +208,17 @@ const Inner = () => {
         estimated_hours: (ra as any).estimated_hours ?? null,
         estimated_cost: (ra as any).estimated_cost ?? null,
       });
+
+      // unread messages count for this assignment
+      if (ra) {
+        const { count } = await supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("assignment_id", (ra as any).id)
+          .neq("sender_id", u.user.id)
+          .is("read_at", null);
+        setUnreadMessages(count ?? 0);
+      }
     }
     setLoading(false);
   };
