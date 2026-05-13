@@ -44,7 +44,7 @@ const PLANS = {
 } as const;
 
 const SubscriptionInner = () => {
-  const { user, role, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading, approvalStatus, isAdmin } = useAuth();
   const { subscription, isActive, loading } = useSubscription();
   const [openCheckout, setOpenCheckout] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
