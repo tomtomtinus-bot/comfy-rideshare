@@ -15,6 +15,7 @@ import {
   unlockWithBiometrics,
   isNative,
 } from "@/lib/biometric";
+import { isNativeApp, signInWithGoogleNative } from "@/lib/nativeGoogleAuth";
 
 const Auth = () => {
   const { user, loading } = useAuth();
