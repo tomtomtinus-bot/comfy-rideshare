@@ -731,6 +731,13 @@ const RequestRideInner = () => {
                           {leg.pickup && (
                             <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => setPickerTarget({ kind: "extra-pickup", index: i })}
+                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                          >
+                            Op kaart of coördinaten
+                          </button>
                         </div>
                         <div>
                           <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Bestemming</p>
@@ -747,6 +754,13 @@ const RequestRideInner = () => {
                           {leg.dropoff && (
                             <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => setPickerTarget({ kind: "extra-dropoff", index: i })}
+                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                          >
+                            Op kaart of coördinaten
+                          </button>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
