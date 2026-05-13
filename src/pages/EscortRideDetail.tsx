@@ -15,6 +15,7 @@ import { toast } from "sonner";
 interface RideDetail {
   ride: {
     id: string;
+    status?: string;
     pickup_address: string;
     pickup_city: string;
     pickup_lat?: number | null;
@@ -106,7 +107,27 @@ const Inner = () => {
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null; bundle_priority_offer: boolean; responds_by: string; status: string } | null>(null);
+  const [myAssignment, setMyAssignment] = useState<{
+    id: string;
+    cancel_request_status: string;
+    cancel_request_reason: string | null;
+    bundle_priority_offer: boolean;
+    responds_by: string;
+    status: string;
+    actual_hours: number | null;
+    actual_cost: number | null;
+    extra_costs: { description: string; amount: number }[] | null;
+    extra_costs_total: number;
+    hours_notes: string | null;
+    departed_base_at: string | null;
+    returned_base_at: string | null;
+    hours_submitted_at: string | null;
+    hours_dispute_status: string | null;
+    hours_dispute_reason: string | null;
+    hours_disputed_at: string | null;
+    estimated_hours: number | null;
+    estimated_cost: number | null;
+  } | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [showCancelForm, setShowCancelForm] = useState(false);
@@ -154,7 +175,13 @@ const Inner = () => {
       setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
-        .select("id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status")
+        .select(`
+          id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status,
+          actual_hours, actual_cost, extra_costs, extra_costs_total, hours_notes,
+          departed_base_at, returned_base_at, hours_submitted_at,
+          hours_dispute_status, hours_dispute_reason, hours_disputed_at,
+          estimated_hours, estimated_cost
+        `)
         .eq("ride_id", id)
         .eq("escort_id", u.user.id)
         .maybeSingle();
@@ -165,6 +192,19 @@ const Inner = () => {
         bundle_priority_offer: (ra as any).bundle_priority_offer ?? false,
         responds_by: (ra as any).responds_by,
         status: (ra as any).status,
+        actual_hours: (ra as any).actual_hours ?? null,
+        actual_cost: (ra as any).actual_cost ?? null,
+        extra_costs: (ra as any).extra_costs ?? null,
+        extra_costs_total: (ra as any).extra_costs_total ?? 0,
+        hours_notes: (ra as any).hours_notes ?? null,
+        departed_base_at: (ra as any).departed_base_at ?? null,
+        returned_base_at: (ra as any).returned_base_at ?? null,
+        hours_submitted_at: (ra as any).hours_submitted_at ?? null,
+        hours_dispute_status: (ra as any).hours_dispute_status ?? null,
+        hours_dispute_reason: (ra as any).hours_dispute_reason ?? null,
+        hours_disputed_at: (ra as any).hours_disputed_at ?? null,
+        estimated_hours: (ra as any).estimated_hours ?? null,
+        estimated_cost: (ra as any).estimated_cost ?? null,
       });
     }
     setLoading(false);
@@ -212,6 +252,7 @@ const Inner = () => {
 
   const { ride, client, escorts, permit, viewer_status } = data;
   const isInvited = viewer_status === "invited";
+  const isCompleted = ride.status === "completed";
   const others = escorts.filter((e) => !e.is_self);
 
   return (
@@ -229,7 +270,14 @@ const Inner = () => {
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
           {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
         </h1>
-        <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
+        <div className="flex items-center gap-3 mt-2">
+          <p className="text-brass-deep/60">{fmtDateTime(ride.scheduled_at)}</p>
+          {isCompleted && (
+            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold border border-emerald-300">
+              Afgerond
+            </span>
+          )}
+        </div>
       </header>
 
       {userId && (
@@ -325,14 +373,55 @@ const Inner = () => {
         );
       })()}
 
+      {isCompleted && myAssignment && (
+        <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
+          <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="Geschatte uren" value={myAssignment.estimated_hours ? `${myAssignment.estimated_hours} uur` : "—"} />
+            <Field label="Geschatte kosten" value={myAssignment.estimated_cost ? `€ ${myAssignment.estimated_cost.toFixed(2)}` : "—"} />
+            <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
+            <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
+            <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
+            <Field label="Werkelijke kosten" value={myAssignment.actual_cost ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+            <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
+            <Field label="Totaal" value={myAssignment.actual_cost ? `€ ${(myAssignment.actual_cost + (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+          </div>
+          {myAssignment.extra_costs && myAssignment.extra_costs.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Specificatie extra kosten</p>
+              <ul className="space-y-1">
+                {myAssignment.extra_costs.map((ex, i) => (
+                  <li key={i} className="flex justify-between text-sm">
+                    <span className="text-emerald-900">{ex.description}</span>
+                    <span className="font-medium tabular-nums">€ {ex.amount.toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {myAssignment.hours_notes && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">Opmerkingen</p>
+              <p className="text-sm text-emerald-900">{myAssignment.hours_notes}</p>
+            </div>
+          )}
+          {myAssignment.hours_dispute_status && myAssignment.hours_dispute_status !== "none" && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">Uren afgewezen</p>
+              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || "Geen reden opgegeven"}</p>
+            </div>
+          )}
+        </section>
+      )}
+
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
           <Field label="Bestemming" value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
           <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
-          <Field label="Aantal begeleiders" value={ride.num_escorts} />
-          <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />
-          {(ride.cargo_length_m || ride.cargo_weight_t) && (
+          {!isCompleted && <Field label="Aantal begeleiders" value={ride.num_escorts} />}
+          {!isCompleted && <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />}
+          {!isCompleted && (ride.cargo_length_m || ride.cargo_weight_t) && (
             <div className="md:col-span-2">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
               <p className="text-sm font-medium tabular-nums">
@@ -348,10 +437,12 @@ const Inner = () => {
             </div>
           )}
         </div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
-          <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
-        </div>
+        {!isCompleted && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+            <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
+          </div>
+        )}
       </Section>
 
       <ExtraLegsList rideId={ride.id} />
@@ -366,11 +457,15 @@ const Inner = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Bedrijf" value={client.company_name ?? "—"} />
             <Field label="Contactpersoon" value={client.billing_contact_name ?? client.full_name ?? "—"} />
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
-              <p className="text-sm"><TelLink phone={client.phone} /></p>
-            </div>
-            <Field label="E-mail" value={client.billing_email ?? "—"} />
+            {!isCompleted && (
+              <>
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
+                  <p className="text-sm"><TelLink phone={client.phone} /></p>
+                </div>
+                <Field label="E-mail" value={client.billing_email ?? "—"} />
+              </>
+            )}
           </div>
         ) : (
           <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
@@ -378,7 +473,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && myAssignment && userId && (
+      {!isInvited && !isCompleted && myAssignment && userId && (
         <Section title="Berichten">
           <AssignmentChat
             assignmentId={myAssignment.id}
@@ -388,7 +483,7 @@ const Inner = () => {
         </Section>
       )}
 
-      {!isInvited && (() => {
+      {!isInvited && !isCompleted && (() => {
         const drivers = ride.drivers ?? [];
         const plates = ride.license_plates ?? [];
         if (drivers.length === 0 && plates.length === 0) return null;
@@ -429,7 +524,7 @@ const Inner = () => {
         );
       })()}
 
-      {!isInvited && (
+      {!isInvited && !isCompleted && (
       <Section title={`Mede-begeleiders (${others.length})`}>
         {others.length === 0 ? (
           <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
@@ -464,7 +559,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && (
+      {!isInvited && !isCompleted && (
       <Section title="Ontheffing">
         {permit ? (
           <div className="space-y-4">
@@ -536,7 +631,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && myAssignment && (
+      {!isInvited && !isCompleted && myAssignment && (
         <Section title="Annulering">
           {myAssignment.cancel_request_status === "pending" ? (
             <div className="bg-brass-gold/10 border border-brass-gold/40 p-4 text-sm text-brass-deep">
