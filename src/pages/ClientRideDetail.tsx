@@ -542,6 +542,48 @@ const Inner = () => {
           onCreated={() => { setSwapFor(null); setSwapTick((t) => t + 1); load(); }}
         />
       )}
+      {disputeFor && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !busy && setDisputeFor(null)}
+        >
+          <div
+            className="bg-card max-w-md w-full p-6 space-y-4 shadow-etched"
+            onClick={(ev) => ev.stopPropagation()}
+          >
+            <h3 className="font-display italic text-xl text-brass-deep">Uren afwijzen</h3>
+            <p className="text-sm text-brass-deep/70">
+              Geef aan waarom de ingediende uren niet kloppen. De begeleider ontvangt een melding en kan opnieuw indienen.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={(ev) => setDisputeReason(ev.target.value)}
+              maxLength={500}
+              rows={4}
+              placeholder="Bijv. starttijd was 09:00 i.p.v. 08:00"
+              className="w-full border border-brass-deep/20 bg-background px-3 py-2 text-sm"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setDisputeFor(null)}
+                className="px-4 py-2 border border-brass-deep/30 uppercase tracking-widest text-[10px] font-semibold disabled:opacity-50"
+              >
+                Annuleer
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={submitDispute}
+                className="px-4 py-2 bg-destructive text-destructive-foreground uppercase tracking-widest text-[10px] font-semibold disabled:opacity-50"
+              >
+                Afwijzen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
