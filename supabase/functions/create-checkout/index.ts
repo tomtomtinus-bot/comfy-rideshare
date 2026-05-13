@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
-      ui_mode: "embedded",
+      ui_mode: "embedded_page",
       return_url: returnUrl,
       payment_method_types: ["card", "ideal"],
       ...(customerId && { customer: customerId }),
