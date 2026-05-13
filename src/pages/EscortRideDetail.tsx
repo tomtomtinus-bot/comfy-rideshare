@@ -15,6 +15,7 @@ import { toast } from "sonner";
 interface RideDetail {
   ride: {
     id: string;
+    status?: string;
     pickup_address: string;
     pickup_city: string;
     pickup_lat?: number | null;
