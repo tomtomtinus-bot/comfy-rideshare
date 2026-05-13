@@ -473,7 +473,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && myAssignment && userId && (
+      {!isInvited && !isCompleted && myAssignment && userId && (
         <Section title="Berichten">
           <AssignmentChat
             assignmentId={myAssignment.id}
@@ -483,7 +483,7 @@ const Inner = () => {
         </Section>
       )}
 
-      {!isInvited && (() => {
+      {!isInvited && !isCompleted && (() => {
         const drivers = ride.drivers ?? [];
         const plates = ride.license_plates ?? [];
         if (drivers.length === 0 && plates.length === 0) return null;
