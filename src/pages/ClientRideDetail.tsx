@@ -12,6 +12,7 @@ import { SwapRequestDialog } from "@/components/site/SwapRequestDialog";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 interface RideDetail {
   ride: {
@@ -66,11 +67,26 @@ interface RideDetail {
 const fmtDateTime = (d: string) =>
   new Date(d).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" });
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="bg-card shadow-etched p-6 md:p-8">
-    <h2 className="font-display text-xl text-brass-deep italic mb-4">{title}</h2>
-    {children}
-  </section>
+const AccSection = ({
+  value,
+  title,
+  badge,
+  children,
+}: {
+  value: string;
+  title: string;
+  badge?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <AccordionItem value={value} className="bg-card shadow-etched border-b-0">
+    <AccordionTrigger className="px-6 md:px-8 py-5 hover:no-underline">
+      <span className="flex items-center gap-3 font-display text-xl text-brass-deep italic">
+        {title}
+        {badge}
+      </span>
+    </AccordionTrigger>
+    <AccordionContent className="px-6 md:px-8 pt-0 pb-6 md:pb-8">{children}</AccordionContent>
+  </AccordionItem>
 );
 
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
