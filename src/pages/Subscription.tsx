@@ -43,12 +43,29 @@ const PLANS = {
 } as const;
 
 const SubscriptionInner = () => {
-  const { user, role } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const { subscription, isActive, loading } = useSubscription();
   const [openCheckout, setOpenCheckout] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
 
-  if (!role) return null;
+  if (authLoading) {
+    return (
+      <main className="container mx-auto px-4 py-12">
+        <p className="text-sm text-brass-deep/50 uppercase tracking-widest">Laden…</p>
+      </main>
+    );
+  }
+
+  if (!role) {
+    return (
+      <main className="container mx-auto px-4 py-12 max-w-3xl">
+        <h1 className="font-display text-3xl md:text-4xl text-brass-deep">Abonnement</h1>
+        <p className="mt-3 text-brass-deep/70">
+          We konden je accountrol nog niet bepalen. Neem contact op met support@viacust.com als dit blijft gebeuren.
+        </p>
+      </main>
+    );
+  }
   const plan = role === "begeleider" ? PLANS.begeleider : role === "opdrachtgever" ? PLANS.opdrachtgever : null;
   if (!plan) {
     return (
@@ -69,8 +86,8 @@ const SubscriptionInner = () => {
       });
       if (error || !data?.url) throw new Error(error?.message || "Portal niet beschikbaar");
       window.open(data.url, "_blank");
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Portal niet beschikbaar");
     } finally {
       setPortalLoading(false);
     }
