@@ -50,6 +50,7 @@ type FormState = {
   wero_enabled: boolean;
   wero_handle: string;
   wero_fee: string;
+  self_billing_mandate: boolean;
 };
 
 const empty: FormState = {
@@ -67,6 +68,7 @@ const empty: FormState = {
   wero_enabled: false,
   wero_handle: "",
   wero_fee: "0",
+  self_billing_mandate: false,
 };
 
 const FieldImpl = ({
@@ -125,7 +127,7 @@ const BillingDetailsInner = () => {
         .from(table)
         .select(
           "company_name, billing_contact_name, billing_email, billing_address, billing_postcode, billing_city, billing_country, kvk_number, vat_number" +
-            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee" : ""),
+            (isEscort ? ", iban, bank_account_holder, wero_enabled, wero_handle, wero_fee, self_billing_mandate_accepted_at" : ""),
         )
         .eq("id", user.id)
         .maybeSingle();
@@ -138,6 +140,7 @@ const BillingDetailsInner = () => {
             Object.entries(d).map(([k, v]) => {
               if (k === "wero_enabled") return [k, !!v];
               if (k === "wero_fee") return [k, v == null ? "0" : String(v)];
+              if (k === "self_billing_mandate_accepted_at") return ["self_billing_mandate", !!v];
               return [k, v ?? ""];
             }),
           ),
@@ -169,6 +172,11 @@ const BillingDetailsInner = () => {
       toast.error(t("billing.checkData"));
       return;
     }
+    if (isEscort && !form.self_billing_mandate) {
+      setErrors({ self_billing_mandate: "Vereist om te kunnen factureren via ViaCust." });
+      toast.error("Bevestig de factuurvolmacht om door te gaan.");
+      return;
+    }
     setErrors({});
     setSaving(true);
     const payload: Record<string, string | number | boolean | null> = { ...parsed.data };
@@ -179,6 +187,14 @@ const BillingDetailsInner = () => {
       payload.wero_enabled = !!form.wero_enabled;
       payload.wero_handle = form.wero_handle.trim() || null;
       payload.wero_fee = Number(form.wero_fee || 0);
+      payload.self_billing_mandate_accepted_at = form.self_billing_mandate
+        ? (initialRef.current.self_billing_mandate
+            ? undefined
+            : new Date().toISOString())
+        : null;
+      if (payload.self_billing_mandate_accepted_at === undefined) {
+        delete payload.self_billing_mandate_accepted_at;
+      }
     }
     const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
@@ -310,6 +326,29 @@ const BillingDetailsInner = () => {
                         placeholder: "0.50",
                       })}
                     </div>
+                  )}
+                </section>
+              )}
+
+              {isEscort && (
+                <section className="space-y-3 border-t border-brass-deep/10 pt-6">
+                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                    Factuurvolmacht (self-billing)
+                  </h2>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!form.self_billing_mandate}
+                      onChange={(e) => setBool("self_billing_mandate")(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 accent-brass-gold shrink-0"
+                    />
+                    <span className="text-sm text-brass-deep/85 leading-relaxed">
+                      Ik verleen ViaCust volmacht om namens mijn bedrijf facturen op te stellen
+                      voor de door mij uitgevoerde ritten.
+                    </span>
+                  </label>
+                  {errors.self_billing_mandate && (
+                    <p className="text-xs text-red-700">{errors.self_billing_mandate}</p>
                   )}
                 </section>
               )}
