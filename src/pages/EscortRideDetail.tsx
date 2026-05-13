@@ -161,6 +161,8 @@ const Inner = () => {
     hours_disputed_at: string | null;
     estimated_hours: number | null;
     estimated_cost: number | null;
+    travel_to_pickup_min: number | null;
+    travel_back_home_min: number | null;
   } | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineForm, setShowDeclineForm] = useState(false);
@@ -215,7 +217,8 @@ const Inner = () => {
           actual_hours, actual_cost, extra_costs, extra_costs_total, hours_notes,
           departed_base_at, returned_base_at, hours_submitted_at,
           hours_dispute_status, hours_dispute_reason, hours_disputed_at,
-          estimated_hours, estimated_cost
+          estimated_hours, estimated_cost,
+          travel_to_pickup_min, travel_back_home_min
         `)
         .eq("ride_id", id)
         .eq("escort_id", u.user.id)
@@ -240,6 +243,8 @@ const Inner = () => {
         hours_disputed_at: (ra as any).hours_disputed_at ?? null,
         estimated_hours: (ra as any).estimated_hours ?? null,
         estimated_cost: (ra as any).estimated_cost ?? null,
+        travel_to_pickup_min: (ra as any).travel_to_pickup_min ?? null,
+        travel_back_home_min: (ra as any).travel_back_home_min ?? null,
       });
 
       // unread messages count for this assignment
@@ -422,15 +427,36 @@ const Inner = () => {
       {isCompleted && myAssignment && (
         <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
           <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <Field label="Geschatte kosten" value={myAssignment.estimated_cost ? `€ ${myAssignment.estimated_cost.toFixed(2)}` : "—"} />
-            <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
-            <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
-            <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
-            <Field label="Werkelijke kosten" value={myAssignment.actual_cost ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
-            <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
-            <Field label="Totaal" value={myAssignment.actual_cost ? `€ ${(myAssignment.actual_cost + (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
-          </div>
+          {(() => {
+            const ceilQ = (m: number) => Math.ceil(m / 15) * 15;
+            const fmtH = (m: number | null) => {
+              if (m == null) return "—";
+              const q = ceilQ(m);
+              const h = Math.floor(q / 60);
+              const min = q % 60;
+              return min === 0 ? `${h} uur` : `${h}u${String(min).padStart(2, "0")}`;
+            };
+            const startBegeleiding = myAssignment.departed_base_at && myAssignment.travel_to_pickup_min != null
+              ? new Date(new Date(myAssignment.departed_base_at).getTime() + ceilQ(myAssignment.travel_to_pickup_min) * 60_000).toISOString()
+              : null;
+            const eindeBegeleiding = myAssignment.returned_base_at && myAssignment.travel_back_home_min != null
+              ? new Date(new Date(myAssignment.returned_base_at).getTime() - ceilQ(myAssignment.travel_back_home_min) * 60_000).toISOString()
+              : null;
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Field label="Aanvoer (heen)" value={fmtH(myAssignment.travel_to_pickup_min)} />
+                <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
+                <Field label="Start begeleiding" value={startBegeleiding ? fmtDateTime(startBegeleiding) : "—"} />
+                <Field label="Einde begeleiding" value={eindeBegeleiding ? fmtDateTime(eindeBegeleiding) : "—"} />
+                <Field label="Aanvoer (terug)" value={fmtH(myAssignment.travel_back_home_min)} />
+                <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
+                <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
+                <Field label="Werkelijke kosten" value={myAssignment.actual_cost ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+                <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
+                <Field label="Totaal" value={myAssignment.actual_cost ? `€ ${(myAssignment.actual_cost + (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+              </div>
+            );
+          })()}
           {myAssignment.extra_costs && myAssignment.extra_costs.length > 0 && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
               <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Specificatie extra kosten</p>
