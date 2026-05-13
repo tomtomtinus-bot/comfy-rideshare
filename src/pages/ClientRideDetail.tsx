@@ -418,6 +418,45 @@ const Inner = () => {
                     </div>
                   </div>
                 )}
+                {(() => {
+                  const h = hoursMap[e.assignment_id];
+                  if (!h?.hours_submitted_at) return null;
+                  const disputed = h.hours_dispute_status === "disputed";
+                  const fmt = (d: string | null) => d ? new Date(d).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" }) : "—";
+                  return (
+                    <div className={`p-3 border ${disputed ? "border-destructive/40 bg-destructive/5" : "border-brass-deep/15 bg-parchment/40"} space-y-2`}>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                          Ingediende uren {disputed && <span className="text-destructive ml-2">· afgewezen</span>}
+                        </p>
+                        <p className="text-sm font-semibold tabular-nums">
+                          {h.actual_hours}u · €{Number(h.actual_cost ?? 0).toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-brass-deep/70">
+                        <div><span className="opacity-60">Vertrek standplaats:</span> {fmt(h.departed_base_at)}</div>
+                        <div><span className="opacity-60">Terug standplaats:</span> {fmt(h.returned_base_at)}</div>
+                      </div>
+                      {h.extra_costs_total != null && Number(h.extra_costs_total) > 0 && (
+                        <p className="text-xs text-brass-deep/70">Extra kosten: €{Number(h.extra_costs_total).toFixed(2)}</p>
+                      )}
+                      {h.hours_notes && <p className="text-xs italic text-brass-deep/70">"{h.hours_notes}"</p>}
+                      {disputed ? (
+                        <p className="text-xs text-destructive">
+                          Afgewezen{h.hours_dispute_reason ? `: "${h.hours_dispute_reason}"` : ""}. Wacht op nieuwe indiening door begeleider.
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => { setDisputeFor(e.assignment_id); setDisputeReason(""); }}
+                          className="text-[10px] uppercase tracking-widest font-semibold text-destructive hover:underline"
+                        >
+                          Uren afwijzen
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
                 {e.status === "accepted" && (
                   <button
                     type="button"
