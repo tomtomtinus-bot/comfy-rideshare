@@ -559,7 +559,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && (
+      {!isInvited && !isCompleted && (
       <Section title="Ontheffing">
         {permit ? (
           <div className="space-y-4">
