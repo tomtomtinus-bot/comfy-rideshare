@@ -767,7 +767,9 @@ const EscortDashboard = () => {
         extra_costs_total: extrasTotal,
         hours_notes: parsed.data.hours_notes || null,
         hours_submitted_at: new Date().toISOString(),
-      })
+        hours_dispute_status: "none",
+        hours_dispute_reason: null,
+      } as never)
       .eq("id", id);
 
     if (error) return toast.error(error.message);
