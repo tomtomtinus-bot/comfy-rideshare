@@ -1238,6 +1238,23 @@ const RequestRideInner = () => {
             </AlertDialogContent>
           </AlertDialog>
 
+          <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("request.startOverTitle", { defaultValue: "Concept wissen?" })}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("request.startOverBody", { defaultValue: "Alle ingevulde gegevens van deze ritaanvraag worden gewist. De geüploade ontheffing blijft bewaard in je vergunningen." })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("common.cancel", { defaultValue: "Annuleren" })}</AlertDialogCancel>
+                <AlertDialogAction onClick={resetDraft}>
+                  {t("request.startOver", { defaultValue: "Begin opnieuw" })}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {matches && pickupGeo && dropoffGeo && (
             <Matches
               matches={matches}
