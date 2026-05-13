@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -45,32 +45,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchRole = async (uid: string) => {
+  const fetchRole = useCallback(async (uid: string) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", uid);
-    const all = ((data ?? []).map((r: any) => r.role)) as AppRole[];
+    const all = ((data ?? []) as { role: AppRole }[]).map((r) => r.role);
     setRoles(all);
     const primary = all.find((r) => r !== "admin") ?? all[0] ?? null;
     setRole(primary);
-  };
+  }, []);
 
-  const fetchApproval = async (uid: string) => {
+  const fetchApproval = useCallback(async (uid: string) => {
     const { data } = await supabase
       .from("profiles")
       .select("approval_status, rejection_reason")
       .eq("id", uid)
       .maybeSingle();
     if (data) {
-      setApprovalStatus(((data as any).approval_status ?? "pending") as ApprovalStatus);
-      setRejectionReason(((data as any).rejection_reason ?? null) as string | null);
+      const profile = data as { approval_status?: ApprovalStatus | null; rejection_reason?: string | null };
+      setApprovalStatus(profile.approval_status ?? "pending");
+      setRejectionReason(profile.rejection_reason ?? null);
     }
-  };
+  }, []);
 
-  const loadUserData = async (uid: string) => {
+  const loadUserData = useCallback(async (uid: string) => {
     await Promise.all([fetchRole(uid), fetchApproval(uid)]);
-  };
+  }, [fetchApproval, fetchRole]);
 
   useEffect(() => {
     // "Blijf ingelogd" handling: if user opted out, sign them out at the start
@@ -125,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [loadUserData]);
 
   const refreshApproval = async () => {
     if (user) await fetchApproval(user.id);
