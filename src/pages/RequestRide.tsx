@@ -535,7 +535,7 @@ const RequestRideInner = () => {
       dropoff_city: ex.dropoff!.city,
       dropoff_lat: ex.dropoff!.lat,
       dropoff_lng: ex.dropoff!.lng,
-      scheduled_at: new Date(`${ex.scheduled_date}T${ex.scheduled_time}`).toISOString(),
+      scheduled_at: nlISO(ex.scheduled_date, ex.scheduled_time),
     }));
 
     const { data: ride, error } = await supabase
