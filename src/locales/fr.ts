@@ -7,7 +7,7 @@ const fr: Dict = {
     request: "Demander un transport",
     profile: "Profil",
     permits: "Autorisations",
-    invoices: "​",
+    invoices: "Factures",
     history: "Historique",
     billing: "Coordonnées de facturation",
     admin: "Admin",
