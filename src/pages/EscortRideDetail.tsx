@@ -107,7 +107,27 @@ const Inner = () => {
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [myAssignment, setMyAssignment] = useState<{ id: string; cancel_request_status: string; cancel_request_reason: string | null; bundle_priority_offer: boolean; responds_by: string; status: string } | null>(null);
+  const [myAssignment, setMyAssignment] = useState<{
+    id: string;
+    cancel_request_status: string;
+    cancel_request_reason: string | null;
+    bundle_priority_offer: boolean;
+    responds_by: string;
+    status: string;
+    actual_hours: number | null;
+    actual_cost: number | null;
+    extra_costs: { description: string; amount: number }[] | null;
+    extra_costs_total: number;
+    hours_notes: string | null;
+    departed_base_at: string | null;
+    returned_base_at: string | null;
+    hours_submitted_at: string | null;
+    hours_dispute_status: string | null;
+    hours_dispute_reason: string | null;
+    hours_disputed_at: string | null;
+    estimated_hours: number | null;
+    estimated_cost: number | null;
+  } | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [showCancelForm, setShowCancelForm] = useState(false);
