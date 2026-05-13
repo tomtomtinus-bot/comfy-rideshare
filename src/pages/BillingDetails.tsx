@@ -172,6 +172,11 @@ const BillingDetailsInner = () => {
       toast.error(t("billing.checkData"));
       return;
     }
+    if (isEscort && !form.self_billing_mandate) {
+      setErrors({ self_billing_mandate: "Vereist om te kunnen factureren via ViaCust." });
+      toast.error("Bevestig de factuurvolmacht om door te gaan.");
+      return;
+    }
     setErrors({});
     setSaving(true);
     const payload: Record<string, string | number | boolean | null> = { ...parsed.data };
@@ -182,6 +187,14 @@ const BillingDetailsInner = () => {
       payload.wero_enabled = !!form.wero_enabled;
       payload.wero_handle = form.wero_handle.trim() || null;
       payload.wero_fee = Number(form.wero_fee || 0);
+      payload.self_billing_mandate_accepted_at = form.self_billing_mandate
+        ? (initialRef.current.self_billing_mandate
+            ? undefined
+            : new Date().toISOString())
+        : null;
+      if (payload.self_billing_mandate_accepted_at === undefined) {
+        delete payload.self_billing_mandate_accepted_at;
+      }
     }
     const { error } = await supabase.from(table).update(payload as never).eq("id", user.id);
     setSaving(false);
