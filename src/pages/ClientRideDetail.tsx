@@ -214,6 +214,27 @@ const Inner = () => {
     load();
   };
 
+  const submitDispute = async () => {
+    if (!disputeFor) return;
+    const reason = disputeReason.trim();
+    if (reason.length < 5) { toast.error("Geef een korte reden op (min. 5 tekens)."); return; }
+    setBusy(true);
+    const { error } = await supabase
+      .from("ride_assignments")
+      .update({
+        hours_dispute_status: "disputed",
+        hours_dispute_reason: reason,
+        hours_disputed_at: new Date().toISOString(),
+      } as never)
+      .eq("id", disputeFor);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Uren afgewezen. De begeleider is op de hoogte gebracht.");
+    setDisputeFor(null);
+    setDisputeReason("");
+    load();
+  };
+
   if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
   if (error || !data) {
     return (
