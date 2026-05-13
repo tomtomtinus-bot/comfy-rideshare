@@ -14,6 +14,40 @@ import { AddressAutocomplete, type AddressResult } from "@/components/site/Addre
 import { LocationPickerDialog } from "@/components/site/LocationPickerDialog";
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+/** Today as YYYY-MM-DD in the user's local timezone (not UTC). */
+const todayLocalDate = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/**
+ * Convert a wall-clock date+time entered by the user (always meant as
+ * Europe/Amsterdam time) to a correct UTC ISO string, regardless of the
+ * browser's timezone. Two-pass refinement handles DST cleanly.
+ */
+const nlISO = (dateStr: string, timeStr: string): string => {
+  const wantedUtcMs = new Date(`${dateStr}T${timeStr}:00Z`).getTime();
+  let guess = new Date(wantedUtcMs);
+  for (let i = 0; i < 2; i++) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Amsterdam",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(guess);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+    const nlAsUtcMs = new Date(
+      `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}Z`
+    ).getTime();
+    guess = new Date(guess.getTime() + (wantedUtcMs - nlAsUtcMs));
+  }
+  return guess.toISOString();
+};
 
 const makeSchema = (t: (k: string) => string) => z.object({
   pickup_address: z.string().trim().min(2).max(200),
