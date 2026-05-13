@@ -202,6 +202,12 @@ const Inner = () => {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
         <p className="text-brass-deep/60 mb-4">Geen toegang tot deze ritdetails.</p>
+        <p className="text-xs text-brass-deep/50 mb-4">
+          Ondersteuning nodig?{" "}
+          <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+            support@viacust.com
+          </a>
+        </p>
         <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
           ← Terug naar dashboard
         </Link>
