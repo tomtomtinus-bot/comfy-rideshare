@@ -175,7 +175,13 @@ const Inner = () => {
       setUserId(u.user.id);
       const { data: ra } = await supabase
         .from("ride_assignments")
-        .select("id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status")
+        .select(`
+          id, cancel_request_status, cancel_request_reason, bundle_priority_offer, responds_by, status,
+          actual_hours, actual_cost, extra_costs, extra_costs_total, hours_notes,
+          departed_base_at, returned_base_at, hours_submitted_at,
+          hours_dispute_status, hours_dispute_reason, hours_disputed_at,
+          estimated_hours, estimated_cost
+        `)
         .eq("ride_id", id)
         .eq("escort_id", u.user.id)
         .maybeSingle();
@@ -186,6 +192,19 @@ const Inner = () => {
         bundle_priority_offer: (ra as any).bundle_priority_offer ?? false,
         responds_by: (ra as any).responds_by,
         status: (ra as any).status,
+        actual_hours: (ra as any).actual_hours ?? null,
+        actual_cost: (ra as any).actual_cost ?? null,
+        extra_costs: (ra as any).extra_costs ?? null,
+        extra_costs_total: (ra as any).extra_costs_total ?? 0,
+        hours_notes: (ra as any).hours_notes ?? null,
+        departed_base_at: (ra as any).departed_base_at ?? null,
+        returned_base_at: (ra as any).returned_base_at ?? null,
+        hours_submitted_at: (ra as any).hours_submitted_at ?? null,
+        hours_dispute_status: (ra as any).hours_dispute_status ?? null,
+        hours_dispute_reason: (ra as any).hours_dispute_reason ?? null,
+        hours_disputed_at: (ra as any).hours_disputed_at ?? null,
+        estimated_hours: (ra as any).estimated_hours ?? null,
+        estimated_cost: (ra as any).estimated_cost ?? null,
       });
     }
     setLoading(false);
