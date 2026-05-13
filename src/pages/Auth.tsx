@@ -211,7 +211,7 @@ const Auth = () => {
             {mode === "login" ? t("auth.welcomeBack") : mode === "signup" ? t("auth.join") : "Herstel je toegang"}
           </h1>
           <p className="text-sm text-brass-deep/50 italic mb-8">
-            Digital Escort Solutions.
+            ViaCust Digital Escort Solutions.
           </p>
 
           {mode === "signup" && (
