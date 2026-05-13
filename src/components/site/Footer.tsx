@@ -8,7 +8,7 @@ export const Footer = () => {
     <footer id="contact" className="bg-brass-deep py-16 md:py-20 px-6 md:px-8 text-parchment/70">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
         <div className="max-w-sm">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-2">
             <img
               src={logo}
               alt="ViaCust"
@@ -21,6 +21,9 @@ export const Footer = () => {
               ViaCust
             </span>
           </div>
+          <p className="text-[10px] uppercase tracking-widest text-parchment/40 mb-4">
+            ViaCust, Digital Escort Solutions.
+          </p>
           <p className="text-sm leading-relaxed">{t("home.footer.tagline")}</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-12 md:gap-16">

@@ -11,6 +11,9 @@ export const Hero = () => {
           <h1 className="font-display text-[2.25rem] sm:text-6xl lg:text-7xl text-brass-deep leading-[1.05] italic">
             Slimme Transportbegeleiding.<br />Zonder Administratieve Last.
           </h1>
+          <p className="text-brass-gold/70 text-sm tracking-wide mt-3 italic">
+            ViaCust, Digital Escort Solutions.
+          </p>
         </div>
         <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
           <p className="text-sm md:text-lg text-brass-deep/80 leading-relaxed max-w-[44ch] mb-6 md:mb-8">
