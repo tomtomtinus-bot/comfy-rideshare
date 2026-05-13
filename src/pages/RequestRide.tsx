@@ -642,6 +642,13 @@ const RequestRideInner = () => {
                   {pickupGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget({ kind: "main-pickup" })}
+                    className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                  >
+                    Op kaart kiezen of coördinaten invoeren
+                  </button>
                 </div>
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.dropoff")}</p>
