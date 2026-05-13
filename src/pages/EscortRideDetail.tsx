@@ -524,7 +524,7 @@ const Inner = () => {
         );
       })()}
 
-      {!isInvited && (
+      {!isInvited && !isCompleted && (
       <Section title={`Mede-begeleiders (${others.length})`}>
         {others.length === 0 ? (
           <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
