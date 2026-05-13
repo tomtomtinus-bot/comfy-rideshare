@@ -5,6 +5,8 @@ project_id = "qsiduhrmgunvipxelgpe"
     verify_jwt = false
   [functions.check-hours-reminders]
     verify_jwt = false
+  [functions.check-discount-reminders]
+    verify_jwt = false
   [functions.cleanup-permit]
     verify_jwt = false
   [functions.fetch-fuel-prices]
