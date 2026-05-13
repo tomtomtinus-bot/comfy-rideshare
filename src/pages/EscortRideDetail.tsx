@@ -454,6 +454,9 @@ const Inner = () => {
                 <Field label="Werkelijke kosten" value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
                 <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
                 <Field label="Totaal" value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+                <p className="md:col-span-2 text-xs text-brass-deep/60 italic mt-1">
+                  Let op: de brandstoftoeslag wordt pas op de eerstvolgende maandag berekend en daarna aan het totaal toegevoegd.
+                </p>
               </div>
             );
           })()}
