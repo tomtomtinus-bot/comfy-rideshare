@@ -134,16 +134,30 @@ const Inner = () => {
         .createSignedUrl(detail.permit.pdf_path, 3600);
       if (signed?.signedUrl) setPermitUrl(signed.signedUrl);
     }
-    // Fetch cancel-request status per assignment
+    // Fetch cancel-request status + hours per assignment
     const { data: ras } = await supabase
       .from("ride_assignments")
-      .select("id, cancel_request_status, cancel_request_reason")
+      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason")
       .eq("ride_id", id);
     const map: Record<string, { status: string; reason: string | null }> = {};
+    const hmap: Record<string, any> = {};
     (ras ?? []).forEach((r: any) => {
       map[r.id] = { status: r.cancel_request_status ?? "none", reason: r.cancel_request_reason ?? null };
+      hmap[r.id] = {
+        actual_hours: r.actual_hours,
+        actual_cost: r.actual_cost,
+        hours_submitted_at: r.hours_submitted_at,
+        hours_notes: r.hours_notes,
+        departed_base_at: r.departed_base_at,
+        returned_base_at: r.returned_base_at,
+        extra_costs: r.extra_costs,
+        extra_costs_total: r.extra_costs_total,
+        hours_dispute_status: r.hours_dispute_status ?? "none",
+        hours_dispute_reason: r.hours_dispute_reason ?? null,
+      };
     });
     setCancelReqs(map);
+    setHoursMap(hmap);
     setLoading(false);
   }, [id]);
 
