@@ -24,6 +24,9 @@ const InfoNederland = () => {
             <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[1.05] mb-4">
               Rij­tijden &amp; afmetingen exceptioneel transport
             </h1>
+            <p className="text-brass-gold/70 text-sm tracking-wide italic mb-4">
+              ViaCust, Digital Escort Solutions.
+            </p>
             <p className="text-base md:text-lg text-brass-deep/80 max-w-3xl leading-relaxed">
               Overzicht van de toegestane afmetingen en rijtijden voor exceptioneel transport over
               het Nederlandse onderliggende en bovenliggende wegennet.
