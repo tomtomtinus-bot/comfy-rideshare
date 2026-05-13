@@ -27,6 +27,7 @@ export const Nav = () => {
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
+    { to: "/faq", label: "FAQ", show: true },
   ];
 
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
