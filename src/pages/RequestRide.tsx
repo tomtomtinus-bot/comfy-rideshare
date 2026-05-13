@@ -801,7 +801,7 @@ const RequestRideInner = () => {
                         <Input
                           label="Datum"
                           type="date"
-                          min={new Date().toISOString().slice(0, 10)}
+                          min={todayLocalDate()}
                           value={leg.scheduled_date}
                           onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
                         />
