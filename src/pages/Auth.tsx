@@ -15,6 +15,7 @@ import {
   unlockWithBiometrics,
   isNative,
 } from "@/lib/biometric";
+import { isNativeApp, signInWithGoogleNative } from "@/lib/nativeGoogleAuth";
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -101,19 +102,33 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    setBusy(false);
-    if (result.error) {
-      toast.error(result.error.message || "Google-inloggen mislukt");
-      return;
+    try {
+      if (isNativeApp()) {
+        // Native iOS/Android — gebruikt platform-specifieke OAuth client.
+        await signInWithGoogleNative();
+        setBusy(false);
+        navigate(redirectTo);
+        return;
+      }
+
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      setBusy(false);
+      if (result.error) {
+        toast.error(result.error.message || "Google-inloggen mislukt");
+        return;
+      }
+      if (result.redirected) {
+        // Browser redirect happens automatically
+        return;
+      }
+      navigate(redirectTo);
+    } catch (err) {
+      setBusy(false);
+      const msg = err instanceof Error ? err.message : "Google-inloggen mislukt";
+      toast.error(msg);
     }
-    if (result.redirected) {
-      // Browser redirect happens automatically
-      return;
-    }
-    navigate(redirectTo);
   };
 
   const handleBiometricLogin = async () => {
