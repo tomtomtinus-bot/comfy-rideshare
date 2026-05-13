@@ -252,6 +252,7 @@ const Inner = () => {
 
   const { ride, client, escorts, permit, viewer_status } = data;
   const isInvited = viewer_status === "invited";
+  const isCompleted = ride.status === "completed";
   const others = escorts.filter((e) => !e.is_self);
 
   return (
