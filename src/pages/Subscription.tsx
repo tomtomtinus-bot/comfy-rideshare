@@ -86,8 +86,8 @@ const SubscriptionInner = () => {
       });
       if (error || !data?.url) throw new Error(error?.message || "Portal niet beschikbaar");
       window.open(data.url, "_blank");
-    } catch (e: any) {
-      toast.error(e.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Portal niet beschikbaar");
     } finally {
       setPortalLoading(false);
     }
