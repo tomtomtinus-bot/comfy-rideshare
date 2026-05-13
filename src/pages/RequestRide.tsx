@@ -11,6 +11,7 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { RequireSubscription } from "@/components/RequireSubscription";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
+import { LocationPickerDialog } from "@/components/site/LocationPickerDialog";
 import { uploadPermitPdf } from "@/lib/uploadPermit";
 import { Loader2, Upload, X, FileText } from "lucide-react";
 
@@ -152,6 +153,11 @@ const RequestRideInner = () => {
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
   const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
+  const [pickerTarget, setPickerTarget] = useState<
+    | { kind: "main-pickup" | "main-dropoff" }
+    | { kind: "extra-pickup" | "extra-dropoff"; index: number }
+    | null
+  >(null);
 
   useEffect(() => {
     try {
@@ -636,6 +642,13 @@ const RequestRideInner = () => {
                   {pickupGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget({ kind: "main-pickup" })}
+                    className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                  >
+                    Op kaart kiezen of coördinaten invoeren
+                  </button>
                 </div>
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.dropoff")}</p>
@@ -649,6 +662,13 @@ const RequestRideInner = () => {
                   {dropoffGeo && (
                     <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget({ kind: "main-dropoff" })}
+                    className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                  >
+                    Op kaart kiezen of coördinaten invoeren
+                  </button>
                 </div>
               </div>
               {pickupGeo && dropoffGeo && (() => {
@@ -711,6 +731,13 @@ const RequestRideInner = () => {
                           {leg.pickup && (
                             <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => setPickerTarget({ kind: "extra-pickup", index: i })}
+                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                          >
+                            Op kaart of coördinaten
+                          </button>
                         </div>
                         <div>
                           <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Bestemming</p>
@@ -727,6 +754,13 @@ const RequestRideInner = () => {
                           {leg.dropoff && (
                             <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => setPickerTarget({ kind: "extra-dropoff", index: i })}
+                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                          >
+                            Op kaart of coördinaten
+                          </button>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -1051,6 +1085,37 @@ const RequestRideInner = () => {
             </button>
           </form>
           )}
+
+          <LocationPickerDialog
+            open={!!pickerTarget}
+            onOpenChange={(o) => { if (!o) setPickerTarget(null); }}
+            title={
+              pickerTarget?.kind === "main-pickup" ? "Vertrek kiezen" :
+              pickerTarget?.kind === "main-dropoff" ? "Bestemming kiezen" :
+              pickerTarget?.kind === "extra-pickup" ? "Vertrek vervolgrit kiezen" :
+              pickerTarget?.kind === "extra-dropoff" ? "Bestemming vervolgrit kiezen" : ""
+            }
+            initial={
+              pickerTarget?.kind === "main-pickup" ? (pickupGeo ? { lat: pickupGeo.lat, lng: pickupGeo.lng } : null) :
+              pickerTarget?.kind === "main-dropoff" ? (dropoffGeo ? { lat: dropoffGeo.lat, lng: dropoffGeo.lng } : null) :
+              pickerTarget?.kind === "extra-pickup" ? (extraLegs[pickerTarget.index]?.pickup ? { lat: extraLegs[pickerTarget.index].pickup!.lat, lng: extraLegs[pickerTarget.index].pickup!.lng } : null) :
+              pickerTarget?.kind === "extra-dropoff" ? (extraLegs[pickerTarget.index]?.dropoff ? { lat: extraLegs[pickerTarget.index].dropoff!.lat, lng: extraLegs[pickerTarget.index].dropoff!.lng } : null) :
+              null
+            }
+            onConfirm={(r) => {
+              if (!pickerTarget) return;
+              if (pickerTarget.kind === "main-pickup") onPickPickup(r);
+              else if (pickerTarget.kind === "main-dropoff") onPickDropoff(r);
+              else if (pickerTarget.kind === "extra-pickup") updateExtraLeg(pickerTarget.index, {
+                pickup_address: r.display,
+                pickup: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+              });
+              else if (pickerTarget.kind === "extra-dropoff") updateExtraLeg(pickerTarget.index, {
+                dropoff_address: r.display,
+                dropoff: { city: r.city, country: r.country, lat: r.lat, lng: r.lng },
+              });
+            }}
+          />
 
           {matches && pickupGeo && dropoffGeo && (
             <Matches
