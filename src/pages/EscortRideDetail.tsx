@@ -373,6 +373,47 @@ const Inner = () => {
         );
       })()}
 
+      {isCompleted && myAssignment && (
+        <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
+          <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="Geschatte uren" value={myAssignment.estimated_hours ? `${myAssignment.estimated_hours} uur` : "—"} />
+            <Field label="Geschatte kosten" value={myAssignment.estimated_cost ? `€ ${myAssignment.estimated_cost.toFixed(2)}` : "—"} />
+            <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
+            <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
+            <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
+            <Field label="Werkelijke kosten" value={myAssignment.actual_cost ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+            <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
+            <Field label="Totaal" value={myAssignment.actual_cost ? `€ ${(myAssignment.actual_cost + (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+          </div>
+          {myAssignment.extra_costs && myAssignment.extra_costs.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Specificatie extra kosten</p>
+              <ul className="space-y-1">
+                {myAssignment.extra_costs.map((ex, i) => (
+                  <li key={i} className="flex justify-between text-sm">
+                    <span className="text-emerald-900">{ex.description}</span>
+                    <span className="font-medium tabular-nums">€ {ex.amount.toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {myAssignment.hours_notes && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">Opmerkingen</p>
+              <p className="text-sm text-emerald-900">{myAssignment.hours_notes}</p>
+            </div>
+          )}
+          {myAssignment.hours_dispute_status && myAssignment.hours_dispute_status !== "none" && (
+            <div className="mt-4 pt-4 border-t border-emerald-200">
+              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">Uren afgewezen</p>
+              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || "Geen reden opgegeven"}</p>
+            </div>
+          )}
+        </section>
+      )}
+
       <Section title="Rit">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
