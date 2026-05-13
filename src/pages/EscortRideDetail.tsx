@@ -631,7 +631,7 @@ const Inner = () => {
       </Section>
       )}
 
-      {!isInvited && myAssignment && (
+      {!isInvited && !isCompleted && myAssignment && (
         <Section title="Annulering">
           {myAssignment.cancel_request_status === "pending" ? (
             <div className="bg-brass-gold/10 border border-brass-gold/40 p-4 text-sm text-brass-deep">
