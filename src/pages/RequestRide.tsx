@@ -1084,7 +1084,7 @@ const RequestRideInner = () => {
             <section className="border-t border-brass-deep/10 pt-6">
               <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label={t("common.date")} type="date" min={new Date().toISOString().slice(0,10)} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
+                <Input label={t("common.date")} type="date" min={todayLocalDate()} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
                   <select
