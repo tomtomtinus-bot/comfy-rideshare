@@ -12,7 +12,7 @@ export const Hero = () => {
             Slimme Transportbegeleiding.<br />Zonder Administratieve Last.
           </h1>
           <p className="text-brass-gold/70 text-sm tracking-wide mt-3 italic">
-            ViaCust Digital Escort Solutions.
+            {" "}
           </p>
         </div>
         <div className="col-span-12 lg:col-span-4 pb-2 animate-fade-up [animation-delay:120ms]">
