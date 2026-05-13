@@ -63,6 +63,7 @@ const TermsNL = () => (
       <li><strong>Platformfunctie:</strong> ViaCust fungeert uitsluitend als een digitale infrastructuur (Software as a Service) die vraag en aanbod in de transportbegeleiding samenbrengt en administratieve processen automatiseert.</li>
       <li><strong>Geen Bemiddeling:</strong> ViaCust treedt niet op als bemiddelaar, agent of tussenpersoon. De overeenkomst voor de feitelijke transportbegeleiding komt rechtstreeks tot stand tussen de Opdrachtgever en de Begeleider.</li>
       <li><strong>Geen Dienstbetrekking:</strong> Het gebruik van het platform creëert nimmer een arbeidsrelatie tussen ViaCust en de Begeleider. De Begeleider voert de werkzaamheden uit als zelfstandig ondernemer voor eigen rekening en risico.</li>
+      <li><strong>Eigenaren en Medewerkers als Gebruikers:</strong> Medewerkers of eigenaren van ViaCust kunnen als gebruiker actief zijn op het platform. Zij zijn hierbij gebonden aan dezelfde regels, plichten en kwaliteitseisen als alle andere gebruikers.</li>
     </ul>
 
     <h2>3. Google API-integraties, Kaarten en Synchronisatie</h2>
@@ -129,6 +130,7 @@ const TermsEN = () => (
       <li>The Platform functions exclusively as a digital marketplace connecting Clients and Escorts.</li>
       <li>The agreement for the actual transport accompaniment is concluded directly between the Client and the Escort.</li>
       <li><strong>ViaCust</strong> is never a party to this agreement and accepts no liability for the quality, safety, or legality of the services provided.</li>
+      <li><strong>Employees and Owners as Users:</strong> Employees or owners of ViaCust may be active as users on the platform. They are bound by the same rules, obligations and quality requirements as all other users.</li>
     </ul>
 
     <h2>3. Access and EU Sanctions</h2>
@@ -164,6 +166,7 @@ const TermsDE = () => (
       <li>Die Plattform fungiert ausschließlich als digitaler Marktplatz, der Auftraggeber und Begleiter zusammenbringt.</li>
       <li>Der Vertrag über die eigentliche Transportbegleitung kommt direkt zwischen dem Auftraggeber und dem Begleiter zustande.</li>
       <li><strong>ViaCust</strong> ist niemals Vertragspartner dieser Vereinbarung und übernimmt keine Haftung für die Qualität oder Rechtmäßigkeit der erbrachten Dienste.</li>
+      <li><strong>Mitarbeiter und Eigentümer als Nutzer:</strong> Mitarbeiter oder Eigentümer von ViaCust können als Nutzer auf der Plattform aktiv sein. Sie sind hierbei an dieselben Regeln, Pflichten und Qualitätsanforderungen gebunden wie alle anderen Nutzer.</li>
     </ul>
 
     <h2>3. Widerrufsrecht</h2>
@@ -193,6 +196,7 @@ const TermsFR = () => (
       <li>La Plateforme fonctionne exclusivement comme une place de marché numérique mettant en relation des Clients et des Accompagnateurs.</li>
       <li>Le contrat pour l'accompagnement effectif du transport est conclu directement entre le Client et l'Accompagnateur.</li>
       <li><strong>ViaCust</strong> n'est jamais partie à cet accord et n'accepte aucune responsabilité quant à la qualité ou à la légalité des services fournis.</li>
+      <li><strong>Employés et Propriétaires comme Utilisateurs:</strong> Les employés ou propriétaires de ViaCust peuvent être actifs en tant qu'utilisateurs sur la plateforme. Ils sont liés par les mêmes règles, obligations et exigences de qualité que tous les autres utilisateurs.</li>
     </ul>
 
     <h2>3. Droit de Rétractation</h2>
