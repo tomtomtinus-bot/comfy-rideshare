@@ -86,6 +86,39 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </section>
 );
 
+const Badge = ({ children, tone = "alert" }: { children: React.ReactNode; tone?: "alert" | "info" }) => (
+  <span
+    className={
+      "inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full " +
+      (tone === "alert" ? "bg-red-600 text-white" : "bg-brass-gold text-brass-deep")
+    }
+  >
+    {children}
+  </span>
+);
+
+const AccSection = ({
+  value,
+  title,
+  badge,
+  children,
+}: {
+  value: string;
+  title: string;
+  badge?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <AccordionItem value={value} className="bg-card shadow-etched border-b-0">
+    <AccordionTrigger className="px-6 md:px-8 py-5 hover:no-underline">
+      <span className="flex items-center gap-3 font-display text-xl text-brass-deep italic">
+        {title}
+        {badge}
+      </span>
+    </AccordionTrigger>
+    <AccordionContent className="px-6 md:px-8 pt-0 pb-6 md:pb-8">{children}</AccordionContent>
+  </AccordionItem>
+);
+
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div>
     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
