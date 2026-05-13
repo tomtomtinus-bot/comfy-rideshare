@@ -620,8 +620,13 @@ const RequestRideInner = () => {
     });
 
     const { error: aErr } = await supabase.from("ride_assignments").insert(rows);
+    if (aErr) {
+      // #3 Rollback: voorkom een orphan rit zonder assignments.
+      await supabase.from("rides").delete().eq("id", ride.id);
+      setBusy(false);
+      return toast.error(aErr.message);
+    }
     setBusy(false);
-    if (aErr) return toast.error(aErr.message);
 
     // Send ride confirmation email to the client (best-effort; do not block on errors)
     if (user?.email) {
