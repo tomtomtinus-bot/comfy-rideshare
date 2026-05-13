@@ -46,9 +46,14 @@ export const Nav = () => {
             height={32}
             className="size-8 object-contain"
           />
-          <span className="font-display text-2xl tracking-tight text-brass-deep italic">
-            ViaCust
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-display text-2xl tracking-tight text-brass-deep italic">
+              ViaCust
+            </span>
+            <span className="hidden md:block text-[10px] uppercase tracking-widest text-brass-deep/40 font-medium border-l border-brass-deep/15 pl-2 ml-1 leading-none">
+              Digital Escort Solutions
+            </span>
+          </div>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link

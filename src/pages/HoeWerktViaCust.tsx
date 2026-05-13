@@ -26,6 +26,9 @@ const HoeWerktViaCust = () => {
             <h1 className="font-display text-4xl sm:text-5xl md:text-7xl text-brass-deep leading-[1] italic mb-8">
               Hoe werkt ViaCust?
             </h1>
+            <p className="text-brass-gold/70 text-sm tracking-wide italic mb-6">
+              ViaCust, Digital Escort Solutions.
+            </p>
             <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
               Efficiëntie in transportbegeleiding begint hier. Of u nu een rit wilt uitzetten of als
               professional op de weg zit: ViaCust brengt vraag en aanbod samen met slimme technologie.

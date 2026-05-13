@@ -207,9 +207,12 @@ const Auth = () => {
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
             {mode === "login" ? t("auth.login") : mode === "signup" ? t("auth.signup") : "Wachtwoord vergeten"}
           </p>
-          <h1 className="font-display text-4xl text-brass-deep italic mb-8">
+          <h1 className="font-display text-4xl text-brass-deep italic mb-2">
             {mode === "login" ? t("auth.welcomeBack") : mode === "signup" ? t("auth.join") : "Herstel je toegang"}
           </h1>
+          <p className="text-sm text-brass-deep/50 italic mb-8">
+            ViaCust, Digital Escort Solutions.
+          </p>
 
           {mode === "signup" && (
             <div className="mb-6 grid grid-cols-2 gap-px bg-brass-deep/10 p-px">
