@@ -451,9 +451,9 @@ const Inner = () => {
                 <Field label="Aanvoer (terug)" value={fmtH(myAssignment.travel_back_home_min)} />
                 <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
                 <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
-                <Field label="Werkelijke kosten" value={myAssignment.actual_cost ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+                <Field label="Werkelijke kosten" value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
                 <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
-                <Field label="Totaal" value={myAssignment.actual_cost ? `€ ${(myAssignment.actual_cost + (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+                <Field label="Totaal" value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
               </div>
             );
           })()}
