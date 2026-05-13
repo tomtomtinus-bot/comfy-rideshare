@@ -42,15 +42,14 @@ export function useSubscription() {
   useEffect(() => {
     refetch();
     if (!user) return;
-    const ch = supabase
-      .channel(`subs-${user.id}`)
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "subscriptions",
-        filter: `user_id=eq.${user.id}`,
-      }, () => refetch())
-      .subscribe();
+    const ch = supabase.channel(`subs-${user.id}-${Math.random().toString(36).slice(2)}`);
+    ch.on("postgres_changes", {
+      event: "*",
+      schema: "public",
+      table: "subscriptions",
+      filter: `user_id=eq.${user.id}`,
+    }, () => refetch());
+    ch.subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
