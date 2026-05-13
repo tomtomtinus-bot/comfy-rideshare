@@ -10,6 +10,7 @@ import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { ExtraLegsList } from "@/components/site/ExtraLegsList";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "sonner";
 
 interface RideDetail {
