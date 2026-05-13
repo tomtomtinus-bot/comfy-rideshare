@@ -878,6 +878,9 @@ export type Database = {
           extra_costs: Json
           extra_costs_total: number
           google_event_id: string | null
+          hours_dispute_reason: string | null
+          hours_dispute_status: string
+          hours_disputed_at: string | null
           hours_notes: string | null
           hours_submitted_at: string | null
           id: string
@@ -914,6 +917,9 @@ export type Database = {
           extra_costs?: Json
           extra_costs_total?: number
           google_event_id?: string | null
+          hours_dispute_reason?: string | null
+          hours_dispute_status?: string
+          hours_disputed_at?: string | null
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
@@ -950,6 +956,9 @@ export type Database = {
           extra_costs?: Json
           extra_costs_total?: number
           google_event_id?: string | null
+          hours_dispute_reason?: string | null
+          hours_dispute_status?: string
+          hours_disputed_at?: string | null
           hours_notes?: string | null
           hours_submitted_at?: string | null
           id?: string
