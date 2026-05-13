@@ -78,6 +78,9 @@ interface AssignmentRow {
   actual_cost: number | null;
   hours_submitted_at: string | null;
   hours_notes: string | null;
+  hours_dispute_status?: string | null;
+  hours_dispute_reason?: string | null;
+  hours_disputed_at?: string | null;
   status: "invited" | "accepted" | "declined" | "expired" | "cancelled";
   invited_at: string;
   responds_by: string;
