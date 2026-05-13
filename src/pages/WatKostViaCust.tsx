@@ -66,7 +66,7 @@ const WatKostViaCust = () => {
           <Bullet label="Abonnement" value="€ 50,- per maand. (ex. BTW)" />
           <div className="border-l-2 border-brass-gold pl-5 py-1">
             <span className="font-semibold text-brass-deep">Introductieaanbieding: </span>
-            <span>Nu voor slechts € 25,- per maand (ex. BTW) gedurende de eerste 12 maanden! Profiteer van 50% lanceringskorting en krijg direct toegang tot alle ritten.</span>
+            <span>Nu voor slechts € 25,- per maand (ex. BTW) gedurende de eerste 12 maanden! Profiteer van 50% lanceringskorting en krijg direct toegang tot onze begeleiders.</span>
           </div>
           <Bullet label="Platformcommissie" value="Slechts 1,5% per voltooide rit." />
           <p>
