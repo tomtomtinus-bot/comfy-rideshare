@@ -1152,6 +1152,28 @@ const RequestRideInner = () => {
             }}
           />
 
+          <AlertDialog open={confirmRemovePermit} onOpenChange={setConfirmRemovePermit}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Vergunning verwijderen?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  De PDF en alle ingelezen routes worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    setConfirmRemovePermit(false);
+                    await removeUploadedPermit();
+                  }}
+                >
+                  Verwijderen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {matches && pickupGeo && dropoffGeo && (
             <Matches
               matches={matches}
