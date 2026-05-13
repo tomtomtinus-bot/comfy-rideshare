@@ -220,11 +220,33 @@ const RequestRideInner = () => {
     setLicensePlates((p) => p.map((x, idx) => (idx === i ? v.toUpperCase() : x)));
   const removePlate = (i: number) => setLicensePlates((p) => p.filter((_, idx) => idx !== i));
 
-  // Auto-fill vergunningnummer zodra een ontheffing is geüpload
+  // Auto-fill vergunningnummer alleen wanneer het veld nog leeg is — nooit
+  // een handmatig getypte waarde overschrijven na een nieuwe upload.
   useEffect(() => {
-    if (!uploadedPermit) return;
-    setForm((f) => ({ ...f, permit_number: uploadedPermit.permit_number }));
+    if (!uploadedPermit?.permit_number) return;
+    setForm((f) => (f.permit_number?.trim() ? f : { ...f, permit_number: uploadedPermit.permit_number }));
   }, [uploadedPermit]);
+
+  const [confirmReset, setConfirmReset] = useState(false);
+  const resetDraft = () => {
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    setForm({
+      pickup_address: "", dropoff_address: "", scheduled_date: "", scheduled_time: "",
+      num_escorts: 1, notes: "",
+      cargo_length_m: "", cargo_width_m: "", cargo_height_m: "", cargo_weight_t: "",
+      permit_number: "", client_reference: "",
+      be_escort_type: "type1",
+    });
+    setPickupGeo(null);
+    setDropoffGeo(null);
+    setUploadedPermit(null);
+    setDrivers([]);
+    setLicensePlates([]);
+    setExtraLegs([]);
+    setMatches(null);
+    setConfirmReset(false);
+    toast.success(t("request.draftCleared", { defaultValue: "Concept gewist" }));
+  };
 
   const extractPermitNumberFromFilename = (filename: string): string => {
     const base = filename.replace(/\.[^.]+$/, "");
@@ -669,9 +691,20 @@ const RequestRideInner = () => {
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
             {t("request.kicker")}
           </p>
-          <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95] mb-12">
-            {t("request.title")}
-          </h1>
+          <div className="flex items-start justify-between gap-4 mb-12">
+            <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95]">
+              {t("request.title")}
+            </h1>
+            {isApproved && (
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="shrink-0 text-xs uppercase tracking-[0.2em] font-semibold text-brass-deep/70 hover:text-brass-deep underline underline-offset-4 mt-2"
+              >
+                {t("request.startOver", { defaultValue: "Begin opnieuw" })}
+              </button>
+            )}
+          </div>
 
           {!isApproved ? (
             <div className="bg-card shadow-etched p-8 md:p-10 border-l-4 border-brass-gold">
@@ -1200,6 +1233,23 @@ const RequestRideInner = () => {
                   }}
                 >
                   Verwijderen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("request.startOverTitle", { defaultValue: "Concept wissen?" })}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("request.startOverBody", { defaultValue: "Alle ingevulde gegevens van deze ritaanvraag worden gewist. De geüploade ontheffing blijft bewaard in je vergunningen." })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("common.cancel", { defaultValue: "Annuleren" })}</AlertDialogCancel>
+                <AlertDialogAction onClick={resetDraft}>
+                  {t("request.startOver", { defaultValue: "Begin opnieuw" })}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
