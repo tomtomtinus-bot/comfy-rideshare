@@ -27,13 +27,6 @@ const PLANS = {
       "Platform fee 1,5% per rit (verzameld per week)",
     ],
   },
-      "30 dagen gratis proberen — opzegbaar tijdens de proefperiode",
-      "Onbeperkt ritten plannen",
-      "Toegang tot het volledige begeleidersnetwerk",
-      "Vergunningen automatisch verwerken",
-      "Platform fee 1,5% per rit (verzameld per week)",
-    ],
-  },
   begeleider: {
     priceId: "begeleider_monthly",
     title: "Begeleider abonnement",
