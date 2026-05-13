@@ -15,15 +15,6 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
-    GoogleAuth: {
-      // Web client ID — used as serverClientId on iOS/Android to obtain an ID token
-      // that Lovable Cloud (Supabase) can verify.
-      scopes: ['profile', 'email'],
-      serverClientId: '489521062007-l3qb24ue5t92snune33b693vveldj9a6.apps.googleusercontent.com',
-      // iOS: client ID of type "iOS" — bundle ID must match this app's bundle ID.
-      iosClientId: '489521062007-upteobvulv3mcon96ver2q9iq2couik6.apps.googleusercontent.com',
-      forceCodeForRefreshToken: true,
-    },
   },
 };
 
