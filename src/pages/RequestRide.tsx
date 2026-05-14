@@ -18,6 +18,18 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+
+type FuelSurcharge = {
+  enabled?: boolean;
+  kind?: "per_uur" | "percent";
+  tiers?: { from?: string | number; to?: string | number; value?: string | number }[];
+} | null;
+
+const hasFuelSurcharge = (fs: FuelSurcharge): boolean =>
+  !!fs && fs.enabled === true && Array.isArray(fs.tiers) && fs.tiers.some((t) => Number(t?.value) > 0);
 
 /** Today as YYYY-MM-DD in the user's local timezone (not UTC). */
 const todayLocalDate = (): string => {
@@ -101,6 +113,7 @@ interface MatchedEscort {
   travelToPickupMin: number;
   travelBackHomeMin: number;
   is_favorite?: boolean;
+  fuel_surcharge?: FuelSurcharge;
   conflict?: {
     rideStart: string; // ISO
     rideEnd: string;
@@ -344,7 +357,7 @@ const RequestRideInner = () => {
     const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
-        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available")
+        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
         .eq("available", true),
       supabase
         .from("client_excluded_escorts")
@@ -1282,6 +1295,7 @@ const Matches = ({
 }) => {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string[]>([]);
+  const [fuelEscort, setFuelEscort] = useState<MatchedEscort | null>(null);
   const toggle = (id: string) => {
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : s.length < numWanted ? [...s, id] : s
@@ -1326,6 +1340,16 @@ const Matches = ({
                       ★ Favoriet
                     </span>
                   )}
+                  {hasFuelSurcharge(m.fuel_surcharge) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setFuelEscort(m); }}
+                      title="Brandstoftoeslag bekijken"
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-deep/10 text-brass-deep hover:bg-brass-deep hover:text-parchment shrink-0 transition-colors"
+                    >
+                      ⛽ Brandstoftoeslag
+                    </button>
+                  )}
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
                     <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
                     <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
@@ -1338,6 +1362,8 @@ const Matches = ({
         </ul>
       )}
 
+      <FuelSurchargeDialog escort={fuelEscort} onClose={() => setFuelEscort(null)} />
+
       <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
         disabled={busy || selected.length !== numWanted || anySelectedConflict}
         className="mt-4 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
@@ -1346,6 +1372,58 @@ const Matches = ({
     </section>
   );
 };
+
+const FuelSurchargeDialog = ({
+  escort, onClose,
+}: { escort: MatchedEscort | null; onClose: () => void }) => {
+  const open = !!escort;
+  const fs = escort?.fuel_surcharge ?? null;
+  const tiers = (fs?.tiers ?? []).filter((t) => t && (t.from !== undefined || t.to !== undefined || t.value !== undefined));
+  const isPercent = fs?.kind === "percent";
+  const fmtRange = (from?: string | number, to?: string | number) => {
+    const f = from === undefined || from === "" ? "0" : String(from);
+    const tt = to === undefined || to === "" ? "∞" : String(to);
+    return `€ ${f} – € ${tt}`;
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Brandstoftoeslag — #{escort?.anonymous_id}</DialogTitle>
+          <DialogDescription>
+            Deze begeleider rekent een brandstoftoeslag bovenop het uurtarief, afhankelijk van de
+            actuele dieselprijs (€ per liter, excl. btw).
+          </DialogDescription>
+        </DialogHeader>
+        {tiers.length === 0 ? (
+          <p className="text-sm text-brass-deep/60">Geen drempels opgegeven.</p>
+        ) : (
+          <div className="border border-brass-deep/15">
+            <div className="grid grid-cols-12 text-[10px] uppercase tracking-widest font-bold text-brass-deep/55 bg-parchment px-3 py-2 border-b border-brass-deep/15">
+              <div className="col-span-8">Dieselprijs / liter</div>
+              <div className="col-span-4 text-right">{isPercent ? "% uurtarief" : "€ / uur"}</div>
+            </div>
+            <ul className="divide-y divide-brass-deep/10">
+              {tiers.map((tier, i) => (
+                <li key={i} className="grid grid-cols-12 px-3 py-2 text-sm tabular-nums">
+                  <div className="col-span-8">{fmtRange(tier.from, tier.to)}</div>
+                  <div className="col-span-4 text-right font-semibold">
+                    {isPercent ? `${tier.value ?? 0}%` : `€ ${tier.value ?? 0}`}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <p className="text-[11px] text-brass-deep/55 leading-relaxed">
+          De toeslag wordt berekend op basis van de wekelijkse dieselprijs van het land waarin
+          gereden wordt en verschijnt als aparte regel op de factuur.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 
 const Input = ({
   label, value, onChange, type = "text", placeholder, step, inputMode, min,
