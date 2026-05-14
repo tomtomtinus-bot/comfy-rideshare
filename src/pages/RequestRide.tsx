@@ -1373,6 +1373,58 @@ const Matches = ({
   );
 };
 
+const FuelSurchargeDialog = ({
+  escort, onClose,
+}: { escort: MatchedEscort | null; onClose: () => void }) => {
+  const open = !!escort;
+  const fs = escort?.fuel_surcharge ?? null;
+  const tiers = (fs?.tiers ?? []).filter((t) => t && (t.from !== undefined || t.to !== undefined || t.value !== undefined));
+  const isPercent = fs?.kind === "percent";
+  const fmtRange = (from?: string | number, to?: string | number) => {
+    const f = from === undefined || from === "" ? "0" : String(from);
+    const tt = to === undefined || to === "" ? "∞" : String(to);
+    return `€ ${f} – € ${tt}`;
+  };
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Brandstoftoeslag — #{escort?.anonymous_id}</DialogTitle>
+          <DialogDescription>
+            Deze begeleider rekent een brandstoftoeslag bovenop het uurtarief, afhankelijk van de
+            actuele dieselprijs (€ per liter, excl. btw).
+          </DialogDescription>
+        </DialogHeader>
+        {tiers.length === 0 ? (
+          <p className="text-sm text-brass-deep/60">Geen drempels opgegeven.</p>
+        ) : (
+          <div className="border border-brass-deep/15">
+            <div className="grid grid-cols-12 text-[10px] uppercase tracking-widest font-bold text-brass-deep/55 bg-parchment px-3 py-2 border-b border-brass-deep/15">
+              <div className="col-span-8">Dieselprijs / liter</div>
+              <div className="col-span-4 text-right">{isPercent ? "% uurtarief" : "€ / uur"}</div>
+            </div>
+            <ul className="divide-y divide-brass-deep/10">
+              {tiers.map((tier, i) => (
+                <li key={i} className="grid grid-cols-12 px-3 py-2 text-sm tabular-nums">
+                  <div className="col-span-8">{fmtRange(tier.from, tier.to)}</div>
+                  <div className="col-span-4 text-right font-semibold">
+                    {isPercent ? `${tier.value ?? 0}%` : `€ ${tier.value ?? 0}`}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <p className="text-[11px] text-brass-deep/55 leading-relaxed">
+          De toeslag wordt berekend op basis van de wekelijkse dieselprijs van het land waarin
+          gereden wordt en verschijnt als aparte regel op de factuur.
+        </p>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+
 const Input = ({
   label, value, onChange, type = "text", placeholder, step, inputMode, min,
 }: {
