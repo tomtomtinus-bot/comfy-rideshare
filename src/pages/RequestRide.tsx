@@ -113,6 +113,7 @@ interface MatchedEscort {
   travelToPickupMin: number;
   travelBackHomeMin: number;
   is_favorite?: boolean;
+  fuel_surcharge?: FuelSurcharge;
   conflict?: {
     rideStart: string; // ISO
     rideEnd: string;
