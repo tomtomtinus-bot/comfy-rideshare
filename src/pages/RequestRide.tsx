@@ -18,6 +18,18 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+
+type FuelSurcharge = {
+  enabled?: boolean;
+  kind?: "per_uur" | "percent";
+  tiers?: { from?: string | number; to?: string | number; value?: string | number }[];
+} | null;
+
+const hasFuelSurcharge = (fs: FuelSurcharge): boolean =>
+  !!fs && fs.enabled === true && Array.isArray(fs.tiers) && fs.tiers.some((t) => Number(t?.value) > 0);
 
 /** Today as YYYY-MM-DD in the user's local timezone (not UTC). */
 const todayLocalDate = (): string => {
