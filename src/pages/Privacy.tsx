@@ -79,7 +79,13 @@ const PrivacyNL = () => (
       </li>
     </ul>
 
-    <h2>3. Sub-verwerkers</h2>
+    <h2>3. Validatie van bedrijfsgegevens (VIES)</h2>
+    <p>Om de fiscale integriteit van het platform te waarborgen en te voldoen aan de Europese wetgeving met betrekking tot de verlegging van BTW bij grensoverschrijdende diensten, voert ViaCust een validatie uit van de door u verstrekte BTW-nummers.</p>
+    <p>Wij maken hiervoor gebruik van het VIES-systeem (VAT Information Exchange System) van de Europese Commissie.</p>
+    <p>Tijdens deze controle wordt uw BTW-nummer verzonden naar de centrale systemen van de Europese Unie om de geldigheid en de bijbehorende bedrijfsnaam/adresgegevens te verifiëren.</p>
+    <p>Deze gegevens worden uitsluitend gebruikt voor het valideren van uw account en het opstellen van fiscaal correcte facturen.</p>
+
+    <h2>4. Sub-verwerkers</h2>
     <p>Wij maken gebruik van:</p>
     <ul>
       <li><strong>Supabase / Vercel:</strong> Data-opslag in de EU.</li>
@@ -87,14 +93,14 @@ const PrivacyNL = () => (
       <li><strong>Google Cloud Platform:</strong> Kaartdiensten en login.</li>
     </ul>
 
-    <h2>4. Bewaartermijnen</h2>
+    <h2>5. Bewaartermijnen</h2>
     <ul>
       <li><strong>Fiscale data:</strong> 7 jaar conform wettelijke administratieplicht.</li>
       <li><strong>Beoordelingen:</strong> Zolang het account actief is.</li>
       <li><strong>OAuth-tokens:</strong> Onmiddellijke verwijdering na het verbreken van de koppeling.</li>
     </ul>
 
-    <h2>5. Uw Rechten en Contact</h2>
+    <h2>6. Uw Rechten en Contact</h2>
     <p>U heeft recht op inzage, correctie en verwijdering van uw gegevens. Voor vragen: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland</p>
   </>
