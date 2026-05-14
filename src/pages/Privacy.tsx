@@ -79,7 +79,13 @@ const PrivacyNL = () => (
       </li>
     </ul>
 
-    <h2>3. Sub-verwerkers</h2>
+    <h2>3. Validatie van bedrijfsgegevens (VIES)</h2>
+    <p>Om de fiscale integriteit van het platform te waarborgen en te voldoen aan de Europese wetgeving met betrekking tot de verlegging van BTW bij grensoverschrijdende diensten, voert ViaCust een validatie uit van de door u verstrekte BTW-nummers.</p>
+    <p>Wij maken hiervoor gebruik van het VIES-systeem (VAT Information Exchange System) van de Europese Commissie.</p>
+    <p>Tijdens deze controle wordt uw BTW-nummer verzonden naar de centrale systemen van de Europese Unie om de geldigheid en de bijbehorende bedrijfsnaam/adresgegevens te verifiëren.</p>
+    <p>Deze gegevens worden uitsluitend gebruikt voor het valideren van uw account en het opstellen van fiscaal correcte facturen.</p>
+
+    <h2>4. Sub-verwerkers</h2>
     <p>Wij maken gebruik van:</p>
     <ul>
       <li><strong>Supabase / Vercel:</strong> Data-opslag in de EU.</li>
