@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.charge-platform-invoice]
 verify_jwt = false
+
+[functions.validate-vat]
+verify_jwt = false
