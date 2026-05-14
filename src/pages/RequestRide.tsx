@@ -1295,6 +1295,7 @@ const Matches = ({
 }) => {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string[]>([]);
+  const [fuelEscort, setFuelEscort] = useState<MatchedEscort | null>(null);
   const toggle = (id: string) => {
     setSelected((s) =>
       s.includes(id) ? s.filter((x) => x !== id) : s.length < numWanted ? [...s, id] : s
