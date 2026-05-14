@@ -259,7 +259,12 @@ const BillingDetailsInner = () => {
                   })}
                   <div />
                   {renderField({ label: t("billing.f.kvk"), name: "kvk_number", placeholder: "12345678" })}
-                  {renderField({ label: t("billing.f.vat"), name: "vat_number", placeholder: "NL000000000B01" })}
+                  <VatField
+                    label={t("billing.f.vat")}
+                    value={form.vat_number}
+                    onChange={set("vat_number")}
+                    error={errors.vat_number}
+                  />
                 </div>
               </section>
 
