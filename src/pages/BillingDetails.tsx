@@ -105,6 +105,101 @@ const FieldImpl = ({
   </label>
 );
 
+type ViesResult =
+  | { status: "idle" }
+  | { status: "checking" }
+  | { status: "valid"; name?: string; address?: string }
+  | { status: "invalid" }
+  | { status: "error"; message: string };
+
+const VatField = ({
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
+}) => {
+  const [result, setResult] = useState<ViesResult>({ status: "idle" });
+
+  const check = async () => {
+    const v = (value || "").trim();
+    if (v.length < 4) {
+      setResult({ status: "error", message: "Vul eerst een geldig btw-nummer in (incl. landcode)." });
+      return;
+    }
+    setResult({ status: "checking" });
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("validate-vat", {
+        body: { vat: v },
+      });
+      if (fnErr) {
+        setResult({ status: "error", message: fnErr.message });
+        return;
+      }
+      if (data?.valid) {
+        setResult({ status: "valid", name: data.name, address: data.address });
+        toast.success("Btw-nummer geldig volgens VIES");
+      } else if (data?.error === "vies_error") {
+        setResult({ status: "error", message: "VIES (EU) is tijdelijk niet bereikbaar. Probeer later opnieuw." });
+      } else {
+        setResult({ status: "invalid" });
+      }
+    } catch (e) {
+      setResult({ status: "error", message: e instanceof Error ? e.message : "Onbekende fout" });
+    }
+  };
+
+  return (
+    <label className="block">
+      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60 mb-1 block">
+        {label}
+      </span>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e);
+            setResult({ status: "idle" });
+          }}
+          placeholder="NL000000000B01"
+          className="flex-1 bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+        />
+        <button
+          type="button"
+          onClick={check}
+          disabled={result.status === "checking"}
+          className="px-3 py-2 bg-brass-deep text-parchment text-[10px] uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50 whitespace-nowrap"
+        >
+          {result.status === "checking" ? "Bezig…" : "Controleer (VIES)"}
+        </button>
+      </div>
+      {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+      {result.status === "valid" && (
+        <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2">
+          ✓ Geldig volgens VIES
+          {result.name ? <div className="mt-1 opacity-80">{result.name}</div> : null}
+          {result.address ? <div className="opacity-70 whitespace-pre-line">{result.address}</div> : null}
+        </div>
+      )}
+      {result.status === "invalid" && (
+        <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2">
+          ✗ Niet geldig volgens VIES. Controleer landcode en nummer.
+        </div>
+      )}
+      {result.status === "error" && (
+        <div className="mt-2 text-xs bg-amber-50 border border-amber-300 text-amber-900 px-3 py-2">
+          {result.message}
+        </div>
+      )}
+    </label>
+  );
+};
+
 const BillingDetailsInner = () => {
   const { user, role } = useAuth();
   const { t } = useTranslation();
