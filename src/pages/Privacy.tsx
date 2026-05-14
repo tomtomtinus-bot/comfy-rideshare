@@ -93,14 +93,14 @@ const PrivacyNL = () => (
       <li><strong>Google Cloud Platform:</strong> Kaartdiensten en login.</li>
     </ul>
 
-    <h2>4. Bewaartermijnen</h2>
+    <h2>5. Bewaartermijnen</h2>
     <ul>
       <li><strong>Fiscale data:</strong> 7 jaar conform wettelijke administratieplicht.</li>
       <li><strong>Beoordelingen:</strong> Zolang het account actief is.</li>
       <li><strong>OAuth-tokens:</strong> Onmiddellijke verwijdering na het verbreken van de koppeling.</li>
     </ul>
 
-    <h2>5. Uw Rechten en Contact</h2>
+    <h2>6. Uw Rechten en Contact</h2>
     <p>U heeft recht op inzage, correctie en verwijdering van uw gegevens. Voor vragen: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland</p>
   </>
