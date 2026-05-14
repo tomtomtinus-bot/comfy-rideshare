@@ -1339,6 +1339,16 @@ const Matches = ({
                       ★ Favoriet
                     </span>
                   )}
+                  {hasFuelSurcharge(m.fuel_surcharge) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setFuelEscort(m); }}
+                      title="Brandstoftoeslag bekijken"
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-deep/10 text-brass-deep hover:bg-brass-deep hover:text-parchment shrink-0 transition-colors"
+                    >
+                      ⛽ Brandstoftoeslag
+                    </button>
+                  )}
                   <div className="flex items-center gap-4 text-[11px] text-brass-deep/70">
                     <span>{t("request.travelIn")} <strong className="text-brass-deep">{fmtHours(m.travelToPickupMin)}</strong></span>
                     <span>{t("request.travelOut")} <strong className="text-brass-deep">{fmtHours(m.travelBackHomeMin)}</strong></span>
@@ -1350,6 +1360,8 @@ const Matches = ({
           })}
         </ul>
       )}
+
+      <FuelSurchargeDialog escort={fuelEscort} onClose={() => setFuelEscort(null)} />
 
       <button onClick={() => onBook(matches.filter((m) => selected.includes(m.id)))}
         disabled={busy || selected.length !== numWanted || anySelectedConflict}
