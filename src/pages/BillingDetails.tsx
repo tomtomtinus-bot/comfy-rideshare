@@ -357,6 +357,8 @@ const BillingDetailsInner = () => {
             </p>
           </header>
 
+          <EmailChangeCard />
+
           {loading ? (
             <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : (
