@@ -424,6 +424,10 @@ const Inner = () => {
     if (pErr) return toast.error(pErr.message);
     if (error) return toast.error(error.message);
     setDirty(false);
+    if (draftKey) {
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+      draftRef.current = {};
+    }
     toast.success("Profiel bijgewerkt");
     navigate("/dashboard");
   };
