@@ -139,20 +139,30 @@ const InvoicesInner = () => {
     if (escortIds.length) {
       const { data: ec } = await supabase
         .from("escort_profiles_public")
-        .select("id, billing_country")
+        .select("id, billing_country, company_name, anonymous_id")
         .in("id", escortIds);
-      const map: Record<string, string | null> = {};
-      (ec ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-      setEscortCountries(map);
+      const cmap: Record<string, string | null> = {};
+      const nmap: Record<string, string> = {};
+      (ec ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; anonymous_id: string | null }) => {
+        cmap[r.id] = r.billing_country;
+        nmap[r.id] = r.company_name || r.anonymous_id || "";
+      });
+      setEscortCountries(cmap);
+      setEscortNames((prev) => ({ ...prev, ...nmap }));
     }
     if (clientIds.length) {
       const { data: cc } = await supabase
         .from("profiles")
-        .select("id, billing_country")
+        .select("id, billing_country, company_name, full_name, anonymous_id")
         .in("id", clientIds);
-      const map: Record<string, string | null> = {};
-      (cc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-      setClientCountries((prev) => ({ ...prev, ...map }));
+      const cmap: Record<string, string | null> = {};
+      const nmap: Record<string, string> = {};
+      (cc ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; full_name: string | null; anonymous_id: string | null }) => {
+        cmap[r.id] = r.billing_country;
+        nmap[r.id] = r.company_name || r.full_name || r.anonymous_id || "";
+      });
+      setClientCountries((prev) => ({ ...prev, ...cmap }));
+      setClientNames((prev) => ({ ...prev, ...nmap }));
     }
     if (list.length) {
       const { data: it } = await supabase
