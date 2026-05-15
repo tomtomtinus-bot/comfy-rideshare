@@ -1047,16 +1047,15 @@ const EscortDashboard = () => {
                         </div>
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
-                          <select
+                          <input
+                            type="time"
+                            step={900}
                             name="ride_start_time"
                             defaultValue={defTime}
                             required
+                            placeholder="hh:mm"
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          >
-                            {QUARTER_TIMES.map((qt) => (
-                              <option key={qt} value={qt}>{qt}</option>
-                            ))}
-                          </select>
+                          />
                         </div>
                         <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
                           {t("dash.rideEndTime")}
@@ -1073,17 +1072,15 @@ const EscortDashboard = () => {
                         </div>
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
-                          <select
+                          <input
+                            type="time"
+                            step={900}
                             name="ride_end_time"
                             defaultValue=""
                             required
+                            placeholder="hh:mm"
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          >
-                            <option value="" disabled>{t("dash.pickTime")}</option>
-                            {QUARTER_TIMES.map((qt) => (
-                              <option key={qt} value={qt}>{qt}</option>
-                            ))}
-                          </select>
+                          />
                         </div>
                       </>
                     );
