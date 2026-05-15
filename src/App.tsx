@@ -70,6 +70,7 @@ const App = () => (
             <Route path="/info/belgie" element={<InfoBelgie />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/kies-rol" element={<RolePicker />} />
             <Route path="/aanvragen" element={<RequestRide />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profiel" element={<EscortSettings />} />
