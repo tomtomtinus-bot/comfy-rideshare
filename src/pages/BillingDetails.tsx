@@ -319,6 +319,9 @@ const BillingDetailsInner = () => {
     if (error) return toast.error(error.message);
     toast.success(t("billing.saved"));
     initialRef.current = form;
+    if (draftKey) {
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+    }
   };
 
   const renderField = (props: {
