@@ -540,8 +540,45 @@ const Inner = () => {
             </AccSection>
 
             {isInvited && (
-              <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep">
-                U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+              <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep space-y-3">
+                <p>
+                  U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+                </p>
+                {myAssignment && myAssignment.status === "invited" && (
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        const { error } = await supabase.rpc("express_ride_interest", { _assignment_id: myAssignment.id });
+                        setBusy(false);
+                        if (error) return toast.error(error.message);
+                        toast.success("Beschikbaar gemeld — selectie binnen 5 min.");
+                        load();
+                      }}
+                      className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
+                    >
+                      ✓ Accepteer rit
+                    </button>
+                    <button
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        const { error } = await supabase
+                          .from("ride_assignments")
+                          .update({ status: "declined", responded_at: new Date().toISOString() })
+                          .eq("id", myAssignment.id);
+                        setBusy(false);
+                        if (error) return toast.error(error.message);
+                        toast.success("Rit geweigerd.");
+                        load();
+                      }}
+                      className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
+                    >
+                      ✗ Weiger
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
