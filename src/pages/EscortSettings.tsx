@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { EmailChangeCard } from "@/components/site/EmailChangeCard";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
