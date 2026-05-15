@@ -813,16 +813,14 @@ const RequestRideInner = () => {
                 />
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
-                  <select
+                  <input
+                    type="time"
+                    step={900}
                     value={form.scheduled_time}
                     onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
+                    placeholder="hh:mm"
                     className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  >
-                    <option value="" disabled>{t("request.pickTime")}</option>
-                    {QUARTER_TIMES.map((qt) => (
-                      <option key={qt} value={qt}>{qt}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
               </div>
@@ -916,16 +914,14 @@ const RequestRideInner = () => {
                         />
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd (kwartier)</label>
-                          <select
+                          <input
+                            type="time"
+                            step={900}
                             value={leg.scheduled_time}
                             onChange={(e) => updateExtraLeg(i, { scheduled_time: e.target.value })}
+                            placeholder="hh:mm"
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          >
-                            <option value="" disabled>Kies een tijd</option>
-                            {QUARTER_TIMES.map((qt) => (
-                              <option key={qt} value={qt}>{qt}</option>
-                            ))}
-                          </select>
+                          />
                         </div>
                       </div>
                       {leg.pickup && leg.dropoff && (() => {
