@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { ReactNode } from "react";
 
 export const RequireAuth = ({ children }: { children: ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, roles, loading } = useAuth();
   const location = useLocation();
   if (loading) {
     return (
@@ -15,6 +15,9 @@ export const RequireAuth = ({ children }: { children: ReactNode }) => {
   if (!user) {
     const redirect = `${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/auth?redirect=${encodeURIComponent(redirect)}`} replace />;
+  }
+  if (roles.length === 0 && location.pathname !== "/kies-rol") {
+    return <Navigate to="/kies-rol" replace />;
   }
   return <>{children}</>;
 };
