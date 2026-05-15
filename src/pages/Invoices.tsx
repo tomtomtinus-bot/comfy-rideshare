@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,6 +65,39 @@ const fmtDate = (d: string, lng: string) =>
   new Date(d).toLocaleDateString(lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium" });
 const fmtMoney = (n: number) => `€${Number(n).toFixed(2)}`;
 
+const MONTHS_NL = [
+  "Januari", "Februari", "Maart", "April", "Mei", "Juni",
+  "Juli", "Augustus", "September", "Oktober", "November", "December",
+];
+
+const isoWeek = (date: Date): number => {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+};
+
+function groupByYMW<T extends { period_start: string }>(items: T[]) {
+  const tree: Record<string, Record<string, Record<string, T[]>>> = {};
+  for (const inv of items) {
+    const d = new Date(inv.period_start);
+    const y = String(d.getFullYear());
+    const m = MONTHS_NL[d.getMonth()];
+    const w = `Week ${isoWeek(d)}`;
+    tree[y] ??= {};
+    tree[y][m] ??= {};
+    tree[y][m][w] ??= [];
+    tree[y][m][w].push(inv);
+  }
+  return tree;
+}
+
+const sortYearDesc = (a: string, b: string) => b.localeCompare(a, undefined, { numeric: true });
+const sortMonthDesc = (a: string, b: string) => MONTHS_NL.indexOf(b) - MONTHS_NL.indexOf(a);
+const sortWeekDesc = (a: string, b: string) =>
+  parseInt(b.replace("Week ", ""), 10) - parseInt(a.replace("Week ", ""), 10);
+
 const InvoicesInner = () => {
   const { user, role } = useAuth();
   const { t, i18n } = useTranslation();
@@ -77,10 +110,15 @@ const InvoicesInner = () => {
   const [wero, setWero] = useState<{ enabled: boolean; handle: string | null; fee: number }>({ enabled: false, handle: null, fee: 0 });
   const [escortCountries, setEscortCountries] = useState<Record<string, string | null>>({});
   const [clientCountries, setClientCountries] = useState<Record<string, string | null>>({});
+  const [escortNames, setEscortNames] = useState<Record<string, string>>({});
+  const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
   const [payInvoiceId, setPayInvoiceId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const isEscort = role === "begeleider";
 
@@ -101,20 +139,30 @@ const InvoicesInner = () => {
     if (escortIds.length) {
       const { data: ec } = await supabase
         .from("escort_profiles_public")
-        .select("id, billing_country")
+        .select("id, billing_country, company_name, anonymous_id")
         .in("id", escortIds);
-      const map: Record<string, string | null> = {};
-      (ec ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-      setEscortCountries(map);
+      const cmap: Record<string, string | null> = {};
+      const nmap: Record<string, string> = {};
+      (ec ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; anonymous_id: string | null }) => {
+        cmap[r.id] = r.billing_country;
+        nmap[r.id] = r.company_name || r.anonymous_id || "";
+      });
+      setEscortCountries(cmap);
+      setEscortNames((prev) => ({ ...prev, ...nmap }));
     }
     if (clientIds.length) {
       const { data: cc } = await supabase
         .from("profiles")
-        .select("id, billing_country")
+        .select("id, billing_country, company_name, full_name, anonymous_id")
         .in("id", clientIds);
-      const map: Record<string, string | null> = {};
-      (cc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-      setClientCountries((prev) => ({ ...prev, ...map }));
+      const cmap: Record<string, string | null> = {};
+      const nmap: Record<string, string> = {};
+      (cc ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; full_name: string | null; anonymous_id: string | null }) => {
+        cmap[r.id] = r.billing_country;
+        nmap[r.id] = r.company_name || r.full_name || r.anonymous_id || "";
+      });
+      setClientCountries((prev) => ({ ...prev, ...cmap }));
+      setClientNames((prev) => ({ ...prev, ...nmap }));
     }
     if (list.length) {
       const { data: it } = await supabase
@@ -150,11 +198,16 @@ const InvoicesInner = () => {
       if (platClientIds.length) {
         const { data: pc } = await supabase
           .from("profiles")
-          .select("id, billing_country")
+          .select("id, billing_country, company_name, full_name, anonymous_id")
           .in("id", platClientIds);
-        const map: Record<string, string | null> = {};
-        (pc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-        setClientCountries((prev) => ({ ...prev, ...map }));
+        const cmap: Record<string, string | null> = {};
+        const nmap: Record<string, string> = {};
+        (pc ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; full_name: string | null; anonymous_id: string | null }) => {
+          cmap[r.id] = r.billing_country;
+          nmap[r.id] = r.company_name || r.full_name || r.anonymous_id || "";
+        });
+        setClientCountries((prev) => ({ ...prev, ...cmap }));
+        setClientNames((prev) => ({ ...prev, ...nmap }));
       }
       if (platList.length) {
         const { data: pit } = await supabase
@@ -290,6 +343,53 @@ const InvoicesInner = () => {
             </div>
           </header>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-card shadow-etched">
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Zoek (naam / factuurnr.)
+              </label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={isEscort ? "Opdrachtgever, factuurnr…" : "Begeleider, opdrachtgever…"}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Datum van
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Datum tot
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            {(search || dateFrom || dateTo) && (
+              <div className="md:col-span-3">
+                <button
+                  onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}
+                  className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline"
+                >
+                  Filters wissen
+                </button>
+              </div>
+            )}
+          </div>
+
           {!isEscort && (
             <Tabs defaultValue="begeleiders" className="w-full">
               <TabsList className="mb-6">
@@ -344,20 +444,90 @@ const InvoicesInner = () => {
     </div>
   );
 
-  function renderPlatformInvoices() {
-    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
-    if (platformInvoices.length === 0)
+  function matchesFilter(inv: { invoice_number: string; period_start: string; period_end: string; escort_id?: string; client_id: string }) {
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const eName = inv.escort_id ? escortNames[inv.escort_id] || "" : "";
+      const cName = clientNames[inv.client_id] || "";
+      const hay = [inv.invoice_number, eName, cName].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (dateFrom && new Date(inv.period_end) < new Date(dateFrom)) return false;
+    if (dateTo && new Date(inv.period_start) > new Date(dateTo + "T23:59:59")) return false;
+    return true;
+  }
+
+  function renderGrouped<T extends { id: string; period_start: string }>(items: T[], renderItem: (i: T) => JSX.Element, emptyText: string) {
+    if (items.length === 0)
       return (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{t("invoices.noPlatform")}</p>
+          <p className="text-brass-deep/60">{emptyText}</p>
         </div>
       );
+    const tree = groupByYMW(items);
+    const years = Object.keys(tree).sort(sortYearDesc);
+    const expandAll = !!(search || dateFrom || dateTo);
     return (
-      <ul className="space-y-px bg-brass-deep/10">
-        {platformInvoices.map((inv) => {
-          const isOpen = openPlat === inv.id;
-          const rows = platformItems[inv.id] ?? [];
+      <div className="space-y-2">
+        {years.map((y, yi) => {
+          const months = Object.keys(tree[y]).sort(sortMonthDesc);
+          const yearCount = months.reduce((s, m) => s + Object.values(tree[y][m]).reduce((a, arr) => a + arr.length, 0), 0);
           return (
+            <details key={y} open={expandAll || yi === 0} className="group bg-card shadow-etched">
+              <summary className="flex items-center justify-between cursor-pointer select-none px-5 py-3 hover:bg-parchment/50">
+                <span className="font-display text-lg text-brass-deep">{y}</span>
+                <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                  {yearCount} factu{yearCount === 1 ? "ur" : "ren"}
+                  <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
+                </span>
+              </summary>
+              <div className="px-3 pb-3 space-y-2">
+                {months.map((m) => {
+                  const weeks = Object.keys(tree[y][m]).sort(sortWeekDesc);
+                  const monthCount = weeks.reduce((s, w) => s + tree[y][m][w].length, 0);
+                  return (
+                    <details key={m} open={expandAll} className="group/m border border-brass-deep/10 bg-parchment/30">
+                      <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
+                        <span className="text-sm font-semibold text-brass-deep">{m}</span>
+                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                          {monthCount}
+                          <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">▼</span>
+                        </span>
+                      </summary>
+                      <div className="px-2 pb-2 space-y-2">
+                        {weeks.map((w) => (
+                          <details key={w} open={expandAll} className="group/w border border-brass-deep/10 bg-card">
+                            <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/40">
+                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{w}</span>
+                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                                {tree[y][m][w].length}
+                                <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">▼</span>
+                              </span>
+                            </summary>
+                            <ul className="space-y-px bg-brass-deep/10">
+                              {tree[y][m][w].map(renderItem)}
+                            </ul>
+                          </details>
+                        ))}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderPlatformInvoices() {
+    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
+    const filtered = platformInvoices.filter(matchesFilter);
+    const renderInv = (inv: PlatformInvoice) => {
+      const isOpen = openPlat === inv.id;
+      const rows = platformItems[inv.id] ?? [];
+      return (
             <li key={inv.id} className="bg-card p-6 md:p-8">
               <div className="grid grid-cols-12 gap-4 items-start">
                 <div className="col-span-12 md:col-span-3">
@@ -434,26 +604,18 @@ const InvoicesInner = () => {
                 </div>
               )}
             </li>
-          );
-        })}
-      </ul>
-    );
+      );
+    };
+    return renderGrouped(filtered, renderInv, t("invoices.noPlatform"));
   }
 
   function renderEscortInvoices() {
     if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
-    if (invoices.length === 0)
+    const filtered = invoices.filter(matchesFilter);
+    const renderInv = (inv: Invoice) => {
+      const isOpen = open === inv.id;
+      const rows = items[inv.id] ?? [];
       return (
-        <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{t("invoices.noInvoices")}</p>
-        </div>
-      );
-    return (
-            <ul className="space-y-px bg-brass-deep/10">
-              {invoices.map((inv) => {
-                const isOpen = open === inv.id;
-                const rows = items[inv.id] ?? [];
-                return (
                   <li key={inv.id} className="bg-card p-6 md:p-8">
                     <div className="grid grid-cols-12 gap-4 items-start">
                       <div className="col-span-12 md:col-span-3">
@@ -603,10 +765,9 @@ const InvoicesInner = () => {
                       );
                     })()}
                   </li>
-                );
-              })}
-            </ul>
-    );
+      );
+    };
+    return renderGrouped(filtered, renderInv, t("invoices.noInvoices"));
   }
 };
 
