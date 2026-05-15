@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
       .from('ride_assignments')
       .select('id, escort_id, responds_by')
       .eq('ride_id', rideId)
-      .eq('status', 'invited')
+      .in('status', ['invited', 'accepted'])
 
     if (!assignments || assignments.length === 0) {
       return new Response(JSON.stringify({ sent: 0 }), {
