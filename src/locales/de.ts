@@ -198,7 +198,7 @@ const de: Dict = {
     plates: "Kennzeichen", addPlate: "+ Kennzeichen hinzufügen",
     platesHint: "Z.B. Zugmaschine und Auflieger.", platePlaceholder: "Z.B. M-AB-1234",
     removeDriver: "Fahrer entfernen", removePlate: "Kennzeichen entfernen",
-    plannedStart: "Geplante Startzeit", timeQuarter: "Uhrzeit (Viertelstunde)",
+    plannedStart: "Geplante Startzeit", timeQuarter: "Uhrzeit",
     pickTime: "Uhrzeit wählen…", notes: "Anmerkungen (optional)",
     searching: "Suche…", search: "Nächstgelegene Begleiter suchen",
     matchesKicker: "Vorgeschlagene Begleiter", matchesTitle: "Nächstgelegene anonyme Begleiter",
