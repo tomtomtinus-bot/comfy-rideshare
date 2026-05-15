@@ -133,12 +133,28 @@ export const Nav = () => {
             )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10">
               {user ? (
-                <button
-                  onClick={() => { close(); signOut(); }}
-                  className="w-full text-left px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-gold hover:text-parchment transition-colors"
-                >
-                  {t("nav.logout")}
-                </button>
+                <>
+                  <div className="px-3 py-2 mb-1">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+                      Ingelogd als
+                    </p>
+                    <p className="text-sm font-semibold text-brass-deep truncate">
+                      {(user.user_metadata as { full_name?: string; name?: string } | null)?.full_name
+                        || (user.user_metadata as { full_name?: string; name?: string } | null)?.name
+                        || user.email}
+                    </p>
+                    {((user.user_metadata as { full_name?: string; name?: string } | null)?.full_name
+                      || (user.user_metadata as { full_name?: string; name?: string } | null)?.name) && (
+                      <p className="text-[11px] text-brass-deep/55 truncate">{user.email}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { close(); signOut(); }}
+                    className="w-full text-left px-3 py-3 text-sm uppercase tracking-widest font-semibold text-brass-deep hover:bg-brass-gold hover:text-parchment transition-colors"
+                  >
+                    {t("nav.logout")}
+                  </button>
+                </>
               ) : (
                 <Link
                   to="/auth"
