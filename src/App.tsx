@@ -38,6 +38,7 @@ import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminEscortDetail from "./pages/admin/AdminEscortDetail.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import AdminExcluded from "./pages/admin/AdminExcluded.tsx";
+import AdminEmailChanges from "./pages/admin/AdminEmailChanges.tsx";
 import ExcludedEscorts from "./pages/ExcludedEscorts.tsx";
 import PreferredClients from "./pages/PreferredClients.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
@@ -94,6 +95,7 @@ const App = () => (
               <Route path="escorts/:id" element={<AdminEscortDetail />} />
               <Route path="fuel" element={<AdminFuel />} />
               <Route path="excluded" element={<AdminExcluded />} />
+              <Route path="email-changes" element={<AdminEmailChanges />} />
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />

@@ -92,6 +92,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_change_requests: {
+        Row: {
+          created_at: string
+          current_email: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          new_email: string
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_email: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          new_email: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_email?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          new_email?: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
