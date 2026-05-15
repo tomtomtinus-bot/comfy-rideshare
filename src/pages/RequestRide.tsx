@@ -869,7 +869,7 @@ const RequestRideInner = () => {
               </div>
               {extraLegs.length === 0 ? (
                 <p className="text-xs text-brass-deep/55">
-                  Voeg vervolgritten toe als de begeleider direct aansluitend nog meer ritten doet. Dezelfde begeleider, dezelfde lading/vergunning. Begeleidingstijd loopt door van start rit 1 tot einde laatste rit.
+                  Voeg vervolgritten toe als er direct aansluitend nog meer ritten gereden worden. Aansluitende ritten kunnen met andere chauffeurs, bedrijven of ontheffingen zijn. Begeleidingstijd loopt door van start rit 1 tot einde laatste rit.
                 </p>
               ) : (
                 <ul className="space-y-4">
