@@ -198,11 +198,16 @@ const InvoicesInner = () => {
       if (platClientIds.length) {
         const { data: pc } = await supabase
           .from("profiles")
-          .select("id, billing_country")
+          .select("id, billing_country, company_name, full_name, anonymous_id")
           .in("id", platClientIds);
-        const map: Record<string, string | null> = {};
-        (pc ?? []).forEach((r: { id: string; billing_country: string | null }) => { map[r.id] = r.billing_country; });
-        setClientCountries((prev) => ({ ...prev, ...map }));
+        const cmap: Record<string, string | null> = {};
+        const nmap: Record<string, string> = {};
+        (pc ?? []).forEach((r: { id: string; billing_country: string | null; company_name: string | null; full_name: string | null; anonymous_id: string | null }) => {
+          cmap[r.id] = r.billing_country;
+          nmap[r.id] = r.company_name || r.full_name || r.anonymous_id || "";
+        });
+        setClientCountries((prev) => ({ ...prev, ...cmap }));
+        setClientNames((prev) => ({ ...prev, ...nmap }));
       }
       if (platList.length) {
         const { data: pit } = await supabase
