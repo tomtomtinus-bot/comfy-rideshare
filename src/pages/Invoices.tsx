@@ -343,6 +343,53 @@ const InvoicesInner = () => {
             </div>
           </header>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-card shadow-etched">
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Zoek (naam / factuurnr.)
+              </label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={isEscort ? "Opdrachtgever, factuurnr…" : "Begeleider, opdrachtgever…"}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Datum van
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+                Datum tot
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
+              />
+            </div>
+            {(search || dateFrom || dateTo) && (
+              <div className="md:col-span-3">
+                <button
+                  onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}
+                  className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline"
+                >
+                  Filters wissen
+                </button>
+              </div>
+            )}
+          </div>
+
           {!isEscort && (
             <Tabs defaultValue="begeleiders" className="w-full">
               <TabsList className="mb-6">
