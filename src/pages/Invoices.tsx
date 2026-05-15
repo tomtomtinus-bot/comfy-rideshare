@@ -611,18 +611,11 @@ const InvoicesInner = () => {
 
   function renderEscortInvoices() {
     if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
-    if (invoices.length === 0)
+    const filtered = invoices.filter(matchesFilter);
+    const renderInv = (inv: Invoice) => {
+      const isOpen = open === inv.id;
+      const rows = items[inv.id] ?? [];
       return (
-        <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{t("invoices.noInvoices")}</p>
-        </div>
-      );
-    return (
-            <ul className="space-y-px bg-brass-deep/10">
-              {invoices.map((inv) => {
-                const isOpen = open === inv.id;
-                const rows = items[inv.id] ?? [];
-                return (
                   <li key={inv.id} className="bg-card p-6 md:p-8">
                     <div className="grid grid-cols-12 gap-4 items-start">
                       <div className="col-span-12 md:col-span-3">
