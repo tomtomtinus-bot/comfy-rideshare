@@ -10,6 +10,10 @@ const ResetPassword = () => {
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsMfa, setNeedsMfa] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,8 +122,44 @@ const ResetPassword = () => {
     if (password !== confirm) return toast.error("Wachtwoorden komen niet overeen.");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      const msg = error.message || "";
+      if (/AAL2|MFA|assurance/i.test(msg)) {
+        // User has MFA enabled — require TOTP challenge before allowing password update.
+        const { data: list } = await supabase.auth.mfa.listFactors();
+        const verified = (list?.totp ?? []).find((f: any) => f.status === "verified");
+        if (verified) {
+          setMfaFactorId(verified.id);
+          setPendingPassword(password);
+          setNeedsMfa(true);
+          setBusy(false);
+          return;
+        }
+      }
+      setBusy(false);
+      return toast.error(msg);
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    toast.success("Wachtwoord bijgewerkt.");
+    navigate("/dashboard");
+  };
+
+  const onVerifyMfa = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!mfaFactorId || !pendingPassword) return;
+    if (mfaCode.length < 6) return toast.error("Voer de 6-cijferige code in.");
+    setBusy(true);
+    const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: mfaFactorId,
+      code: mfaCode,
+    });
+    if (vErr) {
+      setBusy(false);
+      return toast.error(vErr.message);
+    }
+    const { error: uErr } = await supabase.auth.updateUser({ password: pendingPassword });
+    setBusy(false);
+    if (uErr) return toast.error(uErr.message);
     toast.success("Wachtwoord bijgewerkt.");
     navigate("/dashboard");
   };
@@ -143,6 +183,26 @@ const ResetPassword = () => {
             </div>
           ) : !ready ? (
             <p className="text-sm text-brass-deep/70">Bezig met verifiëren van je herstellink…</p>
+          ) : needsMfa ? (
+            <form onSubmit={onVerifyMfa} className="space-y-4">
+              <p className="text-sm text-brass-deep/70">
+                Tweestapsverificatie is actief op dit account. Voer de 6-cijferige code uit je authenticator-app in om je nieuwe wachtwoord op te slaan.
+              </p>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Verificatiecode</label>
+                <input
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm tracking-[0.5em] text-center focus:outline-none focus:border-brass-gold"
+                />
+              </div>
+              <button disabled={busy} className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
+                {busy ? "Bezig…" : "Bevestigen & opslaan"}
+              </button>
+            </form>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
