@@ -35,6 +35,7 @@ import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminRides from "./pages/admin/AdminRides.tsx";
 import AdminInvoices from "./pages/admin/AdminInvoices.tsx";
 import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
+import AdminEscortDetail from "./pages/admin/AdminEscortDetail.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import AdminExcluded from "./pages/admin/AdminExcluded.tsx";
 import ExcludedEscorts from "./pages/ExcludedEscorts.tsx";
@@ -90,6 +91,7 @@ const App = () => (
               <Route path="rides" element={<AdminRides />} />
               <Route path="invoices" element={<AdminInvoices />} />
               <Route path="escorts" element={<AdminEscorts />} />
+              <Route path="escorts/:id" element={<AdminEscortDetail />} />
               <Route path="fuel" element={<AdminFuel />} />
               <Route path="excluded" element={<AdminExcluded />} />
             </Route>
