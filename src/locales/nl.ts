@@ -279,7 +279,7 @@ const nl = {
     removeDriver: "Verwijder chauffeur",
     removePlate: "Verwijder kenteken",
     plannedStart: "Geplande starttijd",
-    timeQuarter: "Tijd (per kwartier)",
+    timeQuarter: "Tijd",
     pickTime: "Kies tijd…",
     notes: "Opmerkingen (optioneel)",
     searching: "Zoeken…",
