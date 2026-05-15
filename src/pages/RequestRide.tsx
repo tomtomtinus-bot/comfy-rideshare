@@ -736,11 +736,15 @@ const RequestRideInner = () => {
             </div>
           ) : (
           <form onSubmit={findMatches} className="bg-card shadow-etched p-8 md:p-10 space-y-8">
-            <section>
+            <details open className="group border border-brass-deep/15 bg-card">
+              <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("request.route")}</p>
+                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="px-5 pb-5 pt-2">
               <p className="text-[12px] text-brass-deep/80 bg-parchment/60 border border-brass-deep/15 px-3 py-2 mb-4">
                 Let op: Voorlopig alleen beschikbaar in Nederland en België
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.route")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.pickup")}</p>
@@ -821,13 +825,18 @@ const RequestRideInner = () => {
                   </select>
                 </div>
               </div>
-            </section>
+              </div>
+            </details>
 
-            <section className="border-t border-brass-deep/10 pt-6">
-              <div className="flex items-center justify-between mb-4">
+            <details className="group border border-brass-deep/15 bg-card">
+              <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                  Aansluitende ritten <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel)</span>
+                  Aansluitende ritten <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel{extraLegs.length > 0 ? ` · ${extraLegs.length}` : ""})</span>
                 </p>
+                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="px-5 pb-5 pt-2">
+              <div className="flex items-center justify-end mb-4">
                 <button type="button" onClick={addExtraLeg} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
                   + Rit toevoegen
                 </button>
@@ -948,10 +957,15 @@ const RequestRideInner = () => {
                   </div>
                 );
               })()}
-            </section>
+              </div>
+            </details>
 
-            <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
+            <details className="group border border-brass-deep/15 bg-card">
+              <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
+                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="px-5 pb-5 pt-2">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Input label={t("request.length")} inputMode="decimal" value={form.cargo_length_m} onChange={(v) => setForm({ ...form, cargo_length_m: v })} placeholder="bv. 25.50" />
                 <Input label={t("request.width")} inputMode="decimal" value={form.cargo_width_m} onChange={(v) => setForm({ ...form, cargo_width_m: v })} placeholder="bv. 4.20" />
