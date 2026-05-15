@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -175,6 +176,12 @@ const AdminEscorts = () => {
                   >
                     {e.available ? "Deactiveer" : "Activeer"}
                   </button>
+                  <Link
+                    to={`/admin/escorts/${e.id}`}
+                    className="block text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-brass-deep text-parchment hover:bg-brass-gold text-center"
+                  >
+                    Bekijk gegevens
+                  </Link>
                 </div>
               </div>
             </li>
