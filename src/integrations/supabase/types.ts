@@ -1472,6 +1472,10 @@ export type Database = {
         Args: { _label: string; _ride_ids: string[] }
         Returns: string
       }
+      claim_initial_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       client_cancel_ride: {
         Args: { _reason?: string; _ride_id: string }
         Returns: Json
