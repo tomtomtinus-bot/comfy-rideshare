@@ -177,9 +177,31 @@ const Inner = () => {
   // Ritten op de planner-kaart (alleen voor weergave elders)
   const [rides, setRides] = useState<Record<string, RideItem>>({});
 
+  // Lokaal concept: bewaart wat de gebruiker invult, ook bij navigatie weg.
+  const draftKey = user ? `escort-settings-draft:${user.id}` : null;
+  const draftRef = useRef<Record<string, unknown>>({});
+  const dv = (name: string, fallback: string) => {
+    const v = draftRef.current[name];
+    return v == null ? fallback : String(v);
+  };
+  const writeDraft = (patch: Record<string, unknown>) => {
+    draftRef.current = { ...draftRef.current, ...patch };
+    if (draftKey) {
+      try { localStorage.setItem(draftKey, JSON.stringify(draftRef.current)); } catch { /* ignore */ }
+    }
+  };
+
   useEffect(() => {
     (async () => {
       if (!user) return;
+
+      // Lees lokaal concept eerst (zodat dv() in inputs werkt)
+      if (draftKey) {
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (raw) draftRef.current = JSON.parse(raw) ?? {};
+        } catch { /* ignore */ }
+      }
 
       const [{ data: p }, { data: pp }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
@@ -197,38 +219,44 @@ const Inner = () => {
           .maybeSingle(),
       ]);
       if (fp) setCurrentFuel(fp as any);
+      const d = draftRef.current;
       if (pp) {
-        setFullName(pp.full_name ?? "");
-        setPhone(pp.phone ?? "");
+        setFullName((d.fullName as string) ?? pp.full_name ?? "");
+        setPhone((d.phone as string) ?? pp.phone ?? "");
       }
 
       if (p) {
         setProfile(p);
-        setCategories(((p as any).categories ?? []) as string[]);
+        setCategories((d.categories as string[]) ?? (((p as any).categories ?? []) as string[]));
         setFiles(((p as any).certificate_files ?? []) as string[]);
-        setLanguages((((p as any).languages ?? ["Nederlands"]) as string[]));
-        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
-          label: String(s.label ?? ""),
-          amount: String(s.amount ?? ""),
-          unit: s.unit === "percent" ? "percent" : "per_uur",
-        })));
+        setLanguages((d.languages as string[]) ?? (((p as any).languages ?? ["Nederlands"]) as string[]));
+        setSurcharges(
+          (d.surcharges as { label: string; amount: string; unit: "per_uur" | "percent" }[]) ??
+            (((p as any).surcharges ?? []) as any[]).map((s) => ({
+              label: String(s.label ?? ""),
+              amount: String(s.amount ?? ""),
+              unit: s.unit === "percent" ? "percent" : "per_uur",
+            })),
+        );
         const fs = (p as any).fuel_surcharge ?? {};
-        setFuel({
-          enabled: !!fs.enabled,
-          kind: fs.kind === "percent" ? "percent" : "per_uur",
-          tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
-            ? fs.tiers.map((t: any) => ({
-                from: String(t.from ?? "0"),
-                to: t.to == null ? "" : String(t.to),
-                value: String(t.value ?? "0"),
-              }))
-            : [{ from: "0", to: "1.60", value: "0" }],
-        });
-        setPostcode((p as any).base_postcode ?? "");
-        setCity(p.base_city ?? "");
+        setFuel(
+          (d.fuel as typeof fuel) ?? {
+            enabled: !!fs.enabled,
+            kind: fs.kind === "percent" ? "percent" : "per_uur",
+            tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
+              ? fs.tiers.map((t: any) => ({
+                  from: String(t.from ?? "0"),
+                  to: t.to == null ? "" : String(t.to),
+                  value: String(t.value ?? "0"),
+                }))
+              : [{ from: "0", to: "1.60", value: "0" }],
+          },
+        );
+        setPostcode((d.postcode as string) ?? (p as any).base_postcode ?? "");
+        setCity((d.city as string) ?? (p.base_city ?? ""));
         const split = splitAddress((p as any).base_address ?? "");
-        setStreet(split.street);
-        setHouseNumber(split.number);
+        setStreet((d.street as string) ?? split.street);
+        setHouseNumber((d.houseNumber as string) ?? split.number);
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
 
@@ -245,7 +273,18 @@ const Inner = () => {
 
       setLoading(false);
     })();
-  }, [user]);
+  }, [user, draftKey]);
+
+  // Bewaar controlled state continu in concept
+  useEffect(() => {
+    if (loading) return;
+    writeDraft({
+      fullName, phone, postcode, houseNumber, street, city,
+      categories, languages, surcharges, fuel,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, loading]);
+
 
   const toggle = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
