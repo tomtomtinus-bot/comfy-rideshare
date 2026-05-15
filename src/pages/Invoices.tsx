@@ -110,10 +110,15 @@ const InvoicesInner = () => {
   const [wero, setWero] = useState<{ enabled: boolean; handle: string | null; fee: number }>({ enabled: false, handle: null, fee: 0 });
   const [escortCountries, setEscortCountries] = useState<Record<string, string | null>>({});
   const [clientCountries, setClientCountries] = useState<Record<string, string | null>>({});
+  const [escortNames, setEscortNames] = useState<Record<string, string>>({});
+  const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [openPlat, setOpenPlat] = useState<string | null>(null);
   const [payInvoiceId, setPayInvoiceId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const isEscort = role === "begeleider";
 
