@@ -765,10 +765,9 @@ const InvoicesInner = () => {
                       );
                     })()}
                   </li>
-                );
-              })}
-            </ul>
-    );
+      );
+    };
+    return renderGrouped(filtered, renderInv, t("invoices.noInvoices"));
   }
 };
 
