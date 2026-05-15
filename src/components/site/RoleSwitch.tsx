@@ -15,13 +15,17 @@ export const RoleSwitch = () => {
       </Link>
     );
   }
+  const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string };
+  const displayName = meta.full_name || meta.name || user.email || "";
+  const profilePath = role === "begeleider" ? "/profiel" : "/facturatiegegevens";
   return (
     <div className="flex items-center gap-3">
       <Link
-        to="/dashboard"
-        className="hidden md:inline text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
+        to={profilePath}
+        title="Profielinstellingen"
+        className="hidden md:inline-block max-w-[180px] truncate text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
       >
-        {role === "begeleider" ? t("nav.myAssignments") : t("nav.myRides")}
+        {displayName}
       </Link>
       <button
         onClick={signOut}
