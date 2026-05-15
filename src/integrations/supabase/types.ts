@@ -1434,6 +1434,7 @@ export type Database = {
         Returns: undefined
       }
       admin_approve_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_list_users: {
         Args: never
         Returns: {
