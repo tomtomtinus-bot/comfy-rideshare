@@ -81,7 +81,7 @@ const WatKostViaCust = () => {
           kicker="Voor de Begeleider (Professional)"
           title="Focus op de weg, terwijl ons systeem uw backoffice beheert."
         >
-          <Bullet label="Vaste bijdrage" value="€ 2,50 per maand." />
+          <Bullet label="Abonnement" value="€ 2,50 per maand." />
           <Bullet
             label="Onbeperkt ritten"
             value="Er is geen limiet aan het aantal opdrachten dat u kunt accepteren."
