@@ -2,13 +2,13 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
 
-const Th = ({ children }: { children: React.ReactNode }) => (
-  <th className="border border-brass-deep/20 bg-brass-deep text-parchment px-3 py-2 text-left text-xs uppercase tracking-widest font-semibold">
+const Th = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <th className={`border border-brass-deep/20 bg-brass-deep text-parchment px-3 py-2 text-left text-xs uppercase tracking-widest font-semibold ${className}`}>
     {children}
   </th>
 );
-const Td = ({ children }: { children: React.ReactNode }) => (
-  <td className="border border-brass-deep/15 px-3 py-2 text-sm text-brass-deep/90">{children}</td>
+const Td = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <td className={`border border-brass-deep/15 px-3 py-2 text-sm text-brass-deep/90 align-top ${className}`}>{children}</td>
 );
 
 const InfoNederland = () => {
@@ -22,94 +22,147 @@ const InfoNederland = () => {
               Info — Nederland
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[1.05] mb-4">
-              Rij­tijden &amp; afmetingen exceptioneel transport
+              Rijtijden &amp; begeleiding exceptioneel transport
             </h1>
-            <p className="text-brass-gold/70 text-sm tracking-wide italic mb-4">
-              {" "}
-            </p>
             <p className="text-base md:text-lg text-brass-deep/80 max-w-3xl leading-relaxed">
-              Overzicht van de toegestane afmetingen en rijtijden voor exceptioneel transport over
-              het Nederlandse onderliggende en bovenliggende wegennet.
+              Officiële rijtijden en het aantal vereiste begeleidingsvoertuigen voor exceptioneel
+              transport in Nederland — zowel op het autosnelwegennet als het onderliggend wegennet.
             </p>
             <div className="mt-6">
               <Link to="/info/belgie" className="text-xs uppercase tracking-widest font-semibold text-brass-gold hover:underline">
-                → Bekijk de Belgische info­pagina
+                → Bekijk de Belgische infopagina
               </Link>
             </div>
           </div>
         </section>
 
         <section className="py-12 md:py-16 px-5 md:px-8 border-b border-brass-deep/10">
-          <div className="max-w-5xl mx-auto space-y-12">
-            <div>
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Onderliggend wegennet
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr><Th>Lengte (m)</Th><Th>Breedte (m)</Th><Th>Massa (t)</Th></tr>
-                  </thead>
-                  <tbody>
-                    <tr><Td>22m00 – 27m50</Td><Td>3m00 – 3m50</Td><Td>—</Td></tr>
-                    <tr><Td>27m51 – 32m00</Td><Td>3m51 – 4m00</Td><Td>—</Td></tr>
-                    <tr><Td>32m01 – 50m00</Td><Td>4m01 – 4m50</Td><Td>—</Td></tr>
-                    <tr><Td>&gt; 50m01</Td><Td>&gt; 5m01</Td><Td>&gt; 100t</Td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          <div className="max-w-5xl mx-auto space-y-14">
 
             <div>
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Bovenliggend wegennet
+              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-2">
+                Rijtijden &amp; begeleiding — Autosnelweg
               </h2>
-              <p className="text-sm text-brass-deep/70 mb-3 italic">
-                Autosnelwegen inclusief N2, N3, N7, N15 en N57 (Rotterdam-Brielle).
+              <p className="text-sm text-brass-deep/70 mb-4 italic">
+                Inclusief N2, N3, N7, N15 en N57 (Rotterdam – Brielle).
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr><Th>Lengte (m)</Th><Th>Breedte (m)</Th><Th>Massa (t)</Th></tr>
+                    <tr>
+                      <Th>Categorie</Th>
+                      <Th>1 begeleidingsvoertuig</Th>
+                      <Th>2 begeleidingsvoertuigen</Th>
+                    </tr>
                   </thead>
                   <tbody>
-                    <tr><Td>22m00 – 40m00</Td><Td>3m00 – 4m00</Td><Td>—</Td></tr>
-                    <tr><Td>40m01 – 50m00</Td><Td>4m01 – 4m50</Td><Td>—</Td></tr>
-                    <tr><Td>—</Td><Td>4m51 – 5m00</Td><Td>—</Td></tr>
-                    <tr><Td>&gt; 50m01</Td><Td>&gt; 5m01</Td><Td>&gt; 100t</Td></tr>
+                    <tr>
+                      <Td><strong>Lengte</strong></Td>
+                      <Td>40 m – 50 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 50 m<br/><span className="text-brass-deep/60">20:00 – 06:00</span></Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Breedte</strong></Td>
+                      <Td>4,01 m – 4,50 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>
+                        4,51 m – 5,00 m<br/><span className="text-brass-deep/60">20:00 – 06:00</span><br/><br/>
+                        &gt; 5,00 m<br/><span className="text-brass-deep/60">22:00 – 06:00</span>
+                      </Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Bijzondere verrichting</strong></Td>
+                      <Td>—</Td>
+                      <Td>10:00 – 15:00 &amp; 20:00 – 06:00</Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Massa</strong></Td>
+                      <Td>—</Td>
+                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
             <div>
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Rijtijden onderliggend wegennet
+              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-2">
+                Rijtijden &amp; begeleiding — Onderliggend wegennet
               </h2>
-              <ul className="space-y-2 text-sm text-brass-deep/90 leading-relaxed list-disc pl-5">
-                <li>Breedte 4m01 – 4m50: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Breedte 4m51 – 5m00: van 20h00 en 06h00</li>
-                <li>Breedte 5m01 en breder: 22h00 – 06h00</li>
-                <li>Lengte 40m01 – 50m00: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Lengte 40m01 en langer: van 20h00 en 06h00</li>
-                <li>Gewicht: vanaf 100.001 kg en zwaarder: van 10h00 – 15h00 en 20h00 en 06h00</li>
-              </ul>
+              <p className="text-sm text-brass-deep/70 mb-4 italic">
+                Inclusief N-wegen onder beheer van RWS en alle wegen onder beheer van provincies,
+                gemeenten en waterschappen.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Th>Categorie</Th>
+                      <Th>1 begeleidingsvoertuig</Th>
+                      <Th>2 begeleidingsvoertuigen</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Td><strong>Lengte</strong></Td>
+                      <Td>27,51 m – 32 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 32,01 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00 **</span></Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Breedte</strong></Td>
+                      <Td>3,51 m – 4 m<br/><span className="text-brass-deep/60">geen beperking</span></Td>
+                      <Td>
+                        4,01 m – 4,99 m<br/>
+                        <span className="text-brass-deep/60">10:00 – 15:00 (tot 4,51 m)</span><br/>
+                        <span className="text-brass-deep/60">20:00 – 06:00</span><br/><br/>
+                        &gt; 5,00 m<br/><span className="text-brass-deep/60">22:00 – 06:00</span>
+                      </Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Bijzondere verrichting</strong></Td>
+                      <Td>—</Td>
+                      <Td>10:00 – 15:00 &amp; 20:00 – 06:00</Td>
+                    </tr>
+                    <tr>
+                      <Td><strong>Massa</strong></Td>
+                      <Td>—</Td>
+                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4 space-y-1 text-xs text-brass-deep/70 italic leading-relaxed">
+                <p>Van bovenstaande rijtijden mag uitsluitend worden afgeweken indien de wegbeheerder de afwijkende rijtijden motiveert.</p>
+                <p>* Rijtijden gelden op werkdagen. Op zaterdag en zondag gelden geen rijtijden, tenzij anders voorgeschreven door de wegbeheerder.</p>
+                <p>** Bij een transportlengte &gt; 50 m mag een wegbeheerder van het onderliggend wegennet zonder motivatie afwijkende rijtijden opgeven. De lengte is dan voldoende motivatie.</p>
+              </div>
             </div>
 
             <div>
-              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Rijtijden bovenliggend wegennet
+              <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-2">
+                Konvooi Nederland
               </h2>
-              <ul className="space-y-2 text-sm text-brass-deep/90 leading-relaxed list-disc pl-5">
-                <li>Breedte 3m51 – 4m00: geen beperkingen</li>
-                <li>Breedte 4m01 – 4m50: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Breedte 4m51 – 5m00: 20h00 – 06h00</li>
-                <li>Breedte 5m00 en breder: 22h00 – 06h00</li>
-                <li>Lengte 27m51 – 32m00: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Lengte 32m01 – 50m00: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Lengte 50m01 en langer: van 10h00 – 15h00 en 20h00 en 06h00</li>
-                <li>Gewicht: vanaf 100.001 kg en zwaarder: van 10h00 – 15h00 en 20h00 en 06h00</li>
-              </ul>
+              <p className="text-sm text-brass-deep/70 mb-4 italic">
+                Niet toegestaan op het onderliggend wegennet. Een konvooi mag maximaal uit
+                2 exceptionele voertuigen bestaan.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <Th>1 begeleidingsvoertuig</Th>
+                      <Th>2 begeleidingsvoertuigen</Th>
+                      <Th>3 begeleidingsvoertuigen</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <Td>Afhankelijk van breedte / gewicht is rijden met 1 begeleider mogelijk.</Td>
+                      <Td>Tot 50 m</Td>
+                      <Td>50,01 m – 120 m</Td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
           </div>
