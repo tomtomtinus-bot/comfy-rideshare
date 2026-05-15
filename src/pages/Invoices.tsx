@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,6 +64,39 @@ interface Item {
 const fmtDate = (d: string, lng: string) =>
   new Date(d).toLocaleDateString(lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB", { dateStyle: "medium" });
 const fmtMoney = (n: number) => `€${Number(n).toFixed(2)}`;
+
+const MONTHS_NL = [
+  "Januari", "Februari", "Maart", "April", "Mei", "Juni",
+  "Juli", "Augustus", "September", "Oktober", "November", "December",
+];
+
+const isoWeek = (date: Date): number => {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+};
+
+function groupByYMW<T extends { period_start: string }>(items: T[]) {
+  const tree: Record<string, Record<string, Record<string, T[]>>> = {};
+  for (const inv of items) {
+    const d = new Date(inv.period_start);
+    const y = String(d.getFullYear());
+    const m = MONTHS_NL[d.getMonth()];
+    const w = `Week ${isoWeek(d)}`;
+    tree[y] ??= {};
+    tree[y][m] ??= {};
+    tree[y][m][w] ??= [];
+    tree[y][m][w].push(inv);
+  }
+  return tree;
+}
+
+const sortYearDesc = (a: string, b: string) => b.localeCompare(a, undefined, { numeric: true });
+const sortMonthDesc = (a: string, b: string) => MONTHS_NL.indexOf(b) - MONTHS_NL.indexOf(a);
+const sortWeekDesc = (a: string, b: string) =>
+  parseInt(b.replace("Week ", ""), 10) - parseInt(a.replace("Week ", ""), 10);
 
 const InvoicesInner = () => {
   const { user, role } = useAuth();
