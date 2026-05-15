@@ -42,9 +42,7 @@ const RolePicker = () => {
 
     setBusy(true);
     try {
-      const { error: roleErr } = await supabase
-        .from("user_roles")
-        .insert({ user_id: user.id, role });
+      const { error: roleErr } = await supabase.rpc("claim_initial_role", { _role: role });
       if (roleErr) throw roleErr;
 
       const { error: profErr } = await supabase
