@@ -463,7 +463,13 @@ const Inner = () => {
               <GoogleCalendarCard />
               <form
               onSubmit={save}
-              onInput={() => setDirty(true)}
+              onInput={(e) => {
+                setDirty(true);
+                const target = e.target as HTMLInputElement;
+                if (target && target.name) {
+                  writeDraft({ [target.name]: target.value });
+                }
+              }}
               onChange={() => setDirty(true)}
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
