@@ -10,6 +10,10 @@ const ResetPassword = () => {
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsMfa, setNeedsMfa] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
