@@ -1111,12 +1111,17 @@ const RequestRideInner = () => {
                   </div>
                 );
               })()}
-            </section>
+              </div>
+            </details>
 
-            <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">
-                {t("request.driversSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span>
-              </p>
+            <details className="group border border-brass-deep/15 bg-card">
+              <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
+                  {t("request.driversSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span>
+                </p>
+                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+              </summary>
+              <div className="px-5 pb-5 pt-2">
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
