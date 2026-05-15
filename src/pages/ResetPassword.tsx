@@ -183,6 +183,26 @@ const ResetPassword = () => {
             </div>
           ) : !ready ? (
             <p className="text-sm text-brass-deep/70">Bezig met verifiëren van je herstellink…</p>
+          ) : needsMfa ? (
+            <form onSubmit={onVerifyMfa} className="space-y-4">
+              <p className="text-sm text-brass-deep/70">
+                Tweestapsverificatie is actief op dit account. Voer de 6-cijferige code uit je authenticator-app in om je nieuwe wachtwoord op te slaan.
+              </p>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Verificatiecode</label>
+                <input
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm tracking-[0.5em] text-center focus:outline-none focus:border-brass-gold"
+                />
+              </div>
+              <button disabled={busy} className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">
+                {busy ? "Bezig…" : "Bevestigen & opslaan"}
+              </button>
+            </form>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
