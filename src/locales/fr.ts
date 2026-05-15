@@ -204,7 +204,7 @@ const fr: Dict = {
     plates: "Plaques", addPlate: "+ Ajouter une plaque",
     platesHint: "Ex. tracteur et remorque.", platePlaceholder: "Ex. 12-AB-345",
     removeDriver: "Supprimer le chauffeur", removePlate: "Supprimer la plaque",
-    plannedStart: "Heure de départ prévue", timeQuarter: "Heure (par quart d'heure)",
+    plannedStart: "Heure de départ prévue", timeQuarter: "Heure",
     pickTime: "Choisir une heure…", notes: "Remarques (optionnel)",
     searching: "Recherche…", search: "Trouver les accompagnateurs les plus proches",
     matchesKicker: "Accompagnateurs suggérés", matchesTitle: "Accompagnateurs anonymes les plus proches",

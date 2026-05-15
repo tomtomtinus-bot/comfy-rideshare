@@ -913,7 +913,7 @@ const RequestRideInner = () => {
                           onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
                         />
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd (kwartier)</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
                           <input
                             type="time"
                             step={900}

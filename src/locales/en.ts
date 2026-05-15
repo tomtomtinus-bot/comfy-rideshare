@@ -281,7 +281,7 @@ const en: Dict = {
     removeDriver: "Remove driver",
     removePlate: "Remove plate",
     plannedStart: "Planned start time",
-    timeQuarter: "Time (per quarter hour)",
+    timeQuarter: "Time",
     pickTime: "Pick a time…",
     notes: "Notes (optional)",
     searching: "Searching…",
