@@ -19,6 +19,7 @@ import Invoices from "./pages/Invoices.tsx";
 import BillingDetails from "./pages/BillingDetails.tsx";
 import History from "./pages/History.tsx";
 import Subscription from "./pages/Subscription.tsx";
+import RolePicker from "./pages/RolePicker.tsx";
 
 import EscortRideDetail from "./pages/EscortRideDetail.tsx";
 import ClientRideDetail from "./pages/ClientRideDetail.tsx";
