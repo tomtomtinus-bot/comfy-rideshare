@@ -799,6 +799,28 @@ const RequestRideInner = () => {
                   </div>
                 );
               })()}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <Input
+                  label={t("common.date")}
+                  type="date"
+                  min={todayLocalDate()}
+                  value={form.scheduled_date}
+                  onChange={(v) => setForm({ ...form, scheduled_date: v })}
+                />
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
+                  <select
+                    value={form.scheduled_time}
+                    onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
+                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                  >
+                    <option value="" disabled>{t("request.pickTime")}</option>
+                    {QUARTER_TIMES.map((qt) => (
+                      <option key={qt} value={qt}>{qt}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </section>
 
             <section className="border-t border-brass-deep/10 pt-6">
@@ -1159,25 +1181,6 @@ const RequestRideInner = () => {
               </div>
             </section>
 
-            <section className="border-t border-brass-deep/10 pt-6">
-              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-4">{t("request.plannedStart")}</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label={t("common.date")} type="date" min={todayLocalDate()} value={form.scheduled_date} onChange={(v) => setForm({ ...form, scheduled_date: v })} />
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
-                  <select
-                    value={form.scheduled_time}
-                    onChange={(e) => setForm({ ...form, scheduled_time: e.target.value })}
-                    className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                  >
-                    <option value="" disabled>{t("request.pickTime")}</option>
-                    {QUARTER_TIMES.map((qt) => (
-                      <option key={qt} value={qt}>{qt}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </section>
 
             <div>
               <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.notes")}</label>
