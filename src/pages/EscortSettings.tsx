@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -177,9 +177,31 @@ const Inner = () => {
   // Ritten op de planner-kaart (alleen voor weergave elders)
   const [rides, setRides] = useState<Record<string, RideItem>>({});
 
+  // Lokaal concept: bewaart wat de gebruiker invult, ook bij navigatie weg.
+  const draftKey = user ? `escort-settings-draft:${user.id}` : null;
+  const draftRef = useRef<Record<string, unknown>>({});
+  const dv = (name: string, fallback: string) => {
+    const v = draftRef.current[name];
+    return v == null ? fallback : String(v);
+  };
+  const writeDraft = (patch: Record<string, unknown>) => {
+    draftRef.current = { ...draftRef.current, ...patch };
+    if (draftKey) {
+      try { localStorage.setItem(draftKey, JSON.stringify(draftRef.current)); } catch { /* ignore */ }
+    }
+  };
+
   useEffect(() => {
     (async () => {
       if (!user) return;
+
+      // Lees lokaal concept eerst (zodat dv() in inputs werkt)
+      if (draftKey) {
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (raw) draftRef.current = JSON.parse(raw) ?? {};
+        } catch { /* ignore */ }
+      }
 
       const [{ data: p }, { data: pp }, { data: assigns }, { data: fp }] = await Promise.all([
         supabase.from("escort_profiles").select("*").eq("id", user.id).maybeSingle(),
@@ -197,38 +219,44 @@ const Inner = () => {
           .maybeSingle(),
       ]);
       if (fp) setCurrentFuel(fp as any);
+      const d = draftRef.current;
       if (pp) {
-        setFullName(pp.full_name ?? "");
-        setPhone(pp.phone ?? "");
+        setFullName((d.fullName as string) ?? pp.full_name ?? "");
+        setPhone((d.phone as string) ?? pp.phone ?? "");
       }
 
       if (p) {
         setProfile(p);
-        setCategories(((p as any).categories ?? []) as string[]);
+        setCategories((d.categories as string[]) ?? (((p as any).categories ?? []) as string[]));
         setFiles(((p as any).certificate_files ?? []) as string[]);
-        setLanguages((((p as any).languages ?? ["Nederlands"]) as string[]));
-        setSurcharges((((p as any).surcharges ?? []) as any[]).map((s) => ({
-          label: String(s.label ?? ""),
-          amount: String(s.amount ?? ""),
-          unit: s.unit === "percent" ? "percent" : "per_uur",
-        })));
+        setLanguages((d.languages as string[]) ?? (((p as any).languages ?? ["Nederlands"]) as string[]));
+        setSurcharges(
+          (d.surcharges as { label: string; amount: string; unit: "per_uur" | "percent" }[]) ??
+            (((p as any).surcharges ?? []) as any[]).map((s) => ({
+              label: String(s.label ?? ""),
+              amount: String(s.amount ?? ""),
+              unit: s.unit === "percent" ? "percent" : "per_uur",
+            })),
+        );
         const fs = (p as any).fuel_surcharge ?? {};
-        setFuel({
-          enabled: !!fs.enabled,
-          kind: fs.kind === "percent" ? "percent" : "per_uur",
-          tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
-            ? fs.tiers.map((t: any) => ({
-                from: String(t.from ?? "0"),
-                to: t.to == null ? "" : String(t.to),
-                value: String(t.value ?? "0"),
-              }))
-            : [{ from: "0", to: "1.60", value: "0" }],
-        });
-        setPostcode((p as any).base_postcode ?? "");
-        setCity(p.base_city ?? "");
+        setFuel(
+          (d.fuel as typeof fuel) ?? {
+            enabled: !!fs.enabled,
+            kind: fs.kind === "percent" ? "percent" : "per_uur",
+            tiers: Array.isArray(fs.tiers) && fs.tiers.length > 0
+              ? fs.tiers.map((t: any) => ({
+                  from: String(t.from ?? "0"),
+                  to: t.to == null ? "" : String(t.to),
+                  value: String(t.value ?? "0"),
+                }))
+              : [{ from: "0", to: "1.60", value: "0" }],
+          },
+        );
+        setPostcode((d.postcode as string) ?? (p as any).base_postcode ?? "");
+        setCity((d.city as string) ?? (p.base_city ?? ""));
         const split = splitAddress((p as any).base_address ?? "");
-        setStreet(split.street);
-        setHouseNumber(split.number);
+        setStreet((d.street as string) ?? split.street);
+        setHouseNumber((d.houseNumber as string) ?? split.number);
         if (p.base_lat && p.base_lng) setCoords({ lat: p.base_lat, lng: p.base_lng });
       }
 
@@ -245,7 +273,18 @@ const Inner = () => {
 
       setLoading(false);
     })();
-  }, [user]);
+  }, [user, draftKey]);
+
+  // Bewaar controlled state continu in concept
+  useEffect(() => {
+    if (loading) return;
+    writeDraft({
+      fullName, phone, postcode, houseNumber, street, city,
+      categories, languages, surcharges, fuel,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, loading]);
+
 
   const toggle = (arr: string[], v: string) =>
     arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
@@ -385,6 +424,10 @@ const Inner = () => {
     if (pErr) return toast.error(pErr.message);
     if (error) return toast.error(error.message);
     setDirty(false);
+    if (draftKey) {
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+      draftRef.current = {};
+    }
     toast.success("Profiel bijgewerkt");
     navigate("/dashboard");
   };
@@ -420,7 +463,13 @@ const Inner = () => {
               <GoogleCalendarCard />
               <form
               onSubmit={save}
-              onInput={() => setDirty(true)}
+              onInput={(e) => {
+                setDirty(true);
+                const target = e.target as HTMLInputElement;
+                if (target && target.name) {
+                  writeDraft({ [target.name]: target.value });
+                }
+              }}
               onChange={() => setDirty(true)}
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
@@ -488,19 +537,19 @@ const Inner = () => {
                     </p>
                   </div>
                   {categories.includes("nl") && (
-                    <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={String(profile?.hourly_rate ?? 55)} />
+                    <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={dv("hourlyRate", String(profile?.hourly_rate ?? 55))} />
                   )}
                   {(categories.includes("be-1") || categories.includes("be-2")) && (
-                    <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55)} />
+                    <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={dv("hourlyRateBe", String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
-                    <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55)} />
+                    <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={dv("hourlyRateDe", String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("fr") && (
-                    <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55)} />
+                    <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={dv("hourlyRateFr", String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("lu") && (
-                    <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55)} />
+                    <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={dv("hourlyRateLu", String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
                     <div>
@@ -509,22 +558,21 @@ const Inner = () => {
                         type="number"
                         step="0.01"
                         label="Km-tarief Duitsland (€/km, optioneel)"
-                        defaultValue={
-                          (profile as any)?.km_rate_de == null
-                            ? ""
-                            : String((profile as any).km_rate_de)
-                        }
+                        defaultValue={dv(
+                          "kmRateDe",
+                          (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
+                        )}
                       />
                       <p className="text-[10px] text-brass-deep/50 mt-1">
                         Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
                       </p>
                     </div>
                   )}
-                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={String((profile as any)?.min_billable_hours ?? 0)} />
+                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={dv("minBillableHours", String((profile as any)?.min_billable_hours ?? 0))} />
                   <Input
                     name="vehicleType"
                     label="Pilotvoertuig (type & kenmerk)"
-                    defaultValue={profile?.vehicle_type ?? ""}
+                    defaultValue={dv("vehicleType", profile?.vehicle_type ?? "")}
                   />
                 </div>
               </section>

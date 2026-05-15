@@ -215,6 +215,8 @@ const BillingDetailsInner = () => {
   const dirty = !loading && JSON.stringify(form) !== JSON.stringify(initialRef.current);
   useUnsavedChanges(dirty);
 
+  const draftKey = user ? `billing-draft:${user.id}:${table}` : null;
+
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -227,9 +229,10 @@ const BillingDetailsInner = () => {
         .eq("id", user.id)
         .maybeSingle();
       if (error) toast.error(error.message);
+      let next: FormState = empty;
       if (data) {
         const d = data as unknown as Record<string, unknown>;
-        const next: FormState = {
+        next = {
           ...empty,
           ...Object.fromEntries(
             Object.entries(d).map(([k, v]) => {
@@ -240,12 +243,32 @@ const BillingDetailsInner = () => {
             }),
           ),
         } as FormState;
-        setForm(next);
-        initialRef.current = next;
       }
+      initialRef.current = next;
+      // Voorrang voor lokale concept-versie als die bestaat
+      let draft: FormState | null = null;
+      if (draftKey) {
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (raw) draft = JSON.parse(raw) as FormState;
+        } catch { /* ignore */ }
+      }
+      setForm(draft ? { ...next, ...draft } : next);
       setLoading(false);
     })();
-  }, [user, table, isEscort]);
+  }, [user, table, isEscort, draftKey]);
+
+  // Bewaar tussentijds als concept zodat ingevulde data behouden blijft bij wegklikken
+  useEffect(() => {
+    if (loading || !draftKey) return;
+    if (JSON.stringify(form) === JSON.stringify(initialRef.current)) {
+      localStorage.removeItem(draftKey);
+      return;
+    }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(form));
+    } catch { /* ignore */ }
+  }, [form, loading, draftKey]);
 
   const set = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -296,6 +319,9 @@ const BillingDetailsInner = () => {
     if (error) return toast.error(error.message);
     toast.success(t("billing.saved"));
     initialRef.current = form;
+    if (draftKey) {
+      try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
+    }
   };
 
   const renderField = (props: {
