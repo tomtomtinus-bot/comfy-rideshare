@@ -122,8 +122,44 @@ const ResetPassword = () => {
     if (password !== confirm) return toast.error("Wachtwoorden komen niet overeen.");
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      const msg = error.message || "";
+      if (/AAL2|MFA|assurance/i.test(msg)) {
+        // User has MFA enabled — require TOTP challenge before allowing password update.
+        const { data: list } = await supabase.auth.mfa.listFactors();
+        const verified = (list?.totp ?? []).find((f: any) => f.status === "verified");
+        if (verified) {
+          setMfaFactorId(verified.id);
+          setPendingPassword(password);
+          setNeedsMfa(true);
+          setBusy(false);
+          return;
+        }
+      }
+      setBusy(false);
+      return toast.error(msg);
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    toast.success("Wachtwoord bijgewerkt.");
+    navigate("/dashboard");
+  };
+
+  const onVerifyMfa = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!mfaFactorId || !pendingPassword) return;
+    if (mfaCode.length < 6) return toast.error("Voer de 6-cijferige code in.");
+    setBusy(true);
+    const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: mfaFactorId,
+      code: mfaCode,
+    });
+    if (vErr) {
+      setBusy(false);
+      return toast.error(vErr.message);
+    }
+    const { error: uErr } = await supabase.auth.updateUser({ password: pendingPassword });
+    setBusy(false);
+    if (uErr) return toast.error(uErr.message);
     toast.success("Wachtwoord bijgewerkt.");
     navigate("/dashboard");
   };
