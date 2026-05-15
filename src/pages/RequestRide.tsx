@@ -1053,37 +1053,9 @@ const RequestRideInner = () => {
                 )}
               </div>
               <p className="text-[11px] text-brass-deep/50 mt-1">{t("request.permitUploadHint")}</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
                 <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
-                <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.numEscorts")}</label>
-                  <div className="mt-1 flex items-stretch border border-brass-deep/15 bg-parchment">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, num_escorts: Math.max(1, form.num_escorts - 1) })}
-                      className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label={t("request.fewerEscorts")}
-                    >−</button>
-                    <input
-                      type="number"
-                      min={1}
-                      inputMode="numeric"
-                      value={form.num_escorts}
-                      onChange={(e) => {
-                        const v = parseInt(e.target.value, 10);
-                        setForm({ ...form, num_escorts: Number.isNaN(v) ? 1 : Math.max(1, v) });
-                      }}
-                      className="flex-1 w-full bg-transparent px-2 py-3 text-sm text-center focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, num_escorts: form.num_escorts + 1 })}
-                      className="px-4 text-lg font-bold text-brass-deep hover:bg-brass-gold/10"
-                      aria-label={t("request.moreEscorts")}
-                    >+</button>
-                  </div>
-                </div>
               </div>
               {(() => {
                 const expand = (c?: string): string[] => {
