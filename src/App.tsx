@@ -38,6 +38,7 @@ import AdminEscorts from "./pages/admin/AdminEscorts.tsx";
 import AdminEscortDetail from "./pages/admin/AdminEscortDetail.tsx";
 import AdminFuel from "./pages/admin/AdminFuel.tsx";
 import AdminExcluded from "./pages/admin/AdminExcluded.tsx";
+import AdminEmailChanges from "./pages/admin/AdminEmailChanges.tsx";
 import ExcludedEscorts from "./pages/ExcludedEscorts.tsx";
 import PreferredClients from "./pages/PreferredClients.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
