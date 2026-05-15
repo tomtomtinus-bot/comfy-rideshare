@@ -1198,7 +1198,8 @@ const RequestRideInner = () => {
                   )}
                 </div>
               </div>
-            </section>
+              </div>
+            </details>
 
 
             <div>
