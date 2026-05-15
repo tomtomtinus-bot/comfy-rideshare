@@ -604,10 +604,9 @@ const InvoicesInner = () => {
                 </div>
               )}
             </li>
-          );
-        })}
-      </ul>
-    );
+      );
+    };
+    return renderGrouped(filtered, renderInv, t("invoices.noPlatform"));
   }
 
   function renderEscortInvoices() {
