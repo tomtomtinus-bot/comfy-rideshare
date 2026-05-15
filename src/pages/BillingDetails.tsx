@@ -491,6 +491,8 @@ const BillingDetailsInner = () => {
               </div>
             </form>
           )}
+
+          <EmailChangeCard />
         </div>
       </main>
       <Footer />
