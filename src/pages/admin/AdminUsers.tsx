@@ -122,6 +122,20 @@ const AdminUsers = () => {
     }
   };
 
+  const removeUser = async (uid: string, label: string) => {
+    if (uid === user?.id) {
+      toast.error("Je kunt je eigen account niet verwijderen");
+      return;
+    }
+    if (!confirm(`Account "${label}" definitief verwijderen?\n\nDit verwijdert de gebruiker, het profiel en alle gekoppelde gegevens. Deze actie kan niet ongedaan worden gemaakt.`)) return;
+    const { error } = await supabase.rpc("admin_delete_user", { _user_id: uid });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Account verwijderd");
+      load();
+    }
+  };
+
   const reject = async (uid: string) => {
     const reason = window.prompt("Optionele reden van afwijzing:") ?? null;
     const { error } = await supabase.rpc("admin_reject_user", { _user_id: uid, _reason: reason });
