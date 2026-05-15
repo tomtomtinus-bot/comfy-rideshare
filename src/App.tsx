@@ -95,6 +95,7 @@ const App = () => (
               <Route path="escorts/:id" element={<AdminEscortDetail />} />
               <Route path="fuel" element={<AdminFuel />} />
               <Route path="excluded" element={<AdminExcluded />} />
+              <Route path="email-changes" element={<AdminEmailChanges />} />
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />
