@@ -293,6 +293,14 @@ const AdminUsers = () => {
                         Admin intrekken
                       </button>
                     )}
+                    {!isMe && (
+                      <button
+                        onClick={() => removeUser(u.id, u.full_name || u.email)}
+                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-red-700 text-parchment hover:bg-red-800"
+                      >
+                        Verwijderen
+                      </button>
+                    )}
                   </div>
                   <p className="col-span-12 text-[10px] text-brass-deep/40 tabular-nums">
                     Aangemaakt {fmtDate(u.created_at)}
