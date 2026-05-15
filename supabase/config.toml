@@ -45,3 +45,9 @@ verify_jwt = false
 
 [functions.validate-vat]
 verify_jwt = false
+
+[functions.notify-admins-new-signup]
+verify_jwt = false
+
+[functions.admin-approve-email-change]
+verify_jwt = true

@@ -188,6 +188,19 @@ const Auth = () => {
     setBusy(false);
     if (error) return toast.error(error.message);
 
+    // Notify admins (best-effort, niet blokkerend)
+    if (data.user?.id) {
+      supabase.functions.invoke("notify-admins-new-signup", {
+        body: {
+          userId: data.user.id,
+          email: d.email,
+          fullName: d.fullName,
+          phone: d.phone,
+          role: d.role,
+        },
+      }).catch(() => { /* stil falen */ });
+    }
+
     if (data.session) {
       toast.success(t("auth.accountCreated"));
       navigate("/dashboard");
