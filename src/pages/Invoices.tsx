@@ -444,20 +444,90 @@ const InvoicesInner = () => {
     </div>
   );
 
-  function renderPlatformInvoices() {
-    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
-    if (platformInvoices.length === 0)
+  function matchesFilter(inv: { invoice_number: string; period_start: string; period_end: string; escort_id?: string; client_id: string }) {
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const eName = inv.escort_id ? escortNames[inv.escort_id] || "" : "";
+      const cName = clientNames[inv.client_id] || "";
+      const hay = [inv.invoice_number, eName, cName].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (dateFrom && new Date(inv.period_end) < new Date(dateFrom)) return false;
+    if (dateTo && new Date(inv.period_start) > new Date(dateTo + "T23:59:59")) return false;
+    return true;
+  }
+
+  function renderGrouped<T extends { id: string; period_start: string }>(items: T[], renderItem: (i: T) => JSX.Element, emptyText: string) {
+    if (items.length === 0)
       return (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{t("invoices.noPlatform")}</p>
+          <p className="text-brass-deep/60">{emptyText}</p>
         </div>
       );
+    const tree = groupByYMW(items);
+    const years = Object.keys(tree).sort(sortYearDesc);
+    const expandAll = !!(search || dateFrom || dateTo);
     return (
-      <ul className="space-y-px bg-brass-deep/10">
-        {platformInvoices.map((inv) => {
-          const isOpen = openPlat === inv.id;
-          const rows = platformItems[inv.id] ?? [];
+      <div className="space-y-2">
+        {years.map((y, yi) => {
+          const months = Object.keys(tree[y]).sort(sortMonthDesc);
+          const yearCount = months.reduce((s, m) => s + Object.values(tree[y][m]).reduce((a, arr) => a + arr.length, 0), 0);
           return (
+            <details key={y} open={expandAll || yi === 0} className="group bg-card shadow-etched">
+              <summary className="flex items-center justify-between cursor-pointer select-none px-5 py-3 hover:bg-parchment/50">
+                <span className="font-display text-lg text-brass-deep">{y}</span>
+                <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                  {yearCount} factu{yearCount === 1 ? "ur" : "ren"}
+                  <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
+                </span>
+              </summary>
+              <div className="px-3 pb-3 space-y-2">
+                {months.map((m) => {
+                  const weeks = Object.keys(tree[y][m]).sort(sortWeekDesc);
+                  const monthCount = weeks.reduce((s, w) => s + tree[y][m][w].length, 0);
+                  return (
+                    <details key={m} open={expandAll} className="group/m border border-brass-deep/10 bg-parchment/30">
+                      <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
+                        <span className="text-sm font-semibold text-brass-deep">{m}</span>
+                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                          {monthCount}
+                          <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">▼</span>
+                        </span>
+                      </summary>
+                      <div className="px-2 pb-2 space-y-2">
+                        {weeks.map((w) => (
+                          <details key={w} open={expandAll} className="group/w border border-brass-deep/10 bg-card">
+                            <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/40">
+                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{w}</span>
+                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                                {tree[y][m][w].length}
+                                <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">▼</span>
+                              </span>
+                            </summary>
+                            <ul className="space-y-px bg-brass-deep/10">
+                              {tree[y][m][w].map(renderItem)}
+                            </ul>
+                          </details>
+                        ))}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderPlatformInvoices() {
+    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
+    const filtered = platformInvoices.filter(matchesFilter);
+    const renderInv = (inv: PlatformInvoice) => {
+      const isOpen = openPlat === inv.id;
+      const rows = platformItems[inv.id] ?? [];
+      return (
             <li key={inv.id} className="bg-card p-6 md:p-8">
               <div className="grid grid-cols-12 gap-4 items-start">
                 <div className="col-span-12 md:col-span-3">
