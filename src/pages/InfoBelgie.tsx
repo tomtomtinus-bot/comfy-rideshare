@@ -20,6 +20,7 @@ const links = [
   { label: "Actuele en belangrijke wegenwerken in België", href: "https://wegenenverkeer.be/wegenwerken" },
   { label: "Plan uw route via het reiswegennetwerk op kaart (Vlaams Gewest)", href: "https://wegenenverkeer.be/zwaar-en-uitzonderlijk-vervoer/reiswegennetwerk" },
   { label: "Plan uw route via het reiswegennetwerk op kaart (Waals Gewest)", href: "https://routier.wallonie.be/" },
+  { label: "Vrijstelling rijden op feestdagen (PDF)", href: "https://wegenenverkeer.be/sites/default/files/uploads/documenten/uitzonderlijk%20vervoer/20221220_Afwijking%20rijtijden_%20feestdagen.pdf" },
 ];
 
 const InfoBelgie = () => {
