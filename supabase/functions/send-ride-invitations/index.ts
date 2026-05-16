@@ -153,22 +153,35 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fire-and-forget push notifications to invited escorts
+    // Fire-and-forget push notifications to invited escorts, per escort, with
+    // their exact deadline (responds_by) included in the body. Because lock-screen
+    // pushes can't tick, we communicate the absolute end time instead.
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${ANON_KEY}`,
-          'apikey': ANON_KEY,
-        },
-        body: JSON.stringify({
-          userIds: escortIds,
-          title: 'Nieuwe ritaanvraag',
-          body: `${ride.pickup_city} → ${ride.dropoff_city} • ${plannedAt}`,
-          url: `/rit/${ride.id}`,
-        }),
-      }).then(r => r.text())
+      await Promise.all(assignments.map(async (a) => {
+        const escortId = a.escort_id as string
+        if (!escortId) return
+        const deadline = a.responds_by ? new Date(a.responds_by) : null
+        const deadlineTxt = deadline
+          ? deadline.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+          : null
+        const body = `${ride.pickup_city} → ${ride.dropoff_city} • ${plannedAt}` +
+          (deadlineTxt ? ` • Reageer vóór ${deadlineTxt}` : '')
+        await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${ANON_KEY}`,
+            'apikey': ANON_KEY,
+          },
+          body: JSON.stringify({
+            userIds: [escortId],
+            title: 'Nieuwe ritaanvraag',
+            body,
+            url: `/rit/${ride.id}`,
+            tag: `ride-invite-${a.id}`,
+          }),
+        }).then(r => r.text())
+      }))
     } catch (e) {
       console.error('[send-ride-invitations] push failed', e)
     }

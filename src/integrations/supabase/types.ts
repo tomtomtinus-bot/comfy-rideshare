@@ -964,6 +964,8 @@ export type Database = {
           invited_at: string
           invoice_id: string | null
           invoiced_at: string | null
+          push_expired_sent_at: string | null
+          push_warning_sent_at: string | null
           reminder_10h_sent_at: string | null
           reminder_8h_sent_at: string | null
           responded_at: string | null
@@ -1003,6 +1005,8 @@ export type Database = {
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
+          push_expired_sent_at?: string | null
+          push_warning_sent_at?: string | null
           reminder_10h_sent_at?: string | null
           reminder_8h_sent_at?: string | null
           responded_at?: string | null
@@ -1042,6 +1046,8 @@ export type Database = {
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
+          push_expired_sent_at?: string | null
+          push_warning_sent_at?: string | null
           reminder_10h_sent_at?: string | null
           reminder_8h_sent_at?: string | null
           responded_at?: string | null
