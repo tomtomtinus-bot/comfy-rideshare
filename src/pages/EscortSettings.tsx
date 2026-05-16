@@ -463,6 +463,7 @@ const Inner = () => {
             <>
               <GoogleCalendarCard />
               <div className="mb-6"><EmailChangeCard /></div>
+              <NotificationPreferencesCard />
               <form
               onSubmit={save}
               onInput={(e) => {
