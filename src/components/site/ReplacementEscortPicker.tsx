@@ -12,7 +12,8 @@ type Candidate = {
   rides_completed: number | null;
   vehicle_type: string | null;
   languages: string[] | null;
-  dist_km: number | null;
+  aanvoer_km: number | null;
+  afvoer_km: number | null;
 };
 
 export const ReplacementEscortPicker = ({
