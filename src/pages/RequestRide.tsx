@@ -344,10 +344,12 @@ const RequestRideInner = () => {
     legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
     for (const ex of extraLegs) {
       if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
+      if (!ex.end_time) return null;
       const startMs = new Date(nlISO(ex.scheduled_date, ex.scheduled_time)).getTime();
-      if (isNaN(startMs)) return null;
-      const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
-      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
+      const endMs = new Date(nlISO(ex.end_date || ex.scheduled_date, ex.end_time)).getTime();
+      if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) return null;
+      const durMin = Math.round((endMs - startMs) / 60_000);
+      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs });
     }
     return legs;
   };
