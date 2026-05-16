@@ -12,7 +12,8 @@ type Candidate = {
   rides_completed: number | null;
   vehicle_type: string | null;
   languages: string[] | null;
-  dist_km: number | null;
+  aanvoer_km: number | null;
+  afvoer_km: number | null;
 };
 
 export const ReplacementEscortPicker = ({
@@ -79,15 +80,15 @@ export const ReplacementEscortPicker = ({
                 <div className="min-w-0">
                   <p className="font-medium text-sm">
                     Begeleider #{c.anonymous_id ?? "—"}
-                    {typeof c.dist_km === "number" && (
-                      <span className="ml-2 text-xs text-brass-deep/50 tabular-nums">
-                        ~{Math.round(c.dist_km)} km
-                      </span>
-                    )}
                   </p>
                   <p className="text-xs text-brass-deep/60 mt-0.5">
                     {c.base_city ?? "—"} · {c.vehicle_type ?? "—"} · €{Number(c.hourly_rate ?? 0).toFixed(2)}/u ·{" "}
                     ★ {Number(c.rating ?? 0).toFixed(1)} ({c.rides_completed ?? 0})
+                  </p>
+                  <p className="text-xs text-brass-deep/70 mt-1 tabular-nums">
+                    Aanvoer: <span className="font-medium">{c.aanvoer_km != null ? `~${Math.round(c.aanvoer_km)} km` : "—"}</span>
+                    {" · "}
+                    Afvoer: <span className="font-medium">{c.afvoer_km != null ? `~${Math.round(c.afvoer_km)} km` : "—"}</span>
                   </p>
                 </div>
                 <button
