@@ -76,12 +76,6 @@ export function NotificationsListener() {
         .order("created_at", { ascending: false })
         .limit(5);
       data?.forEach((n) => toast(n.title, { description: n.body }));
-      if (data && data.length > 0) {
-        await supabase
-          .from("notifications")
-          .update({ read_at: new Date().toISOString() })
-          .in("id", data.map((n) => n.id));
-      }
 
       // Browser push (if permission granted) — web only
       if (
@@ -113,10 +107,6 @@ export function NotificationsListener() {
           ) {
             new Notification(n.title, { body: n.body });
           }
-          await supabase
-            .from("notifications")
-            .update({ read_at: new Date().toISOString() })
-            .eq("id", n.id);
         }
       )
       .subscribe();

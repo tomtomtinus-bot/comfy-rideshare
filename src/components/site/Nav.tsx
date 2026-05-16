@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RoleSwitch } from "@/components/site/RoleSwitch";
 import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
+import { NotificationBell } from "@/components/site/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Nav = () => {
@@ -72,6 +73,7 @@ export const Nav = () => {
           <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
+          <NotificationBell />
           <RoleSwitch />
           <LanguageSwitcher />
           <button
