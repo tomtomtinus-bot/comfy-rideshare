@@ -375,7 +375,7 @@ const Auth = () => {
               <p className="text-xs text-brass-deep/70 leading-relaxed">
                 Vul je e-mailadres in. We sturen je een link om een nieuw wachtwoord in te stellen.
               </p>
-              <Field name="email" type="email" label={t("auth.email")} required />
+              <Field name="email" type="email" label={t("auth.email")} required autoComplete="email" />
               <button
                 disabled={busy}
                 className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
@@ -423,15 +423,31 @@ const Auth = () => {
                 )}
               </>
             )}
-            <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
+            <form
+              onSubmit={mode === "login" ? handleLogin : handleSignup}
+              className="space-y-4"
+              autoComplete="on"
+            >
               {mode === "signup" && (
                 <>
-                  <Field name="fullName" label={t("auth.fullName")} required />
-                  <Field name="phone" label={t("auth.phone")} required />
+                  <Field name="fullName" label={t("auth.fullName")} required autoComplete="name" />
+                  <Field name="phone" type="tel" label={t("auth.phone")} required autoComplete="tel" />
                 </>
               )}
-              <Field name="email" type="email" label={t("auth.email")} required />
-              <Field name="password" type="password" label={t("auth.password")} required />
+              <Field
+                name="email"
+                type="email"
+                label={t("auth.email")}
+                required
+                autoComplete={mode === "signup" ? "email" : "username"}
+              />
+              <Field
+                name="password"
+                type="password"
+                label={t("auth.password")}
+                required
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              />
 
               {mode === "login" && (
                 <div className="flex items-center justify-between gap-2 pt-1">
@@ -536,22 +552,31 @@ const Field = ({
   type = "text",
   required,
   defaultValue,
+  autoComplete,
+  id,
 }: {
   name: string;
   label: string;
   type?: string;
   required?: boolean;
   defaultValue?: string;
+  autoComplete?: string;
+  id?: string;
 }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+    <label
+      htmlFor={id ?? name}
+      className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold"
+    >
       {label}
     </label>
     <input
+      id={id ?? name}
       name={name}
       type={type}
       required={required}
       defaultValue={defaultValue}
+      autoComplete={autoComplete}
       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
     />
   </div>
