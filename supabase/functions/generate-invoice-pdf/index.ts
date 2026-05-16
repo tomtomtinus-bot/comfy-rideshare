@@ -18,6 +18,16 @@ const fmtMoney = (n: number) =>
     maximumFractionDigits: 2,
   })}`;
 
+// jsPDF default helvetica uses WinAnsi encoding which has no glyph for "→",
+// "—", non-breaking space etc. Replace with safe ASCII so they don't render
+// as `!'` boxes on invoices.
+const safe = (s: string): string =>
+  s
+    .replace(/→/g, ">")
+    .replace(/—/g, "-")
+    .replace(/–/g, "-")
+    .replace(/\u00a0/g, " ");
+
 type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
 type AutoTablePluginFn = (jsPDFClass: typeof jsPDF) => void;
 const autoTableExports = autoTableModule as unknown as {
@@ -167,7 +177,7 @@ const drawShell = (doc: jsPDF, opts: ShellOpts, logoDataUrl: string | null) => {
   doc.text("Betalingsconditie:", metaX, 78);
   doc.text("30 dagen", right, 78, { align: "right" });
   doc.text("Periode:", metaX, 84);
-  doc.text(`${fmtDate(opts.period_start)} – ${fmtDate(opts.period_end)}`, right, 84, {
+  doc.text(`${fmtDate(opts.period_start)} - ${fmtDate(opts.period_end)}`, right, 84, {
     align: "right",
   });
 };
@@ -364,6 +374,16 @@ Deno.serve(async (req) => {
       items = its ?? [];
       from = { ...(epProf ?? {}), ...(ep ?? {}) } as BillingParty;
       to = (cp ?? {}) as BillingParty;
+
+      // Enrich: fetch ride metadata (route, reference, permit) for grouping
+      const rideIds = Array.from(new Set(items.map((i) => String(i.ride_id)).filter(Boolean)));
+      if (rideIds.length > 0) {
+        const { data: rideRows } = await admin
+          .from("rides")
+          .select("id, scheduled_at, pickup_city, dropoff_city, client_reference, permit_number, license_plates")
+          .in("id", rideIds);
+        (invoice as Record<string, unknown>).__rides = rideRows ?? [];
+      }
     } else {
       const { data: inv } = await admin
         .from("platform_invoices")
@@ -402,6 +422,17 @@ Deno.serve(async (req) => {
         admin.from("profiles").select("*").eq("id", inv.client_id).maybeSingle(),
       ]);
       items = its ?? [];
+
+      // Enrich with ride reference (for clearer line item)
+      const rideIds = Array.from(new Set(items.map((i) => String(i.ride_id)).filter(Boolean)));
+      if (rideIds.length > 0) {
+        const { data: rideRows } = await admin
+          .from("rides")
+          .select("id, client_reference")
+          .in("id", rideIds);
+        (invoice as Record<string, unknown>).__rides = rideRows ?? [];
+      }
+
       from = PLATFORM_PARTY;
       to = (cp ?? {}) as BillingParty;
     }
@@ -421,16 +452,115 @@ Deno.serve(async (req) => {
     let subtotal = 0;
     if (type === "regular") {
       subtotal = items.reduce((s, r) => s + Number(r.amount ?? 0), 0);
+
+      // Group invoice_items per ride so each rit becomes a clear sub-block
+      // with route + reference as section header and split lines beneath.
+      type RideMeta = {
+        id: string;
+        scheduled_at?: string | null;
+        pickup_city?: string | null;
+        dropoff_city?: string | null;
+        client_reference?: string | null;
+        permit_number?: string | null;
+        license_plates?: string[] | null;
+      };
+      const ridesMeta = ((invoice as Record<string, unknown>).__rides ?? []) as RideMeta[];
+      const rideById = new Map(ridesMeta.map((r) => [r.id, r]));
+
+      const groupOrder: string[] = [];
+      const groups = new Map<string, Array<Record<string, unknown>>>();
+      for (const it of items) {
+        const rid = String(it.ride_id);
+        if (!groups.has(rid)) {
+          groups.set(rid, []);
+          groupOrder.push(rid);
+        }
+        groups.get(rid)!.push(it);
+      }
+
+      type Row = Array<{ content: string; colSpan?: number; styles?: Record<string, unknown> } | string>;
+      const body: Row[] = [];
+
+      const classify = (desc: string): "uren" | "brandstof" | "extra" => {
+        const d = desc.toLowerCase();
+        if (d.startsWith("brandstof")) return "brandstof";
+        if (d.startsWith("extra kosten")) return "extra";
+        return "uren";
+      };
+
+      for (const rid of groupOrder) {
+        const rows = groups.get(rid)!;
+        const meta = rideById.get(rid);
+        const refParts: string[] = [];
+        if (meta?.client_reference) refParts.push(`ref. ${meta.client_reference}`);
+        if (meta?.permit_number) refParts.push(`vergunning ${meta.permit_number}`);
+        if (meta?.license_plates && meta.license_plates.length > 0) {
+          refParts.push(meta.license_plates.join(", "));
+        }
+        const route = meta?.pickup_city && meta?.dropoff_city
+          ? `${meta.pickup_city} > ${meta.dropoff_city}`
+          : String(rows.find((r) => classify(String(r.description ?? "")) === "uren")?.description ?? "Rit");
+        const dateStr = fmtDate(String(meta?.scheduled_at ?? rows[0].ride_date));
+        const header = safe(`${dateStr}   ·   ${route}` + (refParts.length ? `   ·   ${refParts.join(" · ")}` : ""));
+
+        body.push([{
+          content: header,
+          colSpan: 4,
+          styles: {
+            fontStyle: "bold",
+            fillColor: [242, 238, 230],
+            textColor: 20,
+            cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+          },
+        }]);
+
+        const sorted = [...rows].sort((a, b) => {
+          const order = { uren: 0, brandstof: 1, extra: 2 } as const;
+          return order[classify(String(a.description ?? ""))] - order[classify(String(b.description ?? ""))];
+        });
+
+        let groupTotal = 0;
+        for (const r of sorted) {
+          const kind = classify(String(r.description ?? ""));
+          const amount = Number(r.amount ?? 0);
+          groupTotal += amount;
+          let label = "";
+          let qty = "";
+          let rate = "";
+          if (kind === "uren") {
+            label = "Uren begeleiding";
+            qty = `${Number(r.hours ?? 0).toFixed(2)} u`;
+            rate = fmtMoney(Number(r.hourly_rate ?? 0));
+          } else if (kind === "brandstof") {
+            label = "Brandstoftoeslag";
+          } else {
+            label = safe(String(r.description ?? "Extra kosten").replace(/^Extra kosten:\s*/i, "Extra: "));
+          }
+          body.push([
+            { content: label, styles: { cellPadding: { top: 2, bottom: 2, left: 6, right: 1 } } },
+            { content: qty, styles: { halign: "right" } },
+            { content: rate, styles: { halign: "right" } },
+            { content: fmtMoney(amount), styles: { halign: "right" } },
+          ]);
+        }
+
+        body.push([
+          {
+            content: "Subtotaal rit",
+            colSpan: 3,
+            styles: { halign: "right", fontStyle: "bold", textColor: 60, cellPadding: { top: 2, bottom: 4, left: 1, right: 1 } },
+          },
+          {
+            content: fmtMoney(groupTotal),
+            styles: { halign: "right", fontStyle: "bold", cellPadding: { top: 2, bottom: 4, left: 1, right: 1 } },
+          },
+        ]);
+      }
+
       addInvoiceTable(doc, {
         startY: 105,
-        head: [["Datum", "Omschrijving", "Aantal", "Prijs", "Totaal"]],
-        body: items.map((r) => [
-          fmtDate(String(r.ride_date)),
-          String(r.description ?? ""),
-          Number(r.hours ?? 0).toFixed(2),
-          fmtMoney(Number(r.hourly_rate ?? 0)),
-          fmtMoney(Number(r.amount ?? 0)),
-        ]),
+        head: [["Omschrijving", "Aantal", "Tarief", "Bedrag"]],
+        body,
         theme: "plain",
         headStyles: {
           fontStyle: "bold",
@@ -442,29 +572,37 @@ Deno.serve(async (req) => {
         bodyStyles: {
           textColor: 30,
           lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 },
-          lineColor: [200, 200, 200],
+          lineColor: [220, 215, 205],
         },
         columnStyles: {
-          0: { cellWidth: 22 },
-          2: { halign: "right", cellWidth: 18 },
-          3: { halign: "right", cellWidth: 28 },
-          4: { halign: "right", cellWidth: 32 },
+          1: { halign: "right", cellWidth: 22 },
+          2: { halign: "right", cellWidth: 28 },
+          3: { halign: "right", cellWidth: 32 },
         },
         styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
         margin: { left: 18, right: 18 },
       });
     } else {
       subtotal = Number(invoice!.total_amount ?? 0);
+      type RideRef = { id: string; client_reference?: string | null };
+      const ridesMeta = ((invoice as Record<string, unknown>).__rides ?? []) as RideRef[];
+      const refById = new Map(ridesMeta.map((r) => [r.id, r.client_reference ?? ""]));
+
       addInvoiceTable(doc, {
         startY: 105,
-        head: [["Datum", "Omschrijving", "Aantal", "Tarief", "Totaal"]],
-        body: items.map((r) => [
-          fmtDate(String(r.ride_date)),
-          `App-fee rit ${r.route ?? ""}`.trim(),
-          String(r.num_escorts ?? 0),
-          "1,5%",
-          fmtMoney(Number(r.amount ?? 0)),
-        ]),
+        head: [["Datum", "Rit", "Begeleiders", "Tarief", "App-fee"]],
+        body: items.map((r) => {
+          const ref = refById.get(String(r.ride_id)) || "";
+          const route = String(r.route ?? "");
+          const desc = safe(ref ? `${route}\nref. ${ref}` : route);
+          return [
+            fmtDate(String(r.ride_date)),
+            { content: desc, styles: { fontStyle: "normal" } },
+            { content: String(r.num_escorts ?? 0), styles: { halign: "right" } },
+            { content: "1,5%", styles: { halign: "right" } },
+            { content: fmtMoney(Number(r.amount ?? 0)), styles: { halign: "right" } },
+          ];
+        }),
         theme: "plain",
         headStyles: {
           fontStyle: "bold",
@@ -476,15 +614,15 @@ Deno.serve(async (req) => {
         bodyStyles: {
           textColor: 30,
           lineWidth: { top: 0, bottom: 0.1, left: 0, right: 0 },
-          lineColor: [200, 200, 200],
+          lineColor: [220, 215, 205],
         },
         columnStyles: {
           0: { cellWidth: 22 },
-          2: { halign: "right", cellWidth: 18 },
-          3: { halign: "right", cellWidth: 28 },
+          2: { halign: "right", cellWidth: 24 },
+          3: { halign: "right", cellWidth: 22 },
           4: { halign: "right", cellWidth: 32 },
         },
-        styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
+        styles: { fontSize: 9.5, cellPadding: { top: 3, bottom: 3, left: 1, right: 1 } },
         margin: { left: 18, right: 18 },
       });
     }
