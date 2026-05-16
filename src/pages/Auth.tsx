@@ -35,6 +35,7 @@ const Auth = () => {
   const [bioReady, setBioReady] = useState(false);
   const [mfa, setMfa] = useState<{ factorId: string; challengeId?: string } | null>(null);
   const [mfaCode, setMfaCode] = useState("");
+  const [mfaChecked, setMfaChecked] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -44,7 +45,25 @@ const Auth = () => {
     })();
   }, []);
 
-  if (!loading && user && !mfa) return <Navigate to={redirectTo} replace />;
+  // If a session already exists on mount (e.g. returning from OAuth redirect),
+  // verify MFA before allowing the auto-redirect to fire.
+  useEffect(() => {
+    if (loading || !user || mfaChecked) return;
+    (async () => {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+        const { data: list } = await supabase.auth.mfa.listFactors();
+        const verified = (list?.totp ?? []).find((f) => f.status === "verified");
+        if (verified) {
+          const { data: ch } = await supabase.auth.mfa.challenge({ factorId: verified.id });
+          setMfa({ factorId: verified.id, challengeId: ch?.id });
+        }
+      }
+      setMfaChecked(true);
+    })();
+  }, [loading, user, mfaChecked]);
+
+  if (!loading && user && mfaChecked && !mfa) return <Navigate to={redirectTo} replace />;
 
   // After a successful password sign-in, check if MFA is required and prompt.
   // Returns true if MFA challenge was started (caller should NOT navigate).
