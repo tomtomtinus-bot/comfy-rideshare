@@ -136,6 +136,8 @@ interface ExtraLeg {
   dropoff: GeoPoint | null;
   scheduled_date: string;
   scheduled_time: string;
+  end_date: string;
+  end_time: string;
   permit_number: string;
   drivers: { name: string; phone: string }[];
 }
