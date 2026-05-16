@@ -181,28 +181,7 @@ export const NotificationBell = () => {
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
-                  const clickable = !!n.ride_assignment_id;
-                  const inner = (
-                    <div
-                      className={cn(
-                        "px-4 py-3 hover:bg-brass-deep/[0.04] transition-colors",
-                        !n.read_at && "bg-brass-gold/[0.07]"
-                      )}
-                    >
-                      <div className="flex items-start gap-2">
-                        {!n.read_at && (
-                          <span className="mt-1.5 size-2 rounded-full bg-brass-gold shrink-0" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
-                          <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
-                            {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
+                  const clickable = !!(n.ride_assignment_id || n.ride_id);
                   return (
                     <li key={n.id}>
                       <button
@@ -210,7 +189,25 @@ export const NotificationBell = () => {
                         className="w-full text-left"
                         onClick={() => (clickable ? openNotification(n) : !n.read_at && markOneRead(n.id))}
                       >
-                        {inner}
+                        <div
+                          className={cn(
+                            "px-4 py-3 hover:bg-brass-deep/[0.04] transition-colors",
+                            !n.read_at && "bg-brass-gold/[0.07]"
+                          )}
+                        >
+                          <div className="flex items-start gap-2">
+                            {!n.read_at && (
+                              <span className="mt-1.5 size-2 rounded-full bg-brass-gold shrink-0" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
+                              <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
+                              <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
+                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </button>
                     </li>
                   );
