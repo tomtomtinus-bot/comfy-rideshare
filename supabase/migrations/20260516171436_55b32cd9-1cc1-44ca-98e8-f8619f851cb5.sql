@@ -1,0 +1,2 @@
+ALTER TABLE public.invoice_items DROP CONSTRAINT IF EXISTS invoice_items_ride_assignment_id_key;
+CREATE INDEX IF NOT EXISTS idx_invoice_items_ride_assignment_id ON public.invoice_items(ride_assignment_id);
