@@ -978,6 +978,55 @@ const RequestRideInner = () => {
                           </p>
                         );
                       })()}
+                      <div className="mt-4">
+                        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold block mb-1">Vergunningnummer (optioneel)</label>
+                        <input
+                          type="text"
+                          value={leg.permit_number}
+                          onChange={(e) => updateExtraLeg(i, { permit_number: e.target.value })}
+                          placeholder="Andere ontheffing dan hoofdrit"
+                          className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                        />
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs (optioneel)</p>
+                          <button
+                            type="button"
+                            onClick={() => updateExtraLeg(i, { drivers: [...leg.drivers, { name: "", phone: "" }] })}
+                            className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold"
+                          >+ Toevoegen</button>
+                        </div>
+                        {leg.drivers.length === 0 ? (
+                          <p className="text-[11px] text-brass-deep/40 italic">Geen chauffeurs toegevoegd.</p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {leg.drivers.map((d, di) => (
+                              <li key={di} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                <input
+                                  placeholder="Naam"
+                                  value={d.name}
+                                  onChange={(e) => updateExtraLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, name: e.target.value } : x) })}
+                                  className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm"
+                                />
+                                <input
+                                  placeholder="Telefoon"
+                                  value={d.phone}
+                                  onChange={(e) => updateExtraLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, phone: e.target.value } : x) })}
+                                  className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => updateExtraLeg(i, { drivers: leg.drivers.filter((_, j) => j !== di) })}
+                                  className="px-2 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                                  aria-label="Verwijder chauffeur"
+                                >×</button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
                     </li>
                   ))}
                 </ul>
