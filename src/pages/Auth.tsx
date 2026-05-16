@@ -148,6 +148,10 @@ const Auth = () => {
         }
       }
     }
+    if (await checkAndPromptMfa()) {
+      setBusy(false);
+      return;
+    }
     setBusy(false);
     navigate(redirectTo);
   };
@@ -158,6 +162,7 @@ const Auth = () => {
       if (isNativeApp()) {
         // Native iOS/Android — gebruikt platform-specifieke OAuth client.
         await signInWithGoogleNative();
+        if (await checkAndPromptMfa()) { setBusy(false); return; }
         setBusy(false);
         navigate(redirectTo);
         return;
