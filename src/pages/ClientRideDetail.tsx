@@ -129,6 +129,8 @@ const Inner = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [swapFor, setSwapFor] = useState<{ assignmentId: string; anon: string | null } | null>(null);
   const [swapTick, setSwapTick] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [autoBusy, setAutoBusy] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
