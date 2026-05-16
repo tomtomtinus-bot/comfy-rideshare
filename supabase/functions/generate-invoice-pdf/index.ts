@@ -177,7 +177,7 @@ const drawShell = (doc: jsPDF, opts: ShellOpts, logoDataUrl: string | null) => {
   doc.text("Betalingsconditie:", metaX, 78);
   doc.text("30 dagen", right, 78, { align: "right" });
   doc.text("Periode:", metaX, 84);
-  doc.text(`${fmtDate(opts.period_start)} – ${fmtDate(opts.period_end)}`, right, 84, {
+  doc.text(`${fmtDate(opts.period_start)} - ${fmtDate(opts.period_end)}`, right, 84, {
     align: "right",
   });
 };
