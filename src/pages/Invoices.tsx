@@ -290,19 +290,46 @@ const InvoicesInner = () => {
   // PDF generation now happens server-side via the `generate-invoice-pdf` edge function.
   // The local helpers/constants for client-side rendering have been removed.
 
+  const triggerDownload = async (url: string, filename: string) => {
+    // Fetch the PDF as a blob so we can force a real download in every browser
+    // (incl. iOS Safari / in-app webviews that ignore the `download` attribute
+    // on cross-origin URLs and otherwise just preview the file).
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const pdfBlob =
+        blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch {
+      // Fallback: open in a new tab so the user can still save it manually.
+      window.open(url, "_blank", "noopener");
+    }
+  };
+
   const openInvoicePdf = async (
     invoiceId: string,
     type: "regular" | "platform",
     cachedPath?: string | null,
+    invoiceNumber?: string | null,
   ) => {
     try {
-      // If we already have a path, just sign it.
+      const filename = `${invoiceNumber || invoiceId}.pdf`;
+      // If we already have a path, just sign it (with forced download header).
       if (cachedPath) {
         const { data, error } = await supabase.storage
           .from("invoices")
-          .createSignedUrl(cachedPath, 60 * 10);
+          .createSignedUrl(cachedPath, 60 * 10, { download: filename });
         if (!error && data?.signedUrl) {
-          window.open(data.signedUrl, "_blank");
+          await triggerDownload(data.signedUrl, filename);
           return;
         }
       }
@@ -313,7 +340,7 @@ const InvoicesInner = () => {
       if (error) throw error;
       const signed = (data as { signed_url?: string } | null)?.signed_url;
       if (!signed) throw new Error("Geen download-URL ontvangen");
-      window.open(signed, "_blank");
+      await triggerDownload(signed, filename);
     } catch (e) {
       toast.error((e as Error).message);
     }
