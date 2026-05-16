@@ -73,9 +73,11 @@ export const Nav = () => {
           <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
-          <NotificationBell />
           <RoleSwitch />
-          <LanguageSwitcher />
+          <NotificationBell />
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
