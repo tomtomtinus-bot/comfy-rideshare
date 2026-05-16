@@ -241,6 +241,7 @@ Deno.serve(async (req) => {
           clientName, escortName, reason: reason ?? "",
           pickup, dropoff, plannedAt, reference, rideUrl,
         });
+        await sendPush([ride.client_id], "Begeleider geannuleerd", `${escortName} kan rit niet rijden. ${pickup} → ${dropoff}`, `/rit/${ride.id}`);
         void ride;
         break;
       }
@@ -266,10 +267,9 @@ Deno.serve(async (req) => {
           amount: fmtMoney(invoice.total_amount),
           invoiceUrl: `${origin}/facturen`,
         });
+        await sendPush([escortUserId2], "Nieuwe factuur klaar", `${fmtMoney(invoice.total_amount)} • ${clientName}`, `/facturen`);
         break;
       }
-
-      case "payment_succeeded": {
         if (!invoiceId) break;
         const { data: inv } = await admin
           .from("platform_invoices")
@@ -288,10 +288,9 @@ Deno.serve(async (req) => {
           paidAt: fmtDateTime(invoice.paid_at || new Date().toISOString()),
           invoiceUrl: `${origin}/facturen`,
         });
+        await sendPush([invoice.client_id], "Betaling ontvangen", `Factuur ${invoice.invoice_number} • ${fmtMoney(invoice.total_amount)}`, `/facturen`);
         break;
       }
-
-      case "payment_failed_admin": {
         const adminEmails = await getAdminEmails(admin);
         if (adminEmails.length === 0) break;
         const p = paymentEvent ?? {};
