@@ -310,6 +310,39 @@ const Auth = () => {
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">
+          {mfa ? (
+            <div className="space-y-5">
+              <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Tweestapsverificatie</p>
+              <h1 className="font-display text-4xl text-brass-deep italic mb-2">Voer je code in</h1>
+              <p className="text-sm text-brass-deep/70 leading-relaxed">
+                Open je authenticator-app en voer de 6-cijferige code in om in te loggen.
+              </p>
+              <input
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="123456"
+                inputMode="numeric"
+                autoFocus
+                className="w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-lg tracking-widest text-center focus:outline-none focus:border-brass-gold"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={verifyMfaCode}
+                  disabled={busy}
+                  className="flex-1 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-60"
+                >
+                  {busy ? "Bezig…" : "Bevestig"}
+                </button>
+                <button
+                  onClick={cancelMfa}
+                  className="px-6 py-4 border border-brass-deep/20 text-xs uppercase tracking-widest text-brass-deep/70"
+                >
+                  Annuleer
+                </button>
+              </div>
+            </div>
+          ) : (
+          <>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
             {mode === "login" ? t("auth.login") : mode === "signup" ? t("auth.signup") : "Wachtwoord vergeten"}
           </p>
