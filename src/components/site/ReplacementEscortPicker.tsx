@@ -64,7 +64,7 @@ export const ReplacementEscortPicker = ({
             Kies een nieuwe begeleider
           </DialogTitle>
           <DialogDescription>
-            Beschikbare begeleiders, gesorteerd op afstand tot het ophaaladres.
+            Beschikbare begeleiders, gesorteerd op reistijd tot het ophaaladres.
           </DialogDescription>
         </DialogHeader>
         {loading ? (
