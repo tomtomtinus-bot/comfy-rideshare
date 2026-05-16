@@ -96,9 +96,9 @@ export const ReplacementEscortPicker = ({
                     ★ {Number(c.rating ?? 0).toFixed(1)} ({c.rides_completed ?? 0})
                   </p>
                   <p className="text-xs text-brass-deep/70 mt-1 tabular-nums">
-                    Aanvoer: <span className="font-medium">{c.aanvoer_km != null ? `~${Math.round(c.aanvoer_km)} km` : "—"}</span>
+                    Aanvoer: <span className="font-medium">{kmToTime(c.aanvoer_km)}</span>
                     {" · "}
-                    Afvoer: <span className="font-medium">{c.afvoer_km != null ? `~${Math.round(c.afvoer_km)} km` : "—"}</span>
+                    Afvoer: <span className="font-medium">{kmToTime(c.afvoer_km)}</span>
                   </p>
                 </div>
                 <button
