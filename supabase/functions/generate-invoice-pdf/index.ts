@@ -594,7 +594,7 @@ Deno.serve(async (req) => {
         body: items.map((r) => {
           const ref = refById.get(String(r.ride_id)) || "";
           const route = String(r.route ?? "");
-          const desc = ref ? `${route}\nref. ${ref}` : route;
+          const desc = safe(ref ? `${route}\nref. ${ref}` : route);
           return [
             fmtDate(String(r.ride_date)),
             { content: desc, styles: { fontStyle: "normal" } },
