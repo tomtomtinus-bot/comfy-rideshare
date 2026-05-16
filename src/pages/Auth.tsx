@@ -517,6 +517,8 @@ const Auth = () => {
               support@viacust.com
             </a>
           </p>
+          </>
+          )}
         </div>
       </main>
       <Footer />
