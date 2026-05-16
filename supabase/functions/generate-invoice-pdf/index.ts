@@ -18,6 +18,17 @@ const fmtMoney = (n: number) =>
     maximumFractionDigits: 2,
   })}`;
 
+// jsPDF default helvetica uses WinAnsi encoding which has no glyph for "→",
+// "—", non-breaking space etc. Replace with safe ASCII so they don't render
+// as `!'` boxes on invoices.
+const safe = (s: string): string =>
+  s
+    .replace(/→/g, ">")
+    .replace(/—/g, "-")
+    .replace(/–/g, "-")
+    .replace(/·/g, "•")
+    .replace(/\u00a0/g, " ");
+
 type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
 type AutoTablePluginFn = (jsPDFClass: typeof jsPDF) => void;
 const autoTableExports = autoTableModule as unknown as {
