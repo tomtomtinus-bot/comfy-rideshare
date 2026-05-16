@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 type Prefs = {
   weekly_updates: boolean;
@@ -8,10 +9,17 @@ type Prefs = {
 
 const DEFAULTS: Prefs = { weekly_updates: true };
 
+const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isStandalone = typeof window !== "undefined" && (
+  window.matchMedia?.("(display-mode: standalone)").matches ||
+  (window.navigator as any).standalone === true
+);
+
 export const NotificationPreferencesCard = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
+  const push = usePushSubscription();
 
   useEffect(() => {
     (async () => {
