@@ -514,6 +514,30 @@ export type Database = {
           },
         ]
       }
+      invoice_number_sequences: {
+        Row: {
+          last_seq: number
+          scope: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          last_seq?: number
+          scope: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          last_seq?: number
+          scope?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           client_id: string
@@ -535,7 +559,7 @@ export type Database = {
           created_at?: string
           escort_id: string
           id?: string
-          invoice_number?: string
+          invoice_number: string
           paid_at?: string | null
           pdf_path?: string | null
           period_end: string
@@ -793,7 +817,7 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
-          invoice_number?: string
+          invoice_number: string
           paid_at?: string | null
           pdf_path?: string | null
           period_end: string
@@ -1791,6 +1815,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      next_invoice_number: {
+        Args: { _anonymous_id: string; _scope: string; _user_id: string }
+        Returns: string
       }
       notify_ride_confirmed: {
         Args: { _assignment_id: string }
