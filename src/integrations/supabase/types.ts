@@ -1629,9 +1629,15 @@ export type Database = {
           afvoer_km: number
           anonymous_id: string
           base_city: string
+          base_lat: number
+          base_lng: number
+          dropoff_lat: number
+          dropoff_lng: number
           hourly_rate: number
           id: string
           languages: string[]
+          pickup_lat: number
+          pickup_lng: number
           rating: number
           rides_completed: number
           vehicle_type: string
