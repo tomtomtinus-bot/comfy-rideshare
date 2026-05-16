@@ -21,10 +21,28 @@ const PAGE = 15;
 
 export const NotificationBell = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  const openNotification = async (n: Notification) => {
+    setOpen(false);
+    if (!n.read_at) void markOneRead(n.id);
+    if (!n.ride_assignment_id) return;
+    const { data } = await supabase
+      .from("ride_assignments")
+      .select("ride_id, escort_id")
+      .eq("id", n.ride_assignment_id)
+      .maybeSingle();
+    if (!data) return;
+    if (user && data.escort_id === user.id) {
+      navigate(`/opdracht/${n.ride_assignment_id}`);
+    } else if (data.ride_id) {
+      navigate(`/rit/${data.ride_id}`);
+    }
+  };
 
   const unread = items.filter((n) => !n.read_at).length;
 
