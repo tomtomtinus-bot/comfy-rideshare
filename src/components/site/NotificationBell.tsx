@@ -150,7 +150,7 @@ export const NotificationBell = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[340px] max-w-[calc(100vw-2rem)] bg-parchment border border-brass-deep/15 shadow-etched z-50">
+        <div className="fixed left-3 right-3 top-[5.25rem] w-auto sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[340px] sm:max-w-[calc(100vw-2rem)] bg-parchment border border-brass-deep/15 shadow-etched z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-brass-deep/10">
             <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">Meldingen</p>
             <div className="flex items-center gap-3">
