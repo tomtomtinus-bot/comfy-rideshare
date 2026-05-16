@@ -33,6 +33,9 @@ const Auth = () => {
     return localStorage.getItem("viacust_remember") !== "false";
   });
   const [bioReady, setBioReady] = useState(false);
+  const [mfa, setMfa] = useState<{ factorId: string; challengeId?: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaChecked, setMfaChecked] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -42,7 +45,75 @@ const Auth = () => {
     })();
   }, []);
 
-  if (!loading && user) return <Navigate to={redirectTo} replace />;
+  // If a session already exists on mount (e.g. returning from OAuth redirect),
+  // verify MFA before allowing the auto-redirect to fire.
+  useEffect(() => {
+    if (loading || !user || mfaChecked) return;
+    (async () => {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+        const { data: list } = await supabase.auth.mfa.listFactors();
+        const verified = (list?.totp ?? []).find((f) => f.status === "verified");
+        if (verified) {
+          const { data: ch } = await supabase.auth.mfa.challenge({ factorId: verified.id });
+          setMfa({ factorId: verified.id, challengeId: ch?.id });
+        }
+      }
+      setMfaChecked(true);
+    })();
+  }, [loading, user, mfaChecked]);
+
+  if (!loading && user && mfaChecked && !mfa) return <Navigate to={redirectTo} replace />;
+
+  // After a successful password sign-in, check if MFA is required and prompt.
+  // Returns true if MFA challenge was started (caller should NOT navigate).
+  const checkAndPromptMfa = async (): Promise<boolean> => {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      const { data: list } = await supabase.auth.mfa.listFactors();
+      const verified = (list?.totp ?? []).find((f) => f.status === "verified");
+      if (verified) {
+        const { data: ch, error } = await supabase.auth.mfa.challenge({ factorId: verified.id });
+        if (error) {
+          toast.error(error.message);
+          await supabase.auth.signOut();
+          return true;
+        }
+        setMfa({ factorId: verified.id, challengeId: ch.id });
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const verifyMfaCode = async () => {
+    if (!mfa) return;
+    if (!/^\d{6}$/.test(mfaCode)) return toast.error("Voer een 6-cijferige code in");
+    setBusy(true);
+    let challengeId = mfa.challengeId;
+    if (!challengeId) {
+      const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId: mfa.factorId });
+      if (cErr) { setBusy(false); return toast.error(cErr.message); }
+      challengeId = ch.id;
+    }
+    const { error } = await supabase.auth.mfa.verify({
+      factorId: mfa.factorId,
+      challengeId,
+      code: mfaCode,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Geverifieerd");
+    setMfa(null);
+    setMfaCode("");
+    navigate(redirectTo);
+  };
+
+  const cancelMfa = async () => {
+    setMfa(null);
+    setMfaCode("");
+    await supabase.auth.signOut();
+  };
 
   const signupSchema = z.object({
     email: z.string().trim().email(t("auth.err.invalidEmail")).max(255),
@@ -96,6 +167,10 @@ const Auth = () => {
         }
       }
     }
+    if (await checkAndPromptMfa()) {
+      setBusy(false);
+      return;
+    }
     setBusy(false);
     navigate(redirectTo);
   };
@@ -106,6 +181,7 @@ const Auth = () => {
       if (isNativeApp()) {
         // Native iOS/Android — gebruikt platform-specifieke OAuth client.
         await signInWithGoogleNative();
+        if (await checkAndPromptMfa()) { setBusy(false); return; }
         setBusy(false);
         navigate(redirectTo);
         return;
@@ -123,6 +199,7 @@ const Auth = () => {
         // Browser redirect happens automatically
         return;
       }
+      if (await checkAndPromptMfa()) { setBusy(false); return; }
       navigate(redirectTo);
     } catch (err) {
       setBusy(false);
@@ -139,8 +216,9 @@ const Auth = () => {
       return;
     }
     const error = await doSignIn(creds.email, creds.password);
+    if (error) { setBusy(false); return toast.error("Login mislukt — log opnieuw in met je wachtwoord."); }
+    if (await checkAndPromptMfa()) { setBusy(false); return; }
     setBusy(false);
-    if (error) return toast.error("Login mislukt — log opnieuw in met je wachtwoord.");
     navigate(redirectTo);
   };
 
@@ -232,6 +310,39 @@ const Auth = () => {
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">
+          {mfa ? (
+            <div className="space-y-5">
+              <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Tweestapsverificatie</p>
+              <h1 className="font-display text-4xl text-brass-deep italic mb-2">Voer je code in</h1>
+              <p className="text-sm text-brass-deep/70 leading-relaxed">
+                Open je authenticator-app en voer de 6-cijferige code in om in te loggen.
+              </p>
+              <input
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="123456"
+                inputMode="numeric"
+                autoFocus
+                className="w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-lg tracking-widest text-center focus:outline-none focus:border-brass-gold"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={verifyMfaCode}
+                  disabled={busy}
+                  className="flex-1 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-60"
+                >
+                  {busy ? "Bezig…" : "Bevestig"}
+                </button>
+                <button
+                  onClick={cancelMfa}
+                  className="px-6 py-4 border border-brass-deep/20 text-xs uppercase tracking-widest text-brass-deep/70"
+                >
+                  Annuleer
+                </button>
+              </div>
+            </div>
+          ) : (
+          <>
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
             {mode === "login" ? t("auth.login") : mode === "signup" ? t("auth.signup") : "Wachtwoord vergeten"}
           </p>
@@ -394,18 +505,24 @@ const Auth = () => {
             </>
           )}
 
-          <button
-            onClick={() => setMode(mode === "forgot" ? "login" : mode === "login" ? "signup" : "login")}
-            className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
-          >
-            {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
-          </button>
-          <p className="mt-4 text-center text-[10px] text-brass-deep/40">
-            Problemen?{" "}
-            <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
-              support@viacust.com
-            </a>
-          </p>
+          {!mfa && (
+            <>
+              <button
+                onClick={() => setMode(mode === "forgot" ? "login" : mode === "login" ? "signup" : "login")}
+                className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
+              >
+                {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
+              </button>
+              <p className="mt-4 text-center text-[10px] text-brass-deep/40">
+                Problemen?{" "}
+                <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+                  support@viacust.com
+                </a>
+              </p>
+            </>
+          )}
+          </>
+          )}
         </div>
       </main>
       <Footer />
