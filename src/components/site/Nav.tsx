@@ -135,6 +135,12 @@ export const Nav = () => {
                 )}
               </div>
             )}
+            <div className="mt-2 pt-3 border-t border-brass-deep/10 px-3 pb-2 md:hidden">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">
+                Taal
+              </p>
+              <LanguageSwitcher />
+            </div>
             <div className="mt-2 pt-3 border-t border-brass-deep/10">
               {user ? (
                 <>
