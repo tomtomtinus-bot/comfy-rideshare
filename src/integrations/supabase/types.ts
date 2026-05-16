@@ -1622,6 +1622,20 @@ export type Database = {
         Returns: undefined
       }
       express_ride_interest: { Args: { _assignment_id: string }; Returns: Json }
+      find_replacement_candidates: {
+        Args: { _limit?: number; _ride_id: string }
+        Returns: {
+          anonymous_id: string
+          base_city: string
+          dist_km: number
+          hourly_rate: number
+          id: string
+          languages: string[]
+          rating: number
+          rides_completed: number
+          vehicle_type: string
+        }[]
+      }
       fuel_country_code: { Args: { p_country: string }; Returns: string }
       generate_platform_invoices: { Args: never; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
@@ -1702,6 +1716,10 @@ export type Database = {
       invite_replacement_escorts: {
         Args: { _limit?: number; _ride_id: string }
         Returns: number
+      }
+      invite_specific_replacement: {
+        Args: { _escort_id: string; _ride_id: string }
+        Returns: string
       }
       is_approved: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_escort: {
