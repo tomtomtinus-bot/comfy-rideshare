@@ -277,8 +277,8 @@ const Inner = () => {
     supabase.functions.invoke("notify-ride-event", {
       body: {
         event: "escort_cancelled",
-        rideId: myAssignment.ride_id,
-        escortUserId: user?.id,
+        rideId: id,
+        escortUserId: userId,
         reason: cancelReason.trim(),
       },
     }).catch(() => { /* stil falen */ });
