@@ -957,32 +957,52 @@ const RequestRideInner = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                         <Input
                           label="Datum"
                           type="date"
                           min={todayLocalDate()}
                           value={leg.scheduled_date}
-                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
+                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v, end_date: leg.end_date || v })}
                         />
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
                           <input
                             type="time"
-                            step={900}
                             value={leg.scheduled_time}
                             onChange={(e) => updateExtraLeg(i, { scheduled_time: e.target.value })}
                             placeholder="hh:mm"
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           />
                         </div>
+                        <Input
+                          label="Einddatum"
+                          type="date"
+                          min={leg.scheduled_date || todayLocalDate()}
+                          value={leg.end_date || leg.scheduled_date}
+                          onChange={(v) => updateExtraLeg(i, { end_date: v })}
+                        />
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Eindtijd</label>
+                          <input
+                            type="time"
+                            value={leg.end_time}
+                            onChange={(e) => updateExtraLeg(i, { end_time: e.target.value })}
+                            placeholder="hh:mm"
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                        </div>
                       </div>
-                      {leg.pickup && leg.dropoff && (() => {
-                        const km = distanceKm(leg.pickup, leg.dropoff);
-                        const min = travelMinutes(km);
+                      {(() => {
+                        const km = leg.pickup && leg.dropoff ? distanceKm(leg.pickup, leg.dropoff) : null;
+                        const sMs = leg.scheduled_date && leg.scheduled_time ? new Date(nlISO(leg.scheduled_date, leg.scheduled_time)).getTime() : NaN;
+                        const eMs = leg.end_time ? new Date(nlISO(leg.end_date || leg.scheduled_date, leg.end_time)).getTime() : NaN;
+                        const durMin = !isNaN(sMs) && !isNaN(eMs) && eMs > sMs ? Math.round((eMs - sMs) / 60_000) : null;
+                        if (km == null && durMin == null) return null;
                         return (
                           <p className="mt-3 text-[11px] text-brass-deep/60">
-                            <strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(min)}</strong>
+                            {km != null && (<><strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(travelMinutes(km))}</strong></>)}
+                            {durMin != null && (<> · ingevulde duur <strong className="tabular-nums">{fmtHours(durMin)}</strong></>)}
                           </p>
                         );
                       })()}
