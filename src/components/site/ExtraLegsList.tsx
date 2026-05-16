@@ -12,6 +12,8 @@ interface ExtraLeg {
   dropoff_lat: number;
   dropoff_lng: number;
   scheduled_at: string;
+  permit_number?: string | null;
+  drivers?: { name: string; phone: string }[] | null;
 }
 
 const fmt = (d: string) =>
@@ -60,6 +62,24 @@ export const ExtraLegsList = ({ rideId }: { rideId: string }) => {
                 <MapsLink address={`${leg.dropoff_address}, ${leg.dropoff_city}`} lat={leg.dropoff_lat} lng={leg.dropoff_lng} />
               </div>
             </div>
+            {leg.permit_number && (
+              <div className="mt-3">
+                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Vergunningnummer</p>
+                <p className="text-sm text-brass-deep">{leg.permit_number}</p>
+              </div>
+            )}
+            {leg.drivers && leg.drivers.length > 0 && (
+              <div className="mt-3">
+                <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Chauffeurs</p>
+                <ul className="text-sm text-brass-deep space-y-0.5">
+                  {leg.drivers.map((d, di) => (
+                    <li key={di}>
+                      {d.name}{d.phone ? ` · ${d.phone}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </li>
         ))}
       </ol>

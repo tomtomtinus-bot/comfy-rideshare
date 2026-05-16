@@ -136,6 +136,8 @@ interface ExtraLeg {
   dropoff: GeoPoint | null;
   scheduled_date: string;
   scheduled_time: string;
+  permit_number: string;
+  drivers: { name: string; phone: string }[];
 }
 
 const fmtHours = (min: number) => {
@@ -200,7 +202,18 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
-  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
+  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(
+    (initial?.extraLegs ?? []).map((l: Partial<ExtraLeg>) => ({
+      pickup_address: l.pickup_address ?? "",
+      pickup: l.pickup ?? null,
+      dropoff_address: l.dropoff_address ?? "",
+      dropoff: l.dropoff ?? null,
+      scheduled_date: l.scheduled_date ?? "",
+      scheduled_time: l.scheduled_time ?? "",
+      permit_number: l.permit_number ?? "",
+      drivers: l.drivers ?? [],
+    }))
+  );
   const [pickerTarget, setPickerTarget] = useState<
     | { kind: "main-pickup" | "main-dropoff" }
     | { kind: "extra-pickup" | "extra-dropoff"; index: number }
@@ -217,7 +230,7 @@ const RequestRideInner = () => {
 
   const addExtraLeg = () => setExtraLegs((l) => [...l, {
     pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
-    scheduled_date: "", scheduled_time: "",
+    scheduled_date: "", scheduled_time: "", permit_number: "", drivers: [],
   }]);
   const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
     setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
@@ -598,6 +611,10 @@ const RequestRideInner = () => {
       dropoff_lat: ex.dropoff!.lat,
       dropoff_lng: ex.dropoff!.lng,
       scheduled_at: nlISO(ex.scheduled_date, ex.scheduled_time),
+      permit_number: ex.permit_number.trim() || null,
+      drivers: ex.drivers
+        .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
+        .filter((d) => d.name || d.phone),
     }));
 
     const { data: ride, error } = await supabase
@@ -961,6 +978,55 @@ const RequestRideInner = () => {
                           </p>
                         );
                       })()}
+                      <div className="mt-4">
+                        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold block mb-1">Vergunningnummer (optioneel)</label>
+                        <input
+                          type="text"
+                          value={leg.permit_number}
+                          onChange={(e) => updateExtraLeg(i, { permit_number: e.target.value })}
+                          placeholder="Andere ontheffing dan hoofdrit"
+                          className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+                        />
+                      </div>
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs (optioneel)</p>
+                          <button
+                            type="button"
+                            onClick={() => updateExtraLeg(i, { drivers: [...leg.drivers, { name: "", phone: "" }] })}
+                            className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold"
+                          >+ Toevoegen</button>
+                        </div>
+                        {leg.drivers.length === 0 ? (
+                          <p className="text-[11px] text-brass-deep/40 italic">Geen chauffeurs toegevoegd.</p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {leg.drivers.map((d, di) => (
+                              <li key={di} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                                <input
+                                  placeholder="Naam"
+                                  value={d.name}
+                                  onChange={(e) => updateExtraLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, name: e.target.value } : x) })}
+                                  className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm"
+                                />
+                                <input
+                                  placeholder="Telefoon"
+                                  value={d.phone}
+                                  onChange={(e) => updateExtraLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, phone: e.target.value } : x) })}
+                                  className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => updateExtraLeg(i, { drivers: leg.drivers.filter((_, j) => j !== di) })}
+                                  className="px-2 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                                  aria-label="Verwijder chauffeur"
+                                >×</button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
                     </li>
                   ))}
                 </ul>
