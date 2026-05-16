@@ -8,6 +8,38 @@ import { RequireAuth } from "@/components/site/RequireAuth";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 import { X } from "lucide-react";
 
+interface ExtraLeg {
+  pickup_address: string;
+  pickup_city: string;
+  pickup_lat: number;
+  pickup_lng: number;
+  dropoff_address: string;
+  dropoff_city: string;
+  dropoff_lat: number;
+  dropoff_lng: number;
+  scheduled_at: string;
+  end_at?: string | null;
+  permit_number?: string | null;
+  drivers?: { name: string; phone: string }[] | null;
+}
+
+interface ExtraLegForm {
+  pickup_address: string;
+  pickup_city: string;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_address: string;
+  dropoff_city: string;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
+  scheduled_date: string;
+  scheduled_time: string;
+  end_date: string;
+  end_time: string;
+  permit_number: string;
+  drivers: { name: string; phone: string }[];
+}
+
 interface RideRow {
   id: string;
   client_id: string;
@@ -31,7 +63,17 @@ interface RideRow {
   drivers: { name: string; phone: string }[] | null;
   license_plates: string[] | null;
   status: string;
+  extra_legs: ExtraLeg[] | null;
 }
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const splitISO = (iso: string) => {
+  const d = new Date(iso);
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+};
 
 const Inner = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,6 +98,7 @@ const Inner = () => {
   const [plates, setPlates] = useState<string[]>([]);
   const [pickupAddr, setPickupAddr] = useState("");
   const [dropoffAddr, setDropoffAddr] = useState("");
+  const [extraLegs, setExtraLegs] = useState<ExtraLegForm[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -64,10 +107,9 @@ const Inner = () => {
       if (error || !data) { toast.error(error?.message ?? "Rit niet gevonden"); setLoading(false); return; }
       const r = data as unknown as RideRow;
       setRide(r);
-      const dt = new Date(r.scheduled_at);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      setScheduledDate(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`);
-      setScheduledTime(`${pad(dt.getHours())}:${pad(dt.getMinutes())}`);
+      const s = splitISO(r.scheduled_at);
+      setScheduledDate(s.date);
+      setScheduledTime(s.time);
       setNotes(r.notes ?? "");
       setCargoL(r.cargo_length_m?.toString() ?? "");
       setCargoW(r.cargo_width_m?.toString() ?? "");
@@ -81,6 +123,27 @@ const Inner = () => {
       setDropoffAddr(r.dropoff_address);
       if (r.pickup_lat && r.pickup_lng) setPickupGeo({ city: r.pickup_city, lat: r.pickup_lat, lng: r.pickup_lng });
       if (r.dropoff_lat && r.dropoff_lng) setDropoffGeo({ city: r.dropoff_city, lat: r.dropoff_lat, lng: r.dropoff_lng });
+      const legs = (Array.isArray(r.extra_legs) ? r.extra_legs : []) as ExtraLeg[];
+      setExtraLegs(legs.map((l) => {
+        const ss = splitISO(l.scheduled_at);
+        const ee = l.end_at ? splitISO(l.end_at) : { date: ss.date, time: "" };
+        return {
+          pickup_address: l.pickup_address,
+          pickup_city: l.pickup_city,
+          pickup_lat: l.pickup_lat,
+          pickup_lng: l.pickup_lng,
+          dropoff_address: l.dropoff_address,
+          dropoff_city: l.dropoff_city,
+          dropoff_lat: l.dropoff_lat,
+          dropoff_lng: l.dropoff_lng,
+          scheduled_date: ss.date,
+          scheduled_time: ss.time,
+          end_date: ee.date,
+          end_time: ee.time,
+          permit_number: l.permit_number ?? "",
+          drivers: l.drivers ?? [],
+        };
+      }));
       setLoading(false);
     })();
   }, [id]);
@@ -91,11 +154,45 @@ const Inner = () => {
     return Number.isNaN(n) ? null : n;
   };
 
+  const updateLeg = (i: number, patch: Partial<ExtraLegForm>) =>
+    setExtraLegs((arr) => arr.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
+  const removeLeg = (i: number) => setExtraLegs((arr) => arr.filter((_, idx) => idx !== i));
+  const addLeg = () => setExtraLegs((arr) => [...arr, {
+    pickup_address: "", pickup_city: "", pickup_lat: null, pickup_lng: null,
+    dropoff_address: "", dropoff_city: "", dropoff_lat: null, dropoff_lng: null,
+    scheduled_date: scheduledDate, scheduled_time: "", end_date: scheduledDate, end_time: "",
+    permit_number: "", drivers: [],
+  }]);
+
   const handleSave = async () => {
     if (!ride) return;
     if (!pickupAddr.trim() || !dropoffAddr.trim()) { toast.error("Adressen zijn verplicht."); return; }
     if (!scheduledDate || !scheduledTime) { toast.error("Datum en tijd zijn verplicht."); return; }
+    for (let i = 0; i < extraLegs.length; i++) {
+      const l = extraLegs[i];
+      if (!l.pickup_address.trim() || !l.dropoff_address.trim() || l.pickup_lat == null || l.dropoff_lat == null) {
+        toast.error(`Aansluitende rit ${i + 2}: vul vertrek en bestemming in.`); return;
+      }
+      if (!l.scheduled_date || !l.scheduled_time || !l.end_time) {
+        toast.error(`Aansluitende rit ${i + 2}: vul start- en eindtijd in.`); return;
+      }
+    }
     const scheduledISO = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+    const legsPayload: ExtraLeg[] = extraLegs.map((l) => ({
+      pickup_address: l.pickup_address,
+      pickup_city: l.pickup_city,
+      pickup_lat: l.pickup_lat as number,
+      pickup_lng: l.pickup_lng as number,
+      dropoff_address: l.dropoff_address,
+      dropoff_city: l.dropoff_city,
+      dropoff_lat: l.dropoff_lat as number,
+      dropoff_lng: l.dropoff_lng as number,
+      scheduled_at: new Date(`${l.scheduled_date}T${l.scheduled_time}`).toISOString(),
+      end_at: new Date(`${l.end_date || l.scheduled_date}T${l.end_time}`).toISOString(),
+      permit_number: l.permit_number.trim() || null,
+      drivers: l.drivers.map((d) => ({ name: d.name.trim(), phone: d.phone.trim() })).filter((d) => d.name || d.phone),
+    }));
+    const lastEndISO = legsPayload.length > 0 ? legsPayload[legsPayload.length - 1].end_at ?? null : null;
 
     setBusy(true);
     const update: any = {
@@ -111,6 +208,9 @@ const Inner = () => {
       client_reference: clientRef.trim() || null,
       drivers: drivers.map((d) => ({ name: d.name.trim(), phone: d.phone.trim() })).filter((d) => d.name || d.phone),
       license_plates: plates.map((p) => p.trim()).filter(Boolean),
+      extra_legs: legsPayload,
+      time_window_start: scheduledISO,
+      time_window_end: lastEndISO,
     };
     if (pickupGeo) {
       update.pickup_city = pickupGeo.city;
@@ -126,13 +226,16 @@ const Inner = () => {
     const { error } = await supabase.from("rides").update(update).eq("id", ride.id);
     if (error) { setBusy(false); toast.error(error.message); return; }
 
-    // Notify assigned escorts
     const summary: string[] = [];
     if (new Date(ride.scheduled_at).toISOString() !== scheduledISO) {
       summary.push("Nieuwe tijd: " + new Date(scheduledISO).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" }));
     }
     if (pickupAddr !== ride.pickup_address) summary.push("Vertrek aangepast.");
     if (dropoffAddr !== ride.dropoff_address) summary.push("Bestemming aangepast.");
+    const prevLegsLen = (ride.extra_legs ?? []).length;
+    if (prevLegsLen !== legsPayload.length || JSON.stringify(ride.extra_legs ?? []) !== JSON.stringify(legsPayload)) {
+      summary.push("Aansluitende ritten aangepast.");
+    }
     await supabase.rpc("notify_ride_updated", { _ride_id: ride.id, _summary: summary.join(" ") });
 
     setBusy(false);
@@ -258,6 +361,103 @@ const Inner = () => {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">Aansluitende ritten</p>
+            <button type="button" onClick={addLeg}
+              className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Rit toevoegen</button>
+          </div>
+          {extraLegs.length === 0 ? (
+            <p className="text-xs text-brass-deep/40 italic">Geen aansluitende ritten.</p>
+          ) : (
+            <ul className="space-y-4">
+              {extraLegs.map((leg, i) => (
+                <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
+                    <button type="button" onClick={() => removeLeg(i)}
+                      className="text-brass-deep/50 hover:text-red-700 text-lg leading-none" aria-label="Verwijder rit">×</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <AddressAutocomplete
+                      label="Vertrek"
+                      value={leg.pickup_address}
+                      onChange={(v) => updateLeg(i, { pickup_address: v })}
+                      onSelect={(r) => updateLeg(i, { pickup_address: r.display, pickup_city: r.city, pickup_lat: r.lat, pickup_lng: r.lng })}
+                    />
+                    <AddressAutocomplete
+                      label="Bestemming"
+                      value={leg.dropoff_address}
+                      onChange={(v) => updateLeg(i, { dropoff_address: v })}
+                      onSelect={(r) => updateLeg(i, { dropoff_address: r.display, dropoff_city: r.city, dropoff_lat: r.lat, dropoff_lng: r.lng })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Datum</label>
+                      <input type="date" value={leg.scheduled_date}
+                        onChange={(e) => updateLeg(i, { scheduled_date: e.target.value, end_date: leg.end_date || e.target.value })}
+                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
+                      <input type="time" value={leg.scheduled_time}
+                        onChange={(e) => updateLeg(i, { scheduled_time: e.target.value })}
+                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Einddatum</label>
+                      <input type="date" value={leg.end_date || leg.scheduled_date}
+                        onChange={(e) => updateLeg(i, { end_date: e.target.value })}
+                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Eindtijd</label>
+                      <input type="time" value={leg.end_time}
+                        onChange={(e) => updateLeg(i, { end_time: e.target.value })}
+                        className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold block mb-1">Vergunningnummer (optioneel)</label>
+                    <input type="text" value={leg.permit_number}
+                      onChange={(e) => updateLeg(i, { permit_number: e.target.value })}
+                      placeholder="Andere ontheffing dan hoofdrit"
+                      className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                  </div>
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs (optioneel)</p>
+                      <button type="button"
+                        onClick={() => updateLeg(i, { drivers: [...leg.drivers, { name: "", phone: "" }] })}
+                        className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Toevoegen</button>
+                    </div>
+                    {leg.drivers.length === 0 ? (
+                      <p className="text-[11px] text-brass-deep/40 italic">Geen chauffeurs toegevoegd.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {leg.drivers.map((d, di) => (
+                          <li key={di} className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                            <input placeholder="Naam" value={d.name}
+                              onChange={(e) => updateLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, name: e.target.value } : x) })}
+                              className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                            <input placeholder="Telefoon" value={d.phone}
+                              onChange={(e) => updateLeg(i, { drivers: leg.drivers.map((x, j) => j === di ? { ...x, phone: e.target.value } : x) })}
+                              className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
+                            <button type="button"
+                              onClick={() => updateLeg(i, { drivers: leg.drivers.filter((_, j) => j !== di) })}
+                              className="px-2 text-brass-deep/50 hover:text-red-700"><X className="h-4 w-4" /></button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4 border-t border-brass-deep/10">
