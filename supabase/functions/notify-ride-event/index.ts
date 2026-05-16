@@ -62,11 +62,13 @@ async function getAdminEmails(admin: ReturnType<typeof getAdmin>): Promise<strin
 }
 
 async function loadRide(admin: ReturnType<typeof getAdmin>, rideId: string) {
-  const { data } = await admin
+  const { data, error } = await admin
     .from("rides")
-    .select("id, client_id, pickup_address, pickup_city, dropoff_address, dropoff_city, scheduled_at, reference")
+    .select("id, client_id, pickup_address, pickup_city, dropoff_address, dropoff_city, scheduled_at, client_reference")
     .eq("id", rideId)
     .maybeSingle();
+  if (error) console.error(`[notify-ride-event] loadRide error: ${error.message}`);
+  if (data) (data as any).reference = (data as any).client_reference;
   return data as any;
 }
 
@@ -79,12 +81,30 @@ async function loadProfileName(admin: ReturnType<typeof getAdmin>, userId: strin
   return (data as any)?.company_name || (data as any)?.full_name || "";
 }
 
-async function send(admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
-  const { error } = await admin.functions.invoke("send-transactional-email", {
-    body: { templateName, recipientEmail, idempotencyKey, templateData },
-  });
-  if (error) console.error(`send ${templateName} to ${recipientEmail}: ${error.message}`);
-  return !error;
+async function send(_admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
+  const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${anonKey}`,
+        "apikey": anonKey,
+      },
+      body: JSON.stringify({ templateName, recipientEmail, idempotencyKey, templateData }),
+    });
+    const txt = await res.text();
+    if (!res.ok) {
+      console.error(`[notify] send ${templateName} -> ${recipientEmail} FAILED ${res.status}: ${txt}`);
+      return false;
+    }
+    console.log(`[notify] send ${templateName} -> ${recipientEmail} OK`);
+    return true;
+  } catch (e) {
+    console.error(`[notify] send ${templateName} -> ${recipientEmail} threw: ${String(e)}`);
+    return false;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -113,45 +133,46 @@ Deno.serve(async (req) => {
       return { ride, pickup, dropoff, plannedAt, reference, rideUrl };
     };
 
+    console.log(`[notify-ride-event] event=${event} rideId=${rideId} escortUserId=${escortUserId} invoiceId=${invoiceId}`);
     switch (event) {
       case "match_confirmed": {
-        // Triggered after close-ride-broadcasts assigns winners.
         if (!rideId) break;
         const ctx = await buildRideContext(rideId);
-        if (!ctx) break;
+        if (!ctx) { console.log(`[notify-ride-event] ride not found ${rideId}`); break; }
         const { ride, pickup, dropoff, plannedAt, reference, rideUrl } = ctx;
         const clientEmail = await getUserEmail(admin, ride.client_id);
         const clientName = await loadProfileName(admin, ride.client_id);
-        const { data: accepted } = await admin
+        const { data: accepted, error: accErr } = await admin
           .from("ride_assignments")
-          .select("id, escort_id, escort:escort_profiles(display_name, anonymous_code)")
+          .select("id, escort_id")
           .eq("ride_id", rideId)
           .eq("status", "accepted");
         const list = (accepted ?? []) as any[];
+        console.log(`[notify-ride-event] match_confirmed clientEmail=${clientEmail} acceptedCount=${list.length} accErr=${accErr?.message ?? ""}`);
         for (const a of list) {
-          const escortName = a.escort?.display_name || a.escort?.anonymous_code || "";
-          // Notify client (one per accepted escort, deduped by escort_id)
+          // escort_profiles.id IS the auth.users id
+          const escortUserId = a.escort_id as string;
+          const { data: ep } = await admin
+            .from("escort_profiles")
+            .select("anonymous_id")
+            .eq("id", escortUserId)
+            .maybeSingle();
+          const escortFullName = await loadProfileName(admin, escortUserId);
+          const escortName = escortFullName || (ep as any)?.anonymous_id || "Begeleider";
           if (clientEmail) {
-            await send(admin, "match-found-client", clientEmail, `match-${rideId}-${a.escort_id}`, {
+            await send(admin, "match-found-client", clientEmail, `match-${rideId}-${escortUserId}`, {
               clientName, escortName, pickup, dropoff, plannedAt, reference, rideUrl,
             });
           }
-          // Notify escort
-          const { data: escortProfile } = await admin
-            .from("escort_profiles")
-            .select("user_id, full_name")
-            .eq("id", a.escort_id)
-            .maybeSingle();
-          if (escortProfile?.user_id) {
-            const escortEmail = await getUserEmail(admin, escortProfile.user_id);
-            if (escortEmail) {
-              await send(admin, "ride-confirmed-escort", escortEmail, `confirm-${rideId}-${a.escort_id}`, {
-                escortName: escortProfile.full_name || escortName,
-                clientName, pickup, dropoff, plannedAt, reference, rideUrl,
-              });
-            }
+          const escortEmail = await getUserEmail(admin, escortUserId);
+          if (escortEmail) {
+            await send(admin, "ride-confirmed-escort", escortEmail, `confirm-${rideId}-${escortUserId}`, {
+              escortName: escortFullName || escortName,
+              clientName, pickup, dropoff, plannedAt, reference, rideUrl,
+            });
           }
         }
+        void ride;
         break;
       }
 
@@ -162,17 +183,17 @@ Deno.serve(async (req) => {
         const { pickup, dropoff, plannedAt, reference, rideUrl } = ctx;
         const { data: accepted } = await admin
           .from("ride_assignments")
-          .select("escort_id, escort:escort_profiles(user_id, full_name)")
+          .select("escort_id")
           .eq("ride_id", rideId)
           .eq("status", "accepted");
         const updateKey = `update-${rideId}-${Date.now()}`;
         for (const a of (accepted ?? []) as any[]) {
-          const userId = a.escort?.user_id;
-          if (!userId) continue;
-          const email = await getUserEmail(admin, userId);
+          const escortUserId = a.escort_id as string;
+          const email = await getUserEmail(admin, escortUserId);
           if (!email) continue;
-          await send(admin, "ride-updated-escort", email, `${updateKey}-${a.escort_id}`, {
-            escortName: a.escort?.full_name || "",
+          const escortFullName = await loadProfileName(admin, escortUserId);
+          await send(admin, "ride-updated-escort", email, `${updateKey}-${escortUserId}`, {
+            escortName: escortFullName,
             summary: summary || "Controleer de bijgewerkte ritdetails in de app.",
             pickup, dropoff, plannedAt, reference, rideUrl,
           });
@@ -190,14 +211,16 @@ Deno.serve(async (req) => {
         const clientName = await loadProfileName(admin, ride.client_id);
         const { data: ep } = await admin
           .from("escort_profiles")
-          .select("full_name, anonymous_code, display_name")
-          .eq("user_id", escortUserId)
+          .select("anonymous_id")
+          .eq("id", escortUserId)
           .maybeSingle();
-        const escortName = (ep as any)?.display_name || (ep as any)?.full_name || (ep as any)?.anonymous_code || "";
+        const escortFullName = await loadProfileName(admin, escortUserId);
+        const escortName = escortFullName || (ep as any)?.anonymous_id || "Begeleider";
         await send(admin, "cancel-by-escort-client", clientEmail, `cancel-${rideId}-${escortUserId}-${Date.now()}`, {
           clientName, escortName, reason: reason ?? "",
           pickup, dropoff, plannedAt, reference, rideUrl,
         });
+        void ride;
         break;
       }
 
@@ -210,18 +233,13 @@ Deno.serve(async (req) => {
           .maybeSingle();
         if (!inv) break;
         const invoice = inv as any;
-        const { data: ep } = await admin
-          .from("escort_profiles")
-          .select("user_id, full_name")
-          .eq("id", invoice.escort_id)
-          .maybeSingle();
-        const userId = (ep as any)?.user_id;
-        if (!userId) break;
-        const escortEmail = await getUserEmail(admin, userId);
+        const escortUserId2 = invoice.escort_id as string;
+        const escortEmail = await getUserEmail(admin, escortUserId2);
         if (!escortEmail) break;
+        const escortFullName = await loadProfileName(admin, escortUserId2);
         const clientName = await loadProfileName(admin, invoice.client_id);
         await send(admin, "escort-invoice-ready", escortEmail, `escort-invoice-${invoiceId}`, {
-          escortName: (ep as any)?.full_name || "",
+          escortName: escortFullName,
           invoiceNumber: invoice.invoice_number || invoice.id,
           clientName,
           amount: fmtMoney(invoice.total_amount),

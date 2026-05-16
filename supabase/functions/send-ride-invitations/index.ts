@@ -108,17 +108,29 @@ Deno.serve(async (req) => {
       dateStyle: 'long', timeStyle: 'short',
     })
 
+    console.log('[send-ride-invitations] processing', { rideId, assignmentCount: assignments.length, escortCount: escortIds.length, emailsResolved: idToEmail.size })
+
     let sent = 0
+    const failures: Array<{ assignmentId: string; reason: string }> = []
     for (const a of assignments) {
       const email = idToEmail.get(a.escort_id)
-      if (!email) continue
+      if (!email) {
+        failures.push({ assignmentId: a.id, reason: 'no email' })
+        continue
+      }
       const expiresAt = a.responds_by ? new Date(a.responds_by).getTime() : (Date.now() + 30 * 60 * 1000)
       const token = await buildToken(a.id, expiresAt)
       const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}`
       const rideUrl = `${origin}/rit/${ride.id}`
 
-      const { error } = await admin.functions.invoke('send-transactional-email', {
-        body: {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ANON_KEY}`,
+          'apikey': ANON_KEY,
+        },
+        body: JSON.stringify({
           templateName: 'ride-invitation',
           recipientEmail: email,
           idempotencyKey: `ride-invite-${a.id}`,
@@ -130,12 +142,20 @@ Deno.serve(async (req) => {
             rideUrl,
             acceptUrl,
           },
-        },
+        }),
       })
-      if (!error) sent += 1
+      const txt = await res.text()
+      if (!res.ok) {
+        console.error('[send-ride-invitations] fetch error', { assignmentId: a.id, email, status: res.status, body: txt })
+        failures.push({ assignmentId: a.id, reason: `HTTP ${res.status}: ${txt}` })
+      } else {
+        sent += 1
+      }
     }
 
-    return new Response(JSON.stringify({ sent }), {
+    console.log('[send-ride-invitations] done', { rideId, sent, failures })
+
+    return new Response(JSON.stringify({ sent, failures }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (e) {
