@@ -202,7 +202,18 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
-  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(initial?.extraLegs ?? []);
+  const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(
+    (initial?.extraLegs ?? []).map((l: Partial<ExtraLeg>) => ({
+      pickup_address: l.pickup_address ?? "",
+      pickup: l.pickup ?? null,
+      dropoff_address: l.dropoff_address ?? "",
+      dropoff: l.dropoff ?? null,
+      scheduled_date: l.scheduled_date ?? "",
+      scheduled_time: l.scheduled_time ?? "",
+      permit_number: l.permit_number ?? "",
+      drivers: l.drivers ?? [],
+    }))
+  );
   const [pickerTarget, setPickerTarget] = useState<
     | { kind: "main-pickup" | "main-dropoff" }
     | { kind: "extra-pickup" | "extra-dropoff"; index: number }
