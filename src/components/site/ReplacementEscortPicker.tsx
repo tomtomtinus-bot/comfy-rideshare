@@ -16,6 +16,16 @@ type Candidate = {
   afvoer_km: number | null;
 };
 
+// Schat reistijd op basis van afstand (gemiddeld 70 km/u over de weg)
+const kmToTime = (km: number | null) => {
+  if (km == null) return "—";
+  const minutes = Math.round((km / 70) * 60);
+  if (minutes < 60) return `~${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `~${h} u` : `~${h} u ${m} min`;
+};
+
 export const ReplacementEscortPicker = ({
   rideId,
   open,
