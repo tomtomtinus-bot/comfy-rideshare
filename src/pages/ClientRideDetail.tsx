@@ -13,6 +13,7 @@ import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
 import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { toast } from "sonner";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { ReplacementEscortPicker } from "@/components/site/ReplacementEscortPicker";
 
 interface RideDetail {
   ride: {
