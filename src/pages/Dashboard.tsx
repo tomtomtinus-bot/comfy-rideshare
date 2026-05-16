@@ -395,13 +395,26 @@ const ClientDashboard = () => {
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+            const invitedCount = ass.filter((a) => a.status === "invited").length;
+            const declinedCount = ass.filter((a) => a.status === "declined" || a.status === "expired").length;
+            const needsNewEscort =
+              r.status !== "cancelled" &&
+              r.status !== "completed" &&
+              acceptedCount === 0 &&
+              invitedCount === 0 &&
+              declinedCount > 0;
             const inBundle = !!r.bundle_id;
             const canExtendBundle = inBundle && (bucketKey === "openstaand" || bucketKey === "geaccepteerd");
             return (
               <li key={r.id} className="relative">
                 <Link
                   to={`/rit/${r.id}`}
-                  className="block bg-card px-4 py-3 hover:bg-parchment/40 transition-colors"
+                  className={
+                    "block px-4 py-3 transition-colors " +
+                    (needsNewEscort
+                      ? "bg-red-50 hover:bg-red-100 border-l-4 border-red-600"
+                      : "bg-card hover:bg-parchment/40")
+                  }
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
