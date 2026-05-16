@@ -1,63 +1,49 @@
-# Aansluitende ritten in ritaanvraag
+# E-mailmeldingen uitbreiden
 
-Onder het bestaande Route-blok komt een nieuwe sectie **"Aansluitende ritten"** waar een opdrachtgever extra deelritten (leg 2, 3, 4 …) kan toevoegen. De begeleider neemt het hele pakket aan, krijgt één tarief en één factuurregel. Begeleidingstijd loopt vanaf start rit 1 tot einde laatste rit (inclusief wachttijd), plus aanrij- en terugreistijd.
+## Huidige situatie
 
-## Schema
+Er zijn al 4 e-mailtemplates actief: `ride-confirmation` (opdrachtgever na plaatsing), `ride-invitation` (begeleider — nieuwe rit beschikbaar), `discount-ending`, `new-signup-admin`. De infrastructuur (queue, domein, send-transactional-email) draait al.
 
-```text
-rides
-└── extra_legs  jsonb  (default '[]')
-       [
-         { pickup_address, pickup_city, pickup_lat, pickup_lng,
-           dropoff_address, dropoff_city, dropoff_lat, dropoff_lng,
-           scheduled_at  (ISO timestamp) }
-         …
-       ]
-```
+## Wat er nieuw bijkomt
 
-Eén rit-record blijft het anker. Lading, vergunning, kentekens, chauffeurs en de geboekte begeleider gelden voor het hele pakket. Geen wijziging aan `ride_assignments`.
+### Opdrachtgever
+1. **Match gevonden** — wanneer een begeleider de rit accepteert. Trigger in `accept-ride-invitation` edge function.
+2. **Betalingsbevestiging / factuur klaar** — zodra Stripe de platformfactuur betaald markeert. Trigger in `payments-webhook` (invoice.payment_succeeded) of in `generate-invoice-pdf`.
+3. **Annulering door begeleider** — wanneer een toegewezen begeleider zich afmeldt (swap-flow of directe cancel). Trigger waar de assignment wordt verwijderd/geannuleerd.
 
-## UI – RequestRide
+### Begeleider
+4. **Definitieve bevestiging** — direct na accept (en na eventuele betaling). Trigger in `accept-ride-invitation`.
+5. **Wijziging ritdetails** — wanneer opdrachtgever de rit aanpast. Trigger in de bestaande RPC/notify-flow van `EditRide` (notify_ride_updated → edge function `notify-ride-updated` of inline).
+6. **Factuur klaar — controleer** — als begeleidersfactuur is gegenereerd. Trigger in `generate-invoice-pdf` (escort variant).
 
-Nieuwe sectie direct onder Route, boven Lading & vergunning:
+### Admin
+7. **Stripe-betalingsfout** — webhook-events `invoice.payment_failed`, `charge.failed`, of signature-verificatiefouten. Trigger in `payments-webhook`.
 
-- Knop **"+ Aansluitende rit toevoegen"**.
-- Per extra leg een kaart met:
-  - Vertrek-adres (AddressAutocomplete)
-  - Bestemming-adres (AddressAutocomplete)
-  - Datum + kwartiertijd (zelfde stijl als hoofdblok)
-  - Verwijderknop
-- Tijdvolgorde-validatie: elke leg-start moet ≥ einde vorige leg liggen (geschatte rijduur via `travelMinutes(distanceKm)`).
-- Onder de lijst een samenvattingsblok: totale begeleidingstijd = `lastLegEnd − leg1Start`, plus `+ aanrijden + terugreis` per begeleider.
+(Reeds afgedekt: nieuwe bedrijfsaanmelding via `new-signup-admin`, nieuwe beschikbare rit via `ride-invitation`, ritplaatsingsbevestiging via `ride-confirmation`.)
 
-## Matching & boeking
+## Aanpak
 
-- Aanrijden = vanaf basis begeleider naar pickup van **leg 1**.
-- Terugreis = vanaf dropoff van **laatste leg** terug naar basis.
-- Begeleidingstijd binnen pakket = `lastLegEnd − leg1Start` (incl. wachten).
-- Schatting per leg via bestaande `travelMinutes(distanceKm)`; eind = `legStart + duur`.
-- Conflict-check (`get_escort_busy_windows`) gebruikt venster `leg1Start … lastLegEnd`.
-- Bij boeken: `rides.scheduled_at = leg1.start`, `rides.time_window_end = lastLegEnd`, en `extra_legs` gevuld.
-- `ride_assignments.estimated_hours/estimated_cost` op basis van totale tijd.
+Per e-mail:
+- Nieuw `.tsx` template in `supabase/functions/_shared/transactional-email-templates/` met dezelfde brass/parchment-styling als bestaande templates.
+- Toevoegen aan `registry.ts`.
+- `supabase.functions.invoke('send-transactional-email', …)` aanroep met `idempotencyKey` op de juiste plek (edge function of client).
+- Voor admin-mails: ophalen van admin e-mailadressen via een query op `user_roles` + `profiles` (zoals `new-signup-admin` doet).
 
-## Weergave op detailpagina's
+Aan het eind één keer `deploy_edge_functions` voor alle gewijzigde functies.
 
-Op `ClientRideDetail` en `EscortRideDetail` een chronologisch lijstje "Route":
-1. Pickup → Dropoff – starttijd
-2. Pickup → Dropoff – starttijd
-   …
+## Technische details
 
-Bestaande pickup/dropoff-velden tonen de eerste leg; extra legs eronder.
+- Idempotency keys:
+  - match-found: `match-${rideId}-${escortUserId}`
+  - definitive-confirm: `confirm-${rideId}-${escortUserId}`
+  - payment-confirm: `payment-${invoiceId}`
+  - ride-cancelled-by-escort: `cancel-${rideId}-${escortUserId}`
+  - ride-updated: `update-${rideId}-${updatedAt}`
+  - escort-invoice-ready: `escort-invoice-${invoiceId}`
+  - payment-failed-admin: `payment-failed-${stripeEventId}`
+- Geen DB-schema wijzigingen nodig.
+- Geen nieuwe edge functions; alles via bestaande `send-transactional-email`.
 
-## Wijzigingen
+## Open vraag
 
-- Migratie: `ALTER TABLE rides ADD COLUMN extra_legs jsonb NOT NULL DEFAULT '[]'`.
-- `src/pages/RequestRide.tsx`: nieuwe state `extraLegs`, UI-sectie, validatie, aangepaste `findMatches` (start/eind, ride-duur), aangepaste `bookEscorts` (insert).
-- `src/pages/ClientRideDetail.tsx` + `src/pages/EscortRideDetail.tsx`: leg-lijst tonen wanneer `extra_legs.length > 0`.
-
-## Buiten scope (later)
-
-- Bewerken van extra legs na boeking (`EditRide.tsx`).
-- Aparte facturatie per leg.
-- Per-leg lading of vergunning.
-- Bundle-flow / 1-op-1 voorrang voor losse vervolgritten (blijft beschikbaar voor wie meerdere losse rides wil maken).
+Voor de **wijziging ritdetails**-mail: alleen sturen bij wijziging van starttijd/locatie/datum, of bij elke aanpassing (ook ontheffing/chauffeurs)? Standaard: bij elke wijziging één e-mail, met "controleer de bijgewerkte ritdetails in de app".
