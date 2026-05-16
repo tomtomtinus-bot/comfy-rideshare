@@ -124,6 +124,7 @@ async function sendPush(userIds: string[], title: string, body: string, url: str
   } catch (e) {
     console.error("[notify] sendPush failed", e);
   }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
