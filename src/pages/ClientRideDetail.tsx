@@ -312,6 +312,68 @@ const Inner = () => {
       )}
 
       {(() => {
+        const acceptedCount = escorts.filter((e) => e.status === "accepted").length;
+        const invitedCount = escorts.filter((e) => e.status === "invited").length;
+        const declinedCount = escorts.filter((e) => e.status === "declined" || e.status === "expired").length;
+        const needsNewEscort =
+          ride.status !== "cancelled" &&
+          ride.status !== "completed" &&
+          acceptedCount === 0 &&
+          invitedCount === 0 &&
+          declinedCount > 0;
+        if (!needsNewEscort) return null;
+        const handleAuto = async () => {
+          if (autoBusy) return;
+          setAutoBusy(true);
+          const limit = Math.max(1, ride.num_escorts ?? 1) * 5;
+          const { data, error } = await supabase.rpc("invite_replacement_escorts", {
+            _ride_id: ride.id,
+            _limit: limit,
+          });
+          setAutoBusy(false);
+          if (error) return toast.error(error.message);
+          const n = typeof data === "number" ? data : 0;
+          if (n === 0) toast.info("Geen extra begeleiders gevonden om uit te nodigen.");
+          else toast.success(`${n} begeleider${n === 1 ? "" : "s"} uitgenodigd.`);
+          load();
+        };
+        return (
+          <div className="bg-red-50 border-l-4 border-red-600 p-5 space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-red-900">
+                Alle uitgenodigde begeleiders hebben deze rit afgewezen.
+              </p>
+              <p className="text-xs text-red-800/80 mt-1">
+                Kies handmatig een nieuwe begeleider of laat ViaCust automatisch passende begeleiders uitnodigen.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setPickerOpen(true)}
+                className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors"
+              >
+                Kies nieuwe begeleider
+              </button>
+              <button
+                disabled={autoBusy}
+                onClick={handleAuto}
+                className="px-5 py-2.5 border border-brass-deep/40 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
+              >
+                {autoBusy ? "Zoeken…" : "Automatisch zoeken"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      <ReplacementEscortPicker
+        rideId={ride.id}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onInvited={load}
+      />
+
+      {(() => {
         const hasPendingCancel = Object.values(cancelReqs).some((c) => c.status === "pending");
         const hasSubmittedHours = Object.values(hoursMap).some((h: any) => h?.hours_submitted_at);
         const defaultOpen: string[] = ["rit"];
