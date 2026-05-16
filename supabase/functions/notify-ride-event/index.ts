@@ -79,12 +79,30 @@ async function loadProfileName(admin: ReturnType<typeof getAdmin>, userId: strin
   return (data as any)?.company_name || (data as any)?.full_name || "";
 }
 
-async function send(admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
-  const { error } = await admin.functions.invoke("send-transactional-email", {
-    body: { templateName, recipientEmail, idempotencyKey, templateData },
-  });
-  if (error) console.error(`send ${templateName} to ${recipientEmail}: ${error.message}`);
-  return !error;
+async function send(_admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
+  const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`;
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${key}`,
+        "apikey": key,
+      },
+      body: JSON.stringify({ templateName, recipientEmail, idempotencyKey, templateData }),
+    });
+    const txt = await res.text();
+    if (!res.ok) {
+      console.error(`[notify] send ${templateName} -> ${recipientEmail} FAILED ${res.status}: ${txt}`);
+      return false;
+    }
+    console.log(`[notify] send ${templateName} -> ${recipientEmail} OK`);
+    return true;
+  } catch (e) {
+    console.error(`[notify] send ${templateName} -> ${recipientEmail} threw: ${String(e)}`);
+    return false;
+  }
 }
 
 Deno.serve(async (req) => {
