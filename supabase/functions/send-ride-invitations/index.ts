@@ -123,8 +123,14 @@ Deno.serve(async (req) => {
       const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}`
       const rideUrl = `${origin}/rit/${ride.id}`
 
-      const { data, error } = await admin.functions.invoke('send-transactional-email', {
-        body: {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SERVICE_KEY}`,
+          'apikey': SERVICE_KEY,
+        },
+        body: JSON.stringify({
           templateName: 'ride-invitation',
           recipientEmail: email,
           idempotencyKey: `ride-invite-${a.id}`,
@@ -136,11 +142,12 @@ Deno.serve(async (req) => {
             rideUrl,
             acceptUrl,
           },
-        },
+        }),
       })
-      if (error) {
-        console.error('[send-ride-invitations] invoke error', { assignmentId: a.id, email, error: String(error), data })
-        failures.push({ assignmentId: a.id, reason: String(error?.message ?? error) })
+      const txt = await res.text()
+      if (!res.ok) {
+        console.error('[send-ride-invitations] fetch error', { assignmentId: a.id, email, status: res.status, body: txt })
+        failures.push({ assignmentId: a.id, reason: `HTTP ${res.status}: ${txt}` })
       } else {
         sent += 1
       }
