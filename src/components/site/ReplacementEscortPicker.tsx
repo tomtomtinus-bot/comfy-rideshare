@@ -16,6 +16,16 @@ type Candidate = {
   afvoer_km: number | null;
 };
 
+// Schat reistijd op basis van afstand (gemiddeld 70 km/u over de weg)
+const kmToTime = (km: number | null) => {
+  if (km == null) return "—";
+  const minutes = Math.round((km / 70) * 60);
+  if (minutes < 60) return `~${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `~${h} u` : `~${h} u ${m} min`;
+};
+
 export const ReplacementEscortPicker = ({
   rideId,
   open,
@@ -64,7 +74,7 @@ export const ReplacementEscortPicker = ({
             Kies een nieuwe begeleider
           </DialogTitle>
           <DialogDescription>
-            Beschikbare begeleiders, gesorteerd op afstand tot het ophaaladres.
+            Beschikbare begeleiders, gesorteerd op reistijd tot het ophaaladres.
           </DialogDescription>
         </DialogHeader>
         {loading ? (
@@ -86,9 +96,9 @@ export const ReplacementEscortPicker = ({
                     ★ {Number(c.rating ?? 0).toFixed(1)} ({c.rides_completed ?? 0})
                   </p>
                   <p className="text-xs text-brass-deep/70 mt-1 tabular-nums">
-                    Aanvoer: <span className="font-medium">{c.aanvoer_km != null ? `~${Math.round(c.aanvoer_km)} km` : "—"}</span>
+                    Aanvoer: <span className="font-medium">{kmToTime(c.aanvoer_km)}</span>
                     {" · "}
-                    Afvoer: <span className="font-medium">{c.afvoer_km != null ? `~${Math.round(c.afvoer_km)} km` : "—"}</span>
+                    Afvoer: <span className="font-medium">{kmToTime(c.afvoer_km)}</span>
                   </p>
                 </div>
                 <button
