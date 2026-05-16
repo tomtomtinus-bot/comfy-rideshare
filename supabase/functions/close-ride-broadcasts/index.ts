@@ -127,6 +127,12 @@ Deno.serve(async (req) => {
       })
     }
     closedRides += 1
+
+    if (winners.length > 0) {
+      supabase.functions.invoke("notify-ride-event", {
+        body: { event: "match_confirmed", rideId },
+      }).catch((e) => console.error("notify match_confirmed", e));
+    }
   }
 
   if (notifications.length > 0) {
