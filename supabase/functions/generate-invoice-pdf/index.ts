@@ -364,6 +364,16 @@ Deno.serve(async (req) => {
       items = its ?? [];
       from = { ...(epProf ?? {}), ...(ep ?? {}) } as BillingParty;
       to = (cp ?? {}) as BillingParty;
+
+      // Enrich: fetch ride metadata (route, reference, permit) for grouping
+      const rideIds = Array.from(new Set(items.map((i) => String(i.ride_id)).filter(Boolean)));
+      if (rideIds.length > 0) {
+        const { data: rideRows } = await admin
+          .from("rides")
+          .select("id, scheduled_at, pickup_city, dropoff_city, client_reference, permit_number, license_plates")
+          .in("id", rideIds);
+        (invoice as Record<string, unknown>).__rides = rideRows ?? [];
+      }
     } else {
       const { data: inv } = await admin
         .from("platform_invoices")
@@ -402,6 +412,17 @@ Deno.serve(async (req) => {
         admin.from("profiles").select("*").eq("id", inv.client_id).maybeSingle(),
       ]);
       items = its ?? [];
+
+      // Enrich with ride reference (for clearer line item)
+      const rideIds = Array.from(new Set(items.map((i) => String(i.ride_id)).filter(Boolean)));
+      if (rideIds.length > 0) {
+        const { data: rideRows } = await admin
+          .from("rides")
+          .select("id, client_reference")
+          .in("id", rideIds);
+        (invoice as Record<string, unknown>).__rides = rideRows ?? [];
+      }
+
       from = PLATFORM_PARTY;
       to = (cp ?? {}) as BillingParty;
     }
