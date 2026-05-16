@@ -361,6 +361,13 @@ const Inner = () => {
               >
                 {autoBusy ? "Zoeken…" : "Automatisch zoeken"}
               </button>
+              <button
+                disabled={busy}
+                onClick={handleCancelRide}
+                className="px-5 py-2.5 border border-red-700/60 text-red-800 uppercase tracking-widest text-[10px] font-semibold hover:bg-red-700 hover:text-parchment disabled:opacity-50 transition-colors"
+              >
+                Rit annuleren
+              </button>
             </div>
           </div>
         );
