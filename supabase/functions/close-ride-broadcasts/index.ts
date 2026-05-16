@@ -106,6 +106,7 @@ Deno.serve(async (req) => {
         title: 'Je bent gekozen voor de rit ✓',
         body: `${ride.pickup_city} → ${ride.dropoff_city}. Open de rit voor adres en chauffeurgegevens.`,
         ride_assignment_id: w.id,
+        ride_id: rideId,
       })
     }
     for (const l of list.slice(slotsLeft)) {
