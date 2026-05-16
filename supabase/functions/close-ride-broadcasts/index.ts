@@ -106,6 +106,7 @@ Deno.serve(async (req) => {
         title: 'Je bent gekozen voor de rit ✓',
         body: `${ride.pickup_city} → ${ride.dropoff_city}. Open de rit voor adres en chauffeurgegevens.`,
         ride_assignment_id: w.id,
+        ride_id: rideId,
       })
     }
     for (const l of list.slice(slotsLeft)) {
@@ -115,6 +116,7 @@ Deno.serve(async (req) => {
         title: 'Net niet gekozen',
         body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} is een andere begeleider gekozen. Bedankt voor je beschikbaarheid.`,
         ride_assignment_id: l.id,
+        ride_id: rideId,
       })
     }
     if (winners.length > 0) {
@@ -124,6 +126,7 @@ Deno.serve(async (req) => {
         title: `${winners.length} begeleider${winners.length === 1 ? '' : 's'} bevestigd`,
         body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} is de selectie afgerond.`,
         ride_assignment_id: null,
+        ride_id: rideId,
       })
     }
     closedRides += 1

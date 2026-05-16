@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
       await supabase.from("notifications").insert({
         user_id: r.escort_id,
         ride_assignment_id: r.id,
+        ride_id: ride.id,
         type: "hours_reminder_10h",
         title: "Herinnering: vul je uren in",
         body: `Je rit (${route}) is 10 uur geleden gestart. Vul je werkelijke uren in.`,
@@ -58,6 +59,7 @@ Deno.serve(async (req) => {
       await supabase.from("notifications").insert({
         user_id: r.escort_id,
         ride_assignment_id: r.id,
+        ride_id: ride.id,
         type: "hours_reminder_8h",
         title: "Vergeet je uren niet",
         body: `Je rit (${route}) is 8 uur geleden gestart. Vul je werkelijke uren in.`,

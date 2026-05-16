@@ -13,6 +13,7 @@ type Notification = {
   body: string;
   type: string;
   ride_assignment_id: string | null;
+  ride_id: string | null;
   read_at: string | null;
   created_at: string;
 };
@@ -30,17 +31,26 @@ export const NotificationBell = () => {
   const openNotification = async (n: Notification) => {
     setOpen(false);
     if (!n.read_at) void markOneRead(n.id);
-    if (!n.ride_assignment_id) return;
-    const { data } = await supabase
-      .from("ride_assignments")
-      .select("ride_id, escort_id")
-      .eq("id", n.ride_assignment_id)
-      .maybeSingle();
-    if (!data) return;
-    if (user && data.escort_id === user.id) {
-      navigate(`/opdracht/${n.ride_assignment_id}`);
-    } else if (data.ride_id) {
-      navigate(`/rit/${data.ride_id}`);
+
+    // Escort viewing their own assignment → open assignment detail
+    if (n.ride_assignment_id) {
+      const { data } = await supabase
+        .from("ride_assignments")
+        .select("ride_id, escort_id")
+        .eq("id", n.ride_assignment_id)
+        .maybeSingle();
+      if (user && data?.escort_id === user.id) {
+        navigate(`/opdracht/${n.ride_assignment_id}`);
+        return;
+      }
+      if (data?.ride_id) {
+        navigate(`/rit/${data.ride_id}`);
+        return;
+      }
+    }
+
+    if (n.ride_id) {
+      navigate(`/rit/${n.ride_id}`);
     }
   };
 
@@ -51,7 +61,7 @@ export const NotificationBell = () => {
     setLoading(true);
     const { data } = await supabase
       .from("notifications")
-      .select("id,title,body,type,ride_assignment_id,read_at,created_at")
+      .select("id,title,body,type,ride_assignment_id,ride_id,read_at,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(PAGE);
@@ -171,28 +181,7 @@ export const NotificationBell = () => {
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
-                  const clickable = !!n.ride_assignment_id;
-                  const inner = (
-                    <div
-                      className={cn(
-                        "px-4 py-3 hover:bg-brass-deep/[0.04] transition-colors",
-                        !n.read_at && "bg-brass-gold/[0.07]"
-                      )}
-                    >
-                      <div className="flex items-start gap-2">
-                        {!n.read_at && (
-                          <span className="mt-1.5 size-2 rounded-full bg-brass-gold shrink-0" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
-                          <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
-                            {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
+                  const clickable = !!(n.ride_assignment_id || n.ride_id);
                   return (
                     <li key={n.id}>
                       <button
@@ -200,7 +189,25 @@ export const NotificationBell = () => {
                         className="w-full text-left"
                         onClick={() => (clickable ? openNotification(n) : !n.read_at && markOneRead(n.id))}
                       >
-                        {inner}
+                        <div
+                          className={cn(
+                            "px-4 py-3 hover:bg-brass-deep/[0.04] transition-colors",
+                            !n.read_at && "bg-brass-gold/[0.07]"
+                          )}
+                        >
+                          <div className="flex items-start gap-2">
+                            {!n.read_at && (
+                              <span className="mt-1.5 size-2 rounded-full bg-brass-gold shrink-0" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
+                              <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
+                              <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
+                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </button>
                     </li>
                   );
