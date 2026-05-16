@@ -131,20 +131,22 @@ Deno.serve(async (req) => {
       return { ride, pickup, dropoff, plannedAt, reference, rideUrl };
     };
 
+    console.log(`[notify-ride-event] event=${event} rideId=${rideId} escortUserId=${escortUserId} invoiceId=${invoiceId}`);
     switch (event) {
       case "match_confirmed": {
         if (!rideId) break;
         const ctx = await buildRideContext(rideId);
-        if (!ctx) break;
+        if (!ctx) { console.log(`[notify-ride-event] ride not found ${rideId}`); break; }
         const { ride, pickup, dropoff, plannedAt, reference, rideUrl } = ctx;
         const clientEmail = await getUserEmail(admin, ride.client_id);
         const clientName = await loadProfileName(admin, ride.client_id);
-        const { data: accepted } = await admin
+        const { data: accepted, error: accErr } = await admin
           .from("ride_assignments")
           .select("id, escort_id")
           .eq("ride_id", rideId)
           .eq("status", "accepted");
         const list = (accepted ?? []) as any[];
+        console.log(`[notify-ride-event] match_confirmed clientEmail=${clientEmail} acceptedCount=${list.length} accErr=${accErr?.message ?? ""}`);
         for (const a of list) {
           // escort_profiles.id IS the auth.users id
           const escortUserId = a.escort_id as string;
