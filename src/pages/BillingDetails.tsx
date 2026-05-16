@@ -494,6 +494,7 @@ const BillingDetailsInner = () => {
           )}
 
           <EmailChangeCard />
+          <div className="mt-6"><NotificationPreferencesCard /></div>
         </div>
       </main>
       <Footer />
