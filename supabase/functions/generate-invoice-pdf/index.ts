@@ -498,10 +498,10 @@ Deno.serve(async (req) => {
           refParts.push(meta.license_plates.join(", "));
         }
         const route = meta?.pickup_city && meta?.dropoff_city
-          ? `${meta.pickup_city} → ${meta.dropoff_city}`
+          ? `${meta.pickup_city} > ${meta.dropoff_city}`
           : String(rows.find((r) => classify(String(r.description ?? "")) === "uren")?.description ?? "Rit");
         const dateStr = fmtDate(String(meta?.scheduled_at ?? rows[0].ride_date));
-        const header = `${dateStr}   ·   ${route}` + (refParts.length ? `   ·   ${refParts.join(" · ")}` : "");
+        const header = safe(`${dateStr}   ·   ${route}` + (refParts.length ? `   ·   ${refParts.join(" · ")}` : ""));
 
         body.push([{
           content: header,
