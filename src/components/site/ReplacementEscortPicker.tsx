@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { emptyTravelMinutes } from "@/lib/geo";
 
 type Candidate = {
   id: string;
@@ -13,17 +12,26 @@ type Candidate = {
   rides_completed: number | null;
   vehicle_type: string | null;
   languages: string[] | null;
+  base_lat: number | null;
+  base_lng: number | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
   aanvoer_km: number | null;
   afvoer_km: number | null;
+  aanvoerMin?: number | null;
+  afvoerMin?: number | null;
 };
 
-// Reistijd voor leegrijden (aan-/afvoer) — zelfde berekening als bij de hoofdaanvraag:
-// 100 km/u, naar boven afgerond op een kwartier.
-const kmToTime = (km: number | null) => {
-  if (km == null) return "—";
-  const total = emptyTravelMinutes(km);
-  const h = Math.floor(total / 60);
-  const m = total % 60;
+// Zelfde afronding als de hoofdaanvraag: minimaal 15 minuten,
+// naar boven afgerond op een kwartier.
+const roundQuarter = (sec: number) => Math.max(15, Math.ceil((sec / 60) / 15) * 15);
+
+const fmtMin = (min: number | null | undefined) => {
+  if (min == null) return "—";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
   if (h === 0) return `${m} min`;
   if (m === 0) return `${h}u`;
   return `${h}u ${m}m`;
@@ -46,14 +54,66 @@ export const ReplacementEscortPicker = ({
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
     setLoading(true);
-    supabase
-      .rpc("find_replacement_candidates", { _ride_id: rideId, _limit: 20 })
-      .then(({ data, error }) => {
-        if (error) toast.error(error.message);
-        setCandidates((data as Candidate[]) ?? []);
-        setLoading(false);
+    (async () => {
+      const { data, error } = await supabase.rpc("find_replacement_candidates", {
+        _ride_id: rideId,
+        _limit: 20,
       });
+      if (cancelled) return;
+      if (error) {
+        toast.error(error.message);
+        setCandidates([]);
+        setLoading(false);
+        return;
+      }
+      const base = (data as Candidate[]) ?? [];
+      setCandidates(base);
+      setLoading(false);
+
+      // Reistijden via Google Maps (zonder verkeer = "schone" reistijd, geen files),
+      // identiek aan de hoofdaanvraag.
+      const fetchLeg = async (
+        origin: { lat: number; lng: number } | null,
+        destination: { lat: number; lng: number } | null,
+      ): Promise<number | null> => {
+        if (!origin || !destination) return null;
+        try {
+          const { data: d, error: e } = await supabase.functions.invoke("google-directions", {
+            body: { origin, destination },
+          });
+          if (e || !d?.duration_s) return null;
+          return roundQuarter(Number(d.duration_s));
+        } catch {
+          return null;
+        }
+      };
+
+      const enriched = await Promise.all(
+        base.map(async (c) => {
+          const baseLoc = c.base_lat != null && c.base_lng != null ? { lat: c.base_lat, lng: c.base_lng } : null;
+          const pickup = c.pickup_lat != null && c.pickup_lng != null ? { lat: c.pickup_lat, lng: c.pickup_lng } : null;
+          const dropoff = c.dropoff_lat != null && c.dropoff_lng != null ? { lat: c.dropoff_lat, lng: c.dropoff_lng } : null;
+          const [aanvoer, afvoer] = await Promise.all([
+            fetchLeg(baseLoc, pickup),
+            fetchLeg(dropoff, baseLoc),
+          ]);
+          return { ...c, aanvoerMin: aanvoer, afvoerMin: afvoer };
+        }),
+      );
+      if (cancelled) return;
+      // Sorteer op aanvoertijd (Google) waar beschikbaar, anders houd huidige volgorde
+      enriched.sort((a, b) => {
+        const av = a.aanvoerMin ?? Number.POSITIVE_INFINITY;
+        const bv = b.aanvoerMin ?? Number.POSITIVE_INFINITY;
+        return av - bv;
+      });
+      setCandidates(enriched);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [open, rideId]);
 
   const invite = async (escortId: string) => {
@@ -99,9 +159,9 @@ export const ReplacementEscortPicker = ({
                     ★ {Number(c.rating ?? 0).toFixed(1)} ({c.rides_completed ?? 0})
                   </p>
                   <p className="text-xs text-brass-deep/70 mt-1 tabular-nums">
-                    Aanvoer: <span className="font-medium">{kmToTime(c.aanvoer_km)}</span>
+                    Aanvoer: <span className="font-medium">{fmtMin(c.aanvoerMin)}</span>
                     {" · "}
-                    Afvoer: <span className="font-medium">{kmToTime(c.afvoer_km)}</span>
+                    Afvoer: <span className="font-medium">{fmtMin(c.afvoerMin)}</span>
                   </p>
                 </div>
                 <button
