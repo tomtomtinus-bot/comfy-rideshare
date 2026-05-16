@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 type Prefs = {
   weekly_updates: boolean;
@@ -8,10 +9,17 @@ type Prefs = {
 
 const DEFAULTS: Prefs = { weekly_updates: true };
 
+const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isStandalone = typeof window !== "undefined" && (
+  window.matchMedia?.("(display-mode: standalone)").matches ||
+  (window.navigator as any).standalone === true
+);
+
 export const NotificationPreferencesCard = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
+  const push = usePushSubscription();
 
   useEffect(() => {
     (async () => {
@@ -85,6 +93,58 @@ export const NotificationPreferencesCard = () => {
               </div>
             </div>
           </label>
+
+          <div className="p-3 border border-brass-deep/15">
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-brass-deep">
+                  Pushmeldingen op dit apparaat
+                </div>
+                <div className="text-[12px] text-brass-deep/60">
+                  Ontvang directe meldingen bij nieuwe ritaanvragen, matches en wijzigingen
+                  &mdash; ook als je de app niet open hebt.
+                </div>
+                {push.status === "unsupported" && (
+                  <div className="text-[12px] text-brass-deep/50 mt-2">
+                    Pushmeldingen werken niet in deze omgeving. Open de site op{" "}
+                    <strong>viacust.com</strong> in je browser.
+                  </div>
+                )}
+                {push.status === "blocked" && (
+                  <div className="text-[12px] text-red-700 mt-2">
+                    Meldingen zijn geblokkeerd in je browserinstellingen. Sta ze handmatig
+                    toe en probeer opnieuw.
+                  </div>
+                )}
+                {isIOS && !isStandalone && push.status !== "unsupported" && (
+                  <div className="text-[12px] text-brass-deep/60 mt-2">
+                    Op iPhone/iPad: open in Safari, tik op het deel-icoon en kies
+                    &ldquo;Zet op beginscherm&rdquo;. Open daarna de app via het icoon
+                    om meldingen aan te zetten.
+                  </div>
+                )}
+              </div>
+              {push.status === "subscribed" ? (
+                <button
+                  type="button"
+                  onClick={push.disable}
+                  disabled={push.busy}
+                  className="px-3 py-2 text-xs font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep/5 disabled:opacity-50"
+                >
+                  Uitzetten
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={push.enable}
+                  disabled={push.busy || push.status === "unsupported" || push.status === "blocked"}
+                  className="px-3 py-2 text-xs font-semibold bg-brass-gold text-brass-deep hover:bg-brass-gold/90 disabled:opacity-50"
+                >
+                  {push.busy ? "Bezig…" : "Aanzetten"}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </section>

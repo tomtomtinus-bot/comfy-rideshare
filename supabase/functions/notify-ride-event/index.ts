@@ -107,6 +107,25 @@ async function send(_admin: ReturnType<typeof getAdmin>, templateName: string, r
   }
 }
 
+async function sendPush(userIds: string[], title: string, body: string, url: string) {
+  const ids = userIds.filter(Boolean);
+  if (ids.length === 0) return;
+  try {
+    const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-push`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")!}`,
+        "apikey": Deno.env.get("SUPABASE_ANON_KEY")!,
+      },
+      body: JSON.stringify({ userIds: ids, title, body, url }),
+    });
+    await res.text();
+  } catch (e) {
+    console.error("[notify] sendPush failed", e);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
@@ -172,6 +191,8 @@ Deno.serve(async (req) => {
             });
           }
         }
+        const escortIdsM = list.map((a: any) => a.escort_id as string).filter(Boolean);
+        await sendPush([ride.client_id, ...escortIdsM], "Rit bevestigd", `${pickup} → ${dropoff} • ${plannedAt}`, `/rit/${ride.id}`);
         void ride;
         break;
       }
@@ -198,9 +219,10 @@ Deno.serve(async (req) => {
             pickup, dropoff, plannedAt, reference, rideUrl,
           });
         }
+        const escortIdsU = ((accepted ?? []) as any[]).map((a) => a.escort_id as string).filter(Boolean);
+        await sendPush(escortIdsU, "Rit gewijzigd", summary || "De ritdetails zijn bijgewerkt.", `/rit/${rideId}`);
         break;
       }
-
       case "escort_cancelled": {
         if (!rideId || !escortUserId) break;
         const ctx = await buildRideContext(rideId);
@@ -220,6 +242,7 @@ Deno.serve(async (req) => {
           clientName, escortName, reason: reason ?? "",
           pickup, dropoff, plannedAt, reference, rideUrl,
         });
+        await sendPush([ride.client_id], "Begeleider geannuleerd", `${escortName} kan rit niet rijden. ${pickup} → ${dropoff}`, `/rit/${ride.id}`);
         void ride;
         break;
       }
@@ -245,6 +268,7 @@ Deno.serve(async (req) => {
           amount: fmtMoney(invoice.total_amount),
           invoiceUrl: `${origin}/facturen`,
         });
+        await sendPush([escortUserId2], "Nieuwe factuur klaar", `${fmtMoney(invoice.total_amount)} • ${clientName}`, `/facturen`);
         break;
       }
 
@@ -267,6 +291,7 @@ Deno.serve(async (req) => {
           paidAt: fmtDateTime(invoice.paid_at || new Date().toISOString()),
           invoiceUrl: `${origin}/facturen`,
         });
+        await sendPush([invoice.client_id], "Betaling ontvangen", `Factuur ${invoice.invoice_number} • ${fmtMoney(invoice.total_amount)}`, `/facturen`);
         break;
       }
 

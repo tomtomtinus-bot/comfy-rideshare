@@ -153,6 +153,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Fire-and-forget push notifications to invited escorts
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ANON_KEY}`,
+          'apikey': ANON_KEY,
+        },
+        body: JSON.stringify({
+          userIds: escortIds,
+          title: 'Nieuwe ritaanvraag',
+          body: `${ride.pickup_city} → ${ride.dropoff_city} • ${plannedAt}`,
+          url: `/rit/${ride.id}`,
+        }),
+      }).then(r => r.text())
+    } catch (e) {
+      console.error('[send-ride-invitations] push failed', e)
+    }
+
     console.log('[send-ride-invitations] done', { rideId, sent, failures })
 
     return new Response(JSON.stringify({ sent, failures }), {
