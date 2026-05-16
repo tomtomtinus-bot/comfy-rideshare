@@ -347,10 +347,20 @@ const InvoicesInner = () => {
   };
 
   const downloadEscortPdf = (inv: Invoice) =>
-    openInvoicePdf(inv.id, "regular", (inv as Invoice & { pdf_path?: string | null }).pdf_path);
+    openInvoicePdf(
+      inv.id,
+      "regular",
+      (inv as Invoice & { pdf_path?: string | null }).pdf_path,
+      inv.invoice_number,
+    );
 
   const downloadPlatformPdf = (inv: PlatformInvoice) =>
-    openInvoicePdf(inv.id, "platform", (inv as PlatformInvoice & { pdf_path?: string | null }).pdf_path);
+    openInvoicePdf(
+      inv.id,
+      "platform",
+      (inv as PlatformInvoice & { pdf_path?: string | null }).pdf_path,
+      inv.invoice_number,
+    );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
