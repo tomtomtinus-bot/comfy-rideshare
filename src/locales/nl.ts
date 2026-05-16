@@ -244,7 +244,7 @@ const nl = {
     pickupPlaceholder: "Bv. Hafenstraße 12, Duisburg",
     dropoffPlaceholder: "Bv. Havenweg 8, Rotterdam",
     estDuration: "Geschatte ritduur",
-    speedHint: "(70 km/u beladen, leegrijden 100 km/u)",
+    speedHint: " ",
     cargoSection: "Lading & vergunning",
     length: "Lengte (m)",
     width: "Breedte (m)",
