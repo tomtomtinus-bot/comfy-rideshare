@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,11 +18,6 @@ type Notification = {
 };
 
 const PAGE = 15;
-
-function linkFor(n: Notification): string | null {
-  if (n.ride_assignment_id) return `/ritten/${n.ride_assignment_id}`;
-  return null;
-}
 
 export const NotificationBell = () => {
   const { user } = useAuth();
