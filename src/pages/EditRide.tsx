@@ -195,7 +195,7 @@ const Inner = () => {
     const lastEndISO = legsPayload.length > 0 ? legsPayload[legsPayload.length - 1].end_at ?? null : null;
 
     setBusy(true);
-    const update: Record<string, unknown> = {
+    const update: any = {
       pickup_address: pickupAddr,
       dropoff_address: dropoffAddr,
       scheduled_at: scheduledISO,
