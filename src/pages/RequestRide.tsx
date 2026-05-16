@@ -611,6 +611,10 @@ const RequestRideInner = () => {
       dropoff_lat: ex.dropoff!.lat,
       dropoff_lng: ex.dropoff!.lng,
       scheduled_at: nlISO(ex.scheduled_date, ex.scheduled_time),
+      permit_number: ex.permit_number.trim() || null,
+      drivers: ex.drivers
+        .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
+        .filter((d) => d.name || d.phone),
     }));
 
     const { data: ride, error } = await supabase
