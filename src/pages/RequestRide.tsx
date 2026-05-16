@@ -825,6 +825,9 @@ const RequestRideInner = () => {
                       <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
                       <span className="text-brass-deep/55">{t("request.speedHint")}</span>
                     </p>
+                    <p className="text-[11px] text-brass-deep/55 italic mt-1">
+                      Aan deze geschatte rijtijd kunnen geen rechten worden ontleend.
+                    </p>
                   </div>
                 );
               })()}
