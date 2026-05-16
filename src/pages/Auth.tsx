@@ -180,6 +180,7 @@ const Auth = () => {
         // Browser redirect happens automatically
         return;
       }
+      if (await checkAndPromptMfa()) { setBusy(false); return; }
       navigate(redirectTo);
     } catch (err) {
       setBusy(false);
@@ -196,8 +197,9 @@ const Auth = () => {
       return;
     }
     const error = await doSignIn(creds.email, creds.password);
+    if (error) { setBusy(false); return toast.error("Login mislukt — log opnieuw in met je wachtwoord."); }
+    if (await checkAndPromptMfa()) { setBusy(false); return; }
     setBusy(false);
-    if (error) return toast.error("Login mislukt — log opnieuw in met je wachtwoord.");
     navigate(redirectTo);
   };
 
