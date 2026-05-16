@@ -835,6 +835,7 @@ export type Database = {
           billing_postcode: string | null
           company_name: string | null
           created_at: string
+          email_preferences: Json
           full_name: string | null
           id: string
           kvk_number: string | null
@@ -860,6 +861,7 @@ export type Database = {
           billing_postcode?: string | null
           company_name?: string | null
           created_at?: string
+          email_preferences?: Json
           full_name?: string | null
           id: string
           kvk_number?: string | null
@@ -885,6 +887,7 @@ export type Database = {
           billing_postcode?: string | null
           company_name?: string | null
           created_at?: string
+          email_preferences?: Json
           full_name?: string | null
           id?: string
           kvk_number?: string | null
