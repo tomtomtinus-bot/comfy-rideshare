@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,17 +19,30 @@ type Notification = {
 
 const PAGE = 15;
 
-function linkFor(n: Notification): string | null {
-  if (n.ride_assignment_id) return `/ritten/${n.ride_assignment_id}`;
-  return null;
-}
-
 export const NotificationBell = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  const openNotification = async (n: Notification) => {
+    setOpen(false);
+    if (!n.read_at) void markOneRead(n.id);
+    if (!n.ride_assignment_id) return;
+    const { data } = await supabase
+      .from("ride_assignments")
+      .select("ride_id, escort_id")
+      .eq("id", n.ride_assignment_id)
+      .maybeSingle();
+    if (!data) return;
+    if (user && data.escort_id === user.id) {
+      navigate(`/opdracht/${n.ride_assignment_id}`);
+    } else if (data.ride_id) {
+      navigate(`/rit/${data.ride_id}`);
+    }
+  };
 
   const unread = items.filter((n) => !n.read_at).length;
 
@@ -158,7 +171,7 @@ export const NotificationBell = () => {
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
-                  const to = linkFor(n);
+                  const clickable = !!n.ride_assignment_id;
                   const inner = (
                     <div
                       className={cn(
@@ -182,25 +195,13 @@ export const NotificationBell = () => {
                   );
                   return (
                     <li key={n.id}>
-                      {to ? (
-                        <Link
-                          to={to}
-                          onClick={() => {
-                            setOpen(false);
-                            if (!n.read_at) markOneRead(n.id);
-                          }}
-                        >
-                          {inner}
-                        </Link>
-                      ) : (
-                        <button
-                          type="button"
-                          className="w-full text-left"
-                          onClick={() => !n.read_at && markOneRead(n.id)}
-                        >
-                          {inner}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="w-full text-left"
+                        onClick={() => (clickable ? openNotification(n) : !n.read_at && markOneRead(n.id))}
+                      >
+                        {inner}
+                      </button>
                     </li>
                   );
                 })}
