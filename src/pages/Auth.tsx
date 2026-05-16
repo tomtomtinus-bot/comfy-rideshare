@@ -505,18 +505,22 @@ const Auth = () => {
             </>
           )}
 
-          <button
-            onClick={() => setMode(mode === "forgot" ? "login" : mode === "login" ? "signup" : "login")}
-            className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
-          >
-            {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
-          </button>
-          <p className="mt-4 text-center text-[10px] text-brass-deep/40">
-            Problemen?{" "}
-            <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
-              support@viacust.com
-            </a>
-          </p>
+          {!mfa && (
+            <>
+              <button
+                onClick={() => setMode(mode === "forgot" ? "login" : mode === "login" ? "signup" : "login")}
+                className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
+              >
+                {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
+              </button>
+              <p className="mt-4 text-center text-[10px] text-brass-deep/40">
+                Problemen?{" "}
+                <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+                  support@viacust.com
+                </a>
+              </p>
+            </>
+          )}
           </>
           )}
         </div>
