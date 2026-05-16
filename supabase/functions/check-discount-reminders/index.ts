@@ -44,10 +44,15 @@ Deno.serve(async (req) => {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, email_preferences")
         .eq("id", sub.user_id as string)
         .maybeSingle();
       const name = (profile as any)?.full_name as string | undefined;
+      const prefs = ((profile as any)?.email_preferences ?? {}) as { weekly_updates?: boolean };
+      if (prefs.weekly_updates === false) {
+        console.log("skipped: weekly_updates disabled", sub.id);
+        continue;
+      }
 
       const endsAtDate = new Date(sub.discount_ends_at as string);
       const endsAt = endsAtDate.toLocaleDateString("nl-NL", {
