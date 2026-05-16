@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
