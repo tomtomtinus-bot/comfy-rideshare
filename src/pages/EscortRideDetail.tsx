@@ -274,6 +274,14 @@ const Inner = () => {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Verzoek verstuurd naar opdrachtgever.");
+    supabase.functions.invoke("notify-ride-event", {
+      body: {
+        event: "escort_cancelled",
+        rideId: myAssignment.ride_id,
+        escortUserId: user?.id,
+        reason: cancelReason.trim(),
+      },
+    }).catch(() => { /* stil falen */ });
     setShowCancelForm(false);
     setCancelReason("");
     load();
