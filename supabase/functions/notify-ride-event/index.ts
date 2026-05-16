@@ -190,6 +190,8 @@ Deno.serve(async (req) => {
             });
           }
         }
+        const escortIdsM = list.map((a: any) => a.escort_id as string).filter(Boolean);
+        await sendPush([ride.client_id, ...escortIdsM], "Rit bevestigd", `${pickup} → ${dropoff} • ${plannedAt}`, `/rit/${ride.id}`);
         void ride;
         break;
       }
@@ -216,9 +218,10 @@ Deno.serve(async (req) => {
             pickup, dropoff, plannedAt, reference, rideUrl,
           });
         }
+        const escortIdsU = ((accepted ?? []) as any[]).map((a) => a.escort_id as string).filter(Boolean);
+        await sendPush(escortIdsU, "Rit gewijzigd", summary || "De ritdetails zijn bijgewerkt.", `/rit/${rideId}`);
         break;
       }
-
       case "escort_cancelled": {
         if (!rideId || !escortUserId) break;
         const ctx = await buildRideContext(rideId);
