@@ -135,10 +135,10 @@ const drawShell = (doc: jsPDF, opts: ShellOpts, logoDataUrl: string | null) => {
     doc.setTextColor(20);
     doc.text("ViaCust", left, 25);
   }
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
-  doc.setTextColor(120);
-  doc.text("Verstuurd via viacust.app", left, 44);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(25, 47, 76); // brand navy (matches site --primary)
+  doc.text("Verstuurd via ViaCust", left, 44);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
