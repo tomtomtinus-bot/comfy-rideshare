@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { EmailChangeCard } from "@/components/site/EmailChangeCard";
+import { NotificationPreferencesCard } from "@/components/site/NotificationPreferencesCard";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
