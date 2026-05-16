@@ -212,6 +212,8 @@ const RequestRideInner = () => {
       dropoff: l.dropoff ?? null,
       scheduled_date: l.scheduled_date ?? "",
       scheduled_time: l.scheduled_time ?? "",
+      end_date: l.end_date ?? "",
+      end_time: l.end_time ?? "",
       permit_number: l.permit_number ?? "",
       drivers: l.drivers ?? [],
     }))
@@ -232,7 +234,8 @@ const RequestRideInner = () => {
 
   const addExtraLeg = () => setExtraLegs((l) => [...l, {
     pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
-    scheduled_date: "", scheduled_time: "", permit_number: "", drivers: [],
+    scheduled_date: "", scheduled_time: "", end_date: "", end_time: "",
+    permit_number: "", drivers: [],
   }]);
   const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
     setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
