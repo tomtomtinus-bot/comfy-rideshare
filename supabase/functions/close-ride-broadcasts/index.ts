@@ -115,6 +115,7 @@ Deno.serve(async (req) => {
         title: 'Net niet gekozen',
         body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} is een andere begeleider gekozen. Bedankt voor je beschikbaarheid.`,
         ride_assignment_id: l.id,
+        ride_id: rideId,
       })
     }
     if (winners.length > 0) {
@@ -124,6 +125,7 @@ Deno.serve(async (req) => {
         title: `${winners.length} begeleider${winners.length === 1 ? '' : 's'} bevestigd`,
         body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} is de selectie afgerond.`,
         ride_assignment_id: null,
+        ride_id: rideId,
       })
     }
     closedRides += 1

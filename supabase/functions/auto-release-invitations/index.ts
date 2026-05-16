@@ -153,6 +153,7 @@ Deno.serve(async (req) => {
         title: 'Begeleider(s) hebben niet gereageerd',
         body: `Voor ${ride.pickup_city} → ${ride.dropoff_city}: ${escortIds.length} uitnodiging(en) verlopen. Nog ${needed} begeleider(s) nodig — open de rit om er extra uit te nodigen.`,
         ride_assignment_id: null,
+        ride_id: rideId,
       })
     }
   }
