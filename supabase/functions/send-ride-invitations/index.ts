@@ -108,16 +108,22 @@ Deno.serve(async (req) => {
       dateStyle: 'long', timeStyle: 'short',
     })
 
+    console.log('[send-ride-invitations] processing', { rideId, assignmentCount: assignments.length, escortCount: escortIds.length, emailsResolved: idToEmail.size })
+
     let sent = 0
+    const failures: Array<{ assignmentId: string; reason: string }> = []
     for (const a of assignments) {
       const email = idToEmail.get(a.escort_id)
-      if (!email) continue
+      if (!email) {
+        failures.push({ assignmentId: a.id, reason: 'no email' })
+        continue
+      }
       const expiresAt = a.responds_by ? new Date(a.responds_by).getTime() : (Date.now() + 30 * 60 * 1000)
       const token = await buildToken(a.id, expiresAt)
       const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}`
       const rideUrl = `${origin}/rit/${ride.id}`
 
-      const { error } = await admin.functions.invoke('send-transactional-email', {
+      const { data, error } = await admin.functions.invoke('send-transactional-email', {
         body: {
           templateName: 'ride-invitation',
           recipientEmail: email,
@@ -132,10 +138,17 @@ Deno.serve(async (req) => {
           },
         },
       })
-      if (!error) sent += 1
+      if (error) {
+        console.error('[send-ride-invitations] invoke error', { assignmentId: a.id, email, error: String(error), data })
+        failures.push({ assignmentId: a.id, reason: String(error?.message ?? error) })
+      } else {
+        sent += 1
+      }
     }
 
-    return new Response(JSON.stringify({ sent }), {
+    console.log('[send-ride-invitations] done', { rideId, sent, failures })
+
+    return new Response(JSON.stringify({ sent, failures }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (e) {
