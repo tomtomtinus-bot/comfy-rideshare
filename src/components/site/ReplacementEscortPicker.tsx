@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { emptyTravelMinutes } from "@/lib/geo";
 
 type Candidate = {
   id: string;
@@ -16,14 +17,16 @@ type Candidate = {
   afvoer_km: number | null;
 };
 
-// Schat reistijd op basis van afstand (gemiddeld 70 km/u over de weg)
+// Reistijd voor leegrijden (aan-/afvoer) — zelfde berekening als bij de hoofdaanvraag:
+// 100 km/u, naar boven afgerond op een kwartier.
 const kmToTime = (km: number | null) => {
   if (km == null) return "—";
-  const minutes = Math.round((km / 70) * 60);
-  if (minutes < 60) return `~${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m === 0 ? `~${h} u` : `~${h} u ${m} min`;
+  const total = emptyTravelMinutes(km);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h}u`;
+  return `${h}u ${m}m`;
 };
 
 export const ReplacementEscortPicker = ({
