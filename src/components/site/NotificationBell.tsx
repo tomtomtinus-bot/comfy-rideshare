@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -99,6 +99,14 @@ export const NotificationBell = () => {
     await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
   };
 
+  const clearAll = async () => {
+    if (!user || items.length === 0) return;
+    if (!window.confirm("Alle meldingen wissen?")) return;
+    const ids = items.map((n) => n.id);
+    setItems([]);
+    await supabase.from("notifications").delete().in("id", ids);
+  };
+
   if (!user) return null;
 
   return (
@@ -122,14 +130,24 @@ export const NotificationBell = () => {
         <div className="absolute right-0 mt-2 w-[340px] max-w-[calc(100vw-2rem)] bg-parchment border border-brass-deep/15 shadow-etched z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-brass-deep/10">
             <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">Meldingen</p>
-            {unread > 0 && (
-              <button
-                onClick={markAllRead}
-                className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold inline-flex items-center gap-1"
-              >
-                <CheckCheck className="size-3.5" /> Alles gelezen
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unread > 0 && (
+                <button
+                  onClick={markAllRead}
+                  className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold inline-flex items-center gap-1"
+                >
+                  <CheckCheck className="size-3.5" /> Alles gelezen
+                </button>
+              )}
+              {items.length > 0 && (
+                <button
+                  onClick={clearAll}
+                  className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-destructive inline-flex items-center gap-1"
+                >
+                  <Trash2 className="size-3.5" /> Wissen
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="max-h-[60vh] overflow-y-auto">
