@@ -136,6 +136,8 @@ interface ExtraLeg {
   dropoff: GeoPoint | null;
   scheduled_date: string;
   scheduled_time: string;
+  end_date: string;
+  end_time: string;
   permit_number: string;
   drivers: { name: string; phone: string }[];
 }
@@ -210,6 +212,8 @@ const RequestRideInner = () => {
       dropoff: l.dropoff ?? null,
       scheduled_date: l.scheduled_date ?? "",
       scheduled_time: l.scheduled_time ?? "",
+      end_date: l.end_date ?? "",
+      end_time: l.end_time ?? "",
       permit_number: l.permit_number ?? "",
       drivers: l.drivers ?? [],
     }))
@@ -230,7 +234,8 @@ const RequestRideInner = () => {
 
   const addExtraLeg = () => setExtraLegs((l) => [...l, {
     pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
-    scheduled_date: "", scheduled_time: "", permit_number: "", drivers: [],
+    scheduled_date: "", scheduled_time: "", end_date: "", end_time: "",
+    permit_number: "", drivers: [],
   }]);
   const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
     setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
@@ -339,10 +344,12 @@ const RequestRideInner = () => {
     legs.push({ ...main, endMs: main.startMs + main.durMin * 60_000 });
     for (const ex of extraLegs) {
       if (!ex.pickup || !ex.dropoff || !ex.scheduled_date || !ex.scheduled_time) return null;
+      if (!ex.end_time) return null;
       const startMs = new Date(nlISO(ex.scheduled_date, ex.scheduled_time)).getTime();
-      if (isNaN(startMs)) return null;
-      const durMin = travelMinutes(distanceKm(ex.pickup, ex.dropoff));
-      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs: startMs + durMin * 60_000 });
+      const endMs = new Date(nlISO(ex.end_date || ex.scheduled_date, ex.end_time)).getTime();
+      if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) return null;
+      const durMin = Math.round((endMs - startMs) / 60_000);
+      legs.push({ pickup: ex.pickup, dropoff: ex.dropoff, startMs, durMin, endMs });
     }
     return legs;
   };
@@ -611,6 +618,7 @@ const RequestRideInner = () => {
       dropoff_lat: ex.dropoff!.lat,
       dropoff_lng: ex.dropoff!.lng,
       scheduled_at: nlISO(ex.scheduled_date, ex.scheduled_time),
+      end_at: nlISO(ex.end_date || ex.scheduled_date, ex.end_time),
       permit_number: ex.permit_number.trim() || null,
       drivers: ex.drivers
         .map((d) => ({ name: d.name.trim(), phone: d.phone.trim() }))
@@ -949,32 +957,52 @@ const RequestRideInner = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                         <Input
                           label="Datum"
                           type="date"
                           min={todayLocalDate()}
                           value={leg.scheduled_date}
-                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v })}
+                          onChange={(v) => updateExtraLeg(i, { scheduled_date: v, end_date: leg.end_date || v })}
                         />
                         <div>
                           <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
                           <input
                             type="time"
-                            step={900}
                             value={leg.scheduled_time}
                             onChange={(e) => updateExtraLeg(i, { scheduled_time: e.target.value })}
                             placeholder="hh:mm"
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           />
                         </div>
+                        <Input
+                          label="Einddatum"
+                          type="date"
+                          min={leg.scheduled_date || todayLocalDate()}
+                          value={leg.end_date || leg.scheduled_date}
+                          onChange={(v) => updateExtraLeg(i, { end_date: v })}
+                        />
+                        <div>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Eindtijd</label>
+                          <input
+                            type="time"
+                            value={leg.end_time}
+                            onChange={(e) => updateExtraLeg(i, { end_time: e.target.value })}
+                            placeholder="hh:mm"
+                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                          />
+                        </div>
                       </div>
-                      {leg.pickup && leg.dropoff && (() => {
-                        const km = distanceKm(leg.pickup, leg.dropoff);
-                        const min = travelMinutes(km);
+                      {(() => {
+                        const km = leg.pickup && leg.dropoff ? distanceKm(leg.pickup, leg.dropoff) : null;
+                        const sMs = leg.scheduled_date && leg.scheduled_time ? new Date(nlISO(leg.scheduled_date, leg.scheduled_time)).getTime() : NaN;
+                        const eMs = leg.end_time ? new Date(nlISO(leg.end_date || leg.scheduled_date, leg.end_time)).getTime() : NaN;
+                        const durMin = !isNaN(sMs) && !isNaN(eMs) && eMs > sMs ? Math.round((eMs - sMs) / 60_000) : null;
+                        if (km == null && durMin == null) return null;
                         return (
                           <p className="mt-3 text-[11px] text-brass-deep/60">
-                            <strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(min)}</strong>
+                            {km != null && (<><strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(travelMinutes(km))}</strong></>)}
+                            {durMin != null && (<> · ingevulde duur <strong className="tabular-nums">{fmtHours(durMin)}</strong></>)}
                           </p>
                         );
                       })()}

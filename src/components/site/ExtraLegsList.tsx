@@ -12,6 +12,7 @@ interface ExtraLeg {
   dropoff_lat: number;
   dropoff_lng: number;
   scheduled_at: string;
+  end_at?: string | null;
   permit_number?: string | null;
   drivers?: { name: string; phone: string }[] | null;
 }
@@ -48,9 +49,17 @@ export const ExtraLegsList = ({ rideId }: { rideId: string }) => {
       <ol className="space-y-3">
         {legs.map((leg, i) => (
           <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
-              <p className="text-xs text-brass-deep/70 tabular-nums">{fmt(leg.scheduled_at)}</p>
+              <div className="text-xs text-brass-deep/70 tabular-nums text-right">
+                <p>{fmt(leg.scheduled_at)}{leg.end_at ? ` → ${new Date(leg.end_at).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}` : ""}</p>
+                {leg.end_at && (() => {
+                  const min = Math.round((new Date(leg.end_at).getTime() - new Date(leg.scheduled_at).getTime()) / 60_000);
+                  if (min <= 0) return null;
+                  const h = Math.floor(min / 60), m = min % 60;
+                  return <p className="text-brass-deep/55">{h ? `${h}u ` : ""}{m ? `${m}m` : (h ? "" : "0m")}</p>;
+                })()}
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div>
