@@ -604,6 +604,7 @@ export type Database = {
           id: string
           read_at: string | null
           ride_assignment_id: string | null
+          ride_id: string | null
           title: string
           type: string
           user_id: string
@@ -614,6 +615,7 @@ export type Database = {
           id?: string
           read_at?: string | null
           ride_assignment_id?: string | null
+          ride_id?: string | null
           title: string
           type: string
           user_id: string
@@ -624,6 +626,7 @@ export type Database = {
           id?: string
           read_at?: string | null
           ride_assignment_id?: string | null
+          ride_id?: string | null
           title?: string
           type?: string
           user_id?: string

@@ -1,0 +1,2 @@
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS ride_id uuid;
+UPDATE public.notifications n SET ride_id = ra.ride_id FROM public.ride_assignments ra WHERE n.ride_assignment_id = ra.id AND n.ride_id IS NULL;
