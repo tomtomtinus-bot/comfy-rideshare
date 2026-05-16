@@ -33,6 +33,8 @@ const Auth = () => {
     return localStorage.getItem("viacust_remember") !== "false";
   });
   const [bioReady, setBioReady] = useState(false);
+  const [mfa, setMfa] = useState<{ factorId: string; challengeId?: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -42,7 +44,57 @@ const Auth = () => {
     })();
   }, []);
 
-  if (!loading && user) return <Navigate to={redirectTo} replace />;
+  if (!loading && user && !mfa) return <Navigate to={redirectTo} replace />;
+
+  // After a successful password sign-in, check if MFA is required and prompt.
+  // Returns true if MFA challenge was started (caller should NOT navigate).
+  const checkAndPromptMfa = async (): Promise<boolean> => {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      const { data: list } = await supabase.auth.mfa.listFactors();
+      const verified = (list?.totp ?? []).find((f) => f.status === "verified");
+      if (verified) {
+        const { data: ch, error } = await supabase.auth.mfa.challenge({ factorId: verified.id });
+        if (error) {
+          toast.error(error.message);
+          await supabase.auth.signOut();
+          return true;
+        }
+        setMfa({ factorId: verified.id, challengeId: ch.id });
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const verifyMfaCode = async () => {
+    if (!mfa) return;
+    if (!/^\d{6}$/.test(mfaCode)) return toast.error("Voer een 6-cijferige code in");
+    setBusy(true);
+    let challengeId = mfa.challengeId;
+    if (!challengeId) {
+      const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId: mfa.factorId });
+      if (cErr) { setBusy(false); return toast.error(cErr.message); }
+      challengeId = ch.id;
+    }
+    const { error } = await supabase.auth.mfa.verify({
+      factorId: mfa.factorId,
+      challengeId,
+      code: mfaCode,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Geverifieerd");
+    setMfa(null);
+    setMfaCode("");
+    navigate(redirectTo);
+  };
+
+  const cancelMfa = async () => {
+    setMfa(null);
+    setMfaCode("");
+    await supabase.auth.signOut();
+  };
 
   const signupSchema = z.object({
     email: z.string().trim().email(t("auth.err.invalidEmail")).max(255),
