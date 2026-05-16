@@ -270,6 +270,8 @@ Deno.serve(async (req) => {
         await sendPush([escortUserId2], "Nieuwe factuur klaar", `${fmtMoney(invoice.total_amount)} • ${clientName}`, `/facturen`);
         break;
       }
+
+      case "payment_succeeded": {
         if (!invoiceId) break;
         const { data: inv } = await admin
           .from("platform_invoices")
@@ -291,6 +293,8 @@ Deno.serve(async (req) => {
         await sendPush([invoice.client_id], "Betaling ontvangen", `Factuur ${invoice.invoice_number} • ${fmtMoney(invoice.total_amount)}`, `/facturen`);
         break;
       }
+
+      case "payment_failed_admin": {
         const adminEmails = await getAdminEmails(admin);
         if (adminEmails.length === 0) break;
         const p = paymentEvent ?? {};
