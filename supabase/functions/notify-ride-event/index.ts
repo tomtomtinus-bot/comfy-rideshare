@@ -62,11 +62,13 @@ async function getAdminEmails(admin: ReturnType<typeof getAdmin>): Promise<strin
 }
 
 async function loadRide(admin: ReturnType<typeof getAdmin>, rideId: string) {
-  const { data } = await admin
+  const { data, error } = await admin
     .from("rides")
-    .select("id, client_id, pickup_address, pickup_city, dropoff_address, dropoff_city, scheduled_at, reference")
+    .select("id, client_id, pickup_address, pickup_city, dropoff_address, dropoff_city, scheduled_at, client_reference")
     .eq("id", rideId)
     .maybeSingle();
+  if (error) console.error(`[notify-ride-event] loadRide error: ${error.message}`);
+  if (data) (data as any).reference = (data as any).client_reference;
   return data as any;
 }
 
