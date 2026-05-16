@@ -1625,9 +1625,10 @@ export type Database = {
       find_replacement_candidates: {
         Args: { _limit?: number; _ride_id: string }
         Returns: {
+          aanvoer_km: number
+          afvoer_km: number
           anonymous_id: string
           base_city: string
-          dist_km: number
           hourly_rate: number
           id: string
           languages: string[]
