@@ -219,7 +219,7 @@ const RequestRideInner = () => {
 
   const addExtraLeg = () => setExtraLegs((l) => [...l, {
     pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
-    scheduled_date: "", scheduled_time: "",
+    scheduled_date: "", scheduled_time: "", permit_number: "", drivers: [],
   }]);
   const updateExtraLeg = (i: number, patch: Partial<ExtraLeg>) =>
     setExtraLegs((l) => l.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
