@@ -83,14 +83,14 @@ async function loadProfileName(admin: ReturnType<typeof getAdmin>, userId: strin
 
 async function send(_admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
   const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`;
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${key}`,
-        "apikey": key,
+        "Authorization": `Bearer ${anonKey}`,
+        "apikey": anonKey,
       },
       body: JSON.stringify({ templateName, recipientEmail, idempotencyKey, templateData }),
     });
