@@ -395,13 +395,26 @@ const ClientDashboard = () => {
           const renderRide = (r: RideRow) => {
             const ass = assignments[r.id] ?? [];
             const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+            const invitedCount = ass.filter((a) => a.status === "invited").length;
+            const declinedCount = ass.filter((a) => a.status === "declined" || a.status === "expired").length;
+            const needsNewEscort =
+              r.status !== "cancelled" &&
+              r.status !== "completed" &&
+              acceptedCount === 0 &&
+              invitedCount === 0 &&
+              declinedCount > 0;
             const inBundle = !!r.bundle_id;
             const canExtendBundle = inBundle && (bucketKey === "openstaand" || bucketKey === "geaccepteerd");
             return (
               <li key={r.id} className="relative">
                 <Link
                   to={`/rit/${r.id}`}
-                  className="block bg-card px-4 py-3 hover:bg-parchment/40 transition-colors"
+                  className={
+                    "block px-4 py-3 transition-colors " +
+                    (needsNewEscort
+                      ? "bg-red-50 hover:bg-red-100 border-l-4 border-red-600"
+                      : "bg-card hover:bg-parchment/40")
+                  }
                 >
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
@@ -433,7 +446,12 @@ const ClientDashboard = () => {
                     </p>
                   )}
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
-                    {(r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
+                    {needsNewEscort && (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-red-700 bg-red-100 border border-red-300 px-2 py-0.5">
+                        ✕ Begeleider geweigerd — kies nieuwe
+                      </span>
+                    )}
+                    {!needsNewEscort && (r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
                       <span
                         className={
                           "text-[10px] uppercase tracking-widest font-semibold tabular-nums " +
@@ -447,7 +465,7 @@ const ClientDashboard = () => {
                         {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
                       </span>
                     )}
-                    <StatusBadge status={r.status} />
+                    {!needsNewEscort && <StatusBadge status={r.status} />}
                   </div>
                 </Link>
               </li>
