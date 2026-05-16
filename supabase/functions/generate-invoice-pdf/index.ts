@@ -26,7 +26,6 @@ const safe = (s: string): string =>
     .replace(/→/g, ">")
     .replace(/—/g, "-")
     .replace(/–/g, "-")
-    .replace(/·/g, "•")
     .replace(/\u00a0/g, " ");
 
 type AutoTableFn = (doc: jsPDF, options: Record<string, unknown>) => void;
