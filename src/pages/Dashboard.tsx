@@ -446,7 +446,12 @@ const ClientDashboard = () => {
                     </p>
                   )}
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
-                    {(r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
+                    {needsNewEscort && (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-red-700 bg-red-100 border border-red-300 px-2 py-0.5">
+                        ✕ Begeleider geweigerd — kies nieuwe
+                      </span>
+                    )}
+                    {!needsNewEscort && (r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
                       <span
                         className={
                           "text-[10px] uppercase tracking-widest font-semibold tabular-nums " +
@@ -460,7 +465,7 @@ const ClientDashboard = () => {
                         {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
                       </span>
                     )}
-                    <StatusBadge status={r.status} />
+                    {!needsNewEscort && <StatusBadge status={r.status} />}
                   </div>
                 </Link>
               </li>
