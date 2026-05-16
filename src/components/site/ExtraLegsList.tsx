@@ -12,6 +12,7 @@ interface ExtraLeg {
   dropoff_lat: number;
   dropoff_lng: number;
   scheduled_at: string;
+  end_at?: string | null;
   permit_number?: string | null;
   drivers?: { name: string; phone: string }[] | null;
 }
