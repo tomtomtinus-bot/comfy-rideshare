@@ -12,6 +12,8 @@ interface ExtraLeg {
   dropoff_lat: number;
   dropoff_lng: number;
   scheduled_at: string;
+  permit_number?: string | null;
+  drivers?: { name: string; phone: string }[] | null;
 }
 
 const fmt = (d: string) =>
