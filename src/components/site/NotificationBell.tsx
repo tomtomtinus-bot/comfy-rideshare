@@ -171,7 +171,7 @@ export const NotificationBell = () => {
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
-                  const to = linkFor(n);
+                  const clickable = !!n.ride_assignment_id;
                   const inner = (
                     <div
                       className={cn(
@@ -195,25 +195,13 @@ export const NotificationBell = () => {
                   );
                   return (
                     <li key={n.id}>
-                      {to ? (
-                        <Link
-                          to={to}
-                          onClick={() => {
-                            setOpen(false);
-                            if (!n.read_at) markOneRead(n.id);
-                          }}
-                        >
-                          {inner}
-                        </Link>
-                      ) : (
-                        <button
-                          type="button"
-                          className="w-full text-left"
-                          onClick={() => !n.read_at && markOneRead(n.id)}
-                        >
-                          {inner}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="w-full text-left"
+                        onClick={() => (clickable ? openNotification(n) : !n.read_at && markOneRead(n.id))}
+                      >
+                        {inner}
+                      </button>
                     </li>
                   );
                 })}
