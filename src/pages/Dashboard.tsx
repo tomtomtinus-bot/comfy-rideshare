@@ -10,6 +10,7 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
+import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -1252,6 +1253,7 @@ const DashboardInner = () => {
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto">
+          <InstallAppBanner />
           <OnboardingChecklist />
           {loading ? (
             <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
