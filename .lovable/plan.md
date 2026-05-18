@@ -1,37 +1,127 @@
-# Pushmeldingen via webpush + installeerbare PWA
+# Plan: Bedrijfsaccounts (Planner + Chauffeurs)
 
-## Wat krijg je
-- Begeleiders en opdrachtgevers kunnen ViaCust **toevoegen aan beginscherm** (iPhone via Safari "Deel → Zet op beginscherm", Android automatisch via install-knop).
-- Daarna krijgen ze **pushmeldingen** op precies dezelfde events die nu al mail sturen:
-  - Begeleider: nieuwe ritaanvraag, vervangingsuitnodiging.
-  - Opdrachtgever: rit geaccepteerd, rit afgewezen, begeleider on-route, etc.
-- In hun profiel komt onder *Notificatie-instellingen* een vinkje **"Pushmeldingen op dit apparaat"** + een knop om te activeren/uit te zetten per apparaat.
+## Doel
+Een hoofdaccount ("Bedrijfsplanner") kan extra chauffeurs uitnodigen via e-mail. De planner regelt financiën, abonnement, ritacceptatie en toewijzing. Chauffeurs hebben een eigen login, zien alleen hun toegewezen ritten, vullen uren in (planner keurt goed), en zien geen tarieven/facturen.
 
-## Werking (technisch, beknopt)
-- Geen `vite-plugin-pwa` (botst met de Lovable preview). In plaats daarvan:
-  - `public/manifest.webmanifest` + `public/sw.js` met alléén push-handlers, geen offline cache.
-  - Service worker registreert alleen op de live-omgeving (viacust.com / lovable.app), niet in de editor-iframe.
-- Server: edge function `send-push` verstuurt via `web-push` (VAPID).
-- DB: tabel `push_subscriptions(user_id, endpoint, p256dh, auth, user_agent, last_used_at)`.
-- VAPID-sleutels worden door mij gegenereerd en opgeslagen als `VAPID_PUBLIC_KEY` (publiek, mag in code) en `VAPID_PRIVATE_KEY` (geheim) + `VAPID_SUBJECT` (mailto:).
-- De bestaande mail-trigger paths (`notify-ride-event`, `send-ride-invitations`) krijgen er één extra call bij naar `send-push` — mails blijven gewoon werken.
-- Voorkeur uit `notification_preferences` wordt gerespecteerd: zet een gebruiker pushmeldingen voor "nieuwe aanvraag" uit, dan slaan we die push over (systeemmails blijven, zoals afgesproken).
+---
 
-## iOS belangrijk om te weten
-Apple staat webpush alleen toe **nadat** de gebruiker de site via Safari aan het beginscherm heeft toegevoegd (iOS 16.4+). Op Android werkt het direct in Chrome. Daarom hoort er duidelijke uitleg in de UI: "Voeg eerst toe aan beginscherm, open vanaf het beginscherm, en klik dan op *Pushmeldingen aanzetten*."
+## 1. Datamodel (nieuwe tabellen)
 
-## Te bouwen stappen
-1. **Manifest + iconen + meta tags** zodat de app installeerbaar wordt (geen offline shell).
-2. **Service worker** `public/sw.js` — alleen `push`- en `notificationclick`-handlers.
-3. **Database**: tabel `push_subscriptions` met RLS (gebruiker beheert eigen subscripties).
-4. **VAPID keys** genereren en als secrets opslaan.
-5. **Edge function `send-push`**: leest subscripties voor een user, stuurt webpush, verwijdert verlopen (410/404).
-6. **Frontend hook** `usePushSubscription`: registreert SW, vraagt permissie, slaat subscription op in DB.
-7. **UI**: blokje in `NotificationPreferencesCard` met status + knop *Pushmeldingen aanzetten / uitzetten op dit apparaat*. Aparte iOS-uitlegtekst.
-8. **Inhaken op events**: in `notify-ride-event` en `send-ride-invitations` een extra `send-push`-aanroep, met dezelfde voorkeurchecks.
+**`companies`**
+- `id`, `owner_id` (= planner = begeleider-account), `name`, `seat_limit`, `created_at`
 
-## Wat niet
-- Geen offline ondersteuning / cache van de app (om preview-problemen te voorkomen en omdat het niet nodig is).
-- Geen native app (dat is optie B uit het vorige bericht).
+**`company_members`**
+- `id`, `company_id`, `user_id`, `role` (`planner` | `driver`), `status` (`active` | `removed`), `joined_at`
+- Unique (company_id, user_id). Eén user kan slechts bij één bedrijf horen.
 
-Zal ik beginnen?
+**`company_invitations`**
+- `id`, `company_id`, `email`, `token` (uniek), `role` (`driver`), `invited_by`, `expires_at`, `accepted_at`, `status` (`pending`|`accepted`|`expired`|`revoked`)
+
+**Uitbreiding `ride_assignments`**
+- `assigned_driver_id uuid null` → de chauffeur die de rit fysiek uitvoert. `escort_id` blijft de planner (= account dat de rit accepteerde / wordt gefactureerd).
+- `hours_approved_at`, `hours_approved_by` voor goedkeuringsflow.
+
+**RLS-principes**
+- Planner ziet alle company-data + alle assignments van zijn bedrijf.
+- Driver ziet: eigen `company_members`-rij, eigen profiel, **enkel** assignments waar `assigned_driver_id = auth.uid()`, met beperkte kolommen (geen tarieven, geen `estimated_cost`, `actual_cost`, `extra_costs_total`, `cancellation_fee`, `invoice_id`).
+- Driver mag uren indienen op eigen toegewezen assignment (status → `hours_submitted` blijft, maar pas finaal na planner-goedkeuring).
+- Voor kolom-niveau beperkingen: dedicated view `driver_ride_assignments_view` + RLS die `assigned_driver_id = auth.uid()`. Frontend chauffeur leest enkel die view.
+
+Security definer functies: `is_company_planner(uid)`, `is_company_driver(uid)`, `same_company(uid1, uid2)`.
+
+---
+
+## 2. Uitnodigingsflow
+
+1. Planner opent **"Mijn team"** (nieuwe pagina `/team`) — alleen zichtbaar voor begeleiders met actief abonnement.
+2. Voert e-mailadres in → edge function `invite-company-driver`:
+   - Maakt rij in `company_invitations` met token + 7 dagen geldig.
+   - Verstuurt transactionele mail (Lovable Email) met link `/uitnodiging?token=...`.
+3. Ontvanger landt op `/uitnodiging`:
+   - Niet ingelogd → moet account aanmaken / inloggen (e-mail uit invitatie pre-filled, vergrendeld).
+   - Ingelogd met andere e-mail → fout.
+4. Edge function `accept-company-invitation`: maakt `company_members` rij (`role=driver`), kent `begeleider` rol toe, koppelt aan bedrijf, markeert invitatie `accepted`.
+5. Driver krijgt verkort onboarding (geen tarieven, geen IBAN, geen Stripe — enkel persoonsgegevens, certificaat, voertuig).
+
+**Seat enforcement:** vóór invite + accept controleert function `active_member_count < seat_limit` (komt uit Stripe-abonnement subscription quantity).
+
+---
+
+## 3. Abonnement (per seat)
+
+- Bestaand `subscriptions` product wordt aangepast naar **per-seat pricing** (Stripe `quantity`).
+- `seat_limit` op `companies` = huidige `subscription.quantity`.
+- Planner kan in `/abonnement` chauffeur-seats toevoegen/verlagen → update via Stripe portal of via "Aantal chauffeurs aanpassen" knop → edge function past `subscription_item.quantity` aan.
+- Webhook (`payments-webhook`) synchroniseert `seat_limit` bij elke wijziging.
+- Driver-accounts hebben zelf geen abonnement; `RequireSubscription` checkt bedrijf-abonnement van planner.
+
+---
+
+## 4. UI-wijzigingen
+
+**Planner**
+- Nieuwe pagina `/team` (`Team.tsx`):
+  - Lijst chauffeurs (naam, e-mail, status, koppel-/verwijder-knop).
+  - Lijst openstaande uitnodigingen + "Nieuwe chauffeur uitnodigen" dialog.
+  - Knop "Seats beheren" → naar `/abonnement`.
+- Op `EscortRideDetail.tsx` (accepteerde rit):
+  - Nieuwe sectie **"Toewijzen aan chauffeur"** met dropdown van eigen chauffeurs + zichzelf. Default = zichzelf.
+  - Wijzigbaar tot start van rit; daarna niet meer.
+- Op `Dashboard.tsx` (planner): nieuw kaartje "Mijn team" met aantal chauffeurs / seats.
+- **Urenoverzicht**: bestaande urenflow krijgt extra status. Wanneer driver uren indient → planner ziet "Uren ter goedkeuring" badge → goedkeuren/aanpassen → pas dan komt het op factuur.
+
+**Chauffeur**
+- Aparte minimal dashboard `/chauffeur` (of hergebruik `Dashboard.tsx` met `driverMode` flag):
+  - Vandaag/komende ritten (alleen toegewezen).
+  - Geen tarieven/facturen/abonnement/team in navigatie.
+  - GPS live-locatie + geplande standplaatsen (eigen, persoonlijk).
+  - Rit-detail toont route, opdrachtgever, voertuiginfo — **geen** prijzen/uurtarief.
+  - Uren-invoer scherm.
+- `Nav.tsx`: verbergt "Facturen", "Facturatiegegevens", "Abonnement", "Team", "Brandstofprijzen" voor drivers.
+- `RoleSwitch`/`useAuth`: nieuwe afgeleide flag `companyRole` (`planner` | `driver` | `solo`).
+
+**Matching / RequestRide (opdrachtgever-zijde)**
+- Een bedrijf telt als één entiteit. Opdrachtgever ziet planner-profiel (anonymous_id van planner) met label "Bedrijf · X chauffeurs". Tijdelijke standplaats / geplande standplaats worden geaggregeerd uit alle chauffeurs van het bedrijf (dichtsbijzijnde wint).
+
+---
+
+## 5. Notificaties / e-mails
+
+- Nieuwe transactionele mail: **`company-invitation`** (token-link).
+- Push/in-app notificatie naar driver bij toewijzing.
+- Push naar planner bij ingediende uren.
+
+---
+
+## 6. Edge functions (nieuw / aangepast)
+
+- `invite-company-driver` (nieuw) — valideert seat-limiet, maakt invitatie, queuet e-mail.
+- `accept-company-invitation` (nieuw) — token check, member creatie.
+- `assign-driver` (nieuw) — planner wijst chauffeur aan assignment; check zelfde bedrijf.
+- `approve-driver-hours` (nieuw) — planner accordeert ingediende uren → triggert bestaande facturatieflow.
+- `payments-webhook` (uitbreiden) — sync seat_limit bij quantity-wijziging.
+
+---
+
+## 7. Migratie bestaande accounts
+
+Bestaande begeleider-accounts blijven werken als "solo planner" zonder chauffeurs (impliciet bedrijf met `seat_limit = 1`). Bij eerste invite wordt automatisch `companies`-rij aangemaakt indien nog niet aanwezig.
+
+---
+
+## 8. Juridisch (Privacy + AV update later)
+
+Korte addendum nodig: bedrijfsstructuur, gegevensdeling planner↔chauffeur, verantwoordelijkheid planner voor toewijzing. (apart op te voeren na implementatie).
+
+---
+
+## Implementatie-volgorde (voorgesteld)
+
+1. Migratie: tabellen + RLS + helper-functies.
+2. Backend: invite + accept + assign edge functions, e-mailtemplate.
+3. Planner UI: `/team` pagina, toewijzen-dropdown op ride detail.
+4. Chauffeur UI: aangepaste navigatie, dashboard-filter, ride-detail zonder financiën.
+5. Urengoedkeuringsflow.
+6. Seat-based pricing (Stripe quantity) — kan eventueel later als losse stap.
+
+Akkoord met dit plan? Of wil je aanpassingen (bv. seat-pricing later, andere naam, extra rechten voor chauffeur)?
