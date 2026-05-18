@@ -461,10 +461,13 @@ const RequestRideInner = () => {
         return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
-        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Geldig zolang
-        // current_until in de toekomst ligt. Aanvoer (naar pickup) wordt vanaf die
-        // plek berekend; retour blijft altijd terug naar de thuisbasis.
+        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Alleen geldig
+        // voor directe ritten (start binnen 3 uur) én zolang current_until in de toekomst
+        // ligt. Aanvoer (naar pickup) wordt vanaf die plek berekend; retour blijft altijd
+        // terug naar de thuisbasis. Voor ritten verder weg telt altijd de thuisbasis.
+        const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
         const currentActive =
+          isDirectRide &&
           (e as any).current_lat != null &&
           (e as any).current_lng != null &&
           (e as any).current_until != null &&
@@ -537,8 +540,11 @@ const RequestRideInner = () => {
     };
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
-      // Bij actieve tijdelijke standplaats: aanvoer vanaf huidige locatie, retour naar huis.
+      // Bij actieve tijdelijke standplaats én directe rit (binnen 3u): aanvoer vanaf
+      // huidige locatie, retour naar huis. Anders altijd vanaf thuisbasis.
+      const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
       const currentActive =
+        isDirectRide &&
         (m as any).current_lat != null &&
         (m as any).current_lng != null &&
         (m as any).current_until != null &&
