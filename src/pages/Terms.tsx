@@ -62,6 +62,7 @@ const TermsNL = () => (
     <p><strong>Account:</strong> Gebruikers zijn te allen tijde zelf verantwoordelijk voor het geheimhouden van hun inloggegevens (waaronder de gekoppelde Google-accounttoegang) en voor al het gebruik van hun account.</p>
     <p><strong>Aanbod en Acceptatietimer:</strong> Wanneer een rit specifiek aan een transportbegeleider wordt aangeboden, is dit aanbod strikt gelimiteerd tot een responstijd van exact tien (10) minuten. Indien de begeleider de rit niet binnen deze termijn via het platform accepteert, vervalt het aanbod onherroepelijk en automatisch. De begeleider kan hieraan nimmer enig recht op de rit of schadevergoeding ontlenen.</p>
     <p><strong>Tijdelijke Standplaats (GPS):</strong> Begeleiders kunnen via het platform handmatig hun actuele locatie als tijdelijke standplaats opgeven voor ad-hoc ritten. De begeleider is zelf verantwoordelijk voor het correct activeren en tijdig deactiveren/wissen van deze standplaats.</p>
+    <p><strong>Geplande Standplaats:</strong> Begeleiders kunnen vooraf specifieke toekomstige tijdvensters en locaties invoeren ("Geplande standplaats"). De begeleider is er zelf verantwoordelijk voor dat deze informatie actueel en accuraat is. Indien een begeleider door overmacht, vertraging of wijzigingen in zijn eigen planning niet tijdig op de geplande standplaats aanwezig kan zijn, dient hij de geplande standplaats onverwijld handmatig te verwijderen of aan te passen in het platform.</p>
     <p><strong>Abonnement:</strong> Voor gebruik van het platform kan een jaarlijkse of periodieke fee worden gevraagd. Introductiekortingen (bijv. 50% in het eerste jaar) zijn eenmalig en vervallen automatisch bij verlenging, tenzij schriftelijk anders is overeengekomen.</p>
 
     <h2>3. Facturatie, Lastgeving (Self-Billing) en Brandstofindex</h2>
@@ -77,6 +78,7 @@ const TermsNL = () => (
       <li><strong>Uitvoering ritten:</strong> ViaCust is niet aansprakelijk voor schade, van welke aard dan ook, die voortvloeit uit of verband houdt met de feitelijke uitvoering van de transportbegeleiding.</li>
       <li><strong>Verzekeringsplicht:</strong> Transportbegeleiders dienen zelf zorg te dragen voor geldige en afdoende bedrijfs- en beroepsaansprakelijkheidsverzekeringen, alsmede de wettelijk vereiste vergunningen voor het uitvoeren van begeleidingsdiensten.</li>
       <li><strong>Technische storingen en GPS:</strong> ViaCust is niet aansprakelijk voor fouten in route- of kostencalculaties, afwijkingen in GPS-locatiebepalingen van het toestel van de gebruiker, of technische storingen van geïntegreerde diensten van derden (zoals Google Maps, Google Calendar, of Stripe).</li>
+      <li><strong>Geplande Standplaats:</strong> ViaCust is nimmer aansprakelijk voor misgelopen ritten, vertragingen of schadeclaims die voortvloeien uit onjuiste, verouderde of niet-gerealiseerde 'Geplande standplaatsen' die door begeleiders zelf in het systeem zijn ingevoerd.</li>
     </ul>
 
     <h2>6. Annuleringen</h2>

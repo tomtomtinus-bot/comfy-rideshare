@@ -71,6 +71,7 @@ const PrivacyNL = () => (
       <li><strong>Identificatie &amp; Contact:</strong> Naam, bedrijfsgegevens, BTW/KVK-nummer, e-mail en telefoonnummer voor het beheren van uw account, facturatie en rit-notificaties.</li>
       <li><strong>Administratieve Ritafhandeling:</strong> Gegevens over geplande ritten, de status van de opdracht en door de begeleider ingevoerde onkosten ten behoeve van de facturatie.</li>
       <li><strong>Tijdelijke Standplaats (GPS):</strong> Indien een begeleider handmatig de "Ik sta nu hier"-functie activeert, verwerken wij de actuele GPS-locatie van het toestel om de aanvoertijd voor ad-hoc ritten (binnen 3 uur) nauwkeurig te berekenen. Deze locatiegegevens zijn tijdelijk (naar keuze 2, 4, 8 of 12 uur geldig), worden niet permanent opgeslagen voor trackingdoeleinden en verlopen automatisch na de gekozen duur of bij handmatige uitschakeling.</li>
+      <li><strong>Geplande Standplaats:</strong> Indien een begeleider vooraf een datum, tijdvenster en locatie invoert voor toekomstige beschikbaarheid ("Geplande standplaats"), bewaren en verwerken wij deze locatiegegevens uitsluitend om de matchings- en tarievenlogica voor toekomstige ritaanvragen binnen dat specifieke venster te berekenen.</li>
       <li><strong>Push-notificaties:</strong> Wij verwerken unieke browser-tokens om live updates (zoals acceptatie-timers en rit-waarschuwingen) rechtstreeks naar uw toestel te sturen via Web Push-notificaties.</li>
       <li><strong>Kwaliteitsbewaking &amp; Reviews:</strong> Wij verwerken beoordelingen en feedback die gebruikers over elkaar achterlaten op basis van ons gerechtvaardigd belang om de betrouwbaarheid van het platform te waarborgen.</li>
       <li><strong>Netwerkbeheer en Voorkeurslijsten:</strong>
@@ -100,6 +101,7 @@ const PrivacyNL = () => (
     <ul>
       <li><strong>Fiscale data &amp; Facturen:</strong> 7 jaar conform de wettelijke fiscale administratieplicht.</li>
       <li><strong>Tijdelijke GPS-locatie:</strong> Maximaal 12 uur, of korter indien de gekozen timer afloopt of handmatig wordt gewist.</li>
+      <li><strong>Geplande standplaatsgegevens:</strong> Deze gegevens worden automatisch uit de database gewist of geanonimiseerd zodra het door de begeleider opgegeven tijdvenster is verstreken.</li>
       <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
       <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
     </ul>
