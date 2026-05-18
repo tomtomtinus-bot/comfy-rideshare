@@ -152,8 +152,9 @@ const TeamInner = () => {
                   <DialogHeader><DialogTitle>Chauffeur-seats</DialogTitle></DialogHeader>
                   <div className="space-y-4 pt-2">
                     <p className="text-sm text-brass-deep/70">
-                      Kies hoeveel chauffeurs je onder je bedrijf wilt laten rijden. Je betaalt per actieve
-                      chauffeur per maand. De Bedrijfsplanner is gratis.
+                      Kies hoeveel chauffeurs je onder je bedrijf wilt laten rijden. Je betaalt een vaste
+                      basis voor de Bedrijfsplanner plus een bedrag per actieve chauffeur per maand. Alles
+                      op één factuur naar je hoofdaccount.
                     </p>
                     <div className="flex items-center justify-center gap-4">
                       <Button variant="outline" size="icon" onClick={() => setSeatQty((q) => Math.max(1, q - 1))} disabled={seatQty <= 1}>
@@ -164,9 +165,14 @@ const TeamInner = () => {
                         <Plus className="size-4" />
                       </Button>
                     </div>
-                    <p className="text-center text-sm text-brass-deep/70">
-                      €29,00 × {seatQty} = <strong>€{(29 * seatQty).toFixed(2)}</strong> / maand · excl. BTW
-                    </p>
+                    <div className="text-center text-sm text-brass-deep/70 space-y-1">
+                      <p>Bedrijfsplanner basis: <strong>€10,00</strong> / maand</p>
+                      <p>Chauffeurs: €1,50 × {seatQty} = <strong>€{(1.5 * seatQty).toFixed(2)}</strong> / maand</p>
+                      <p className="pt-1 border-t border-brass-deep/10">
+                        Totaal: <strong>€{(10 + 1.5 * seatQty).toFixed(2)}</strong> / maand · excl. BTW
+                      </p>
+                    </div>
+
                     {seatsUsed > seatQty && (
                       <p className="text-xs text-red-600 text-center">
                         Je hebt nu {seatsUsed} chauffeurs gekoppeld; verlagen naar {seatQty} kan pas nadat je chauffeurs hebt verwijderd.
@@ -216,7 +222,7 @@ const TeamInner = () => {
           open={checkoutOpen}
           onOpenChange={setCheckoutOpen}
           title={`Chauffeur-seats (${seatQty})`}
-          priceId="begeleider_company_seat_monthly"
+          priceId="begeleider_company_seat_v2_monthly"
           quantity={seatQty}
           customerEmail={user?.email ?? undefined}
           userId={user?.id}

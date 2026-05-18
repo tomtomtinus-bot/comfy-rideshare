@@ -18,7 +18,14 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     console.error("No userId in subscription metadata");
     return;
   }
-  const item = subscription.items?.data?.[0];
+  const items = subscription.items?.data ?? [];
+  // Kies "primair" item: seat-item bij bedrijfsabo, anders eerste item.
+  const SEAT_PRICE_IDS = ["begeleider_company_seat_v2_monthly", "begeleider_company_seat_monthly"];
+  const seatItem = items.find((it: any) => {
+    const id = it?.price?.lookup_key || it?.price?.metadata?.lovable_external_id || it?.price?.id;
+    return SEAT_PRICE_IDS.includes(id);
+  });
+  const item = seatItem ?? items[0];
   const priceId = item?.price?.lookup_key
     || item?.price?.metadata?.lovable_external_id
     || item?.price?.id;
@@ -63,8 +70,8 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
   );
 
   // Sync seat_limit op het bedrijf voor het per-seat bedrijfsabonnement.
-  if (priceId === "begeleider_company_seat_monthly") {
-    const quantity = Number(item?.quantity ?? 1);
+  if (SEAT_PRICE_IDS.includes(priceId)) {
+    const quantity = Number(seatItem?.quantity ?? item?.quantity ?? 1);
     const activeStatuses = ["active", "trialing", "past_due"];
     const isActive = activeStatuses.includes(subscription.status)
       || (subscription.status === "canceled" && periodEnd && periodEnd * 1000 > Date.now());
@@ -86,9 +93,12 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
 
   // Reset seat_limit voor opgezegd per-seat abonnement.
   const userId = subscription.metadata?.userId;
-  const item = subscription.items?.data?.[0];
-  const priceId = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
-  if (userId && priceId === "begeleider_company_seat_monthly") {
+  const SEAT_PRICE_IDS = ["begeleider_company_seat_v2_monthly", "begeleider_company_seat_monthly"];
+  const hasSeat = (subscription.items?.data ?? []).some((it: any) => {
+    const id = it?.price?.lookup_key || it?.price?.metadata?.lovable_external_id || it?.price?.id;
+    return SEAT_PRICE_IDS.includes(id);
+  });
+  if (userId && hasSeat) {
     await getSupabase()
       .from("companies")
       .update({ seat_limit: 1, updated_at: new Date().toISOString() })
