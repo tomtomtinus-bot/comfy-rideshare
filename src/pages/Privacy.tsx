@@ -55,21 +55,23 @@ const Privacy = () => {
 
 const PrivacyNL = () => (
   <>
-    <p>ViaCust (hierna: "wij", "ons" of "het platform") hecht grote waarde aan de bescherming van uw persoonsgegevens. In deze verklaring leggen wij uit welke gegevens wij verwerken via onze webapplicatie en de geïntegreerde Google Cloud-services, conform de AVG (GDPR) en het Google API Services User Data Policy.</p>
+    <p>ViaCust (hierna: "wij", "ons" of "het platform") hecht grote waarde aan de bescherming van uw persoonsgegevens. In deze verklaring leggen wij uit welke gegevens wij verwerken via onze webapplicatie en de geïntegreerde Google Cloud-services, conform de Algemene Verordening Gegevensbescherming (AVG/GDPR) en het Google API Services User Data Policy.</p>
 
     <h2>1. Gebruik van Google API Services (Limited Use Policy)</h2>
     <p>ViaCust maakt gebruik van Google API-services om transportbegeleiding te automatiseren. Ons gebruik van informatie ontvangen via Google API's voldoet aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
     <ul>
       <li><strong>Google Identity &amp; OAuth 2.0:</strong> Veilig inloggen en autorisatie. Wij ontvangen uw naam, e-mailadres en profielfoto voor accountpersonalisatie.</li>
-      <li><strong>Google Calendar API (v3):</strong> Gebruik van <code>freeBusy</code> (beschikbaarheid) en <code>calendar.events</code> (synchronisatie van ritten). Gegevens worden niet gedeeld met derden.</li>
-      <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript API voor adresvalidatie en kaartweergave.</li>
+      <li><strong>Google Calendar API (v3):</strong> Gebruik van <code>freeBusy</code> (beschikbaarheid) en <code>calendar.events</code> (synchronisatie van ritten). Gegevens worden uitsluitend gebruikt om ritten in uw persoonlijke agenda te plaatsen en worden niet gedeeld met derden.</li>
+      <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript API en Geocoding API voor adresvalidatie, kaartweergave en het omzetten van GPS-coördinaten naar een fysiek adres (reverse-geocoding).</li>
     </ul>
 
     <h2>2. Gegevensverwerking en Doeleinden</h2>
     <p>Wij verwerken gegevens uitsluitend voor de volgende doelen:</p>
     <ul>
       <li><strong>Identificatie &amp; Contact:</strong> Naam, bedrijfsgegevens, BTW/KVK-nummer, e-mail en telefoonnummer voor het beheren van uw account, facturatie en rit-notificaties.</li>
-      <li><strong>Administratieve Ritafhandeling:</strong> Gegevens over geplande ritten, de status van de opdracht en door de begeleider ingevoerde onkosten ten behoeve van de facturatie. Wij verzamelen <strong>geen</strong> live GPS-locaties of actieve monitoringgegevens.</li>
+      <li><strong>Administratieve Ritafhandeling:</strong> Gegevens over geplande ritten, de status van de opdracht en door de begeleider ingevoerde onkosten ten behoeve van de facturatie.</li>
+      <li><strong>Tijdelijke Standplaats (GPS):</strong> Indien een begeleider handmatig de "Ik sta nu hier"-functie activeert, verwerken wij de actuele GPS-locatie van het toestel om de aanvoertijd voor ad-hoc ritten (binnen 3 uur) nauwkeurig te berekenen. Deze locatiegegevens zijn tijdelijk (naar keuze 2, 4, 8 of 12 uur geldig), worden niet permanent opgeslagen voor trackingdoeleinden en verlopen automatisch na de gekozen duur of bij handmatige uitschakeling.</li>
+      <li><strong>Push-notificaties:</strong> Wij verwerken unieke browser-tokens om live updates (zoals acceptatie-timers en rit-waarschuwingen) rechtstreeks naar uw toestel te sturen via Web Push-notificaties.</li>
       <li><strong>Kwaliteitsbewaking &amp; Reviews:</strong> Wij verwerken beoordelingen en feedback die gebruikers over elkaar achterlaten op basis van ons gerechtvaardigd belang om de betrouwbaarheid van het platform te waarborgen.</li>
       <li><strong>Netwerkbeheer en Voorkeurslijsten:</strong>
         <ul>
@@ -83,25 +85,28 @@ const PrivacyNL = () => (
     <p>Om de fiscale integriteit van het platform te waarborgen en te voldoen aan de Europese wetgeving met betrekking tot de verlegging van BTW bij grensoverschrijdende diensten, voert ViaCust een validatie uit van de door u verstrekte BTW-nummers.</p>
     <p>Wij maken hiervoor gebruik van het VIES-systeem (VAT Information Exchange System) van de Europese Commissie.</p>
     <p>Tijdens deze controle wordt uw BTW-nummer verzonden naar de centrale systemen van de Europese Unie om de geldigheid en de bijbehorende bedrijfsnaam/adresgegevens te verifiëren.</p>
-    <p>Deze gegevens worden uitsluitend gebruikt voor het valideren van uw account en het opstellen van fiscaal correcte facturen.</p>
+    <p>Deze gegevens worden uitsluitend gebruikt voor het valideren van uw account en het opstellen van fiscaal correcte facturen op basis van de wekelijkse brandstofprijzen (o.a. conform TLN-index).</p>
 
     <h2>4. Sub-verwerkers</h2>
-    <p>Wij maken gebruik van:</p>
+    <p>Wij maken gebruik van de volgende betrouwbare partners voor de exploitatie van het platform:</p>
     <ul>
-      <li><strong>Supabase / Vercel:</strong> Data-opslag in de EU.</li>
-      <li><strong>Stripe:</strong> Betalingen.</li>
-      <li><strong>Google Cloud Platform:</strong> Kaartdiensten en login.</li>
+      <li><strong>Supabase / Vercel:</strong> Data-opslag en hosting binnen de Europese Unie (EU).</li>
+      <li><strong>Stripe:</strong> Veilige verwerking van betalingen en facturatiestromen.</li>
+      <li><strong>Google Cloud Platform:</strong> Kaartdiensten, geocoding en OAuth-authenticatie.</li>
+      <li><strong>Push Notification Services:</strong> De push-diensten van uw specifieke browser/besturingssysteem (zoals Google Firebase Cloud Messaging of Apple Push Notification service) voor het afleveren van live meldingen.</li>
     </ul>
 
     <h2>5. Bewaartermijnen</h2>
     <ul>
-      <li><strong>Fiscale data:</strong> 7 jaar conform wettelijke administratieplicht.</li>
-      <li><strong>Beoordelingen:</strong> Zolang het account actief is.</li>
-      <li><strong>OAuth-tokens:</strong> Onmiddellijke verwijdering na het verbreken van de koppeling.</li>
+      <li><strong>Fiscale data &amp; Facturen:</strong> 7 jaar conform de wettelijke fiscale administratieplicht.</li>
+      <li><strong>Tijdelijke GPS-locatie:</strong> Maximaal 12 uur, of korter indien de gekozen timer afloopt of handmatig wordt gewist.</li>
+      <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
+      <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
     </ul>
 
     <h2>6. Uw Rechten en Contact</h2>
-    <p>U heeft recht op inzage, correctie en verwijdering van uw gegevens. Voor vragen: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <p>U heeft te allen tijde het recht op inzage, correctie, dataportabiliteit en verwijdering van uw persoonsgegevens. Daarnaast kunt u de gegeven toestemming voor push-notificaties of locatievoorzieningen op elk moment zelfstandig intrekken via de instellingen van uw browser of mobiele toestel.</p>
+    <p>Voor vragen of het uitoefenen van uw rechten kunt u contact met ons opnemen via: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland</p>
   </>
 );
