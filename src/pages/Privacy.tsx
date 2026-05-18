@@ -101,6 +101,7 @@ const PrivacyNL = () => (
     <ul>
       <li><strong>Fiscale data &amp; Facturen:</strong> 7 jaar conform de wettelijke fiscale administratieplicht.</li>
       <li><strong>Tijdelijke GPS-locatie:</strong> Maximaal 12 uur, of korter indien de gekozen timer afloopt of handmatig wordt gewist.</li>
+      <li><strong>Geplande standplaatsgegevens:</strong> Deze gegevens worden automatisch uit de database gewist of geanonimiseerd zodra het door de begeleider opgegeven tijdvenster is verstreken.</li>
       <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
       <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
     </ul>
