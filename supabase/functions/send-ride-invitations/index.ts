@@ -98,13 +98,44 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Resolve escort emails via auth admin
+    // Resolve escort emails via auth admin. For company drivers we instead
+    // send the invite to the planner (company owner) with a note: "Your
+    // driver Jan was offered this ride." The planner accepts on their behalf.
     const escortIds = [...new Set(assignments.map(a => a.escort_id))]
     const idToEmail = new Map<string, string>()
     const idToName = new Map<string, string>()
+    const idToDriverName = new Map<string, string>() // escort_id -> driver display name when routed to planner
+
+    // Find which escorts are active company drivers + their planner (owner)
+    const { data: driverMemberships } = await admin
+      .from('company_members')
+      .select('user_id, company:companies!inner(owner_id)')
+      .in('user_id', escortIds)
+      .eq('role', 'driver')
+      .eq('status', 'active')
+    const driverToOwner = new Map<string, string>()
+    for (const m of (driverMemberships ?? []) as Array<{ user_id: string; company: { owner_id: string } | null }>) {
+      if (m.company?.owner_id) driverToOwner.set(m.user_id, m.company.owner_id)
+    }
+
+    // Fetch driver names (from profiles) so we can mention them to the planner
+    const { data: driverProfs } = await admin
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', [...driverToOwner.keys()])
+    const driverIdToName = new Map<string, string>()
+    for (const p of (driverProfs ?? [])) {
+      if (p.full_name) driverIdToName.set(p.id, p.full_name.split(' ')[0])
+    }
+
     for (const eid of escortIds) {
-      const { data } = await admin.auth.admin.getUserById(eid)
+      const ownerId = driverToOwner.get(eid)
+      const recipientId = ownerId ?? eid
+      const { data } = await admin.auth.admin.getUserById(recipientId)
       if (data?.user?.email) idToEmail.set(eid, data.user.email)
+      if (ownerId) {
+        idToDriverName.set(eid, driverIdToName.get(eid) ?? 'je chauffeur')
+      }
     }
     const { data: profs } = await admin
       .from('profiles')
