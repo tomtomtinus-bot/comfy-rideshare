@@ -612,6 +612,13 @@ const InvoicesInner = () => {
                 >
                   {t("common.downloadPdf")}
                 </button>
+                <button
+                  onClick={() => downloadPlatformXml(inv)}
+                  className="text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-gold font-semibold"
+                  title="UBL e-factuur (Peppol)"
+                >
+                  XML
+                </button>
                 {inv.status !== "paid" && (
                   <button
                     onClick={() => setPayInvoiceId(inv.id)}
