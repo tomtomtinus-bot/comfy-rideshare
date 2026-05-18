@@ -381,7 +381,7 @@ const RequestRideInner = () => {
     const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
-        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
+        .select("id, anonymous_id, base_city, base_lat, base_lng, current_lat, current_lng, current_address, current_until, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
         .eq("available", true),
       supabase
         .from("client_excluded_escorts")
