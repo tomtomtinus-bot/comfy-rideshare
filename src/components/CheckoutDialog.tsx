@@ -9,6 +9,7 @@ interface Props {
   priceId?: string;
   /** platform invoice id (one-time) */
   platformInvoiceId?: string;
+  quantity?: number;
   customerEmail?: string;
   userId?: string;
   returnUrl: string;
