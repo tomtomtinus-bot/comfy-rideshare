@@ -92,6 +92,26 @@ const WatKostViaCust = () => {
           />
         </Section>
 
+        {/* Bedrijfsaccount */}
+        <Section
+          kicker="Voor het Bedrijfsaccount (Bedrijfsplanner met chauffeurs)"
+          title="Eén centraal account voor uw begeleidingsbedrijf met meerdere chauffeurs."
+        >
+          <Bullet label="Abonnement hoofdaccount" value="€ 10,- per maand." />
+          <Bullet
+            label="Per gekoppelde begeleider"
+            value="€ 1,50 per begeleider per maand (seat-based)."
+          />
+          <Bullet
+            label="Centrale aansturing"
+            value="De Bedrijfsplanner accepteert ritten namens de chauffeurs en beheert facturatie, uitbetalingen en het team vanuit één dashboard."
+          />
+          <Bullet
+            label="Schaalbaar"
+            value="U betaalt alleen voor het aantal actieve chauffeurs onder uw bedrijf. Seats eenvoudig uitbreiden of verlagen in uw abonnementsinstellingen."
+          />
+        </Section>
+
         {/* Facturatie */}
         <Section
           kicker="Geavanceerde Automatische Facturatie"
