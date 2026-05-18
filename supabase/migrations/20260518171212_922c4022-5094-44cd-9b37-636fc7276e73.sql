@@ -1,0 +1,1 @@
+alter view public.escort_profiles_public set (security_invoker = true);
