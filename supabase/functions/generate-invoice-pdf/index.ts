@@ -889,19 +889,69 @@ Deno.serve(async (req) => {
     const table = type === "regular" ? "invoices" : "platform_invoices";
     await admin.from(table).update({ pdf_path: path, xml_path: xmlPath }).eq("id", invoiceId);
 
+    // Long-lived signed URLs for the email (30 days). Also used for the
+    // user-initiated download response below.
+    const SIGN_TTL = 60 * 60 * 24 * 30;
+    const [{ data: signed, error: signErr }, { data: signedXml, error: signXmlErr }] = await Promise.all([
+      admin.storage.from("invoices").createSignedUrl(path, SIGN_TTL, {
+        download: `${shellOpts.invoice_number}.pdf`,
+      }),
+      admin.storage.from("invoices").createSignedUrl(xmlPath, SIGN_TTL, {
+        download: `${shellOpts.invoice_number}.xml`,
+      }),
+    ]);
+    if (signErr) throw signErr;
+    if (signXmlErr) throw signXmlErr;
+
+    // Auto-send to the billing email on first generation (internal/trigger call).
+    if (isInternal && to.billing_email) {
+      const totalAmount = subtotal + subtotal * vatRate + (from.wero_enabled ? Number(from.wero_fee || 0) : 0);
+      const fmtMoney = (n: number) =>
+        `€ ${Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      try {
+        const sendRes = await fetch(`${url}/functions/v1/send-transactional-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceKey}`,
+            apikey: serviceKey,
+          },
+          body: JSON.stringify({
+            templateName: "invoice-to-client",
+            recipientEmail: to.billing_email,
+            fromAddress: "invoice",
+            idempotencyKey: `invoice-${type}-${invoiceId}`,
+            templateData: {
+              recipientName: to.billing_contact_name || to.full_name || to.company_name || "",
+              invoiceNumber: shellOpts.invoice_number,
+              senderName: from.company_name || from.full_name || "ViaCust",
+              amount: fmtMoney(totalAmount),
+              periodStart: fmtDate(shellOpts.period_start),
+              periodEnd: fmtDate(shellOpts.period_end),
+              pdfUrl: signed.signedUrl,
+              xmlUrl: signedXml.signedUrl,
+            },
+          }),
+        });
+        if (!sendRes.ok) {
+          console.error("invoice email send failed", await sendRes.text());
+        }
+      } catch (mailErr) {
+        console.error("invoice email send error", mailErr);
+      }
+
+      return new Response(
+        JSON.stringify({ pdf_path: path, xml_path: xmlPath, generated: true, emailed: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (isInternal) {
       return new Response(
         JSON.stringify({ pdf_path: path, xml_path: xmlPath, generated: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
-    const [{ data: signed, error: signErr }, { data: signedXml, error: signXmlErr }] = await Promise.all([
-      admin.storage.from("invoices").createSignedUrl(path, 60 * 10),
-      admin.storage.from("invoices").createSignedUrl(xmlPath, 60 * 10),
-    ]);
-    if (signErr) throw signErr;
-    if (signXmlErr) throw signXmlErr;
 
     return new Response(
       JSON.stringify({
