@@ -82,6 +82,17 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
     .update({ status: "canceled", updated_at: new Date().toISOString() })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+
+  // Reset seat_limit voor opgezegd per-seat abonnement.
+  const userId = subscription.metadata?.userId;
+  const item = subscription.items?.data?.[0];
+  const priceId = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
+  if (userId && priceId === "begeleider_company_seat_monthly") {
+    await getSupabase()
+      .from("companies")
+      .update({ seat_limit: 1, updated_at: new Date().toISOString() })
+      .eq("owner_id", userId);
+  }
 }
 
 async function handleCheckoutCompleted(session: any) {
