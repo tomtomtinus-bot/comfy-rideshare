@@ -41,6 +41,9 @@ const TeamInner = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [seatsOpen, setSeatsOpen] = useState(false);
+  const [seatQty, setSeatQty] = useState(1);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const load = async () => {
     if (!companyId) return;
