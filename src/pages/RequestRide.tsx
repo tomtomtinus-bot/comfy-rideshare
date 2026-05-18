@@ -479,10 +479,12 @@ const RequestRideInner = () => {
         return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
-        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Alleen geldig
+        // Tijdelijke standplaats (nu): begeleider gaf "ik sta nu hier" door. Alleen geldig
         // voor directe ritten (start binnen 3 uur) én zolang current_until in de toekomst
-        // ligt. Aanvoer (naar pickup) wordt vanaf die plek berekend; retour blijft altijd
-        // terug naar de thuisbasis. Voor ritten verder weg telt altijd de thuisbasis.
+        // ligt. Geplande standplaats: begeleider plande vooraf op een datum/tijd op een
+        // locatie te zijn — telt voor élke rit waarvan de starttijd binnen dat venster valt.
+        // Aanvoer (naar pickup) wordt vanaf die plek berekend; retour blijft altijd
+        // terug naar de thuisbasis.
         const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
         const currentActive =
           isDirectRide &&
@@ -490,7 +492,11 @@ const RequestRideInner = () => {
           (e as any).current_lng != null &&
           (e as any).current_until != null &&
           new Date((e as any).current_until as string).getTime() > Date.now();
-        const pickupOrigin = currentActive
+        const sched = scheduledByEscort.get(e.id);
+        // Geplande standplaats heeft voorrang op "nu hier" (expliciet gepland).
+        const pickupOrigin = sched
+          ? { lat: sched.lat, lng: sched.lng }
+          : currentActive
           ? { lat: (e as any).current_lat as number, lng: (e as any).current_lng as number }
           : { lat: e.base_lat, lng: e.base_lng };
         const dPickup = distanceKm(pickupOrigin, pickupGeo);
