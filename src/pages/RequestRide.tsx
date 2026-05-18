@@ -113,6 +113,8 @@ interface MatchedEscort {
   travelToPickupMin: number;
   travelBackHomeMin: number;
   is_favorite?: boolean;
+  using_current_location?: boolean;
+  current_address?: string | null;
   fuel_surcharge?: FuelSurcharge;
   conflict?: {
     rideStart: string; // ISO
@@ -508,6 +510,8 @@ const RequestRideInner = () => {
           de_km_mode: deKmMode,
           effective_rate: rate,
           is_favorite: favoriteSet.has(e.id),
+          using_current_location: currentActive,
+          current_address: currentActive ? ((e as any).current_address as string | null) : null,
           conflict: null,
         } as MatchedEscort;
       })
@@ -1548,6 +1552,14 @@ const Matches = ({
                   {m.is_favorite && (
                     <span title="Favoriete begeleider" className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-gold text-parchment shrink-0">
                       ★ Favoriet
+                    </span>
+                  )}
+                  {m.using_current_location && (
+                    <span
+                      title={m.current_address ? `Tijdelijk in de buurt: ${m.current_address}` : "Tijdelijk in de buurt"}
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-deep text-parchment shrink-0"
+                    >
+                      📍 In de buurt
                     </span>
                   )}
                   {hasFuelSurcharge(m.fuel_surcharge) && (
