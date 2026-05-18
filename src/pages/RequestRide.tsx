@@ -567,11 +567,24 @@ const RequestRideInner = () => {
     }));
 
     setMatches(withConflicts);
+
+    if (selectionMode === "auto") {
+      const auto = withConflicts.filter((m) => !m.conflict);
+      if (auto.length < form.num_escorts) {
+        toast.warning(
+          `Er zijn maar ${auto.length} geschikte begeleider${auto.length === 1 ? "" : "s"} beschikbaar (gevraagd: ${form.num_escorts}). Kies hieronder zelf wie je wilt uitnodigen of pas de aanvraag aan.`
+        );
+        return;
+      }
+      await bookEscortsInternal(auto, { auto: true });
+    }
   };
 
-  const bookEscorts = async (selected: MatchedEscort[]) => {
+  const bookEscorts = (selected: MatchedEscort[]) => bookEscortsInternal(selected, { auto: false });
+
+  const bookEscortsInternal = async (selected: MatchedEscort[], opts: { auto: boolean }) => {
     if (!user || !pickupGeo || !dropoffGeo) return;
-    if (selected.length !== form.num_escorts) {
+    if (!opts.auto && selected.length !== form.num_escorts) {
       return toast.error(t("request.pickExact", { n: form.num_escorts }));
     }
     const legs = buildLegs();
