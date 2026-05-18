@@ -988,6 +988,7 @@ export type Database = {
           id: string
           interest_expressed_at: string | null
           interest_score: number | null
+          invitation_round: number
           invited_at: string
           invoice_id: string | null
           invoiced_at: string | null
@@ -1029,6 +1030,7 @@ export type Database = {
           id?: string
           interest_expressed_at?: string | null
           interest_score?: number | null
+          invitation_round?: number
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
@@ -1070,6 +1072,7 @@ export type Database = {
           id?: string
           interest_expressed_at?: string | null
           interest_score?: number | null
+          invitation_round?: number
           invited_at?: string
           invoice_id?: string | null
           invoiced_at?: string | null
