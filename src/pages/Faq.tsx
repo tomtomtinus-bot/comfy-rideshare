@@ -13,6 +13,10 @@ const faqs: { q: string; a: string }[] = [
     a: "ViaCust automatiseert het volledige facturatieproces. Zodra een rit door de begeleider als voltooid is gemarkeerd, genereert het platform namens de begeleider een factuur voor de opdrachtgever. Facturen worden iedere maandag automatisch aangemaakt en per e-mail verstuurd, zodat alle ritten van de afgelopen week in één overzichtelijke factuur worden gebundeld. De betaling verloopt veilig via Stripe. Begeleiders hoeven dus niet zelf facturen te sturen; ViaCust regelt de administratieve afhandeling en zorgt voor een overzichtelijke uitbetaling.",
   },
   {
+    q: "Waarom zijn mijn facturen nog niet gegenereerd?",
+    a: "ViaCust automatiseert de facturatie (self-billing) om u administratief werk uit handen te nemen. Omdat de brandstoftoeslag in de transportsector wekelijks fluctueert, baseren wij onze berekeningen op de officiële cijfers.\n\nDe facturen van de ritten van afgelopen week worden definitief opgemaakt zodra de officiële gemiddelde dieselprijs van die week door TLN (Transport en Logistiek Nederland) is gepubliceerd. Zodra deze actuele prijs aan het begin van de nieuwe week in ons systeem is verwerkt, worden de facturen direct automatisch gegenereerd en klaargezet in uw dashboard. U ontvangt hier dan ook meteen een melding van.",
+  },
+  {
     q: "Word ik als begeleider live gevolgd via GPS?",
     a: "Nee. Privacy en vertrouwen staan bij ons voorop. ViaCust verzamelt geen live GPS-locaties en volgt je niet tijdens je werkzaamheden of rusttijden. De app wordt uitsluitend gebruikt voor het matchen van ritten, het doorgeven van ritdetails en de administratieve afronding achteraf. Je behoudt zelf de volledige controle.",
   },
