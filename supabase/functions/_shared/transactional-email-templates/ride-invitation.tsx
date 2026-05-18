@@ -54,7 +54,7 @@ const RideInvitationEmail = ({
 
         {acceptUrl && (
           <Button style={acceptButton} href={acceptUrl}>
-            ✓ Ik ben beschikbaar
+            {driverName ? `✓ Bevestig — ${driverName} doet deze rit` : '✓ Ik ben beschikbaar'}
           </Button>
         )}
         {rideUrl && (
@@ -63,7 +63,9 @@ const RideInvitationEmail = ({
           </Button>
         )}
         <Text style={hint}>
-          Tip: gebruik "Ik ben beschikbaar" om in één klik te reageren — geen inlog nodig.
+          {driverName
+            ? `Tip: bevestig in één klik — geen inlog nodig. Jij blijft eindverantwoordelijk voor acceptatie en facturatie.`
+            : `Tip: gebruik "Ik ben beschikbaar" om in één klik te reageren — geen inlog nodig.`}
         </Text>
 
         <Text style={footer}>— Het {SITE_NAME}-team</Text>
