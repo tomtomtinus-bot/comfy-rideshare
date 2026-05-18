@@ -218,6 +218,9 @@ const RequestRideInner = () => {
       drivers: l.drivers ?? [],
     }))
   );
+  const [selectionMode, setSelectionMode] = useState<"auto" | "manual">(
+    (initial?.selectionMode as "auto" | "manual") ?? "auto"
+  );
   const [pickerTarget, setPickerTarget] = useState<
     | { kind: "main-pickup" | "main-dropoff" }
     | { kind: "extra-pickup" | "extra-dropoff"; index: number }
