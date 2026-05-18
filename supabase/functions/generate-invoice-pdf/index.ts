@@ -583,26 +583,61 @@ Deno.serve(async (req) => {
         margin: { left: 18, right: 18 },
       });
     } else {
-      subtotal = Number(invoice!.total_amount ?? 0);
+      subtotal = items.reduce((s, r) => s + Number(r.amount ?? 0), 0);
       type RideRef = { id: string; client_reference?: string | null };
       const ridesMeta = ((invoice as Record<string, unknown>).__rides ?? []) as RideRef[];
       const refById = new Map(ridesMeta.map((r) => [r.id, r.client_reference ?? ""]));
 
+      type Row = Array<{ content: string; colSpan?: number; styles?: Record<string, unknown> } | string>;
+      const body: Row[] = [];
+
+      for (const r of items) {
+        const ref = refById.get(String(r.ride_id)) || "";
+        const route = safe(String(r.route ?? ""));
+        const dateStr = fmtDate(String(r.ride_date));
+        const headerParts = [`${dateStr}   ·   ${route}`];
+        if (ref) headerParts.push(`ref. ${ref}`);
+        const header = safe(headerParts.join("   ·   "));
+        const numEsc = Number(r.num_escorts ?? 0);
+        const fee = Number(r.amount ?? 0);
+        // Bruto-bedrag waarover de app-fee (1,5%) is berekend.
+        const grossBase = fee > 0 ? fee / 0.015 : 0;
+
+        body.push([{
+          content: header,
+          colSpan: 4,
+          styles: {
+            fontStyle: "bold",
+            fillColor: [242, 238, 230],
+            textColor: 20,
+            cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
+          },
+        }]);
+
+        body.push([
+          { content: `App-fee (${numEsc} ${numEsc === 1 ? "begeleider" : "begeleiders"})`, styles: { cellPadding: { top: 2, bottom: 2, left: 6, right: 1 } } },
+          { content: `over ${fmtMoney(grossBase)}`, styles: { halign: "right", textColor: 100 } },
+          { content: "1,5%", styles: { halign: "right" } },
+          { content: fmtMoney(fee), styles: { halign: "right" } },
+        ]);
+
+        body.push([
+          {
+            content: "Subtotaal rit",
+            colSpan: 3,
+            styles: { halign: "right", fontStyle: "bold", textColor: 60, cellPadding: { top: 2, bottom: 4, left: 1, right: 1 } },
+          },
+          {
+            content: fmtMoney(fee),
+            styles: { halign: "right", fontStyle: "bold", cellPadding: { top: 2, bottom: 4, left: 1, right: 1 } },
+          },
+        ]);
+      }
+
       addInvoiceTable(doc, {
         startY: 105,
-        head: [["Datum", "Rit", "Begeleiders", "Tarief", "App-fee"]],
-        body: items.map((r) => {
-          const ref = refById.get(String(r.ride_id)) || "";
-          const route = String(r.route ?? "");
-          const desc = safe(ref ? `${route}\nref. ${ref}` : route);
-          return [
-            fmtDate(String(r.ride_date)),
-            { content: desc, styles: { fontStyle: "normal" } },
-            { content: String(r.num_escorts ?? 0), styles: { halign: "right" } },
-            { content: "1,5%", styles: { halign: "right" } },
-            { content: fmtMoney(Number(r.amount ?? 0)), styles: { halign: "right" } },
-          ];
-        }),
+        head: [["Omschrijving", "Grondslag", "Tarief", "Bedrag"]],
+        body,
         theme: "plain",
         headStyles: {
           fontStyle: "bold",
@@ -617,12 +652,11 @@ Deno.serve(async (req) => {
           lineColor: [220, 215, 205],
         },
         columnStyles: {
-          0: { cellWidth: 22 },
-          2: { halign: "right", cellWidth: 24 },
-          3: { halign: "right", cellWidth: 22 },
-          4: { halign: "right", cellWidth: 32 },
+          1: { halign: "right", cellWidth: 36 },
+          2: { halign: "right", cellWidth: 22 },
+          3: { halign: "right", cellWidth: 32 },
         },
-        styles: { fontSize: 9.5, cellPadding: { top: 3, bottom: 3, left: 1, right: 1 } },
+        styles: { fontSize: 9.5, cellPadding: { top: 2.5, bottom: 2.5, left: 1, right: 1 } },
         margin: { left: 18, right: 18 },
       });
     }
