@@ -382,7 +382,8 @@ const RequestRideInner = () => {
     }
 
     setBusy(true);
-    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
+    const scheduledISOForQuery = new Date(nlISO(form.scheduled_date, form.scheduled_time)).toISOString();
+    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }, { data: schedLocRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
         .select("id, anonymous_id, base_city, base_lat, base_lng, current_lat, current_lng, current_address, current_until, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
@@ -396,12 +397,25 @@ const RequestRideInner = () => {
         .select("escort_id")
         .eq("client_id", user!.id),
       supabase.rpc("escort_ids_excluding_client", { _client_id: user!.id }),
+      // Geplande standplaatsen die de ritstart omsluiten (start ≤ ritstart ≤ einde).
+      supabase
+        .from("escort_scheduled_locations")
+        .select("escort_id, address, lat, lng, start_at, end_at")
+        .lte("start_at", scheduledISOForQuery)
+        .gte("end_at", scheduledISOForQuery),
     ]);
     setBusy(false);
     if (error) return toast.error(error.message);
     const excludedSet = new Set((excludedRows ?? []).map((r: any) => r.escort_id));
     const favoriteSet = new Set((favoriteRows ?? []).map((r: any) => r.escort_id));
     const escortFilteredOut = new Set((filterRows ?? []).map((r: any) => r.escort_id));
+    // Per begeleider de eerst-passende geplande standplaats (er kunnen er meerdere zijn).
+    const scheduledByEscort = new Map<string, { address: string; lat: number; lng: number }>();
+    for (const r of (schedLocRows ?? []) as any[]) {
+      if (!scheduledByEscort.has(r.escort_id)) {
+        scheduledByEscort.set(r.escort_id, { address: r.address, lat: r.lat, lng: r.lng });
+      }
+    }
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
