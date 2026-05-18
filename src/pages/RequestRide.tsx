@@ -540,8 +540,11 @@ const RequestRideInner = () => {
     };
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
-      // Bij actieve tijdelijke standplaats: aanvoer vanaf huidige locatie, retour naar huis.
+      // Bij actieve tijdelijke standplaats én directe rit (binnen 3u): aanvoer vanaf
+      // huidige locatie, retour naar huis. Anders altijd vanaf thuisbasis.
+      const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
       const currentActive =
+        isDirectRide &&
         (m as any).current_lat != null &&
         (m as any).current_lng != null &&
         (m as any).current_until != null &&
