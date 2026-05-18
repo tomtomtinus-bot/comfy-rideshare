@@ -537,8 +537,17 @@ const RequestRideInner = () => {
     };
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
+      // Bij actieve tijdelijke standplaats: aanvoer vanaf huidige locatie, retour naar huis.
+      const currentActive =
+        (m as any).current_lat != null &&
+        (m as any).current_lng != null &&
+        (m as any).current_until != null &&
+        new Date((m as any).current_until as string).getTime() > Date.now();
+      const pickupOrigin = currentActive
+        ? { lat: (m as any).current_lat as number, lng: (m as any).current_lng as number }
+        : base;
       const [toPickup, backHome] = await Promise.all([
-        fetchLegMin(base, pickupGeo),
+        fetchLegMin(pickupOrigin, pickupGeo),
         fetchLegMin(lastDropoffGeo, base),
       ]);
       return {
