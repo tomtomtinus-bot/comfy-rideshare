@@ -39,22 +39,30 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   try {
-    // Verify caller is authenticated (we use anon client + JWT to verify)
+    // Allow service-role invocations (e.g. from the auto-retry cron) to bypass
+    // the user-owner check. Otherwise verify the caller owns the ride.
     const authHeader = req.headers.get('Authorization') ?? ''
-    const userClient = createClientLite(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-      auth: { persistSession: false },
-    })
-    const { data: { user } } = await userClient.auth.getUser()
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const isServiceRole = authHeader === `Bearer ${SERVICE_KEY}`
+
+    let userId: string | null = null
+    if (!isServiceRole) {
+      const userClient = createClientLite(SUPABASE_URL, ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+        auth: { persistSession: false },
       })
+      const { data: { user } } = await userClient.auth.getUser()
+      if (!user) {
+        return new Response(JSON.stringify({ error: 'Not authenticated' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      userId = user.id
     }
 
     const body = await req.json().catch(() => ({}))
     const rideId = body?.rideId as string
     const origin = (body?.origin as string) ?? 'https://viacust.com'
+    const onlyRound = body?.onlyRound as number | undefined
     if (!rideId) {
       return new Response(JSON.stringify({ error: 'rideId required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -63,24 +71,26 @@ Deno.serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
 
-    // Verify caller owns this ride
+    // Verify caller owns this ride (skipped for service-role)
     const { data: ride } = await admin
       .from('rides')
       .select('id, client_id, pickup_city, dropoff_city, scheduled_at')
       .eq('id', rideId)
       .maybeSingle()
-    if (!ride || ride.client_id !== user.id) {
+    if (!ride || (!isServiceRole && ride.client_id !== userId)) {
       return new Response(JSON.stringify({ error: 'Not allowed' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Pull all invited assignments for this ride
-    const { data: assignments } = await admin
+    // Pull all invited assignments for this ride (optionally only for a specific round)
+    let q = admin
       .from('ride_assignments')
-      .select('id, escort_id, responds_by')
+      .select('id, escort_id, responds_by, invitation_round')
       .eq('ride_id', rideId)
       .in('status', ['invited', 'accepted'])
+    if (typeof onlyRound === 'number') q = q.eq('invitation_round', onlyRound)
+    const { data: assignments } = await q
 
     if (!assignments || assignments.length === 0) {
       return new Response(JSON.stringify({ sent: 0 }), {

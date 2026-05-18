@@ -147,6 +147,57 @@ Deno.serve(async (req) => {
     const needed = (ride.num_escorts ?? 1) - accepted
 
     if (needed > 0) {
+      // Are there still other invited assignments out there (e.g. round 2 was
+      // already kicked off, or some invites haven't expired yet)?
+      const { count: stillInvitedCount } = await supabase
+        .from('ride_assignments')
+        .select('id', { count: 'exact', head: true })
+        .eq('ride_id', rideId)
+        .eq('status', 'invited')
+
+      // What's the highest round number on this ride so far?
+      const { data: roundRow } = await supabase
+        .from('ride_assignments')
+        .select('invitation_round')
+        .eq('ride_id', rideId)
+        .order('invitation_round', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const lastRound = (roundRow?.invitation_round as number | undefined) ?? 1
+
+      // Auto second round: nobody accepted, no pending invites, still round 1.
+      if (accepted === 0 && (stillInvitedCount ?? 0) === 0 && lastRound < 2) {
+        const { data: invited, error: invErr } = await supabase
+          .rpc('invite_replacement_escorts', { _ride_id: rideId, _limit: 10 })
+
+        if (!invErr && (invited ?? 0) > 0) {
+          // Fire emails for the new round (round 2).
+          try {
+            await fetch(`${SUPABASE_URL}/functions/v1/send-ride-invitations`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SERVICE_KEY}`,
+                'apikey': SERVICE_KEY,
+              },
+              body: JSON.stringify({ rideId, onlyRound: 2 }),
+            }).then(r => r.text())
+          } catch (e) {
+            console.error('[auto-release-invitations] send-ride-invitations (round 2) failed', e)
+          }
+
+          notifications.push({
+            user_id: ride.client_id,
+            type: 'invitations_round2',
+            title: 'Tweede ronde gestart',
+            body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} reageerde niemand op tijd. We nodigen automatisch nieuwe begeleiders uit (${invited} extra).`,
+            ride_assignment_id: null,
+            ride_id: rideId,
+          })
+          continue
+        }
+      }
+
       notifications.push({
         user_id: ride.client_id,
         type: 'invitations_expired',

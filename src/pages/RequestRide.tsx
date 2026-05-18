@@ -570,7 +570,9 @@ const RequestRideInner = () => {
     setMatches(withConflicts);
 
     if (selectionMode === "auto") {
-      const auto = withConflicts.filter((m) => !m.conflict);
+      // Max 10 begeleiders per ronde uitnodigen: favorieten eerst, dan dichtstbij.
+      // De lijst is al gesorteerd (favoriet → afstand), dus .slice(0, 10) volstaat.
+      const auto = withConflicts.filter((m) => !m.conflict).slice(0, 10);
       if (auto.length < form.num_escorts) {
         toast.warning(
           `Er zijn maar ${auto.length} geschikte begeleider${auto.length === 1 ? "" : "s"} beschikbaar (gevraagd: ${form.num_escorts}). Kies hieronder zelf wie je wilt uitnodigen of pas de aanvraag aan.`
