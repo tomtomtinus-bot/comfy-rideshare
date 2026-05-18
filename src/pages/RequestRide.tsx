@@ -278,6 +278,7 @@ const RequestRideInner = () => {
     setLicensePlates([]);
     setExtraLegs([]);
     setMatches(null);
+    setSelectionMode("auto");
     setConfirmReset(false);
     toast.success(t("request.draftCleared", { defaultValue: "Concept gewist" }));
   };
