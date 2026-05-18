@@ -78,6 +78,7 @@ const TermsNL = () => (
       <li><strong>Uitvoering ritten:</strong> ViaCust is niet aansprakelijk voor schade, van welke aard dan ook, die voortvloeit uit of verband houdt met de feitelijke uitvoering van de transportbegeleiding.</li>
       <li><strong>Verzekeringsplicht:</strong> Transportbegeleiders dienen zelf zorg te dragen voor geldige en afdoende bedrijfs- en beroepsaansprakelijkheidsverzekeringen, alsmede de wettelijk vereiste vergunningen voor het uitvoeren van begeleidingsdiensten.</li>
       <li><strong>Technische storingen en GPS:</strong> ViaCust is niet aansprakelijk voor fouten in route- of kostencalculaties, afwijkingen in GPS-locatiebepalingen van het toestel van de gebruiker, of technische storingen van geïntegreerde diensten van derden (zoals Google Maps, Google Calendar, of Stripe).</li>
+      <li><strong>Geplande Standplaats:</strong> ViaCust is nimmer aansprakelijk voor misgelopen ritten, vertragingen of schadeclaims die voortvloeien uit onjuiste, verouderde of niet-gerealiseerde 'Geplande standplaatsen' die door begeleiders zelf in het systeem zijn ingevoerd.</li>
     </ul>
 
     <h2>6. Annuleringen</h2>
