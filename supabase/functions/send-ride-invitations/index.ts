@@ -202,6 +202,9 @@ Deno.serve(async (req) => {
       await Promise.all(assignments.map(async (a) => {
         const escortId = a.escort_id as string
         if (!escortId) return
+        const ownerId = driverToOwner.get(escortId)
+        const targetUserId = ownerId ?? escortId
+        const driverName = idToDriverName.get(escortId)
         const deadline = a.responds_by ? new Date(a.responds_by) : null
         const deadlineTxt = deadline
           ? deadline.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
@@ -216,8 +219,10 @@ Deno.serve(async (req) => {
             'apikey': ANON_KEY,
           },
           body: JSON.stringify({
-            userIds: [escortId],
-            title: 'Nieuwe ritaanvraag',
+            userIds: [targetUserId],
+            title: ownerId
+              ? `Ritaanbod voor ${driverName ?? 'je chauffeur'}`
+              : 'Nieuwe ritaanvraag',
             body,
             url: `/rit/${ride.id}`,
             tag: `ride-invite-${a.id}`,
