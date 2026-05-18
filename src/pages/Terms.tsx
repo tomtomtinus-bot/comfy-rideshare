@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string }> = {
-  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden ViaCust", updated: "Versie 1.4 — Laatst bijgewerkt op: 13 mei 2026", back: "← Terug" },
+  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden ViaCust", updated: "Versie 1.5 — Laatst bijgewerkt op: 18 mei 2026", back: "← Terug" },
   en: { kicker: "Legal", title: "Terms and Conditions", updated: "Last updated: May 10, 2026", back: "← Back" },
   de: { kicker: "Rechtliches", title: "Allgemeine Geschäftsbedingungen", updated: "Zuletzt aktualisiert: 10. Mai 2026", back: "← Zurück" },
   fr: { kicker: "Mentions légales", title: "Conditions Générales d'Utilisation", updated: "Dernière mise à jour : 10 mai 2026", back: "← Retour" },
@@ -56,30 +56,34 @@ const Terms = () => {
 const TermsNL = () => (
   <>
     <h2>1. De Dienst</h2>
-    <p>ViaCust biedt een digitaal SaaS-platform dat transportbegeleiders en opdrachtgevers samenbrengt. ViaCust fungeert uitsluitend als bemiddelaar en is geen partij bij de uiteindelijke transportovereenkomst tussen gebruiker en opdrachtgever.</p>
+    <p>ViaCust biedt een digitaal SaaS-platform dat transportbegeleiders en opdrachtgevers samenbrengt. ViaCust fungeert uitsluitend als bemiddelaar en facilitair platform, en is uitdrukkelijk geen partij bij de uiteindelijke transportovereenkomst of afspraken tussen de transportbegeleider en de opdrachtgever.</p>
 
-    <h2>2. Gebruik van het Platform</h2>
-    <p><strong>Account:</strong> Gebruikers zijn verantwoordelijk voor het geheimhouden van hun inloggegevens (waaronder Google-accounttoegang).</p>
-    <p><strong>Abonnement:</strong> Voor gebruik van het platform kan een jaarlijkse fee worden gevraagd. Introductiekortingen (bijv. 50% in het eerste jaar) zijn eenmalig en vervallen bij verlenging, tenzij anders aangegeven.</p>
+    <h2>2. Gebruik van het Platform en Ritacceptatie</h2>
+    <p><strong>Account:</strong> Gebruikers zijn te allen tijde zelf verantwoordelijk voor het geheimhouden van hun inloggegevens (waaronder de gekoppelde Google-accounttoegang) en voor al het gebruik van hun account.</p>
+    <p><strong>Aanbod en Acceptatietimer:</strong> Wanneer een rit specifiek aan een transportbegeleider wordt aangeboden, is dit aanbod strikt gelimiteerd tot een responstijd van exact tien (10) minuten. Indien de begeleider de rit niet binnen deze termijn via het platform accepteert, vervalt het aanbod onherroepelijk en automatisch. De begeleider kan hieraan nimmer enig recht op de rit of schadevergoeding ontlenen.</p>
+    <p><strong>Tijdelijke Standplaats (GPS):</strong> Begeleiders kunnen via het platform handmatig hun actuele locatie als tijdelijke standplaats opgeven voor ad-hoc ritten. De begeleider is zelf verantwoordelijk voor het correct activeren en tijdig deactiveren/wissen van deze standplaats.</p>
+    <p><strong>Abonnement:</strong> Voor gebruik van het platform kan een jaarlijkse of periodieke fee worden gevraagd. Introductiekortingen (bijv. 50% in het eerste jaar) zijn eenmalig en vervallen automatisch bij verlenging, tenzij schriftelijk anders is overeengekomen.</p>
 
-    <h2>3. Facturatie en Lastgeving (Self-Billing)</h2>
-    <p>Begeleiders verlenen ViaCust bij acceptatie van deze voorwaarden een onherroepelijke lastgeving/volmacht om namens de begeleider facturen op te stellen en te versturen naar de opdrachtgever voor uitgevoerde ritten. De begeleider blijft zelf verantwoordelijk voor de fiscale juistheid van de verstrekte gegevens (zoals BTW-nummer en onkosten).</p>
+    <h2>3. Facturatie, Lastgeving (Self-Billing) en Brandstofindex</h2>
+    <p><strong>Volmacht:</strong> Transportbegeleiders verlenen ViaCust bij acceptatie van deze voorwaarden een onherroepelijke lastgeving en volmacht om namens en voor rekening van de begeleider facturen (self-billing) op te stellen en te versturen naar de opdrachtgever voor uitgevoerde ritten.</p>
+    <p><strong>Verantwoordelijkheid:</strong> De begeleider blijft te allen tijde zelf wettelijk en fiscaal verantwoordelijk voor de juistheid en volledigheid van de aan ViaCust verstrekte gegevens (zoals BTW-nummer, KVK-gegevens en ingediende onkosten).</p>
+    <p><strong>Brandstoftoeslag en Vertraging:</strong> De definitieve facturatie en tariefberekening vinden plaats op basis van de wekelijkse gemiddelde dieselprijzen zoals gepubliceerd door TLN (Transport en Logistiek Nederland). ViaCust is niet aansprakelijk voor eventuele vertraging in de facturatie of uitbetaling indien de publicatie door TLN of de verwerking door externe betaaldiensten (Stripe) vertraging oploopt.</p>
 
     <h2>4. Voorkeurslijsten en Kwaliteit</h2>
-    <p>Opdrachtgevers en begeleiders hebben de vrijheid om eigen voorkeurslijsten te beheren. ViaCust behoudt zich het recht voor om accounts te schorsen bij herhaaldelijke negatieve beoordelingen, wangedrag of het niet nakomen van afspraken, na hoor en wederhoor.</p>
+    <p>Opdrachtgevers en begeleiders hebben de vrijheid om binnen het platform eigen voorkeurs- en uitsluitingslijsten te beheren. ViaCust heeft geen invloed op deze lijsten. ViaCust behoudt zich het recht voor om accounts van gebruikers permanent te schorsen of te verwijderen bij herhaaldelijke negatieve beoordelingen, wangedrag, fraude, of het niet nakomen van geaccepteerde ritten, altijd na hoor en wederhoor.</p>
 
     <h2>5. Aansprakelijkheid en Verzekering</h2>
     <ul>
-      <li>ViaCust is niet aansprakelijk voor schade die voortvloeit uit de uitvoering van de transportbegeleiding.</li>
-      <li>Begeleiders dienen zelf zorg te dragen voor afdoende bedrijfs- en beroepsaansprakelijkheidsverzekeringen.</li>
-      <li>ViaCust is niet aansprakelijk voor fouten in routeberekeningen of technische storingen van derden (zoals Google Maps of Stripe).</li>
+      <li><strong>Uitvoering ritten:</strong> ViaCust is niet aansprakelijk voor schade, van welke aard dan ook, die voortvloeit uit of verband houdt met de feitelijke uitvoering van de transportbegeleiding.</li>
+      <li><strong>Verzekeringsplicht:</strong> Transportbegeleiders dienen zelf zorg te dragen voor geldige en afdoende bedrijfs- en beroepsaansprakelijkheidsverzekeringen, alsmede de wettelijk vereiste vergunningen voor het uitvoeren van begeleidingsdiensten.</li>
+      <li><strong>Technische storingen en GPS:</strong> ViaCust is niet aansprakelijk voor fouten in route- of kostencalculaties, afwijkingen in GPS-locatiebepalingen van het toestel van de gebruiker, of technische storingen van geïntegreerde diensten van derden (zoals Google Maps, Google Calendar, of Stripe).</li>
     </ul>
 
     <h2>6. Annuleringen</h2>
-    <p>Indien een geaccepteerde rit door de opdrachtgever wordt geannuleerd, gelden de op het platform gecommuniceerde annuleringstermijnen en vergoedingen.</p>
+    <p>Indien een reeds geaccepteerde rit door de opdrachtgever of begeleider wordt geannuleerd, gelden de specifieke annuleringstermijnen en eventuele (on)kostenvergoedingen zoals deze op dat moment op het platform digitaal zijn gecommuniceerd en vastgelegd.</p>
 
     <h2>7. Toepasselijk recht</h2>
-    <p>Op deze voorwaarden is het Nederlands recht van toepassing. Geschillen worden voorgelegd aan de bevoegde rechter in het arrondissement waar ViaCust is gevestigd.</p>
+    <p>Op deze voorwaarden en alle overeenkomsten tussen de gebruiker en ViaCust is uitsluitend het Nederlands recht van toepassing. Alle geschillen die voortvloeien uit of verband houden met het gebruik van het platform zullen in eerste instantie uitsluitend worden voorgelegd aan de bevoegde rechter in het arrondissement waar ViaCust statutair is gevestigd.</p>
   </>
 );
 
