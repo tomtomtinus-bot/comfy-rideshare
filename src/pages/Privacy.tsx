@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
-  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.5 — Laatst bijgewerkt op: 18 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
+  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.6 — Laatst bijgewerkt op: 18 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
   en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 11, 2026", back: "← Back", toTerms: "Terms and Conditions" },
   de: { kicker: "Datenschutz", title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: 11. Mai 2026", back: "← Zurück", toTerms: "AGB" },
   fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 11 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
@@ -80,6 +80,7 @@ const PrivacyNL = () => (
           <li>Begeleiders: Hebben het recht hun cliëntenportefeuille te beheren door voorkeuren aan te geven voor specifieke opdrachtgevers.</li>
         </ul>
       </li>
+      <li><strong>Multi-voertuig &amp; Bedrijfsaccounts:</strong> Indien een gebruiker zich registreert als Bedrijfsplanner, verwerken wij de bedrijfsgegevens voor centrale facturatie en administratie. Indien deze planner chauffeurs uitnodigt, verwerken wij de e-mailadressen en accountgegevens van deze specifieke chauffeurs. De Bedrijfsplanner heeft inzicht in de aan de chauffeur toegewezen ritten, de rithistorie en de digitale ritbonnen ten behoeve van de centrale planning en kwaliteitsbewaking.</li>
     </ul>
 
     <h2>3. Validatie van bedrijfsgegevens (VIES)</h2>
@@ -104,6 +105,7 @@ const PrivacyNL = () => (
       <li><strong>Geplande standplaatsgegevens:</strong> Deze gegevens worden automatisch uit de database gewist of geanonimiseerd zodra het door de begeleider opgegeven tijdvenster is verstreken.</li>
       <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
       <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
+      <li><strong>Gekoppelde Chauffeursaccounts:</strong> Gegevens van chauffeurs gekoppeld aan een bedrijfsaccount blijven bewaard zolang de koppeling tussen het chauffeursprofiel en het bedrijfsaccount actief is, of totdat het hoofdaccount wordt beëindigd.</li>
     </ul>
 
     <h2>6. Uw Rechten en Contact</h2>
