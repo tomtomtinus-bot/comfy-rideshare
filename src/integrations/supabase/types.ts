@@ -2066,6 +2066,7 @@ export type Database = {
         Args: { _assignment_id: string; _user_id: string }
         Returns: boolean
       }
+      is_company_driver: { Args: { _uid: string }; Returns: boolean }
       is_company_driver_of: {
         Args: { _driver: string; _planner: string }
         Returns: boolean
