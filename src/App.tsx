@@ -101,6 +101,8 @@ const App = () => (
             </Route>
             
             <Route path="/voorwaarden" element={<Terms />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/uitnodiging" element={<AcceptInvitation />} />
             <Route path="/beveiliging" element={<Security />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
