@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  let fromAddressOverride: string | undefined
   try {
     const body = await req.json()
     templateName = body.templateName || body.template_name
@@ -68,6 +69,15 @@ Deno.serve(async (req) => {
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
     if (body.templateData && typeof body.templateData === 'object') {
       templateData = body.templateData
+    }
+    const rawFrom = body.fromAddress || body.from_address
+    if (typeof rawFrom === 'string') {
+      // Only allow local-part overrides on the configured FROM_DOMAIN
+      // (e.g. "invoice" → "invoice@viacust.com"). Reject anything else.
+      const localPart = rawFrom.includes('@') ? rawFrom.split('@')[0] : rawFrom
+      if (/^[a-zA-Z0-9._-]{1,64}$/.test(localPart)) {
+        fromAddressOverride = `${localPart}@${FROM_DOMAIN}`
+      }
     }
   } catch {
     return new Response(
@@ -313,7 +323,9 @@ Deno.serve(async (req) => {
     payload: {
       message_id: messageId,
       to: effectiveRecipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: fromAddressOverride
+        ? `${SITE_NAME} <${fromAddressOverride}>`
+        : `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
       subject: resolvedSubject,
       html,
