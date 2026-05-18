@@ -890,6 +890,7 @@ const EscortDashboard = () => {
 
       {user && <GoogleAgendaStatus />}
       {user && <CurrentLocationCard />}
+      {user && <ScheduledLocationsCard />}
 
       {loading ? (
         <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
