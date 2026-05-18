@@ -47,6 +47,8 @@ import WatKostViaCust from "./pages/WatKostViaCust.tsx";
 import InfoNederland from "./pages/InfoNederland.tsx";
 import InfoBelgie from "./pages/InfoBelgie.tsx";
 import Faq from "./pages/Faq.tsx";
+import Team from "./pages/Team.tsx";
+import AcceptInvitation from "./pages/AcceptInvitation.tsx";
 import { Navigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
