@@ -177,6 +177,7 @@ Deno.serve(async (req) => {
           idempotencyKey: `ride-invite-${a.id}`,
           templateData: {
             name: idToName.get(a.escort_id),
+            driverName: idToDriverName.get(a.escort_id) ?? null,
             pickup: ride.pickup_city,
             dropoff: ride.dropoff_city,
             plannedAt,
