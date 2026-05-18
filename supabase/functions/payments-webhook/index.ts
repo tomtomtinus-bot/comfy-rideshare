@@ -68,7 +68,8 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     const activeStatuses = ["active", "trialing", "past_due"];
     const isActive = activeStatuses.includes(subscription.status)
       || (subscription.status === "canceled" && periodEnd && periodEnd * 1000 > Date.now());
-    const newLimit = isActive ? Math.max(1, quantity) : 1;
+    // seat_limit = planner (1) + ingekochte chauffeur-seats
+    const newLimit = isActive ? 1 + Math.max(0, quantity) : 1;
     await getSupabase()
       .from("companies")
       .update({ seat_limit: newLimit, updated_at: new Date().toISOString() })
