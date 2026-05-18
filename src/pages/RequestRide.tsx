@@ -115,6 +115,8 @@ interface MatchedEscort {
   is_favorite?: boolean;
   using_current_location?: boolean;
   current_address?: string | null;
+  using_scheduled_location?: boolean;
+  scheduled_address?: string | null;
   fuel_surcharge?: FuelSurcharge;
   conflict?: {
     rideStart: string; // ISO
