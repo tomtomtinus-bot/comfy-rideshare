@@ -569,7 +569,8 @@ const RequestRideInner = () => {
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
       // Bij actieve tijdelijke standplaats én directe rit (binnen 3u): aanvoer vanaf
-      // huidige locatie, retour naar huis. Anders altijd vanaf thuisbasis.
+      // huidige locatie. Bij geplande standplaats die ritstart omsluit: aanvoer vanaf
+      // die geplande locatie. Anders altijd vanaf thuisbasis. Retour altijd naar huis.
       const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
       const currentActive =
         isDirectRide &&
@@ -577,7 +578,10 @@ const RequestRideInner = () => {
         (m as any).current_lng != null &&
         (m as any).current_until != null &&
         new Date((m as any).current_until as string).getTime() > Date.now();
-      const pickupOrigin = currentActive
+      const sched = scheduledByEscort.get(m.id);
+      const pickupOrigin = sched
+        ? { lat: sched.lat, lng: sched.lng }
+        : currentActive
         ? { lat: (m as any).current_lat as number, lng: (m as any).current_lng as number }
         : base;
       const [toPickup, backHome] = await Promise.all([
