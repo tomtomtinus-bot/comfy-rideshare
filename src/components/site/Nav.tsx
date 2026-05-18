@@ -7,23 +7,30 @@ import { RoleSwitch } from "@/components/site/RoleSwitch";
 import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
 import { NotificationBell } from "@/components/site/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
 
 export const Nav = () => {
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { user, role, isAdmin, signOut } = useAuth();
+  const { isPlanner, isDriver } = useCompany();
   const { t } = useTranslation();
 
   const close = () => setOpen(false);
 
+  // Chauffeurs (driver) zien geen financiele/abonnement/team-links.
+  const showFinance = !!user && !isDriver;
+  const showPlannerOnly = !!user && role === "begeleider" && !isDriver;
+
   const links: { to: string; label: string; show: boolean }[] = [
     { to: "/dashboard", label: t("nav.dashboard"), show: !!user },
     { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
-    { to: "/facturen", label: t("nav.invoices"), show: !!user },
+    { to: "/facturen", label: t("nav.invoices"), show: showFinance },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
-    { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
     { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
-    { to: "/voorkeursopdrachtgevers", label: "Mijn Voorkeursopdrachtgevers", show: !!user && role === "begeleider" },
+    { to: "/voorkeursopdrachtgevers", label: "Mijn Voorkeursopdrachtgevers", show: showPlannerOnly },
+    { to: "/team", label: "Mijn team", show: showPlannerOnly && isPlanner },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
     { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
@@ -31,9 +38,9 @@ export const Nav = () => {
   ];
 
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
-    { to: "/abonnement", label: "Abonnement", show: !!user && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/abonnement", label: "Abonnement", show: showFinance && (role === "begeleider" || role === "opdrachtgever") },
     { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
-    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: !!user },
+    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: showFinance },
     { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
   ];
 
