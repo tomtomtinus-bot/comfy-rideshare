@@ -115,6 +115,8 @@ interface MatchedEscort {
   is_favorite?: boolean;
   using_current_location?: boolean;
   current_address?: string | null;
+  using_scheduled_location?: boolean;
+  scheduled_address?: string | null;
   fuel_surcharge?: FuelSurcharge;
   conflict?: {
     rideStart: string; // ISO
@@ -380,7 +382,8 @@ const RequestRideInner = () => {
     }
 
     setBusy(true);
-    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
+    const scheduledISOForQuery = new Date(nlISO(form.scheduled_date, form.scheduled_time)).toISOString();
+    const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }, { data: schedLocRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
         .select("id, anonymous_id, base_city, base_lat, base_lng, current_lat, current_lng, current_address, current_until, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
@@ -394,12 +397,25 @@ const RequestRideInner = () => {
         .select("escort_id")
         .eq("client_id", user!.id),
       supabase.rpc("escort_ids_excluding_client", { _client_id: user!.id }),
+      // Geplande standplaatsen die de ritstart omsluiten (start ≤ ritstart ≤ einde).
+      supabase
+        .from("escort_scheduled_locations")
+        .select("escort_id, address, lat, lng, start_at, end_at")
+        .lte("start_at", scheduledISOForQuery)
+        .gte("end_at", scheduledISOForQuery),
     ]);
     setBusy(false);
     if (error) return toast.error(error.message);
     const excludedSet = new Set((excludedRows ?? []).map((r: any) => r.escort_id));
     const favoriteSet = new Set((favoriteRows ?? []).map((r: any) => r.escort_id));
     const escortFilteredOut = new Set((filterRows ?? []).map((r: any) => r.escort_id));
+    // Per begeleider de eerst-passende geplande standplaats (er kunnen er meerdere zijn).
+    const scheduledByEscort = new Map<string, { address: string; lat: number; lng: number }>();
+    for (const r of (schedLocRows ?? []) as any[]) {
+      if (!scheduledByEscort.has(r.escort_id)) {
+        scheduledByEscort.set(r.escort_id, { address: r.address, lat: r.lat, lng: r.lng });
+      }
+    }
 
     // Grenslocaties als "NL/BE" splitsen we naar beide landen; begeleider moet minstens één van de landen dekken
     const expandCountries = (c: string): string[] => {
@@ -463,10 +479,12 @@ const RequestRideInner = () => {
         return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
-        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Alleen geldig
+        // Tijdelijke standplaats (nu): begeleider gaf "ik sta nu hier" door. Alleen geldig
         // voor directe ritten (start binnen 3 uur) én zolang current_until in de toekomst
-        // ligt. Aanvoer (naar pickup) wordt vanaf die plek berekend; retour blijft altijd
-        // terug naar de thuisbasis. Voor ritten verder weg telt altijd de thuisbasis.
+        // ligt. Geplande standplaats: begeleider plande vooraf op een datum/tijd op een
+        // locatie te zijn — telt voor élke rit waarvan de starttijd binnen dat venster valt.
+        // Aanvoer (naar pickup) wordt vanaf die plek berekend; retour blijft altijd
+        // terug naar de thuisbasis.
         const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
         const currentActive =
           isDirectRide &&
@@ -474,7 +492,11 @@ const RequestRideInner = () => {
           (e as any).current_lng != null &&
           (e as any).current_until != null &&
           new Date((e as any).current_until as string).getTime() > Date.now();
-        const pickupOrigin = currentActive
+        const sched = scheduledByEscort.get(e.id);
+        // Geplande standplaats heeft voorrang op "nu hier" (expliciet gepland).
+        const pickupOrigin = sched
+          ? { lat: sched.lat, lng: sched.lng }
+          : currentActive
           ? { lat: (e as any).current_lat as number, lng: (e as any).current_lng as number }
           : { lat: e.base_lat, lng: e.base_lng };
         const dPickup = distanceKm(pickupOrigin, pickupGeo);
@@ -510,8 +532,10 @@ const RequestRideInner = () => {
           de_km_mode: deKmMode,
           effective_rate: rate,
           is_favorite: favoriteSet.has(e.id),
-          using_current_location: currentActive,
-          current_address: currentActive ? ((e as any).current_address as string | null) : null,
+          using_current_location: currentActive && !sched,
+          current_address: currentActive && !sched ? ((e as any).current_address as string | null) : null,
+          using_scheduled_location: !!sched,
+          scheduled_address: sched ? sched.address : null,
           conflict: null,
         } as MatchedEscort;
       })
@@ -545,7 +569,8 @@ const RequestRideInner = () => {
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
       // Bij actieve tijdelijke standplaats én directe rit (binnen 3u): aanvoer vanaf
-      // huidige locatie, retour naar huis. Anders altijd vanaf thuisbasis.
+      // huidige locatie. Bij geplande standplaats die ritstart omsluit: aanvoer vanaf
+      // die geplande locatie. Anders altijd vanaf thuisbasis. Retour altijd naar huis.
       const isDirectRide = scheduledDate.getTime() - Date.now() <= 3 * 3600_000;
       const currentActive =
         isDirectRide &&
@@ -553,7 +578,10 @@ const RequestRideInner = () => {
         (m as any).current_lng != null &&
         (m as any).current_until != null &&
         new Date((m as any).current_until as string).getTime() > Date.now();
-      const pickupOrigin = currentActive
+      const sched = scheduledByEscort.get(m.id);
+      const pickupOrigin = sched
+        ? { lat: sched.lat, lng: sched.lng }
+        : currentActive
         ? { lat: (m as any).current_lat as number, lng: (m as any).current_lng as number }
         : base;
       const [toPickup, backHome] = await Promise.all([
@@ -1560,6 +1588,14 @@ const Matches = ({
                       className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-deep text-parchment shrink-0"
                     >
                       📍 In de buurt
+                    </span>
+                  )}
+                  {m.using_scheduled_location && (
+                    <span
+                      title={m.scheduled_address ? `Geplande standplaats: ${m.scheduled_address} — aanvoer wordt vanaf hier berekend` : "Geplande standplaats — aanvoer wordt vanaf hier berekend"}
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-gold text-parchment shrink-0"
+                    >
+                      📅 Gepland ter plaatse
                     </span>
                   )}
                   {hasFuelSurcharge(m.fuel_surcharge) && (

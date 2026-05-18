@@ -13,6 +13,7 @@ import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import CurrentLocationCard from "@/components/site/CurrentLocationCard";
+import ScheduledLocationsCard from "@/components/site/ScheduledLocationsCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { distanceKm } from "@/lib/geo";
@@ -889,6 +890,7 @@ const EscortDashboard = () => {
 
       {user && <GoogleAgendaStatus />}
       {user && <CurrentLocationCard />}
+      {user && <ScheduledLocationsCard />}
 
       {loading ? (
         <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>

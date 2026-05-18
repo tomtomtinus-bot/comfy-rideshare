@@ -446,6 +446,45 @@ export type Database = {
         }
         Relationships: []
       }
+      escort_scheduled_locations: {
+        Row: {
+          address: string
+          created_at: string
+          end_at: string
+          escort_id: string
+          id: string
+          lat: number
+          lng: number
+          note: string | null
+          start_at: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          end_at: string
+          escort_id: string
+          id?: string
+          lat: number
+          lng: number
+          note?: string | null
+          start_at: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          end_at?: string
+          escort_id?: string
+          id?: string
+          lat?: number
+          lng?: number
+          note?: string | null
+          start_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       google_calendar_tokens: {
         Row: {
           access_token: string

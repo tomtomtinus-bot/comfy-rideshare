@@ -118,12 +118,14 @@ export default function CurrentLocationCard() {
       <div className="flex items-start gap-3 mb-4">
         <MapPin className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
         <div>
-          <h3 className="font-display text-lg text-brass-deep">Tijdelijke standplaats</h3>
+          <h3 className="font-display text-lg text-brass-deep">Tijdelijke standplaats (nu)</h3>
           <p className="text-xs text-brass-deep/60 mt-1">
-            Geef aan waar je nu bent om ritten in de buurt op te pikken. Aanvoertijd wordt
-            vanaf je huidige locatie berekend (retour blijft naar je thuisbasis).
-            Geldt alleen voor directe ritten die binnen 3 uur starten — ritten verder in
-            de toekomst worden altijd vanaf je thuisbasis berekend.
+            Geef aan waar je <strong>op dit moment</strong> bent om spoedritten in de buurt
+            op te pikken. De <strong>aanvoertijd wordt vanaf deze plek</strong> berekend
+            (retour blijft altijd naar je thuisbasis). Geldt alleen voor directe ritten
+            die binnen 3 uur starten — ritten verder in de toekomst worden vanaf je
+            thuisbasis berekend, tenzij je hiervoor een <em>geplande standplaats</em>
+            hebt aangemaakt.
           </p>
         </div>
       </div>
