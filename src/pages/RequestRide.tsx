@@ -1554,6 +1554,14 @@ const Matches = ({
                       ★ Favoriet
                     </span>
                   )}
+                  {m.using_current_location && (
+                    <span
+                      title={m.current_address ? `Tijdelijk in de buurt: ${m.current_address}` : "Tijdelijk in de buurt"}
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-deep text-parchment shrink-0"
+                    >
+                      📍 In de buurt
+                    </span>
+                  )}
                   {hasFuelSurcharge(m.fuel_surcharge) && (
                     <button
                       type="button"
