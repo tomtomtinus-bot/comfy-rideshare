@@ -105,6 +105,23 @@ Deno.serve(async (req) => {
     })
   }
 
+  // Vangnet: bedrijfschauffeurs mogen nooit zelf ritten accepteren.
+  const { data: driverCheck } = await supabase
+    .from('company_members')
+    .select('id')
+    .eq('user_id', assn.escort_id)
+    .eq('role', 'driver')
+    .eq('status', 'active')
+    .maybeSingle()
+  if (driverCheck) {
+    return new Response(htmlPage(
+      'Niet toegestaan',
+      'Je werkt als chauffeur onder een bedrijfsplanner. Alleen je planner kan ritten accepteren. Je ziet toegewezen ritten in je dashboard.',
+      `${origin}/dashboard`,
+      'Open dashboard',
+    ), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' } })
+  }
+
   if (assn.status === 'accepted') {
     return new Response(htmlPage('Al gekozen ✓', 'Je bent al geselecteerd voor deze rit.', `${origin}/opdracht/${assn.ride_id}`, 'Open rit'), {
       headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
