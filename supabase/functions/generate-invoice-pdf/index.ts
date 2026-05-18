@@ -680,32 +680,56 @@ Deno.serve(async (req) => {
     const pdfBytes = doc.output("arraybuffer") as ArrayBuffer;
     const folder = type === "regular" ? "regular" : "platform";
     const path = `${folder}/${invoiceId}.pdf`;
+    const xmlPath = `${folder}/${invoiceId}.xml`;
 
-    const { error: upErr } = await admin.storage
-      .from("invoices")
-      .upload(path, new Uint8Array(pdfBytes), {
+    // Build UBL 2.1 (Peppol BIS Billing 3.0) e-factuur XML.
+    const xml = buildUblInvoice({
+      type,
+      invoice: invoice!,
+      items,
+      from,
+      to,
+      subtotal,
+      vatRate,
+    });
+
+    const [{ error: upErr }, { error: xmlErr }] = await Promise.all([
+      admin.storage.from("invoices").upload(path, new Uint8Array(pdfBytes), {
         contentType: "application/pdf",
         upsert: true,
-      });
+      }),
+      admin.storage.from("invoices").upload(xmlPath, new TextEncoder().encode(xml), {
+        contentType: "application/xml",
+        upsert: true,
+      }),
+    ]);
     if (upErr) throw upErr;
+    if (xmlErr) throw xmlErr;
 
     const table = type === "regular" ? "invoices" : "platform_invoices";
-    await admin.from(table).update({ pdf_path: path }).eq("id", invoiceId);
+    await admin.from(table).update({ pdf_path: path, xml_path: xmlPath }).eq("id", invoiceId);
 
     if (isInternal) {
       return new Response(
-        JSON.stringify({ pdf_path: path, generated: true }),
+        JSON.stringify({ pdf_path: path, xml_path: xmlPath, generated: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const { data: signed, error: signErr } = await admin.storage
-      .from("invoices")
-      .createSignedUrl(path, 60 * 10);
+    const [{ data: signed, error: signErr }, { data: signedXml, error: signXmlErr }] = await Promise.all([
+      admin.storage.from("invoices").createSignedUrl(path, 60 * 10),
+      admin.storage.from("invoices").createSignedUrl(xmlPath, 60 * 10),
+    ]);
     if (signErr) throw signErr;
+    if (signXmlErr) throw signXmlErr;
 
     return new Response(
-      JSON.stringify({ pdf_path: path, signed_url: signed.signedUrl }),
+      JSON.stringify({
+        pdf_path: path,
+        xml_path: xmlPath,
+        signed_url: signed.signedUrl,
+        xml_signed_url: signedXml.signedUrl,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
