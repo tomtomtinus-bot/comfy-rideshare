@@ -461,7 +461,18 @@ const RequestRideInner = () => {
         return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
-        const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
+        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Geldig zolang
+        // current_until in de toekomst ligt. Aanvoer (naar pickup) wordt vanaf die
+        // plek berekend; retour blijft altijd terug naar de thuisbasis.
+        const currentActive =
+          (e as any).current_lat != null &&
+          (e as any).current_lng != null &&
+          (e as any).current_until != null &&
+          new Date((e as any).current_until as string).getTime() > Date.now();
+        const pickupOrigin = currentActive
+          ? { lat: (e as any).current_lat as number, lng: (e as any).current_lng as number }
+          : { lat: e.base_lat, lng: e.base_lng };
+        const dPickup = distanceKm(pickupOrigin, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, lastDropoffGeo);
         const isBe = driveCountries.includes("België");
         const isDe = driveCountries.includes("Duitsland");
