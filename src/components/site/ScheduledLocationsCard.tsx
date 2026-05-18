@@ -152,6 +152,7 @@ export default function ScheduledLocationsCard() {
           <div>
             <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold block mb-1">Locatie</label>
             <AddressAutocomplete
+              label=""
               value={addrText}
               onChange={(v) => setAddrText(v)}
               onSelect={(r) => { setAddr(r); setAddrText(r.display); }}
