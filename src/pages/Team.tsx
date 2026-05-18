@@ -141,34 +141,87 @@ const TeamInner = () => {
                 {seatsLeft > 0 ? ` (${seatsLeft} vrij)` : " — limiet bereikt"}
               </p>
             </div>
-            <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-              <DialogTrigger asChild>
-                <Button disabled={seatsLeft <= 0} className="gap-2">
-                  <UserPlus className="size-4" /> Chauffeur uitnodigen
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Chauffeur uitnodigen</DialogTitle></DialogHeader>
-                <div className="space-y-3 pt-2">
-                  <p className="text-sm text-brass-deep/70">
-                    Vul het e-mailadres in. De chauffeur ontvangt een uitnodiging om een account aan te
-                    maken (of bestaande login te gebruiken).
-                  </p>
-                  <Input
-                    type="email"
-                    placeholder="chauffeur@bedrijf.nl"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    autoFocus
-                  />
-                  <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()} className="w-full">
-                    {inviting ? <><Loader2 className="size-4 animate-spin mr-2" /> Versturen…</> : "Verstuur uitnodiging"}
+            <div className="flex items-center gap-2">
+              <Dialog open={seatsOpen} onOpenChange={(v) => { setSeatsOpen(v); if (v) setSeatQty(Math.max(1, seatsAvailable || 1)); }}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <CreditCard className="size-4" /> Beheer seats
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>Chauffeur-seats</DialogTitle></DialogHeader>
+                  <div className="space-y-4 pt-2">
+                    <p className="text-sm text-brass-deep/70">
+                      Kies hoeveel chauffeurs je onder je bedrijf wilt laten rijden. Je betaalt per actieve
+                      chauffeur per maand. De Bedrijfsplanner is gratis.
+                    </p>
+                    <div className="flex items-center justify-center gap-4">
+                      <Button variant="outline" size="icon" onClick={() => setSeatQty((q) => Math.max(1, q - 1))} disabled={seatQty <= 1}>
+                        <Minus className="size-4" />
+                      </Button>
+                      <div className="text-3xl font-display text-brass-deep w-16 text-center">{seatQty}</div>
+                      <Button variant="outline" size="icon" onClick={() => setSeatQty((q) => Math.min(50, q + 1))} disabled={seatQty >= 50}>
+                        <Plus className="size-4" />
+                      </Button>
+                    </div>
+                    <p className="text-center text-sm text-brass-deep/70">
+                      €29,00 × {seatQty} = <strong>€{(29 * seatQty).toFixed(2)}</strong> / maand · excl. BTW
+                    </p>
+                    {seatsUsed > seatQty && (
+                      <p className="text-xs text-red-600 text-center">
+                        Je hebt nu {seatsUsed} chauffeurs gekoppeld; verlagen naar {seatQty} kan pas nadat je chauffeurs hebt verwijderd.
+                      </p>
+                    )}
+                    <Button
+                      className="w-full"
+                      disabled={seatsUsed > seatQty}
+                      onClick={() => { setSeatsOpen(false); setCheckoutOpen(true); }}
+                    >
+                      Bevestig & betaal
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+                <DialogTrigger asChild>
+                  <Button disabled={seatsLeft <= 0} className="gap-2">
+                    <UserPlus className="size-4" /> Chauffeur uitnodigen
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>Chauffeur uitnodigen</DialogTitle></DialogHeader>
+                  <div className="space-y-3 pt-2">
+                    <p className="text-sm text-brass-deep/70">
+                      Vul het e-mailadres in. De chauffeur ontvangt een uitnodiging om een account aan te
+                      maken (of bestaande login te gebruiken).
+                    </p>
+                    <Input
+                      type="email"
+                      placeholder="chauffeur@bedrijf.nl"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      autoFocus
+                    />
+                    <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()} className="w-full">
+                      {inviting ? <><Loader2 className="size-4 animate-spin mr-2" /> Versturen…</> : "Verstuur uitnodiging"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </section>
+
+        <CheckoutDialog
+          open={checkoutOpen}
+          onOpenChange={setCheckoutOpen}
+          title={`Chauffeur-seats (${seatQty})`}
+          priceId="begeleider_company_seat_monthly"
+          quantity={seatQty}
+          customerEmail={user?.email ?? undefined}
+          userId={user?.id}
+          returnUrl={`${window.location.origin}/team?checkout=success&session_id={CHECKOUT_SESSION_ID}`}
+        />
 
         {seatsLeft <= 0 && seatsAvailable === 0 && (
           <div className="mb-6 p-4 border border-brass-gold/40 bg-brass-gold/10 text-sm text-brass-deep">
