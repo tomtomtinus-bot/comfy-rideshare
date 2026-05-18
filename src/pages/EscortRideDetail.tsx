@@ -9,6 +9,7 @@ import { MapsLink } from "@/components/site/MapsLink";
 import { openPermitPdf } from "@/lib/openPermitPdf";
 import { AssignmentChat } from "@/components/site/AssignmentChat";
 import { SwapPendingBanner } from "@/components/site/SwapPendingBanner";
+import { AssignDriverPanel } from "@/components/site/AssignDriverPanel";
 import { ExtraLegsList } from "@/components/site/ExtraLegsList";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { toast } from "sonner";
@@ -342,6 +343,9 @@ const Inner = () => {
       {userId && (
         <SwapPendingBanner rideId={ride.id} currentUserId={userId} onChanged={load} />
       )}
+
+      <AssignDriverPanel rideId={ride.id} onChanged={load} />
+
 
       {ride.bundle_id && ride.bundle_label && (() => {
         const isPriority = !!myAssignment?.bundle_priority_offer && myAssignment.status === "invited";

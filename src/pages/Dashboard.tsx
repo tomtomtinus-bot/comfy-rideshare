@@ -10,6 +10,8 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
+import { useCompany } from "@/hooks/useCompany";
+import { DriverDashboard } from "@/pages/DriverDashboard";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import CurrentLocationCard from "@/components/site/CurrentLocationCard";
@@ -1252,17 +1254,18 @@ const EscortDashboard = () => {
 const DashboardInner = () => {
   const { t } = useTranslation();
   const { role, loading } = useAuth();
+  const { isDriver, loading: companyLoading } = useCompany();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto">
-          <InstallAppBanner />
-          <OnboardingChecklist />
-          {loading ? (
+          {!isDriver && <InstallAppBanner />}
+          {!isDriver && <OnboardingChecklist />}
+          {loading || companyLoading ? (
             <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
-            <EscortDashboard />
+            isDriver ? <DriverDashboard /> : <EscortDashboard />
           ) : (
             <ClientDashboard />
           )}
