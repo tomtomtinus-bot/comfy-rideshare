@@ -1590,6 +1590,14 @@ const Matches = ({
                       📍 In de buurt
                     </span>
                   )}
+                  {m.using_scheduled_location && (
+                    <span
+                      title={m.scheduled_address ? `Geplande standplaats: ${m.scheduled_address} — aanvoer wordt vanaf hier berekend` : "Geplande standplaats — aanvoer wordt vanaf hier berekend"}
+                      className="text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 bg-brass-gold text-parchment shrink-0"
+                    >
+                      📅 Gepland ter plaatse
+                    </span>
+                  )}
                   {hasFuelSurcharge(m.fuel_surcharge) && (
                     <button
                       type="button"
