@@ -272,6 +272,159 @@ const drawFootNote = (doc: jsPDF, invoiceNumber: string) => {
   doc.text("Gegenereerd via Lowloads", pageW / 2, h - 12, { align: "center" });
 };
 
+// ---------- UBL 2.1 (Peppol BIS Billing 3.0) e-factuur builder ----------
+const xmlEscape = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+
+const num2 = (n: number): string => (Math.round(Number(n) * 100) / 100).toFixed(2);
+const isoDay = (d: string | Date): string => new Date(d).toISOString().slice(0, 10);
+
+const countryCode = (c?: string | null): string => {
+  const v = (c ?? "").trim().toLowerCase();
+  if (!v) return "NL";
+  if (v.startsWith("ned") || v === "nl" || v === "netherlands") return "NL";
+  if (v.startsWith("bel") || v === "be" || v === "belgium" || v === "belgië") return "BE";
+  if (v.startsWith("duits") || v === "de" || v === "germany") return "DE";
+  if (v.startsWith("frank") || v === "fr" || v === "france") return "FR";
+  if (v.startsWith("lux") || v === "lu") return "LU";
+  return v.slice(0, 2).toUpperCase();
+};
+
+interface UblOpts {
+  type: "regular" | "platform";
+  invoice: Record<string, unknown>;
+  items: Array<Record<string, unknown>>;
+  from: BillingParty;
+  to: BillingParty;
+  subtotal: number;
+  vatRate: number;
+}
+
+const buildPartyXml = (label: "AccountingSupplierParty" | "AccountingCustomerParty", p: BillingParty): string => {
+  const name = p.company_name || p.full_name || p.billing_contact_name || "";
+  const cc = countryCode(p.billing_country);
+  const vat = p.vat_number ? `
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>${xmlEscape(p.vat_number)}</cbc:CompanyID>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:PartyTaxScheme>` : "";
+  const kvk = p.kvk_number ? `
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>${xmlEscape(name)}</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="${cc === "NL" ? "0106" : "0208"}">${xmlEscape(p.kvk_number)}</cbc:CompanyID>
+      </cac:PartyLegalEntity>` : `
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>${xmlEscape(name)}</cbc:RegistrationName>
+      </cac:PartyLegalEntity>`;
+  const contact = p.billing_email ? `
+      <cac:Contact>
+        ${p.billing_contact_name ? `<cbc:Name>${xmlEscape(p.billing_contact_name)}</cbc:Name>` : ""}
+        <cbc:ElectronicMail>${xmlEscape(p.billing_email)}</cbc:ElectronicMail>
+      </cac:Contact>` : "";
+  return `
+  <cac:${label}>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>${xmlEscape(name)}</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        ${p.billing_address ? `<cbc:StreetName>${xmlEscape(p.billing_address)}</cbc:StreetName>` : ""}
+        ${p.billing_city ? `<cbc:CityName>${xmlEscape(p.billing_city)}</cbc:CityName>` : ""}
+        ${p.billing_postcode ? `<cbc:PostalZone>${xmlEscape(p.billing_postcode)}</cbc:PostalZone>` : ""}
+        <cac:Country><cbc:IdentificationCode>${cc}</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>${vat}${kvk}${contact}
+    </cac:Party>
+  </cac:${label}>`;
+};
+
+const buildUblInvoice = (opts: UblOpts): string => {
+  const { type, invoice, items, from, to, subtotal, vatRate } = opts;
+  const vatAmount = subtotal * vatRate;
+  const total = subtotal + vatAmount;
+  const currency = "EUR";
+  const issue = isoDay(String(invoice.created_at));
+  const due = isoDay(new Date(new Date(String(invoice.created_at)).getTime() + 30 * 86400_000));
+  const invNum = String(invoice.invoice_number);
+
+  const lines = items.map((it, idx) => {
+    const qty = type === "regular"
+      ? Number(it.hours ?? 1)
+      : Number(it.num_escorts ?? 1);
+    const amount = Number(it.amount ?? 0);
+    const unitPrice = qty > 0 ? amount / qty : amount;
+    const desc = type === "regular"
+      ? String(it.description ?? "Begeleiding")
+      : `App-fee ${String(it.route ?? "")}`.trim();
+    const unitCode = type === "regular" ? "HUR" : "C62";
+    return `
+  <cac:InvoiceLine>
+    <cbc:ID>${idx + 1}</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="${unitCode}">${num2(qty)}</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="${currency}">${num2(amount)}</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>${xmlEscape(desc)}</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>${vatRate === 0 ? "AE" : "S"}</cbc:ID>
+        <cbc:Percent>${num2(vatRate * 100)}</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="${currency}">${num2(unitPrice)}</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>`;
+  }).join("");
+
+  const taxCat = vatRate === 0
+    ? `<cbc:ID>AE</cbc:ID><cbc:Percent>0.00</cbc:Percent><cbc:TaxExemptionReasonCode>VATEX-EU-AE</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>Reverse charge</cbc:TaxExemptionReason>`
+    : `<cbc:ID>S</cbc:ID><cbc:Percent>${num2(vatRate * 100)}</cbc:Percent>`;
+
+  const payment = from.iban ? `
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentID>${xmlEscape(invNum)}</cbc:PaymentID>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>${xmlEscape(from.iban)}</cbc:ID>
+      ${from.bank_account_holder ? `<cbc:Name>${xmlEscape(from.bank_account_holder)}</cbc:Name>` : ""}
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>` : "";
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+  <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+  <cbc:ID>${xmlEscape(invNum)}</cbc:ID>
+  <cbc:IssueDate>${issue}</cbc:IssueDate>
+  <cbc:DueDate>${due}</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>${currency}</cbc:DocumentCurrencyCode>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>${isoDay(String(invoice.period_start))}</cbc:StartDate>
+    <cbc:EndDate>${isoDay(String(invoice.period_end))}</cbc:EndDate>
+  </cac:InvoicePeriod>${buildPartyXml("AccountingSupplierParty", from)}${buildPartyXml("AccountingCustomerParty", to)}${payment}
+  <cac:PaymentTerms><cbc:Note>Betaling binnen 30 dagen</cbc:Note></cac:PaymentTerms>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="${currency}">${num2(vatAmount)}</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="${currency}">${num2(subtotal)}</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="${currency}">${num2(vatAmount)}</cbc:TaxAmount>
+      <cac:TaxCategory>${taxCat}<cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="${currency}">${num2(subtotal)}</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="${currency}">${num2(subtotal)}</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="${currency}">${num2(total)}</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="${currency}">${num2(total)}</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>${lines}
+</Invoice>`;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
