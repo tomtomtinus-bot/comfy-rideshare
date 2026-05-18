@@ -62,6 +62,28 @@ Deno.serve(async (req) => {
 
     const apiKey = (Deno.env.get("GOOGLE_MAPS_SERVER_KEY") ?? Deno.env.get("GOOGLE_MAPS_API_KEY"))!;
     const body = await req.json();
+
+    // Reverse-geocoding mode: { lat, lng } -> { formatted_address }
+    if (typeof body?.lat === "number" && typeof body?.lng === "number") {
+      const u = new URL("https://maps.googleapis.com/maps/api/geocode/json");
+      u.searchParams.set("latlng", `${body.lat},${body.lng}`);
+      u.searchParams.set("language", "nl");
+      u.searchParams.set("key", apiKey);
+      try {
+        const r = await fetch(u);
+        const j = await r.json();
+        const top = j.results?.[0];
+        return new Response(JSON.stringify({
+          formatted_address: top?.formatted_address ?? null,
+          status: j.status,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: String(e) }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const queries: string[] = Array.isArray(body.queries) ? body.queries : [];
     const region: string = (body.region || "nl").toLowerCase();
 

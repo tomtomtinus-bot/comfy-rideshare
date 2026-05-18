@@ -297,6 +297,10 @@ export type Database = {
           company_name: string | null
           countries: string[]
           created_at: string
+          current_address: string | null
+          current_lat: number | null
+          current_lng: number | null
+          current_until: string | null
           escort_types: string[]
           fuel_surcharge: Json
           hourly_rate: number
@@ -350,6 +354,10 @@ export type Database = {
           company_name?: string | null
           countries?: string[]
           created_at?: string
+          current_address?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_until?: string | null
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
@@ -403,6 +411,10 @@ export type Database = {
           company_name?: string | null
           countries?: string[]
           created_at?: string
+          current_address?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_until?: string | null
           escort_types?: string[]
           fuel_surcharge?: Json
           hourly_rate?: number
@@ -1439,6 +1451,10 @@ export type Database = {
           company_name: string | null
           countries: string[] | null
           created_at: string | null
+          current_address: string | null
+          current_lat: number | null
+          current_lng: number | null
+          current_until: string | null
           escort_types: string[] | null
           fuel_surcharge: Json | null
           hourly_rate: number | null
@@ -1476,6 +1492,10 @@ export type Database = {
           company_name?: string | null
           countries?: string[] | null
           created_at?: string | null
+          current_address?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_until?: string | null
           escort_types?: string[] | null
           fuel_surcharge?: Json | null
           hourly_rate?: number | null
@@ -1513,6 +1533,10 @@ export type Database = {
           company_name?: string | null
           countries?: string[] | null
           created_at?: string | null
+          current_address?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_until?: string | null
           escort_types?: string[] | null
           fuel_surcharge?: Json | null
           hourly_rate?: number | null

@@ -381,7 +381,7 @@ const RequestRideInner = () => {
     const [{ data, error }, { data: excludedRows }, { data: favoriteRows }, { data: filterRows }] = await Promise.all([
       supabase
         .from("escort_profiles_public")
-        .select("id, anonymous_id, base_city, base_lat, base_lng, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
+        .select("id, anonymous_id, base_city, base_lat, base_lng, current_lat, current_lng, current_address, current_until, hourly_rate, hourly_rate_be, hourly_rate_de, hourly_rate_fr, hourly_rate_lu, km_rate_de, rating, rides_completed, countries, categories, available, fuel_surcharge")
         .eq("available", true),
       supabase
         .from("client_excluded_escorts")
@@ -461,7 +461,18 @@ const RequestRideInner = () => {
         return driveCountries.every((c) => ec.has(c)) && escortHasBeQualification((e as any).categories ?? []);
       })
       .map((e) => {
-        const dPickup = distanceKm({ lat: e.base_lat, lng: e.base_lng }, pickupGeo);
+        // Tijdelijke standplaats: begeleider gaf "ik sta nu hier" door. Geldig zolang
+        // current_until in de toekomst ligt. Aanvoer (naar pickup) wordt vanaf die
+        // plek berekend; retour blijft altijd terug naar de thuisbasis.
+        const currentActive =
+          (e as any).current_lat != null &&
+          (e as any).current_lng != null &&
+          (e as any).current_until != null &&
+          new Date((e as any).current_until as string).getTime() > Date.now();
+        const pickupOrigin = currentActive
+          ? { lat: (e as any).current_lat as number, lng: (e as any).current_lng as number }
+          : { lat: e.base_lat, lng: e.base_lng };
+        const dPickup = distanceKm(pickupOrigin, pickupGeo);
         const dDropoff = distanceKm({ lat: e.base_lat, lng: e.base_lng }, lastDropoffGeo);
         const isBe = driveCountries.includes("België");
         const isDe = driveCountries.includes("Duitsland");
@@ -526,8 +537,17 @@ const RequestRideInner = () => {
     };
     const rankedWithDirections = await Promise.all(ranked.map(async (m) => {
       const base = { lat: (m as any).base_lat as number, lng: (m as any).base_lng as number };
+      // Bij actieve tijdelijke standplaats: aanvoer vanaf huidige locatie, retour naar huis.
+      const currentActive =
+        (m as any).current_lat != null &&
+        (m as any).current_lng != null &&
+        (m as any).current_until != null &&
+        new Date((m as any).current_until as string).getTime() > Date.now();
+      const pickupOrigin = currentActive
+        ? { lat: (m as any).current_lat as number, lng: (m as any).current_lng as number }
+        : base;
       const [toPickup, backHome] = await Promise.all([
-        fetchLegMin(base, pickupGeo),
+        fetchLegMin(pickupOrigin, pickupGeo),
         fetchLegMin(lastDropoffGeo, base),
       ]);
       return {
