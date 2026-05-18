@@ -105,6 +105,7 @@ const PrivacyNL = () => (
       <li><strong>Geplande standplaatsgegevens:</strong> Deze gegevens worden automatisch uit de database gewist of geanonimiseerd zodra het door de begeleider opgegeven tijdvenster is verstreken.</li>
       <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
       <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
+      <li><strong>Gekoppelde Chauffeursaccounts:</strong> Gegevens van chauffeurs gekoppeld aan een bedrijfsaccount blijven bewaard zolang de koppeling tussen het chauffeursprofiel en het bedrijfsaccount actief is, of totdat het hoofdaccount wordt beëindigd.</li>
     </ul>
 
     <h2>6. Uw Rechten en Contact</h2>
