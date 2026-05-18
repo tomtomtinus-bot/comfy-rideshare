@@ -61,6 +61,19 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     },
     { onConflict: "stripe_subscription_id" },
   );
+
+  // Sync seat_limit op het bedrijf voor het per-seat bedrijfsabonnement.
+  if (priceId === "begeleider_company_seat_monthly") {
+    const quantity = Number(item?.quantity ?? 1);
+    const activeStatuses = ["active", "trialing", "past_due"];
+    const isActive = activeStatuses.includes(subscription.status)
+      || (subscription.status === "canceled" && periodEnd && periodEnd * 1000 > Date.now());
+    const newLimit = isActive ? Math.max(1, quantity) : 1;
+    await getSupabase()
+      .from("companies")
+      .update({ seat_limit: newLimit, updated_at: new Date().toISOString() })
+      .eq("owner_id", userId);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
