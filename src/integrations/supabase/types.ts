@@ -713,6 +713,7 @@ export type Database = {
           total_amount: number
           total_hours: number
           updated_at: string
+          xml_path: string | null
         }
         Insert: {
           client_id: string
@@ -728,6 +729,7 @@ export type Database = {
           total_amount?: number
           total_hours?: number
           updated_at?: string
+          xml_path?: string | null
         }
         Update: {
           client_id?: string
@@ -743,6 +745,7 @@ export type Database = {
           total_amount?: number
           total_hours?: number
           updated_at?: string
+          xml_path?: string | null
         }
         Relationships: []
       }
@@ -979,6 +982,7 @@ export type Database = {
           total_amount: number
           total_escorts: number
           updated_at: string
+          xml_path: string | null
         }
         Insert: {
           client_id: string
@@ -995,6 +999,7 @@ export type Database = {
           total_amount?: number
           total_escorts?: number
           updated_at?: string
+          xml_path?: string | null
         }
         Update: {
           client_id?: string
@@ -1011,6 +1016,7 @@ export type Database = {
           total_amount?: number
           total_escorts?: number
           updated_at?: string
+          xml_path?: string | null
         }
         Relationships: []
       }
