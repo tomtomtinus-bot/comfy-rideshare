@@ -88,7 +88,7 @@ const Faq = () => {
                   <AccordionTrigger className="text-left font-display text-lg md:text-xl text-brass-deep italic hover:text-brass-gold py-5">
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-brass-deep/80 leading-relaxed text-base pb-6">
+                  <AccordionContent className="text-brass-deep/80 leading-relaxed text-base pb-6 whitespace-pre-line">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
