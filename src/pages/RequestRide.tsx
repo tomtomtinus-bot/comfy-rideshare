@@ -230,10 +230,10 @@ const RequestRideInner = () => {
   useEffect(() => {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs,
+        form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs, selectionMode,
       }));
     } catch {}
-  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs]);
+  }, [form, pickupGeo, dropoffGeo, uploadedPermit, drivers, licensePlates, extraLegs, selectionMode]);
 
   const addExtraLeg = () => setExtraLegs((l) => [...l, {
     pickup_address: "", pickup: null, dropoff_address: "", dropoff: null,
