@@ -77,8 +77,9 @@ export const Nav = () => {
           {role === "begeleider" && user && (
             <Link to="/profiel" className="hover:text-brass-gold transition-colors">{t("nav.profile")}</Link>
           )}
-          <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
-        </div>
+          {showFinance && (
+            <Link to="/facturen" className="hover:text-brass-gold transition-colors">{t("nav.invoices")}</Link>
+          )}
         <div className="flex items-center gap-2 md:gap-3">
           <RoleSwitch />
           <NotificationBell />
