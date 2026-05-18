@@ -98,13 +98,44 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Resolve escort emails via auth admin
+    // Resolve escort emails via auth admin. For company drivers we instead
+    // send the invite to the planner (company owner) with a note: "Your
+    // driver Jan was offered this ride." The planner accepts on their behalf.
     const escortIds = [...new Set(assignments.map(a => a.escort_id))]
     const idToEmail = new Map<string, string>()
     const idToName = new Map<string, string>()
+    const idToDriverName = new Map<string, string>() // escort_id -> driver display name when routed to planner
+
+    // Find which escorts are active company drivers + their planner (owner)
+    const { data: driverMemberships } = await admin
+      .from('company_members')
+      .select('user_id, company:companies!inner(owner_id)')
+      .in('user_id', escortIds)
+      .eq('role', 'driver')
+      .eq('status', 'active')
+    const driverToOwner = new Map<string, string>()
+    for (const m of (driverMemberships ?? []) as Array<{ user_id: string; company: { owner_id: string } | null }>) {
+      if (m.company?.owner_id) driverToOwner.set(m.user_id, m.company.owner_id)
+    }
+
+    // Fetch driver names (from profiles) so we can mention them to the planner
+    const { data: driverProfs } = await admin
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', [...driverToOwner.keys()])
+    const driverIdToName = new Map<string, string>()
+    for (const p of (driverProfs ?? [])) {
+      if (p.full_name) driverIdToName.set(p.id, p.full_name.split(' ')[0])
+    }
+
     for (const eid of escortIds) {
-      const { data } = await admin.auth.admin.getUserById(eid)
+      const ownerId = driverToOwner.get(eid)
+      const recipientId = ownerId ?? eid
+      const { data } = await admin.auth.admin.getUserById(recipientId)
       if (data?.user?.email) idToEmail.set(eid, data.user.email)
+      if (ownerId) {
+        idToDriverName.set(eid, driverIdToName.get(eid) ?? 'je chauffeur')
+      }
     }
     const { data: profs } = await admin
       .from('profiles')
@@ -146,6 +177,7 @@ Deno.serve(async (req) => {
           idempotencyKey: `ride-invite-${a.id}`,
           templateData: {
             name: idToName.get(a.escort_id),
+            driverName: idToDriverName.get(a.escort_id) ?? null,
             pickup: ride.pickup_city,
             dropoff: ride.dropoff_city,
             plannedAt,
@@ -170,6 +202,9 @@ Deno.serve(async (req) => {
       await Promise.all(assignments.map(async (a) => {
         const escortId = a.escort_id as string
         if (!escortId) return
+        const ownerId = driverToOwner.get(escortId)
+        const targetUserId = ownerId ?? escortId
+        const driverName = idToDriverName.get(escortId)
         const deadline = a.responds_by ? new Date(a.responds_by) : null
         const deadlineTxt = deadline
           ? deadline.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
@@ -184,8 +219,10 @@ Deno.serve(async (req) => {
             'apikey': ANON_KEY,
           },
           body: JSON.stringify({
-            userIds: [escortId],
-            title: 'Nieuwe ritaanvraag',
+            userIds: [targetUserId],
+            title: ownerId
+              ? `Ritaanbod voor ${driverName ?? 'je chauffeur'}`
+              : 'Nieuwe ritaanvraag',
             body,
             url: `/rit/${ride.id}`,
             tag: `ride-invite-${a.id}`,

@@ -9,6 +9,7 @@ const SITE_NAME = 'ViaCust'
 
 interface RideInvitationProps {
   name?: string
+  driverName?: string | null
   pickup?: string
   dropoff?: string
   plannedAt?: string
@@ -18,6 +19,7 @@ interface RideInvitationProps {
 
 const RideInvitationEmail = ({
   name,
+  driverName,
   pickup,
   dropoff,
   plannedAt,
@@ -26,14 +28,22 @@ const RideInvitationEmail = ({
 }: RideInvitationProps) => (
   <Html lang="nl" dir="ltr">
     <Head />
-    <Preview>Nieuwe rit-uitnodiging — meld je beschikbaar binnen 10 minuten</Preview>
+    <Preview>
+      {driverName
+        ? `Je begeleider ${driverName} heeft een nieuwe rit aangeboden gekregen`
+        : 'Nieuwe rit-uitnodiging — meld je beschikbaar binnen 10 minuten'}
+    </Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
-          {name ? `Hoi ${name}, een nieuwe rit voor jou` : 'Nieuwe rit-uitnodiging'}
+          {driverName
+            ? `Je begeleider ${driverName} heeft een rit aangeboden gekregen`
+            : name ? `Hoi ${name}, een nieuwe rit voor jou` : 'Nieuwe rit-uitnodiging'}
         </Heading>
         <Text style={text}>
-          Je bent uitgenodigd voor een konvooi-begeleiding. Meld je <strong>beschikbaar</strong>; binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen.
+          {driverName
+            ? <>Als planner beslis jij of <strong>{driverName}</strong> deze rit doet. Bevestig met één klik; binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen.</>
+            : <>Je bent uitgenodigd voor een konvooi-begeleiding. Meld je <strong>beschikbaar</strong>; binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen.</>}
         </Text>
 
         <Section style={card}>
@@ -44,7 +54,7 @@ const RideInvitationEmail = ({
 
         {acceptUrl && (
           <Button style={acceptButton} href={acceptUrl}>
-            ✓ Ik ben beschikbaar
+            {driverName ? `✓ Bevestig — ${driverName} doet deze rit` : '✓ Ik ben beschikbaar'}
           </Button>
         )}
         {rideUrl && (
@@ -53,7 +63,9 @@ const RideInvitationEmail = ({
           </Button>
         )}
         <Text style={hint}>
-          Tip: gebruik "Ik ben beschikbaar" om in één klik te reageren — geen inlog nodig.
+          {driverName
+            ? `Tip: bevestig in één klik — geen inlog nodig. Jij blijft eindverantwoordelijk voor acceptatie en facturatie.`
+            : `Tip: gebruik "Ik ben beschikbaar" om in één klik te reageren — geen inlog nodig.`}
         </Text>
 
         <Text style={footer}>— Het {SITE_NAME}-team</Text>

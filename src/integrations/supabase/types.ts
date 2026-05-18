@@ -2038,6 +2038,7 @@ export type Database = {
         }[]
       }
       get_user_company_id: { Args: { _uid: string }; Returns: string }
+      get_user_company_id_as_owner: { Args: { _uid: string }; Returns: string }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
