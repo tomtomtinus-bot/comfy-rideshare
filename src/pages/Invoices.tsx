@@ -315,30 +315,33 @@ const InvoicesInner = () => {
     }
   };
 
-  const openInvoicePdf = async (
+  const openInvoiceFile = async (
     invoiceId: string,
     type: "regular" | "platform",
-    cachedPath?: string | null,
-    invoiceNumber?: string | null,
+    cachedPath: string | null | undefined,
+    cachedXmlPath: string | null | undefined,
+    invoiceNumber: string | null | undefined,
+    format: "pdf" | "xml",
   ) => {
     try {
-      const filename = `${invoiceNumber || invoiceId}.pdf`;
-      // If we already have a path, just sign it (with forced download header).
-      if (cachedPath) {
+      const ext = format;
+      const filename = `${invoiceNumber || invoiceId}.${ext}`;
+      const cached = format === "pdf" ? cachedPath : cachedXmlPath;
+      if (cached) {
         const { data, error } = await supabase.storage
           .from("invoices")
-          .createSignedUrl(cachedPath, 60 * 10, { download: filename });
+          .createSignedUrl(cached, 60 * 10, { download: filename });
         if (!error && data?.signedUrl) {
           await triggerDownload(data.signedUrl, filename);
           return;
         }
       }
-      // Otherwise generate (and cache) it server-side.
       const { data, error } = await supabase.functions.invoke("generate-invoice-pdf", {
         body: { invoice_id: invoiceId, type },
       });
       if (error) throw error;
-      const signed = (data as { signed_url?: string } | null)?.signed_url;
+      const resp = data as { signed_url?: string; xml_signed_url?: string } | null;
+      const signed = format === "pdf" ? resp?.signed_url : resp?.xml_signed_url;
       if (!signed) throw new Error("Geen download-URL ontvangen");
       await triggerDownload(signed, filename);
     } catch (e) {
@@ -347,20 +350,28 @@ const InvoicesInner = () => {
   };
 
   const downloadEscortPdf = (inv: Invoice) =>
-    openInvoicePdf(
-      inv.id,
-      "regular",
+    openInvoiceFile(inv.id, "regular",
       (inv as Invoice & { pdf_path?: string | null }).pdf_path,
-      inv.invoice_number,
-    );
+      (inv as Invoice & { xml_path?: string | null }).xml_path,
+      inv.invoice_number, "pdf");
+
+  const downloadEscortXml = (inv: Invoice) =>
+    openInvoiceFile(inv.id, "regular",
+      (inv as Invoice & { pdf_path?: string | null }).pdf_path,
+      (inv as Invoice & { xml_path?: string | null }).xml_path,
+      inv.invoice_number, "xml");
 
   const downloadPlatformPdf = (inv: PlatformInvoice) =>
-    openInvoicePdf(
-      inv.id,
-      "platform",
+    openInvoiceFile(inv.id, "platform",
       (inv as PlatformInvoice & { pdf_path?: string | null }).pdf_path,
-      inv.invoice_number,
-    );
+      (inv as PlatformInvoice & { xml_path?: string | null }).xml_path,
+      inv.invoice_number, "pdf");
+
+  const downloadPlatformXml = (inv: PlatformInvoice) =>
+    openInvoiceFile(inv.id, "platform",
+      (inv as PlatformInvoice & { pdf_path?: string | null }).pdf_path,
+      (inv as PlatformInvoice & { xml_path?: string | null }).xml_path,
+      inv.invoice_number, "xml");
 
   return (
     <div className="min-h-screen bg-background text-foreground">
