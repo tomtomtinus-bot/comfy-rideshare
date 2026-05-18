@@ -65,6 +65,115 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          seat_limit: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          seat_limit?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          seat_limit?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_invitations: {
+        Row: {
+          accepted_at: string | null
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: string
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_members: {
+        Row: {
+          company_id: string
+          id: string
+          joined_at: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          id?: string
+          joined_at?: string
+          role: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_push_tokens: {
         Row: {
           created_at: string
@@ -667,6 +776,13 @@ export type Database = {
             foreignKeyName: "messages_assignment_id_fkey"
             columns: ["assignment_id"]
             isOneToOne: false
+            referencedRelation: "driver_ride_assignments_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
             referencedRelation: "ride_assignments"
             referencedColumns: ["id"]
           },
@@ -1016,6 +1132,7 @@ export type Database = {
         Row: {
           actual_cost: number | null
           actual_hours: number | null
+          assigned_driver_id: string | null
           broadcast_closes_at: string | null
           bundle_priority_offer: boolean
           cancel_decided_at: string | null
@@ -1031,6 +1148,8 @@ export type Database = {
           extra_costs: Json
           extra_costs_total: number
           google_event_id: string | null
+          hours_approved_at: string | null
+          hours_approved_by: string | null
           hours_dispute_reason: string | null
           hours_dispute_status: string
           hours_disputed_at: string | null
@@ -1058,6 +1177,7 @@ export type Database = {
         Insert: {
           actual_cost?: number | null
           actual_hours?: number | null
+          assigned_driver_id?: string | null
           broadcast_closes_at?: string | null
           bundle_priority_offer?: boolean
           cancel_decided_at?: string | null
@@ -1073,6 +1193,8 @@ export type Database = {
           extra_costs?: Json
           extra_costs_total?: number
           google_event_id?: string | null
+          hours_approved_at?: string | null
+          hours_approved_by?: string | null
           hours_dispute_reason?: string | null
           hours_dispute_status?: string
           hours_disputed_at?: string | null
@@ -1100,6 +1222,7 @@ export type Database = {
         Update: {
           actual_cost?: number | null
           actual_hours?: number | null
+          assigned_driver_id?: string | null
           broadcast_closes_at?: string | null
           bundle_priority_offer?: boolean
           cancel_decided_at?: string | null
@@ -1115,6 +1238,8 @@ export type Database = {
           extra_costs?: Json
           extra_costs_total?: number
           google_event_id?: string | null
+          hours_approved_at?: string | null
+          hours_approved_by?: string | null
           hours_dispute_reason?: string | null
           hours_dispute_status?: string
           hours_disputed_at?: string | null
@@ -1475,6 +1600,77 @@ export type Database = {
       }
     }
     Views: {
+      driver_ride_assignments_view: {
+        Row: {
+          actual_hours: number | null
+          assigned_driver_id: string | null
+          created_at: string | null
+          departed_base_at: string | null
+          escort_id: string | null
+          google_event_id: string | null
+          hours_approved_at: string | null
+          hours_notes: string | null
+          hours_submitted_at: string | null
+          id: string | null
+          invited_at: string | null
+          responded_at: string | null
+          responds_by: string | null
+          returned_base_at: string | null
+          ride_id: string | null
+          status: Database["public"]["Enums"]["assignment_status"] | null
+          travel_back_home_min: number | null
+          travel_to_pickup_min: number | null
+        }
+        Insert: {
+          actual_hours?: number | null
+          assigned_driver_id?: string | null
+          created_at?: string | null
+          departed_base_at?: string | null
+          escort_id?: string | null
+          google_event_id?: string | null
+          hours_approved_at?: string | null
+          hours_notes?: string | null
+          hours_submitted_at?: string | null
+          id?: string | null
+          invited_at?: string | null
+          responded_at?: string | null
+          responds_by?: string | null
+          returned_base_at?: string | null
+          ride_id?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"] | null
+          travel_back_home_min?: number | null
+          travel_to_pickup_min?: number | null
+        }
+        Update: {
+          actual_hours?: number | null
+          assigned_driver_id?: string | null
+          created_at?: string | null
+          departed_base_at?: string | null
+          escort_id?: string | null
+          google_event_id?: string | null
+          hours_approved_at?: string | null
+          hours_notes?: string | null
+          hours_submitted_at?: string | null
+          id?: string | null
+          invited_at?: string | null
+          responded_at?: string | null
+          responds_by?: string | null
+          returned_base_at?: string | null
+          ride_id?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"] | null
+          travel_back_home_min?: number | null
+          travel_to_pickup_min?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_assignments_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escort_profiles_public: {
         Row: {
           anonymous_id: string | null
@@ -1841,6 +2037,7 @@ export type Database = {
           target_scheduled_at: string
         }[]
       }
+      get_user_company_id: { Args: { _uid: string }; Returns: string }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -1869,10 +2066,16 @@ export type Database = {
         Args: { _assignment_id: string; _user_id: string }
         Returns: boolean
       }
+      is_company_driver_of: {
+        Args: { _driver: string; _planner: string }
+        Returns: boolean
+      }
+      is_company_planner: { Args: { _uid: string }; Returns: boolean }
       is_ride_client: {
         Args: { _ride_id: string; _user_id: string }
         Returns: boolean
       }
+      is_same_company: { Args: { _u1: string; _u2: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
