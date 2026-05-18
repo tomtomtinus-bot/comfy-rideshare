@@ -139,9 +139,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Dedupe per week_start (laatste voorkomen wint)
-    const dedupedMap = new Map<string, { week_start: string; eur_per_liter: number; source: string; country: string }>();
-    for (const u of upserts) dedupedMap.set(u.week_start, u);
+    // Dedupe per week_start (laatste voorkomen wint) en zet fetched_at op nu
+    // zodat we kunnen zien wanneer de bron voor het laatst succesvol gelezen is,
+    // ook als de waarde zelf niet veranderd is.
+    const nowIso = new Date().toISOString();
+    const dedupedMap = new Map<string, { week_start: string; eur_per_liter: number; source: string; country: string; fetched_at: string }>();
+    for (const u of upserts) dedupedMap.set(u.week_start, { ...u, fetched_at: nowIso } as any);
     const deduped = Array.from(dedupedMap.values());
 
     const { error } = await admin
