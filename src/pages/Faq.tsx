@@ -52,6 +52,26 @@ const faqs: { q: string; a: string }[] = [
     q: "Wat als ik een technisch probleem heb tijdens een aanvraag?",
     a: "Ons platform is gebouwd op robuuste technologie, maar mocht er toch iets niet lukken (bijvoorbeeld bij het uploaden van een document of het accepteren van een rit), dan staat onze support klaar. U kunt ons bereiken via support@viacust.com. Voor urgente zaken tijdens actieve ritten raden wij aan om direct contact op te nemen met de contactpersoon van de opdrachtgever of begeleider die vermeld staat in de ritdetails.",
   },
+  {
+    q: "Wat is een bedrijfsaccount (Bedrijfsplanner met chauffeurs)?",
+    a: "Een bedrijfsaccount is bedoeld voor begeleidingsbedrijven met meerdere chauffeurs. Het hoofdaccount fungeert als Bedrijfsplanner en beheert het bedrijfsprofiel, het abonnement, de facturatie en de ritacceptatie. Onder dit hoofdaccount kunnen extra chauffeurs (sub-accounts) worden aangemaakt die ritten uitvoeren, maar zelf geen ritten aannemen of financiële gegevens beheren. Zo houdt de planner volledige controle, terwijl chauffeurs een eigen login hebben voor hun dagelijkse werk.",
+  },
+  {
+    q: "Hoe nodig ik als planner een chauffeur uit?",
+    a: "Ga naar 'Mijn team' in het menu en klik op 'Nieuwe chauffeur uitnodigen'. Vul het e-mailadres van de chauffeur in. Hij of zij ontvangt een uitnodigingsmail met een persoonlijke link die 7 dagen geldig is. Zodra de chauffeur de link opent en een account aanmaakt (of inlogt), wordt hij automatisch gekoppeld aan jouw bedrijf. Het aantal chauffeurs dat je kunt uitnodigen hangt af van het aantal seats in je abonnement.",
+  },
+  {
+    q: "Wie accepteert de ritten bij een bedrijfsaccount?",
+    a: "Uitsluitend de Bedrijfsplanner (het hoofdaccount) accepteert ritten. Wanneer een rit wordt aangeboden aan een chauffeur uit jouw bedrijf, ontvangt niet de chauffeur maar de planner de e-mail en push-melding: 'Je begeleider [naam] heeft een rit aangeboden gekregen'. De planner bevestigt namens de chauffeur. Chauffeurs zelf hebben geen knop om ritten aan te nemen of te weigeren.",
+  },
+  {
+    q: "Wat kunnen chauffeurs onder een bedrijfsaccount wel en niet zien?",
+    a: "Chauffeurs zien uitsluitend de ritten die door de planner aan hen zijn toegewezen, inclusief route, opdrachtgever en voertuiginformatie. Na de rit vullen zij hun gewerkte uren en eventuele extra kosten in. Wat zij NIET zien: tarieven, facturen, abonnementsgegevens, bankgegevens (IBAN), het team-overzicht en andere financiële informatie. Alle uitbetalingen en self-billing facturen gaan centraal naar het hoofdaccount.",
+  },
+  {
+    q: "Hoe werkt het abonnement bij een bedrijfsaccount?",
+    a: "Het abonnement wordt afgesloten op het hoofdaccount van de Bedrijfsplanner en werkt op basis van seats: één seat per actieve chauffeur (inclusief de planner zelf als die ook rijdt). Chauffeur-sub-accounts hebben zelf geen abonnement nodig — zij vallen onder het abonnement van de planner. Wil je meer chauffeurs uitnodigen dan je huidige seat-limiet toelaat? Verhoog dan het aantal seats in je abonnementsinstellingen.",
+  },
 ];
 
 const Faq = () => {
