@@ -510,6 +510,8 @@ const RequestRideInner = () => {
           de_km_mode: deKmMode,
           effective_rate: rate,
           is_favorite: favoriteSet.has(e.id),
+          using_current_location: currentActive,
+          current_address: currentActive ? ((e as any).current_address as string | null) : null,
           conflict: null,
         } as MatchedEscort;
       })
