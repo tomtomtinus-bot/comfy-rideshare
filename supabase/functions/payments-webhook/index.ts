@@ -61,6 +61,20 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     },
     { onConflict: "stripe_subscription_id" },
   );
+
+  // Sync seat_limit op het bedrijf voor het per-seat bedrijfsabonnement.
+  if (priceId === "begeleider_company_seat_monthly") {
+    const quantity = Number(item?.quantity ?? 1);
+    const activeStatuses = ["active", "trialing", "past_due"];
+    const isActive = activeStatuses.includes(subscription.status)
+      || (subscription.status === "canceled" && periodEnd && periodEnd * 1000 > Date.now());
+    // seat_limit = planner (1) + ingekochte chauffeur-seats
+    const newLimit = isActive ? 1 + Math.max(0, quantity) : 1;
+    await getSupabase()
+      .from("companies")
+      .update({ seat_limit: newLimit, updated_at: new Date().toISOString() })
+      .eq("owner_id", userId);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
@@ -69,6 +83,17 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
     .update({ status: "canceled", updated_at: new Date().toISOString() })
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
+
+  // Reset seat_limit voor opgezegd per-seat abonnement.
+  const userId = subscription.metadata?.userId;
+  const item = subscription.items?.data?.[0];
+  const priceId = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || item?.price?.id;
+  if (userId && priceId === "begeleider_company_seat_monthly") {
+    await getSupabase()
+      .from("companies")
+      .update({ seat_limit: 1, updated_at: new Date().toISOString() })
+      .eq("owner_id", userId);
+  }
 }
 
 async function handleCheckoutCompleted(session: any) {
