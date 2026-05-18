@@ -1322,11 +1322,60 @@ const RequestRideInner = () => {
               />
             </div>
 
+            <div className="border border-brass-deep/15 bg-parchment/40 p-5">
+              <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-3">
+                Begeleider kiezen
+              </p>
+              <div className="space-y-2">
+                <label className={`flex items-start gap-3 p-3 cursor-pointer border transition-colors ${
+                  selectionMode === "auto" ? "border-brass-gold bg-card" : "border-brass-deep/10 hover:bg-card"
+                }`}>
+                  <input
+                    type="radio"
+                    name="selectionMode"
+                    value="auto"
+                    checked={selectionMode === "auto"}
+                    onChange={() => setSelectionMode("auto")}
+                    className="mt-1 accent-brass-gold"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-brass-deep">Automatisch — laat ViaCust de beste match kiezen</p>
+                    <p className="text-xs text-brass-deep/65 leading-relaxed mt-1">
+                      Alle geschikte begeleiders krijgen tegelijk een uitnodiging. Binnen 5 minuten
+                      na de eerste beschikbaarheidsmelding wordt de best passende begeleider gekozen
+                      op basis van afstand, beoordeling en eerdere samenwerking.
+                    </p>
+                  </div>
+                </label>
+                <label className={`flex items-start gap-3 p-3 cursor-pointer border transition-colors ${
+                  selectionMode === "manual" ? "border-brass-gold bg-card" : "border-brass-deep/10 hover:bg-card"
+                }`}>
+                  <input
+                    type="radio"
+                    name="selectionMode"
+                    value="manual"
+                    checked={selectionMode === "manual"}
+                    onChange={() => setSelectionMode("manual")}
+                    className="mt-1 accent-brass-gold"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-brass-deep">Zelf begeleider kiezen</p>
+                    <p className="text-xs text-brass-deep/65 leading-relaxed mt-1">
+                      Je krijgt een lijst met geschikte begeleiders en kiest zelf wie je wilt
+                      uitnodigen.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <button
               disabled={busy || !pickupGeo || !dropoffGeo}
               className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
-              {busy ? t("request.searching") : t("request.search")}
+              {busy
+                ? (selectionMode === "auto" ? "Aanvraag plaatsen…" : t("request.searching"))
+                : (selectionMode === "auto" ? "Aanvraag plaatsen" : t("request.search"))}
             </button>
           </form>
           )}
