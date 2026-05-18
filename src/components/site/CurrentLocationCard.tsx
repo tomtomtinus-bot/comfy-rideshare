@@ -122,6 +122,8 @@ export default function CurrentLocationCard() {
           <p className="text-xs text-brass-deep/60 mt-1">
             Geef aan waar je nu bent om ritten in de buurt op te pikken. Aanvoertijd wordt
             vanaf je huidige locatie berekend (retour blijft naar je thuisbasis).
+            Geldt alleen voor directe ritten die binnen 3 uur starten — ritten verder in
+            de toekomst worden altijd vanaf je thuisbasis berekend.
           </p>
         </div>
       </div>
