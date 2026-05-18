@@ -396,13 +396,14 @@ const buildUblInvoice = (opts: UblOpts): string => {
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0</cbc:CustomizationID>
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
   <cbc:ID>${xmlEscape(invNum)}</cbc:ID>
   <cbc:IssueDate>${issue}</cbc:IssueDate>
   <cbc:DueDate>${due}</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>${currency}</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>${xmlEscape(invNum)}</cbc:BuyerReference>
   <cac:InvoicePeriod>
     <cbc:StartDate>${isoDay(String(invoice.period_start))}</cbc:StartDate>
     <cbc:EndDate>${isoDay(String(invoice.period_end))}</cbc:EndDate>
