@@ -163,6 +163,9 @@ const RequestRideInner = () => {
   }, [searchParams]);
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<MatchedEscort[] | null>(null);
+  const [selectionMode, setSelectionMode] = useState<"auto" | "manual">(
+    (initial?.selectionMode as "auto" | "manual") ?? "auto"
+  );
 
   const STORAGE_KEY = "requestRide:draft:v1";
   const initial = (() => {
