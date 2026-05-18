@@ -66,6 +66,14 @@ Deno.serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
+    // Bedrijfsabonnement: planner-basis (€10) + per-seat (€1,50 × N) op één factuur.
+    const extraLineItems: Array<{ price: string; quantity: number }> = [];
+    if (priceId === "begeleider_company_seat_v2_monthly") {
+      const baseLookup = await stripe.prices.list({ lookup_keys: ["begeleider_company_base_monthly"] });
+      if (!baseLookup.data.length) throw new Error("Base price not found");
+      extraLineItems.push({ price: baseLookup.data[0].id, quantity: 1 });
+    }
+
     const customerId = (customerEmail || userId)
       ? await resolveOrCreateCustomer(stripe, { email: customerEmail, userId })
       : undefined;
@@ -88,7 +96,10 @@ Deno.serve(async (req) => {
       : undefined;
 
     const session = await stripe.checkout.sessions.create({
-      line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
+      line_items: [
+        { price: stripePrice.id, quantity: quantity || 1 },
+        ...extraLineItems,
+      ],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded_page",
       return_url: returnUrl,
