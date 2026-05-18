@@ -80,6 +80,7 @@ const PrivacyNL = () => (
           <li>Begeleiders: Hebben het recht hun cliëntenportefeuille te beheren door voorkeuren aan te geven voor specifieke opdrachtgevers.</li>
         </ul>
       </li>
+      <li><strong>Multi-voertuig &amp; Bedrijfsaccounts:</strong> Indien een gebruiker zich registreert als Bedrijfsplanner, verwerken wij de bedrijfsgegevens voor centrale facturatie en administratie. Indien deze planner chauffeurs uitnodigt, verwerken wij de e-mailadressen en accountgegevens van deze specifieke chauffeurs. De Bedrijfsplanner heeft inzicht in de aan de chauffeur toegewezen ritten, de rithistorie en de digitale ritbonnen ten behoeve van de centrale planning en kwaliteitsbewaking.</li>
     </ul>
 
     <h2>3. Validatie van bedrijfsgegevens (VIES)</h2>
