@@ -349,23 +349,49 @@ const buildUblInvoice = (opts: UblOpts): string => {
   const due = isoDay(new Date(new Date(String(invoice.created_at)).getTime() + 30 * 86400_000));
   const invNum = String(invoice.invoice_number);
 
+  const classifyKind = (d: string): "uren" | "brandstof" | "extra" => {
+    const s = d.toLowerCase();
+    if (s.startsWith("brandstof")) return "brandstof";
+    if (s.startsWith("extra kosten")) return "extra";
+    return "uren";
+  };
+
   const lines = items.map((it, idx) => {
-    const qty = type === "regular"
-      ? Number(it.hours ?? 1)
-      : Number(it.num_escorts ?? 1);
     const amount = Number(it.amount ?? 0);
+    let qty: number;
+    let unitCode: string;
+    let name: string;
+    if (type === "regular") {
+      const rawDesc = String(it.description ?? "Begeleiding");
+      const kind = classifyKind(rawDesc);
+      if (kind === "uren") {
+        qty = Number(it.hours ?? 1);
+        unitCode = "HUR";
+        name = "Uren begeleiding";
+      } else if (kind === "brandstof") {
+        // Brandstoftoeslag conform TLN-index — als eigen regel met
+        // hetzelfde BTW-tarief als de hoofddienst (vervoer).
+        qty = 1;
+        unitCode = "C62"; // one (stuks)
+        name = rawDesc; // bv. "Brandstoftoeslag januari 2026 (TLN-index 12,3%)"
+      } else {
+        qty = 1;
+        unitCode = "C62";
+        name = rawDesc.replace(/^Extra kosten:\s*/i, "Extra: ");
+      }
+    } else {
+      qty = Number(it.num_escorts ?? 1);
+      unitCode = "C62";
+      name = `App-fee ${String(it.route ?? "")}`.trim();
+    }
     const unitPrice = qty > 0 ? amount / qty : amount;
-    const desc = type === "regular"
-      ? String(it.description ?? "Begeleiding")
-      : `App-fee ${String(it.route ?? "")}`.trim();
-    const unitCode = type === "regular" ? "HUR" : "C62";
     return `
   <cac:InvoiceLine>
     <cbc:ID>${idx + 1}</cbc:ID>
     <cbc:InvoicedQuantity unitCode="${unitCode}">${num2(qty)}</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="${currency}">${num2(amount)}</cbc:LineExtensionAmount>
     <cac:Item>
-      <cbc:Name>${xmlEscape(desc)}</cbc:Name>
+      <cbc:Name>${xmlEscape(name)}</cbc:Name>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>${vatRate === 0 ? "AE" : "S"}</cbc:ID>
         <cbc:Percent>${num2(vatRate * 100)}</cbc:Percent>
@@ -396,13 +422,14 @@ const buildUblInvoice = (opts: UblOpts): string => {
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
-  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0</cbc:CustomizationID>
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
   <cbc:ID>${xmlEscape(invNum)}</cbc:ID>
   <cbc:IssueDate>${issue}</cbc:IssueDate>
   <cbc:DueDate>${due}</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>${currency}</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>${xmlEscape(invNum)}</cbc:BuyerReference>
   <cac:InvoicePeriod>
     <cbc:StartDate>${isoDay(String(invoice.period_start))}</cbc:StartDate>
     <cbc:EndDate>${isoDay(String(invoice.period_end))}</cbc:EndDate>
