@@ -222,7 +222,7 @@ const TeamInner = () => {
           open={checkoutOpen}
           onOpenChange={setCheckoutOpen}
           title={`Chauffeur-seats (${seatQty})`}
-          priceId="begeleider_company_seat_monthly"
+          priceId="begeleider_company_seat_v2_monthly"
           quantity={seatQty}
           customerEmail={user?.email ?? undefined}
           userId={user?.id}
