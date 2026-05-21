@@ -127,8 +127,8 @@ const InfoBelgie = () => {
                       <Td>{t("infoBE.ban2")}</Td>
                     </tr>
                     <tr>
-                      <Td style={{ whiteSpace: "pre-line" }}>{t("infoBE.ban3Reg")}</Td>
-                      <Td style={{ whiteSpace: "pre-line" }}>{t("infoBE.ban3Mot")}</Td>
+                      <Td><span className="whitespace-pre-line">{t("infoBE.ban3Reg")}</span></Td>
+                      <Td><span className="whitespace-pre-line">{t("infoBE.ban3Mot")}</span></Td>
                     </tr>
                     <tr>
                       <Td>{t("infoBE.ban4Reg")}</Td>
