@@ -3,17 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
 
-// Begeleider geeft hier aan "ik sta nu hier zoekend naar werk in de buurt".
-// De aanvoertijd voor nieuwe ritaanvragen wordt vanaf deze plek berekend
-// (in plaats van vanaf de thuisbasis). De afvoertijd blijft altijd terug
-// naar de thuisbasis.
-const DURATIONS = [
-  { hours: 2, label: "2 uur" },
-  { hours: 4, label: "4 uur" },
-  { hours: 8, label: "8 uur" },
-  { hours: 12, label: "12 uur" },
-];
+const DURATIONS = [2, 4, 8, 12];
 
 type CurrentLocation = {
   current_lat: number | null;
@@ -22,8 +14,13 @@ type CurrentLocation = {
   current_until: string | null;
 };
 
+const localeMap: Record<string, string> = { nl: "nl-NL", en: "en-GB", de: "de-DE", fr: "fr-FR" };
+
 export default function CurrentLocationCard() {
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "nl").slice(0, 2);
+  const locale = localeMap[lang] ?? "nl-NL";
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [loc, setLoc] = useState<CurrentLocation | null>(null);
@@ -32,7 +29,6 @@ export default function CurrentLocationCard() {
 
   const isActive = loc?.current_until && new Date(loc.current_until).getTime() > Date.now();
 
-  // Hertekenen elke 60s zodat "verloopt om" en de tijd nauwkeurig blijft.
   useEffect(() => {
     const id = setInterval(() => force((x) => x + 1), 60_000);
     return () => clearInterval(id);
@@ -65,7 +61,7 @@ export default function CurrentLocationCard() {
   const setHere = () => {
     if (!user) return;
     if (!("geolocation" in navigator)) {
-      return toast.error("Je apparaat ondersteunt geen locatiebepaling.");
+      return toast.error(t("standplaats.geoUnsupported"));
     }
     setBusy(true);
     navigator.geolocation.getCurrentPosition(
@@ -86,13 +82,13 @@ export default function CurrentLocationCard() {
         setBusy(false);
         if (error) return toast.error(error.message);
         setLoc({ current_lat: lat, current_lng: lng, current_address: address, current_until: until });
-        toast.success(`Locatie ingesteld voor ${hours} uur.`);
+        toast.success(t("standplaats.setForHours", { hours }));
       },
       (err) => {
         setBusy(false);
         toast.error(err.code === err.PERMISSION_DENIED
-          ? "Locatietoegang geweigerd. Sta locatie toe in je browser/telefoon."
-          : "Kon je locatie niet bepalen.");
+          ? t("standplaats.geoDenied")
+          : t("standplaats.geoFailed"));
       },
       { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 },
     );
@@ -108,7 +104,7 @@ export default function CurrentLocationCard() {
     setBusy(false);
     if (error) return toast.error(error.message);
     setLoc(null);
-    toast.success("Tijdelijke locatie gewist. Aanvoer wordt weer vanaf je thuisbasis berekend.");
+    toast.success(t("standplaats.cleared"));
   };
 
   if (loading) return null;
@@ -118,14 +114,12 @@ export default function CurrentLocationCard() {
       <div className="flex items-start gap-3 mb-4">
         <MapPin className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
         <div>
-          <h3 className="font-display text-lg text-brass-deep">Tijdelijke standplaats (nu)</h3>
+          <h3 className="font-display text-lg text-brass-deep">{t("standplaats.currentTitle")}</h3>
           <p className="text-xs text-brass-deep/60 mt-1">
-            Geef aan waar je <strong>op dit moment</strong> bent om spoedritten in de buurt
-            op te pikken. De <strong>aanvoertijd wordt vanaf deze plek</strong> berekend
-            (retour blijft altijd naar je thuisbasis). Geldt alleen voor directe ritten
-            die binnen 3 uur starten — ritten verder in de toekomst worden vanaf je
-            thuisbasis berekend, tenzij je hiervoor een <em>geplande standplaats</em>
-            hebt aangemaakt.
+            <Trans
+              i18nKey="standplaats.currentDesc"
+              components={{ 1: <strong />, 2: <em /> }}
+            />
           </p>
         </div>
       </div>
@@ -133,11 +127,12 @@ export default function CurrentLocationCard() {
       {isActive ? (
         <div className="space-y-3">
           <div className="bg-brass-gold/10 border border-brass-gold/30 px-3 py-2 text-sm">
-            <p className="text-brass-deep font-semibold">📍 {loc?.current_address ?? "Huidige locatie"}</p>
+            <p className="text-brass-deep font-semibold">📍 {loc?.current_address ?? t("standplaats.currentLocation")}</p>
             <p className="text-xs text-brass-deep/70 mt-1">
-              Actief tot{" "}
-              {new Date(loc!.current_until!).toLocaleString("nl-NL", {
-                weekday: "short", hour: "2-digit", minute: "2-digit",
+              {t("standplaats.activeUntil", {
+                when: new Date(loc!.current_until!).toLocaleString(locale, {
+                  weekday: "short", hour: "2-digit", minute: "2-digit",
+                }),
               })}
             </p>
           </div>
@@ -148,7 +143,7 @@ export default function CurrentLocationCard() {
               disabled={busy}
               className="px-4 py-2 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
             >
-              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Locatie vernieuwen"}
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : t("standplaats.refresh")}
             </button>
             <button
               type="button"
@@ -156,21 +151,21 @@ export default function CurrentLocationCard() {
               disabled={busy}
               className="px-4 py-2 text-brass-deep/70 uppercase tracking-widest text-xs font-semibold hover:text-brass-deep disabled:opacity-50"
             >
-              Wissen
+              {t("standplaats.clear")}
             </button>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-3 items-center">
           <label className="text-sm text-brass-deep/70 flex items-center gap-2">
-            Geldig voor:
+            {t("standplaats.validFor")}
             <select
               value={hours}
               onChange={(e) => setHours(Number(e.target.value))}
               className="border border-brass-deep/20 bg-parchment px-2 py-1.5 text-sm"
             >
-              {DURATIONS.map((d) => (
-                <option key={d.hours} value={d.hours}>{d.label}</option>
+              {DURATIONS.map((h) => (
+                <option key={h} value={h}>{t("standplaats.hours", { n: h })}</option>
               ))}
             </select>
           </label>
@@ -181,7 +176,7 @@ export default function CurrentLocationCard() {
             className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
           >
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-            Ik sta nu hier
+            {t("standplaats.iAmHere")}
           </button>
         </div>
       )}

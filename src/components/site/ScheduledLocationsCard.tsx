@@ -4,11 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { CalendarClock, Loader2, Trash2, Plus } from "lucide-react";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
-
-// Begeleider plant vooraf "ik ben op die datum/tijd op deze locatie".
-// Voor elke ritaanvraag waarvan de starttijd binnen dit venster valt, wordt de
-// aanvoertijd berekend vanaf deze geplande locatie i.p.v. de thuisbasis.
-// Retour gaat altijd terug naar de thuisbasis.
+import { useTranslation, Trans } from "react-i18next";
 
 type ScheduledLocation = {
   id: string;
@@ -25,8 +21,13 @@ const isoLocal = (d: Date) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+const localeMap: Record<string, string> = { nl: "nl-NL", en: "en-GB", de: "de-DE", fr: "fr-FR" };
+
 export default function ScheduledLocationsCard() {
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "nl").slice(0, 2);
+  const locale = localeMap[lang] ?? "nl-NL";
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [rows, setRows] = useState<ScheduledLocation[]>([]);
@@ -59,11 +60,11 @@ export default function ScheduledLocationsCard() {
 
   const add = async () => {
     if (!user) return;
-    if (!addr) return toast.error("Kies een adres.");
+    if (!addr) return toast.error(t("standplaats.pickAddress"));
     const s = new Date(startAt).getTime();
     const e = new Date(endAt).getTime();
-    if (!Number.isFinite(s) || !Number.isFinite(e)) return toast.error("Vul start- en eindtijd in.");
-    if (e <= s) return toast.error("Eindtijd moet na starttijd liggen.");
+    if (!Number.isFinite(s) || !Number.isFinite(e)) return toast.error(t("standplaats.fillTimes"));
+    if (e <= s) return toast.error(t("standplaats.endAfterStart"));
     setBusy(true);
     const { data, error } = await supabase
       .from("escort_scheduled_locations")
@@ -83,7 +84,7 @@ export default function ScheduledLocationsCard() {
     setRows((r) => [...r, data as ScheduledLocation].sort((a, b) => a.start_at.localeCompare(b.start_at)));
     setShowForm(false);
     resetForm();
-    toast.success("Geplande standplaats opgeslagen. Aanvoer wordt in dit venster vanaf deze locatie berekend.");
+    toast.success(t("standplaats.saved"));
   };
 
   const remove = async (id: string) => {
@@ -94,7 +95,7 @@ export default function ScheduledLocationsCard() {
 
   if (loading) return null;
 
-  const fmt = (s: string) => new Date(s).toLocaleString("nl-NL", {
+  const fmt = (s: string) => new Date(s).toLocaleString(locale, {
     weekday: "short", day: "2-digit", month: "2-digit",
     hour: "2-digit", minute: "2-digit",
   });
@@ -104,12 +105,9 @@ export default function ScheduledLocationsCard() {
       <div className="flex items-start gap-3 mb-4">
         <CalendarClock className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
         <div className="flex-1">
-          <h3 className="font-display text-lg text-brass-deep">Geplande standplaats</h3>
+          <h3 className="font-display text-lg text-brass-deep">{t("standplaats.scheduledTitle")}</h3>
           <p className="text-xs text-brass-deep/60 mt-1">
-            Geef vooraf aan dat je op een bepaalde datum en tijd op een specifieke
-            locatie bent. Voor ritaanvragen waarvan de starttijd binnen dit venster
-            valt, wordt de <strong>aanvoertijd vanaf deze geplande locatie</strong> berekend
-            in plaats van vanaf je thuisbasis. Retour gaat altijd terug naar je thuisbasis.
+            <Trans i18nKey="standplaats.scheduledDesc" components={{ 1: <strong /> }} />
           </p>
         </div>
       </div>
@@ -129,7 +127,7 @@ export default function ScheduledLocationsCard() {
                 type="button"
                 onClick={() => remove(r.id)}
                 className="text-brass-deep/50 hover:text-brass-deep p-1"
-                title="Verwijderen"
+                title={t("standplaats.delete")}
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -145,23 +143,23 @@ export default function ScheduledLocationsCard() {
           className="px-4 py-2 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors inline-flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Locatie toevoegen
+          {t("standplaats.addLocation")}
         </button>
       ) : (
         <div className="space-y-3 border-t border-brass-deep/10 pt-4">
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold block mb-1">Locatie</label>
+            <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold block mb-1">{t("standplaats.location")}</label>
             <AddressAutocomplete
               label=""
               value={addrText}
               onChange={(v) => setAddrText(v)}
               onSelect={(r) => { setAddr(r); setAddrText(r.display); }}
-              placeholder="Zoek adres of plaats…"
+              placeholder={t("standplaats.searchPh")}
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="text-xs text-brass-deep/70 block">
-              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">Van</span>
+              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.from")}</span>
               <input
                 type="datetime-local"
                 value={startAt}
@@ -170,7 +168,7 @@ export default function ScheduledLocationsCard() {
               />
             </label>
             <label className="text-xs text-brass-deep/70 block">
-              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">Tot</span>
+              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.to")}</span>
               <input
                 type="datetime-local"
                 value={endAt}
@@ -180,12 +178,12 @@ export default function ScheduledLocationsCard() {
             </label>
           </div>
           <label className="text-xs text-brass-deep/70 block">
-            <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">Notitie (optioneel)</span>
+            <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.note")}</span>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Bijv. klus in Antwerpen"
+              placeholder={t("standplaats.notePh")}
               className="w-full border border-brass-deep/20 bg-parchment px-2 py-1.5 text-sm"
             />
           </label>
@@ -197,7 +195,7 @@ export default function ScheduledLocationsCard() {
               className="px-4 py-2 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
             >
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Opslaan
+              {t("standplaats.save")}
             </button>
             <button
               type="button"
@@ -205,7 +203,7 @@ export default function ScheduledLocationsCard() {
               disabled={busy}
               className="px-4 py-2 text-brass-deep/70 uppercase tracking-widest text-xs font-semibold hover:text-brass-deep disabled:opacity-50"
             >
-              Annuleren
+              {t("standplaats.cancel")}
             </button>
           </div>
         </div>
