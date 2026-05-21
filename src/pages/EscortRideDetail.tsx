@@ -294,22 +294,22 @@ const Inner = () => {
   };
 
   if (loading) {
-    return <p className="text-sm text-brass-deep/50">Laden…</p>;
+    return <p className="text-sm text-brass-deep/50">{t("escortRideDetail.loading")}</p>;
   }
   if (error || !data) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
         <p className="text-brass-deep/60 mb-4">
-          Geen toegang tot deze ritdetails. Alleen geaccepteerde ritten zijn zichtbaar.
+          {t("escortRideDetail.noAccess")}
         </p>
         <p className="text-xs text-brass-deep/50 mb-4">
-          Ondersteuning nodig?{" "}
+          {t("escortRideDetail.supportNeeded")}{" "}
           <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
             support@viacust.com
           </a>
         </p>
         <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
-          ← Terug naar dashboard
+          {t("escortRideDetail.backToDashboard")}
         </Link>
       </div>
     );
