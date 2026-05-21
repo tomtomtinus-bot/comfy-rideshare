@@ -381,20 +381,20 @@ const Inner = () => {
         return (
           <section className="bg-brass-gold/10 border-l-4 border-brass-gold p-5 md:p-6">
             <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">
-              📦 {isPriority ? "Vervolgrit binnen pakket" : "Onderdeel van pakket"}
+              {isPriority ? t("escortRideDetail.bundlePriorityKicker") : t("escortRideDetail.bundleKicker")}
             </p>
             <h2 className="font-display text-xl text-brass-deep italic mb-2">{ride.bundle_label}</h2>
             {isPriority ? (
               <>
                 <p className="text-sm text-brass-deep/80 mb-4">
-                  U heeft al een geaccepteerde rit in dit pakket. Daarom krijgt u deze vervolgrit eerst exclusief aangeboden
+                  {t("escortRideDetail.bundlePriorityBody")}
                   {!expired && myAssignment?.responds_by && (
-                    <> tot <span className="font-semibold tabular-nums">{new Date(myAssignment.responds_by).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</span></>
-                  )}.
-                  Daarna gaat het naar andere begeleiders. <strong>Weigeren of niets doen raakt uw andere geaccepteerde ritten in dit pakket niet.</strong>
+                    <> {t("escortRideDetail.bundleUntil")} <span className="font-semibold tabular-nums">{new Date(myAssignment.responds_by).toLocaleString(i18n.language === "nl" ? "nl-NL" : i18n.language === "de" ? "de-DE" : i18n.language === "fr" ? "fr-FR" : "en-GB", { dateStyle: "short", timeStyle: "short" })}</span></>
+                  )}
+                  <span dangerouslySetInnerHTML={{ __html: t("escortRideDetail.bundleAfter") }} />
                 </p>
                 {expired ? (
-                  <p className="text-sm text-amber-800">Aanbod verlopen.</p>
+                  <p className="text-sm text-amber-800">{t("escortRideDetail.bundleExpired")}</p>
                 ) : !showDeclineForm ? (
                   <div className="flex gap-3 flex-wrap">
                     <button
@@ -402,14 +402,14 @@ const Inner = () => {
                       disabled={bundleBusy}
                       className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
                     >
-                      ✓ Accepteer vervolgrit
+                      {t("escortRideDetail.bundleAcceptNext")}
                     </button>
                     <button
                       onClick={() => setShowDeclineForm(true)}
                       disabled={bundleBusy}
                       className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
                     >
-                      ✗ Niet voor mij
+                      {t("escortRideDetail.bundleNotForMe")}
                     </button>
                   </div>
                 ) : (
@@ -418,15 +418,15 @@ const Inner = () => {
                       value={declineReason}
                       onChange={(e) => setDeclineReason(e.target.value)}
                       rows={2}
-                      placeholder="Reden (optioneel)…"
+                      placeholder={t("escortRideDetail.bundleReasonPlaceholder")}
                       className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                     />
                     <div className="flex gap-2">
                       <button onClick={declineOffer} disabled={bundleBusy} className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50">
-                        Weigeren bevestigen
+                        {t("escortRideDetail.bundleConfirmDecline")}
                       </button>
                       <button onClick={() => { setShowDeclineForm(false); setDeclineReason(""); }} className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5">
-                        Terug
+                        {t("escortRideDetail.bundleBack")}
                       </button>
                     </div>
                   </div>
@@ -434,7 +434,7 @@ const Inner = () => {
               </>
             ) : (
               <p className="text-sm text-brass-deep/70">
-                Deze rit hoort bij een groter pakket van dezelfde opdrachtgever. Mogelijk komen er nog meer vervolgritten — die krijgt u dan eerst exclusief aangeboden.
+                {t("escortRideDetail.bundleInfo")}
               </p>
             )}
           </section>
