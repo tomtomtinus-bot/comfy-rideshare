@@ -521,25 +521,25 @@ const InvoicesInner = () => {
     return (
       <div className="space-y-2">
         {years.map((y, yi) => {
-          const months = Object.keys(tree[y]).sort(sortMonthDesc);
+          const months = Object.keys(tree[y]).sort(sortDescNum);
           const yearCount = months.reduce((s, m) => s + Object.values(tree[y][m]).reduce((a, arr) => a + arr.length, 0), 0);
           return (
             <details key={y} open={expandAll || yi === 0} className="group bg-card shadow-etched">
               <summary className="flex items-center justify-between cursor-pointer select-none px-5 py-3 hover:bg-parchment/50">
                 <span className="font-display text-lg text-brass-deep">{y}</span>
                 <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
-                  {yearCount} factu{yearCount === 1 ? "ur" : "ren"}
+                  {t("invoices.invoiceCount", { count: yearCount })}
                   <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
                 </span>
               </summary>
               <div className="px-3 pb-3 space-y-2">
                 {months.map((m) => {
-                  const weeks = Object.keys(tree[y][m]).sort(sortWeekDesc);
+                  const weeks = Object.keys(tree[y][m]).sort(sortDescNum);
                   const monthCount = weeks.reduce((s, w) => s + tree[y][m][w].length, 0);
                   return (
                     <details key={m} open={expandAll} className="group/m border border-brass-deep/10 bg-parchment/30">
                       <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
-                        <span className="text-sm font-semibold text-brass-deep">{m}</span>
+                        <span className="text-sm font-semibold text-brass-deep">{monthName(parseInt(m, 10), i18n.language)}</span>
                         <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
                           {monthCount}
                           <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">▼</span>
@@ -549,7 +549,7 @@ const InvoicesInner = () => {
                         {weeks.map((w) => (
                           <details key={w} open={expandAll} className="group/w border border-brass-deep/10 bg-card">
                             <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/40">
-                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{w}</span>
+                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{t("invoices.week", { n: parseInt(w, 10) })}</span>
                               <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
                                 {tree[y][m][w].length}
                                 <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">▼</span>
