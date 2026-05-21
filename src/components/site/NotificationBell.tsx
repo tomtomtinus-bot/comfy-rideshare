@@ -175,7 +175,7 @@ export const NotificationBell = () => {
                   onClick={clearAll}
                   className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-destructive inline-flex items-center gap-1"
                 >
-                  <Trash2 className="size-3.5" /> Wissen
+                  <Trash2 className="size-3.5" /> {t("notifBell.clear")}
                 </button>
               )}
             </div>
