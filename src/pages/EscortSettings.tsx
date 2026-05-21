@@ -323,12 +323,12 @@ const Inner = () => {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.length) return;
     const f = e.target.files[0];
-    if (f.size > 10 * 1024 * 1024) return toast.error("Max 10 MB");
+    if (f.size > 10 * 1024 * 1024) return toast.error(t("escortSettings.maxSize"));
     const path = `${user.id}/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error } = await supabase.storage.from("escort-certificates").upload(path, f);
     if (error) return toast.error(error.message);
     setFiles((s) => [...s, path]);
-    toast.success("Certificaat geüpload");
+    toast.success(t("escortSettings.certUploaded"));
     e.target.value = "";
   };
 
