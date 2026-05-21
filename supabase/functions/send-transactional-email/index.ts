@@ -135,6 +135,31 @@ Deno.serve(async (req) => {
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+  // Auto-resolve recipient locale from profile preferred_language, unless
+  // the caller already provided one in templateData. This way every template
+  // that accepts a `locale` prop renders in the recipient's language.
+  if (!templateData.locale) {
+    try {
+      const email = effectiveRecipient.toLowerCase()
+      const { data: users } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 })
+      const match = users?.users?.find((u) => (u.email || '').toLowerCase() === email)
+      if (match?.id) {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('preferred_language')
+          .eq('id', match.id)
+          .maybeSingle()
+        const lang = (prof as any)?.preferred_language
+        if (lang && ['nl', 'en', 'de', 'fr'].includes(lang)) {
+          templateData = { ...templateData, locale: lang }
+        }
+      }
+    } catch (e) {
+      console.warn('Locale resolution failed; falling back to default', { error: String(e) })
+    }
+  }
+
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send)
   const { data: suppressed, error: suppressionError } = await supabase
     .from('suppressed_emails')
