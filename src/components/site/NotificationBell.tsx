@@ -211,7 +211,7 @@ export const NotificationBell = () => {
                               <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
                               <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
                               <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
-                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
+                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fnsLoc })}
                               </p>
                             </div>
                           </div>
