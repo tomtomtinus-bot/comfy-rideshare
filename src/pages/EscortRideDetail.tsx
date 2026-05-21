@@ -780,7 +780,7 @@ const Inner = () => {
             {showAnnulering && (
               <AccSection
                 value="annulering"
-                title="Annulering"
+                title={t("escortRideDetail.annuleringTitle")}
                 badge={
                   cancelPending
                     ? <Badge tone="info">{t("escortRideDetail.badgePending")}</Badge>
@@ -791,34 +791,34 @@ const Inner = () => {
               >
                 {myAssignment!.cancel_request_status === "pending" ? (
                   <div className="bg-brass-gold/10 border border-brass-gold/40 p-4 text-sm text-brass-deep">
-                    <p className="font-semibold mb-1">Verzoek in behandeling</p>
+                    <p className="font-semibold mb-1">{t("escortRideDetail.requestPending")}</p>
                     {myAssignment!.cancel_request_reason && (
                       <p className="italic text-brass-deep/70">"{myAssignment!.cancel_request_reason}"</p>
                     )}
-                    <p className="mt-2 text-xs text-brass-deep/60">De opdrachtgever moet je verzoek goedkeuren.</p>
+                    <p className="mt-2 text-xs text-brass-deep/60">{t("escortRideDetail.clientMustApprove")}</p>
                   </div>
                 ) : myAssignment!.cancel_request_status === "rejected" ? (
                   <div className="bg-red-50 border border-red-200 p-4 text-sm text-red-900 mb-3">
-                    Vorig verzoek afgewezen. Je kunt opnieuw aanvragen.
+                    {t("escortRideDetail.prevRejected")}
                     <button
                       type="button"
                       onClick={() => setShowCancelForm(true)}
                       className="ml-3 underline font-semibold"
                     >
-                      Opnieuw aanvragen
+                      {t("escortRideDetail.reapply")}
                     </button>
                   </div>
                 ) : !showCancelForm ? (
                   <>
                     <p className="text-sm text-brass-deep/70 mb-3">
-                      Annuleren kan alleen in overleg met de opdrachtgever. Stuur een verzoek met reden; bij goedkeuring vervalt de toewijzing zonder kosten.
+                      {t("escortRideDetail.cancelExplain")}
                     </p>
                     <button
                       type="button"
                       onClick={() => setShowCancelForm(true)}
                       className="px-6 py-3 border border-red-700 text-red-700 uppercase tracking-widest text-xs font-semibold hover:bg-red-700 hover:text-parchment transition-colors"
                     >
-                      Annulering aanvragen
+                      {t("escortRideDetail.requestCancel")}
                     </button>
                   </>
                 ) : (
@@ -827,7 +827,7 @@ const Inner = () => {
                       value={cancelReason}
                       onChange={(e) => setCancelReason(e.target.value)}
                       rows={3}
-                      placeholder="Reden voor annulering (verplicht)…"
+                      placeholder={t("escortRideDetail.cancelReasonPlaceholder")}
                       className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                     />
                     <div className="flex gap-2">
@@ -837,14 +837,14 @@ const Inner = () => {
                         onClick={submitCancelRequest}
                         className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50"
                       >
-                        Verzoek versturen
+                        {t("escortRideDetail.submitRequest")}
                       </button>
                       <button
                         type="button"
                         onClick={() => { setShowCancelForm(false); setCancelReason(""); }}
                         className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5"
                       >
-                        Annuleren
+                        {t("escortRideDetail.cancelBack")}
                       </button>
                     </div>
                   </div>
