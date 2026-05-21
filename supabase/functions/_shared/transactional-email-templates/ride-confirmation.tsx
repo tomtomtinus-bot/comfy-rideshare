@@ -4,74 +4,57 @@ import {
   Body, Button, Container, Head, Heading, Html, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
+import { t, normalizeLocale, type Locale } from './i18n.ts'
 
-const SITE_NAME = 'ViaCust'
+const SITE = 'ViaCust'
+const NAME = 'ride-confirmation'
 
-interface RideConfirmationProps {
+interface Props {
   name?: string
   pickup?: string
   dropoff?: string
   plannedAt?: string
   reference?: string
   rideUrl?: string
+  locale?: string
 }
 
-const RideConfirmationEmail = ({
-  name,
-  pickup,
-  dropoff,
-  plannedAt,
-  reference,
-  rideUrl,
-}: RideConfirmationProps) => (
-  <Html lang="nl" dir="ltr">
-    <Head />
-    <Preview>Je rit-aanvraag is ontvangen{reference ? ` (${reference})` : ''}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>
-          {name ? `Bedankt, ${name}!` : 'Bedankt voor je aanvraag!'}
-        </Heading>
-        <Text style={text}>
-          We hebben je rit-aanvraag ontvangen. Onze begeleiders worden direct uitgenodigd; zodra ze accepteren krijg je een bevestiging met de definitieve bemanning.
-        </Text>
-
-        <Section style={card}>
-          {reference && (
-            <Text style={row}><strong>Referentie:</strong> {reference}</Text>
-          )}
-          {pickup && (
-            <Text style={row}><strong>Vertrek:</strong> {pickup}</Text>
-          )}
-          {dropoff && (
-            <Text style={row}><strong>Bestemming:</strong> {dropoff}</Text>
-          )}
-          {plannedAt && (
-            <Text style={row}><strong>Geplande starttijd:</strong> {plannedAt}</Text>
-          )}
-        </Section>
-
-        {rideUrl && (
-          <Button style={button} href={rideUrl}>
-            Bekijk je rit
-          </Button>
-        )}
-
-        <Text style={footer}>
-          Vragen? Stuur een mail naar info@viacust.com.<br />
-          — Het {SITE_NAME}-team
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-)
+const RideConfirmationEmail = (p: Props) => {
+  const l: Locale = normalizeLocale(p.locale)
+  const refSuffix = p.reference ? ` (${p.reference})` : ''
+  return (
+    <Html lang={l} dir="ltr">
+      <Head />
+      <Preview>{t(NAME, l, 'preview', { refSuffix })}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Heading style={h1}>
+            {p.name ? t(NAME, l, 'greeting', { name: p.name }) : t(NAME, l, 'greetingFallback')}
+          </Heading>
+          <Text style={text}>{t(NAME, l, 'body')}</Text>
+          <Section style={card}>
+            {p.reference && <Text style={row}><strong>{t(NAME, l, 'reference')}:</strong> {p.reference}</Text>}
+            {p.pickup && <Text style={row}><strong>{t(NAME, l, 'pickup')}:</strong> {p.pickup}</Text>}
+            {p.dropoff && <Text style={row}><strong>{t(NAME, l, 'dropoff')}:</strong> {p.dropoff}</Text>}
+            {p.plannedAt && <Text style={row}><strong>{t(NAME, l, 'plannedAt')}:</strong> {p.plannedAt}</Text>}
+          </Section>
+          {p.rideUrl && <Button style={button} href={p.rideUrl}>{t(NAME, l, 'cta')}</Button>}
+          <Text style={footer}>
+            {t(NAME, l, 'footer')}<br />
+            {t(NAME, l, 'team', { site: SITE })}
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export const template = {
   component: RideConfirmationEmail,
-  subject: (data: Record<string, any>) =>
-    data.reference
-      ? `Rit-aanvraag ontvangen — ${data.reference}`
-      : 'Je rit-aanvraag is ontvangen',
+  subject: (d: Record<string, any>) => {
+    const l = normalizeLocale(d.locale)
+    return d.reference ? t(NAME, l, 'subject', { reference: d.reference }) : t(NAME, l, 'subjectNoRef')
+  },
   displayName: 'Rit-bevestiging (opdrachtgever)',
   previewData: {
     name: 'Jan de Vries',
@@ -80,6 +63,7 @@ export const template = {
     plannedAt: '15 januari 2026, 08:30',
     reference: 'PO-2026-118',
     rideUrl: 'https://viacust.com',
+    locale: 'nl',
   },
 } satisfies TemplateEntry
 
@@ -87,19 +71,7 @@ const main = { backgroundColor: '#ffffff', fontFamily: "'Inter Tight', 'Inter', 
 const container = { padding: '20px 25px', maxWidth: '560px' }
 const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#161f2b', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#556070', lineHeight: '1.5', margin: '0 0 20px' }
-const card = {
-  backgroundColor: '#f4f6f8',
-  borderLeft: '3px solid #f5a800',
-  padding: '16px 18px',
-  margin: '0 0 24px',
-}
+const card = { backgroundColor: '#f4f6f8', borderLeft: '3px solid #f5a800', padding: '16px 18px', margin: '0 0 24px' }
 const row = { fontSize: '14px', color: '#161f2b', margin: '0 0 8px', lineHeight: '1.5' }
-const button = {
-  backgroundColor: '#1a2a3f',
-  color: '#f5f7f9',
-  fontSize: '14px',
-  borderRadius: '2px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
+const button = { backgroundColor: '#1a2a3f', color: '#f5f7f9', fontSize: '14px', borderRadius: '2px', padding: '12px 20px', textDecoration: 'none' }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0', lineHeight: '1.5' }
