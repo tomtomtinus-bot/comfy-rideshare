@@ -271,7 +271,7 @@ const Inner = () => {
 
   const submitCancelRequest = async () => {
     if (!myAssignment) return;
-    if (cancelReason.trim().length < 3) { toast.error("Geef een korte reden op."); return; }
+    if (cancelReason.trim().length < 3) { toast.error(t("escortRideDetail.cancelReasonShort")); return; }
     setBusy(true);
     const { error } = await supabase.rpc("escort_request_cancellation", {
       _assignment_id: myAssignment.id,
