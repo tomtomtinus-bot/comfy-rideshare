@@ -397,19 +397,19 @@ const InvoicesInner = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-card shadow-etched">
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Zoek (naam / factuurnr.)
+                {t("invoices.searchLabel")}
               </label>
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={isEscort ? "Opdrachtgever, factuurnr…" : "Begeleider, opdrachtgever…"}
+                placeholder={isEscort ? t("invoices.searchPlaceholderEscort") : t("invoices.searchPlaceholderClient")}
                 className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
               />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Datum van
+                {t("invoices.dateFrom")}
               </label>
               <input
                 type="date"
@@ -420,7 +420,7 @@ const InvoicesInner = () => {
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Datum tot
+                {t("invoices.dateTo")}
               </label>
               <input
                 type="date"
@@ -435,7 +435,7 @@ const InvoicesInner = () => {
                   onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}
                   className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline"
                 >
-                  Filters wissen
+                  {t("invoices.clearFilters")}
                 </button>
               </div>
             )}
