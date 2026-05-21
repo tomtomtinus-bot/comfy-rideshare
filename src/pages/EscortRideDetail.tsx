@@ -624,22 +624,22 @@ const Inner = () => {
             {!isInvited && !isCompleted && myAssignment && userId && (
               <AccSection
                 value="berichten"
-                title="Berichten"
-                badge={unreadMessages > 0 ? <Badge tone="alert">{unreadMessages} nieuw</Badge> : null}
+                title={t("escortRideDetail.messages")}
+                badge={unreadMessages > 0 ? <Badge tone="alert">{t("escortRideDetail.newBadge", { n: unreadMessages })}</Badge> : null}
               >
                 <AssignmentChat
                   assignmentId={myAssignment.id}
                   currentUserId={userId}
-                  counterpartyLabel="opdrachtgever"
+                  counterpartyLabel={t("escortRideDetail.counterpartyClient")}
                 />
               </AccSection>
             )}
 
             {!isInvited && !isCompleted && hasDriversOrPlates && (
-              <AccSection value="chauffeurs" title="Chauffeurs & kentekens">
+              <AccSection value="chauffeurs" title={t("escortRideDetail.driversPlates")}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Chauffeurs</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.drivers")}</p>
                     {drivers.length === 0 ? (
                       <p className="text-sm text-brass-deep/40">—</p>
                     ) : (
@@ -654,7 +654,7 @@ const Inner = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Kentekens</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.plates")}</p>
                     {plates.length === 0 ? (
                       <p className="text-sm text-brass-deep/40">—</p>
                     ) : (
@@ -672,9 +672,9 @@ const Inner = () => {
             )}
 
             {!isInvited && !isCompleted && (
-              <AccSection value="medebegeleiders" title={`Mede-begeleiders (${others.length})`}>
+              <AccSection value="medebegeleiders" title={t("escortRideDetail.coEscorts", { n: others.length })}>
                 {others.length === 0 ? (
-                  <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.soleEscort")}</p>
                 ) : (
                   <ul className="divide-y divide-brass-deep/10">
                     {others.map((e) => (
@@ -682,7 +682,7 @@ const Inner = () => {
                         <div>
                           <p className="font-medium text-brass-deep">#{e.anonymous_id ?? "—"}</p>
                           <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                            {e.status === "accepted" ? "geaccepteerd" : e.status}
+                            {e.status === "accepted" ? t("escortRideDetail.accepted") : e.status}
                           </p>
                         </div>
                         <div className="text-sm">
@@ -692,7 +692,7 @@ const Inner = () => {
                               <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
                             </>
                           ) : (
-                            <p className="text-brass-deep/40 text-xs italic">Nog niet bevestigd</p>
+                            <p className="text-brass-deep/40 text-xs italic">{t("escortRideDetail.notYetConfirmed")}</p>
                           )}
                         </div>
                         <div className="text-sm">
@@ -707,16 +707,16 @@ const Inner = () => {
             )}
 
             {!isInvited && !isCompleted && (
-              <AccSection value="ontheffing" title="Ontheffing">
+              <AccSection value="ontheffing" title={t("escortRideDetail.permit")}>
                 {permit ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Field label="Vergunningnummer" value={permit.permit_number} />
-                      <Field label="Geldig van" value={permit.valid_from ?? "—"} />
-                      <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
+                      <Field label={t("escortRideDetail.permitNumber")} value={permit.permit_number} />
+                      <Field label={t("escortRideDetail.validFrom")} value={permit.valid_from ?? "—"} />
+                      <Field label={t("escortRideDetail.validTo")} value={permit.valid_to ?? "—"} />
                       <div className="md:col-span-2">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
-                          Maximale afmetingen
+                          {t("escortRideDetail.maxDims")}
                         </p>
                         <p className="text-sm font-medium tabular-nums">
                           {permit.max_length_m ?? "—"}m × {permit.max_width_m ?? "—"}m × {permit.max_height_m ?? "—"}m ·{" "}
