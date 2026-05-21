@@ -69,6 +69,11 @@ const MONTHS_NL = [
   "Januari", "Februari", "Maart", "April", "Mei", "Juni",
   "Juli", "Augustus", "September", "Oktober", "November", "December",
 ];
+const monthName = (idx: number, lng: string) => {
+  const locale = lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB";
+  const name = new Date(2000, idx, 1).toLocaleString(locale, { month: "long" });
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 const isoWeek = (date: Date): number => {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -83,8 +88,8 @@ function groupByYMW<T extends { period_start: string }>(items: T[]) {
   for (const inv of items) {
     const d = new Date(inv.period_start);
     const y = String(d.getFullYear());
-    const m = MONTHS_NL[d.getMonth()];
-    const w = `Week ${isoWeek(d)}`;
+    const m = String(d.getMonth()).padStart(2, "0");
+    const w = String(isoWeek(d)).padStart(2, "0");
     tree[y] ??= {};
     tree[y][m] ??= {};
     tree[y][m][w] ??= [];
@@ -94,9 +99,7 @@ function groupByYMW<T extends { period_start: string }>(items: T[]) {
 }
 
 const sortYearDesc = (a: string, b: string) => b.localeCompare(a, undefined, { numeric: true });
-const sortMonthDesc = (a: string, b: string) => MONTHS_NL.indexOf(b) - MONTHS_NL.indexOf(a);
-const sortWeekDesc = (a: string, b: string) =>
-  parseInt(b.replace("Week ", ""), 10) - parseInt(a.replace("Week ", ""), 10);
+const sortDescNum = (a: string, b: string) => parseInt(b, 10) - parseInt(a, 10);
 
 const InvoicesInner = () => {
   const { user, role } = useAuth();
@@ -394,19 +397,19 @@ const InvoicesInner = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-card shadow-etched">
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Zoek (naam / factuurnr.)
+                {t("invoices.searchLabel")}
               </label>
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={isEscort ? "Opdrachtgever, factuurnr…" : "Begeleider, opdrachtgever…"}
+                placeholder={isEscort ? t("invoices.searchPlaceholderEscort") : t("invoices.searchPlaceholderClient")}
                 className="w-full px-3 py-2 text-sm border border-brass-deep/20 bg-parchment focus:outline-none focus:border-brass-deep"
               />
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Datum van
+                {t("invoices.dateFrom")}
               </label>
               <input
                 type="date"
@@ -417,7 +420,7 @@ const InvoicesInner = () => {
             </div>
             <div>
               <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
-                Datum tot
+                {t("invoices.dateTo")}
               </label>
               <input
                 type="date"
@@ -432,7 +435,7 @@ const InvoicesInner = () => {
                   onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}
                   className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold underline"
                 >
-                  Filters wissen
+                  {t("invoices.clearFilters")}
                 </button>
               </div>
             )}
@@ -483,7 +486,7 @@ const InvoicesInner = () => {
       <CheckoutDialog
         open={!!payInvoiceId}
         onOpenChange={(v) => !v && setPayInvoiceId(null)}
-        title="Platformfactuur betalen"
+        title={t("invoices.payDialogTitle")}
         platformInvoiceId={payInvoiceId ?? undefined}
         customerEmail={user?.email}
         userId={user?.id}
@@ -518,25 +521,25 @@ const InvoicesInner = () => {
     return (
       <div className="space-y-2">
         {years.map((y, yi) => {
-          const months = Object.keys(tree[y]).sort(sortMonthDesc);
+          const months = Object.keys(tree[y]).sort(sortDescNum);
           const yearCount = months.reduce((s, m) => s + Object.values(tree[y][m]).reduce((a, arr) => a + arr.length, 0), 0);
           return (
             <details key={y} open={expandAll || yi === 0} className="group bg-card shadow-etched">
               <summary className="flex items-center justify-between cursor-pointer select-none px-5 py-3 hover:bg-parchment/50">
                 <span className="font-display text-lg text-brass-deep">{y}</span>
                 <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
-                  {yearCount} factu{yearCount === 1 ? "ur" : "ren"}
+                  {t("invoices.invoiceCount", { count: yearCount })}
                   <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
                 </span>
               </summary>
               <div className="px-3 pb-3 space-y-2">
                 {months.map((m) => {
-                  const weeks = Object.keys(tree[y][m]).sort(sortWeekDesc);
+                  const weeks = Object.keys(tree[y][m]).sort(sortDescNum);
                   const monthCount = weeks.reduce((s, w) => s + tree[y][m][w].length, 0);
                   return (
                     <details key={m} open={expandAll} className="group/m border border-brass-deep/10 bg-parchment/30">
                       <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
-                        <span className="text-sm font-semibold text-brass-deep">{m}</span>
+                        <span className="text-sm font-semibold text-brass-deep">{monthName(parseInt(m, 10), i18n.language)}</span>
                         <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
                           {monthCount}
                           <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">▼</span>
@@ -546,7 +549,7 @@ const InvoicesInner = () => {
                         {weeks.map((w) => (
                           <details key={w} open={expandAll} className="group/w border border-brass-deep/10 bg-card">
                             <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/40">
-                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{w}</span>
+                              <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{t("invoices.week", { n: parseInt(w, 10) })}</span>
                               <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
                                 {tree[y][m][w].length}
                                 <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">▼</span>
@@ -624,7 +627,7 @@ const InvoicesInner = () => {
                     onClick={() => setPayInvoiceId(inv.id)}
                     className="ml-auto px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                   >
-                    Betaal nu
+                    {t("invoices.payNow")}
                   </button>
                 )}
               </div>
