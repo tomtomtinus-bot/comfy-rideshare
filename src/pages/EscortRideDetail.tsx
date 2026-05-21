@@ -559,7 +559,7 @@ const Inner = () => {
             {isInvited && (
               <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep space-y-3">
                 <p>
-                  U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+                  {t("escortRideDetail.invitedNotice")}
                 </p>
                 {myAssignment && myAssignment.status === "invited" && (
                   <div className="flex flex-wrap gap-3 pt-1">
@@ -570,12 +570,12 @@ const Inner = () => {
                         const { error } = await supabase.rpc("express_ride_interest", { _assignment_id: myAssignment.id });
                         setBusy(false);
                         if (error) return toast.error(error.message);
-                        toast.success("Beschikbaar gemeld — selectie binnen 5 min.");
+                        toast.success(t("escortRideDetail.availableReported"));
                         load();
                       }}
                       className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
                     >
-                      ✓ Accepteer rit
+                      {t("escortRideDetail.acceptRide")}
                     </button>
                     <button
                       disabled={busy}
@@ -587,12 +587,12 @@ const Inner = () => {
                           .eq("id", myAssignment.id);
                         setBusy(false);
                         if (error) return toast.error(error.message);
-                        toast.success("Rit geweigerd.");
+                        toast.success(t("escortRideDetail.rideDeclined"));
                         load();
                       }}
                       className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
                     >
-                      ✗ Weiger
+                      {t("escortRideDetail.declineRide")}
                     </button>
                   </div>
                 )}
@@ -600,23 +600,23 @@ const Inner = () => {
             )}
 
             {!isInvited && (
-              <AccSection value="opdrachtgever" title="Opdrachtgever">
+              <AccSection value="opdrachtgever" title={t("escortRideDetail.client")}>
                 {client ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="Bedrijf" value={client.company_name ?? "—"} />
-                    <Field label="Contactpersoon" value={client.billing_contact_name ?? client.full_name ?? "—"} />
+                    <Field label={t("escortRideDetail.company")} value={client.company_name ?? "—"} />
+                    <Field label={t("escortRideDetail.contactPerson")} value={client.billing_contact_name ?? client.full_name ?? "—"} />
                     {!isCompleted && (
                       <>
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.phone")}</p>
                           <p className="text-sm"><TelLink phone={client.phone} /></p>
                         </div>
-                        <Field label="E-mail" value={client.billing_email ?? "—"} />
+                        <Field label={t("escortRideDetail.email")} value={client.billing_email ?? "—"} />
                       </>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noContact")}</p>
                 )}
               </AccSection>
             )}
