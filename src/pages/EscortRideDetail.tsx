@@ -443,7 +443,7 @@ const Inner = () => {
 
       {isCompleted && myAssignment && (
         <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
-          <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
+          <h2 className="font-display text-xl text-emerald-900 italic mb-5">{t("escortRideDetail.hoursTitle")}</h2>
           {(() => {
             const ceilQ = (m: number) => Math.ceil(m / 15) * 15;
             const fmtH = (m: number | null) => {
@@ -451,7 +451,7 @@ const Inner = () => {
               const q = ceilQ(m);
               const h = Math.floor(q / 60);
               const min = q % 60;
-              return min === 0 ? `${h} uur` : `${h}u${String(min).padStart(2, "0")}`;
+              return min === 0 ? `${h} ${t("escortRideDetail.hoursUnit")}` : `${h}u${String(min).padStart(2, "0")}`;
             };
             const startBegeleiding = myAssignment.departed_base_at && myAssignment.travel_to_pickup_min != null
               ? new Date(new Date(myAssignment.departed_base_at).getTime() + ceilQ(myAssignment.travel_to_pickup_min) * 60_000).toISOString()
@@ -461,25 +461,25 @@ const Inner = () => {
               : null;
             return (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Field label="Aanvoer (heen)" value={fmtH(myAssignment.travel_to_pickup_min)} />
-                <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
-                <Field label="Start begeleiding" value={startBegeleiding ? fmtDateTime(startBegeleiding) : "—"} />
-                <Field label="Einde begeleiding" value={eindeBegeleiding ? fmtDateTime(eindeBegeleiding) : "—"} />
-                <Field label="Aanvoer (terug)" value={fmtH(myAssignment.travel_back_home_min)} />
-                <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
-                <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
-                <Field label="Werkelijke kosten" value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
-                <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
-                <Field label="Totaal" value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.travelIn")} value={fmtH(myAssignment.travel_to_pickup_min)} />
+                <Field label={t("escortRideDetail.departedBase")} value={myAssignment.departed_base_at ? fd(myAssignment.departed_base_at) : "—"} />
+                <Field label={t("escortRideDetail.rideStart")} value={startBegeleiding ? fd(startBegeleiding) : "—"} />
+                <Field label={t("escortRideDetail.rideEnd")} value={eindeBegeleiding ? fd(eindeBegeleiding) : "—"} />
+                <Field label={t("escortRideDetail.travelOut")} value={fmtH(myAssignment.travel_back_home_min)} />
+                <Field label={t("escortRideDetail.returnedBase")} value={myAssignment.returned_base_at ? fd(myAssignment.returned_base_at) : "—"} />
+                <Field label={t("escortRideDetail.actualHours")} value={myAssignment.actual_hours ? `${myAssignment.actual_hours} ${t("escortRideDetail.hoursUnit")}` : "—"} />
+                <Field label={t("escortRideDetail.actualCost")} value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.extraCosts")} value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.total")} value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
                 <p className="md:col-span-2 text-xs text-brass-deep/60 italic mt-1">
-                  Let op: de brandstoftoeslag wordt pas op de eerstvolgende maandag berekend en daarna aan het totaal toegevoegd.
+                  {t("escortRideDetail.fuelLater")}
                 </p>
               </div>
             );
           })()}
           {myAssignment.extra_costs && myAssignment.extra_costs.length > 0 && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Specificatie extra kosten</p>
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">{t("escortRideDetail.extraCostsSpec")}</p>
               <ul className="space-y-1">
                 {myAssignment.extra_costs.map((ex, i) => (
                   <li key={i} className="flex justify-between text-sm">
@@ -492,14 +492,14 @@ const Inner = () => {
           )}
           {myAssignment.hours_notes && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">Opmerkingen</p>
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">{t("escortRideDetail.notes")}</p>
               <p className="text-sm text-emerald-900">{myAssignment.hours_notes}</p>
             </div>
           )}
           {myAssignment.hours_dispute_status && myAssignment.hours_dispute_status !== "none" && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">Uren afgewezen</p>
-              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || "Geen reden opgegeven"}</p>
+              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">{t("escortRideDetail.hoursRejected")}</p>
+              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || t("escortRideDetail.noReason")}</p>
             </div>
           )}
         </section>
