@@ -60,13 +60,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchApproval = useCallback(async (uid: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("approval_status, rejection_reason")
+      .select("approval_status, rejection_reason, preferred_language")
       .eq("id", uid)
       .maybeSingle();
     if (data) {
-      const profile = data as { approval_status?: ApprovalStatus | null; rejection_reason?: string | null };
+      const profile = data as { approval_status?: ApprovalStatus | null; rejection_reason?: string | null; preferred_language?: string | null };
       setApprovalStatus(profile.approval_status ?? "pending");
       setRejectionReason(profile.rejection_reason ?? null);
+      const lang = profile.preferred_language;
+      if (lang && ["nl", "en", "de", "fr"].includes(lang) && i18n.resolvedLanguage !== lang) {
+        i18n.changeLanguage(lang);
+        try { localStorage.setItem("viacust_lang", lang); } catch { /* ignore */ }
+      }
     }
   }, []);
 
