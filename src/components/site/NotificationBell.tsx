@@ -132,7 +132,7 @@ export const NotificationBell = () => {
 
   const clearAll = async () => {
     if (!user || items.length === 0) return;
-    if (!window.confirm("Alle meldingen wissen?")) return;
+    if (!window.confirm(t("notifBell.confirmClear"))) return;
     const ids = items.map((n) => n.id);
     setItems([]);
     await supabase.from("notifications").delete().in("id", ids);
