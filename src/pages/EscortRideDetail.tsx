@@ -140,7 +140,8 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
   );
 
 const Inner = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const fd = (d: string) => fmtDateTime(d, i18n.language);
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<RideDetail | null>(null);
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
