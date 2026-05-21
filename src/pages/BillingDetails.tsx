@@ -125,12 +125,13 @@ const VatField = ({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
 }) => {
+  const { t } = useTranslation();
   const [result, setResult] = useState<ViesResult>({ status: "idle" });
 
   const check = async () => {
     const v = (value || "").trim();
     if (v.length < 4) {
-      setResult({ status: "error", message: "Vul eerst een geldig btw-nummer in (incl. landcode)." });
+      setResult({ status: "error", message: t("billingExtra.viesFillFirst") });
       return;
     }
     setResult({ status: "checking" });
@@ -144,14 +145,14 @@ const VatField = ({
       }
       if (data?.valid) {
         setResult({ status: "valid", name: data.name, address: data.address });
-        toast.success("Btw-nummer geldig volgens VIES");
+        toast.success(t("billingExtra.viesValidToast"));
       } else if (data?.error === "vies_error") {
-        setResult({ status: "error", message: "VIES (EU) is tijdelijk niet bereikbaar. Probeer later opnieuw." });
+        setResult({ status: "error", message: t("billingExtra.viesTempUnavailable") });
       } else {
         setResult({ status: "invalid" });
       }
     } catch (e) {
-      setResult({ status: "error", message: e instanceof Error ? e.message : "Onbekende fout" });
+      setResult({ status: "error", message: e instanceof Error ? e.message : t("billingExtra.viesUnknownError") });
     }
   };
 
@@ -177,20 +178,20 @@ const VatField = ({
           disabled={result.status === "checking"}
           className="px-3 py-2 bg-brass-deep text-parchment text-[10px] uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50 whitespace-nowrap"
         >
-          {result.status === "checking" ? "Bezig…" : "Controleer (VIES)"}
+          {result.status === "checking" ? t("billingExtra.viesBusy") : t("billingExtra.viesCheckBtn")}
         </button>
       </div>
       {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
       {result.status === "valid" && (
         <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2">
-          ✓ Geldig volgens VIES
+          {t("billingExtra.viesValidBox")}
           {result.name ? <div className="mt-1 opacity-80">{result.name}</div> : null}
           {result.address ? <div className="opacity-70 whitespace-pre-line">{result.address}</div> : null}
         </div>
       )}
       {result.status === "invalid" && (
         <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2">
-          ✗ Niet geldig volgens VIES. Controleer landcode en nummer.
+          {t("billingExtra.viesInvalidBox")}
         </div>
       )}
       {result.status === "error" && (
@@ -293,8 +294,8 @@ const BillingDetailsInner = () => {
       return;
     }
     if (isEscort && !form.self_billing_mandate) {
-      setErrors({ self_billing_mandate: "Vereist om te kunnen factureren via ViaCust." });
-      toast.error("Bevestig de factuurvolmacht om door te gaan.");
+      setErrors({ self_billing_mandate: t("billingExtra.selfBillingRequired") });
+      toast.error(t("billingExtra.selfBillingConfirm"));
       return;
     }
     setErrors({});
@@ -461,7 +462,7 @@ const BillingDetailsInner = () => {
               {isEscort && (
                 <section className="space-y-3 border-t border-brass-deep/10 pt-6">
                   <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    Factuurvolmacht (self-billing)
+                    {t("billingExtra.selfBillingTitle")}
                   </h2>
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -471,8 +472,7 @@ const BillingDetailsInner = () => {
                       className="h-4 w-4 mt-0.5 accent-brass-gold shrink-0"
                     />
                     <span className="text-sm text-brass-deep/85 leading-relaxed">
-                      Ik verleen ViaCust volmacht om namens mijn bedrijf facturen op te stellen
-                      voor de door mij uitgevoerde ritten.
+                      {t("billingExtra.selfBillingText")}
                     </span>
                   </label>
                   {errors.self_billing_mandate && (

@@ -657,7 +657,7 @@ const Inner = () => {
                           });
                           if (error) throw error;
                           if (!data?.tiers || data.tiers.length === 0) {
-                            toast.error("Geen geldige staffel gevonden in PDF");
+                            toast.error(t("escortSettingsExtra.fuelNoTiers"));
                           } else {
                             setFuel((f) => ({
                               ...f,
@@ -668,10 +668,10 @@ const Inner = () => {
                                 value: String(t.value ?? 0),
                               })),
                             }));
-                            toast.success(`${data.tiers.length} drempels geladen — controleer hieronder`);
+                            toast.success(t("escortSettingsExtra.fuelTiersLoaded", { n: data.tiers.length }));
                           }
                         } catch (err: any) {
-                          toast.error(err?.message || "PDF kon niet verwerkt worden");
+                          toast.error(err?.message || t("escortSettingsExtra.fuelPdfFailed"));
                         } finally {
                           setFuelParsing(false);
                           e.target.value = "";
@@ -679,7 +679,7 @@ const Inner = () => {
                       }}
                       className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold disabled:opacity-50"
                     />
-                    {fuelParsing && <p className="text-[11px] text-brass-gold mt-2">PDF wordt uitgelezen…</p>}
+                    {fuelParsing && <p className="text-[11px] text-brass-gold mt-2">{t("escortSettingsExtra.fuelParsing")}</p>}
                   </div>
                 )}
                 {fuel.enabled && (

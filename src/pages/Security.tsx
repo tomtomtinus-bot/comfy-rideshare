@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +10,7 @@ import { Footer } from "@/components/site/Footer";
 type Factor = { id: string; status: string; friendly_name?: string | null };
 
 const Security = () => {
+  const { t } = useTranslation();
   const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -38,7 +40,6 @@ const Security = () => {
 
   const startEnroll = async () => {
     setBusy(true);
-    // Clean up any unverified factors first
     for (const f of factors.filter((x) => x.status !== "verified")) {
       await supabase.auth.mfa.unenroll({ factorId: f.id });
     }
@@ -53,7 +54,7 @@ const Security = () => {
 
   const verifyEnroll = async () => {
     if (!enroll) return;
-    if (!/^\d{6}$/.test(code)) return toast.error("Voer een 6-cijferige code in");
+    if (!/^\d{6}$/.test(code)) return toast.error(t("security.errSixDigits"));
     setBusy(true);
     const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId: enroll.factorId });
     if (cErr) { setBusy(false); return toast.error(cErr.message); }
@@ -64,7 +65,7 @@ const Security = () => {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Tweestapsverificatie geactiveerd");
+    toast.success(t("security.okEnabled"));
     setEnroll(null);
     setCode("");
     await refresh();
@@ -73,7 +74,7 @@ const Security = () => {
 
   const challengeExisting = async () => {
     if (!verified) return;
-    if (!/^\d{6}$/.test(code)) return toast.error("Voer een 6-cijferige code in");
+    if (!/^\d{6}$/.test(code)) return toast.error(t("security.errSixDigits"));
     setBusy(true);
     const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({ factorId: verified.id });
     if (cErr) { setBusy(false); return toast.error(cErr.message); }
@@ -84,7 +85,7 @@ const Security = () => {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Geverifieerd");
+    toast.success(t("security.okVerified"));
     setCode("");
     await refresh();
     if (forced) navigate("/admin", { replace: true });
@@ -92,13 +93,13 @@ const Security = () => {
 
   const disable = async () => {
     if (!verified) return;
-    if (isAdmin) return toast.error("Admins kunnen 2FA niet uitschakelen.");
-    if (!confirm("Tweestapsverificatie uitschakelen?")) return;
+    if (isAdmin) return toast.error(t("security.adminNoDisable"));
+    if (!confirm(t("security.confirmDisable"))) return;
     setBusy(true);
     const { error } = await supabase.auth.mfa.unenroll({ factorId: verified.id });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("2FA uitgeschakeld");
+    toast.success(t("security.okDisabled"));
     await refresh();
   };
 
@@ -107,27 +108,26 @@ const Security = () => {
       <Nav />
       <main className="px-6 md:px-8 py-12 md:py-16">
         <div className="max-w-2xl mx-auto bg-card shadow-etched p-8 md:p-10">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Beveiliging</p>
-          <h1 className="font-display text-4xl text-brass-deep italic mb-6">Tweestapsverificatie</h1>
+          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">{t("security.kicker")}</p>
+          <h1 className="font-display text-4xl text-brass-deep italic mb-6">{t("security.title")}</h1>
 
           {forced && (
             <div className="mb-6 p-4 border-l-2 border-brass-gold bg-parchment/60 text-sm text-brass-deep">
-              Als beheerder is tweestapsverificatie verplicht. Stel het hier in om door te gaan.
+              {t("security.forcedNotice")}
             </div>
           )}
 
           <p className="text-sm text-brass-deep/75 leading-relaxed mb-8">
-            Bescherm je account met een eenmalige code uit een authenticator-app (zoals Google Authenticator,
-            1Password of Authy). {isAdmin ? "Verplicht voor beheerders." : "Optioneel maar aanbevolen."}
+            {t("security.intro")} {isAdmin ? t("security.requiredAdmin") : t("security.optionalRecommended")}
           </p>
 
           {verified && !enroll && (
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-brass-deep/15">
                 <div>
-                  <div className="text-sm font-semibold text-brass-deep">2FA is actief</div>
+                  <div className="text-sm font-semibold text-brass-deep">{t("security.active")}</div>
                   <div className="text-xs text-brass-deep/60">
-                    Status sessie: {aal === "aal2" ? "geverifieerd (AAL2)" : "niet geverifieerd in deze sessie"}
+                    {t("security.sessionStatus")} {aal === "aal2" ? t("security.verifiedAal2") : t("security.notVerifiedSession")}
                   </div>
                 </div>
                 {!isAdmin && (
@@ -136,7 +136,7 @@ const Security = () => {
                     disabled={busy}
                     className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/70 hover:text-brass-deep border border-brass-deep/20 disabled:opacity-50"
                   >
-                    Uitschakelen
+                    {t("security.disable")}
                   </button>
                 )}
               </div>
@@ -144,7 +144,7 @@ const Security = () => {
               {aal !== "aal2" && (
                 <div className="p-4 border border-brass-gold/40 bg-parchment/60">
                   <p className="text-xs text-brass-deep/75 mb-3">
-                    Voer een code uit je authenticator-app in om deze sessie te verifiëren.
+                    {t("security.enterCodeSession")}
                   </p>
                   <div className="flex gap-2">
                     <input
@@ -159,7 +159,7 @@ const Security = () => {
                       disabled={busy}
                       className="px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-60"
                     >
-                      Verifieer
+                      {t("security.verifyBtn")}
                     </button>
                   </div>
                 </div>
@@ -173,25 +173,25 @@ const Security = () => {
               disabled={busy}
               className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
             >
-              {busy ? "Bezig…" : "2FA inschakelen"}
+              {busy ? t("security.busy") : t("security.enable2fa")}
             </button>
           )}
 
           {enroll && (
             <div className="space-y-5">
               <div className="text-sm text-brass-deep">
-                <p className="mb-3">1. Scan de QR-code met je authenticator-app:</p>
+                <p className="mb-3">{t("security.scanQr")}</p>
                 <div className="flex justify-center bg-white p-4 border border-brass-deep/15">
-                  <img src={enroll.qr} alt="QR code" className="w-48 h-48" />
+                  <img src={enroll.qr} alt={t("security.qrAlt")} className="w-48 h-48" />
                 </div>
                 <p className="mt-3 text-xs text-brass-deep/65">
-                  Of voer handmatig deze sleutel in:{" "}
+                  {t("security.orManual")}{" "}
                   <code className="bg-parchment px-2 py-1 break-all">{enroll.secret}</code>
                 </p>
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
-                  2. Voer de 6-cijferige code in
+                  {t("security.enter6")}
                 </label>
                 <input
                   value={code}
@@ -207,7 +207,7 @@ const Security = () => {
                   disabled={busy}
                   className="flex-1 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-60"
                 >
-                  Bevestig
+                  {t("security.confirm")}
                 </button>
                 <button
                   onClick={async () => {
@@ -218,7 +218,7 @@ const Security = () => {
                   }}
                   className="px-6 py-4 border border-brass-deep/20 text-xs uppercase tracking-widest text-brass-deep/70"
                 >
-                  Annuleer
+                  {t("security.cancel")}
                 </button>
               </div>
             </div>
