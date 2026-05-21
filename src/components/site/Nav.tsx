@@ -122,7 +122,7 @@ export const Nav = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Settings className="size-4" />
-                    Instellingen
+                    {t("landing.navSettings")}
                   </span>
                   <ChevronDown
                     className={`size-4 transition-transform ${settingsOpen ? "rotate-180" : ""}`}
