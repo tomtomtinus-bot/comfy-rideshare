@@ -145,7 +145,7 @@ export const NotificationBell = () => {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Meldingen"
+        aria-label={t("notifBell.ariaLabel")}
         aria-expanded={open}
         className="relative p-2 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
       >
