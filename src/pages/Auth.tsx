@@ -458,14 +458,14 @@ const Auth = () => {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="accent-brass-deep"
                     />
-                    <span>Blijf ingelogd</span>
+                    <span>{t("rememberMe")}</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setMode("forgot")}
                     className="text-xs text-brass-gold hover:text-brass-deep underline"
                   >
-                    Wachtwoord vergeten?
+                    {t("forgotPassword")}
                   </button>
                 </div>
               )}

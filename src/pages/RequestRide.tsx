@@ -1480,7 +1480,7 @@ const RequestRideInner = () => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                <AlertDialogCancel>{t("requestExtra.cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async () => {
                     setConfirmRemovePermit(false);

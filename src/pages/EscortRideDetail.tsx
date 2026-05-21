@@ -779,9 +779,9 @@ const Inner = () => {
                 title="Annulering"
                 badge={
                   cancelPending
-                    ? <Badge tone="info">In behandeling</Badge>
+                    ? <Badge tone="info">{t("escortRideDetail.badgePending")}</Badge>
                     : cancelRejected
-                      ? <Badge tone="alert">Afgewezen</Badge>
+                      ? <Badge tone="alert">{t("escortRideDetail.badgeRejected")}</Badge>
                       : null
                 }
               >
