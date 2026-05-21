@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
@@ -24,6 +25,7 @@ const links = [
 ];
 
 const InfoBelgie = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
@@ -31,19 +33,17 @@ const InfoBelgie = () => {
         <section className="pt-12 md:pt-20 pb-8 md:pb-12 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
           <div className="max-w-5xl mx-auto">
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-              Info — België
+              {t("infoBE.kicker")}
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[1.05] mb-4">
-              Voorschriften uitzonderlijk vervoer België
+              {t("infoBE.title")}
             </h1>
             <p className="text-base md:text-lg text-brass-deep/80 max-w-3xl leading-relaxed">
-              Officiële voorschriften voor transportbegeleiding en de geldende rijverboden voor
-              uitzonderlijk vervoer in België, inclusief directe links naar de netwerken en
-              reiswegen­planning van Wegen en Verkeer.
+              {t("infoBE.intro")}
             </p>
             <div className="mt-6">
               <Link to="/info/nederland" className="text-xs uppercase tracking-widest font-semibold text-brass-gold hover:underline">
-                → Bekijk de Nederlandse infopagina
+                {t("infoCommon.viewNL")}
               </Link>
             </div>
           </div>
@@ -54,39 +54,39 @@ const InfoBelgie = () => {
 
             <div>
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Voorschriften transportbegeleiding
+                {t("infoBE.prescriptionsTitle")}
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <Th>Aantal begeleiders</Th>
-                      <Th>1 begeleidingsvoertuig</Th>
-                      <Th>2 begeleidingsvoertuigen</Th>
-                      <Th>3 begeleidingsvoertuigen</Th>
+                      <Th>{t("infoCommon.numEscortsCol")}</Th>
+                      <Th>{t("infoCommon.oneEscortVehicle")}</Th>
+                      <Th>{t("infoCommon.twoEscortVehicles")}</Th>
+                      <Th>{t("infoCommon.threeEscortVehicles")}</Th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <Td><strong>Lengte</strong></Td>
+                      <Td><strong>{t("infoCommon.length")}</strong></Td>
                       <Td>&gt; 30 m en ≤ 35 m</Td>
                       <Td>&gt; 35 m en ≤ 40 m</Td>
                       <Td>&gt; 40 m</Td>
                     </tr>
                     <tr>
-                      <Td><strong>Breedte</strong></Td>
+                      <Td><strong>{t("infoCommon.width")}</strong></Td>
                       <Td>&gt; 3,5 m en ≤ 4,5 m</Td>
                       <Td>&gt; 4,5 m en ≤ 5 m</Td>
                       <Td>&gt; 5 m</Td>
                     </tr>
                     <tr>
-                      <Td><strong>Hoogte</strong></Td>
+                      <Td><strong>{t("infoCommon.height")}</strong></Td>
                       <Td>—</Td>
                       <Td>&gt; 4,8 m</Td>
                       <Td>—</Td>
                     </tr>
                     <tr>
-                      <Td><strong>Massa</strong></Td>
+                      <Td><strong>{t("infoCommon.mass")}</strong></Td>
                       <Td>&gt; 90 ton</Td>
                       <Td>&gt; 180 ton</Td>
                       <Td>—</Td>
@@ -95,67 +95,64 @@ const InfoBelgie = () => {
                 </table>
               </div>
               <div className="mt-4 text-sm text-brass-deep/80 leading-relaxed">
-                <p className="italic mb-2">
-                  Indien het uitzonderlijk voertuig één van volgende bewegingen moet uitvoeren,
-                  zijn er twee officiële begeleiders vereist:
-                </p>
+                <p className="italic mb-2">{t("infoBE.twoRequired")}</p>
                 <ul className="list-disc pl-5 space-y-1 text-brass-deep/80">
-                  <li>Wanneer tegenliggend of in de rijrichting rijdend verkeer moet worden gestopt op openbare wegen waar de toegelaten maximumsnelheid niet meer dan 70 km/u bedraagt.</li>
-                  <li>Wanneer op kruispunten met verkeerslichten het verkeer moet worden tegengehouden voor de tijd die het konvooi nodig heeft om het kruispunt te verlaten (bij rood licht).</li>
-                  <li>Wanneer op kruispunten zonder verkeerslichten het verkeer uit de tegenoverliggende straten moet worden tegengehouden.</li>
-                  <li>Om te verhinderen dat het verkeer uit dezelfde richting, rijdend achter het uitzonderlijk transport, dat transport zou voorbijsteken.</li>
+                  <li>{t("infoBE.twoBullet1")}</li>
+                  <li>{t("infoBE.twoBullet2")}</li>
+                  <li>{t("infoBE.twoBullet3")}</li>
+                  <li>{t("infoBE.twoBullet4")}</li>
                 </ul>
               </div>
             </div>
 
             <div>
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Rijverboden uitzonderlijk vervoer
+                {t("infoBE.bansTitle")}
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <Th>Gewone wegen</Th>
-                      <Th>Snelwegen</Th>
+                      <Th>{t("infoBE.regularRoads")}</Th>
+                      <Th>{t("infoBE.motorways")}</Th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <Td>Zaterdag van 12:00 tot maandag 00:01 *</Td>
-                      <Td>Zaterdag van 12:00 tot maandag 00:01 *</Td>
+                      <Td>{t("infoBE.ban1")}</Td>
+                      <Td>{t("infoBE.ban1")}</Td>
                     </tr>
                     <tr>
-                      <Td>Dag vóór een wettelijke feestdag vanaf 16:00 tot de feestdag zelf om 24:00 **</Td>
-                      <Td>Dag vóór een wettelijke feestdag vanaf 16:00 tot de feestdag zelf om 24:00 **</Td>
+                      <Td>{t("infoBE.ban2")}</Td>
+                      <Td>{t("infoBE.ban2")}</Td>
                     </tr>
                     <tr>
-                      <Td>Tussen 07:00 – 09:00 en tussen 16:00 – 18:00<br/><span className="text-brass-deep/60">Tenzij massa ≤ 60 t, breedte ≤ 3,50 m en lengte ≤ 27 m ***</span></Td>
-                      <Td>Tussen 07:00 – 09:00 en tussen 16:00 – 18:00<br/><span className="text-brass-deep/60">Tenzij ≤ 3,50 m breed of ≤ 27 m lang ***</span></Td>
+                      <Td><span className="whitespace-pre-line">{t("infoBE.ban3Reg")}</span></Td>
+                      <Td><span className="whitespace-pre-line">{t("infoBE.ban3Mot")}</span></Td>
                     </tr>
                     <tr>
-                      <Td>Tussen 06:00 – 21:00 voor alle transporten langer dan 30 m of breder dan 4 m ****</Td>
-                      <Td>Tussen 06:00 – 21:00 voor alle transporten langer dan 30 m of breder dan 3,50 m ****</Td>
+                      <Td>{t("infoBE.ban4Reg")}</Td>
+                      <Td>{t("infoBE.ban4Mot")}</Td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <div className="mt-4 space-y-2 text-xs text-brass-deep/70 italic leading-relaxed">
-                <p>* Behalve voor kraanauto&apos;s met massa &lt; 96 ton, of die niet breder zijn dan 3 m.</p>
-                <p>** Officiële feestdagen: 1 januari · paasmaandag · 1 mei · O.L.H. Hemelvaart · pinkstermaandag · 21 juli · 15 augustus · 1 en 11 november · 25 december.</p>
-                <p>*** Voor zover de vergunning geen voorschriften voorziet die invloed kunnen hebben op de doorstroming van het verkeer (specifieke manoeuvres of beperkte snelheid).</p>
-                <p>**** Het verkeer van uitzonderlijke voertuigen tot 4 m breed is op autosnelwegen uitzonderlijk toegelaten van 06:00 – 21:00 in de volgende gevallen:</p>
+                <p>{t("infoBE.foot1")}</p>
+                <p>{t("infoBE.foot2")}</p>
+                <p>{t("infoBE.foot3")}</p>
+                <p>{t("infoBE.foot4Intro")}</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Netwerk AB: snelwegen met minstens 3 rijstroken in de gevolgde rijrichting, behalve ter hoogte van op- en afritten.</li>
-                  <li>Netwerk 90 &amp; 120 T: autosnelwegen met twee rijstroken in de gevolgde rijrichting vermeld in de Netwerk-reiswegen. Niet geldig bij trajectvergunningen.</li>
+                  <li>{t("infoBE.foot4Bullet1")}</li>
+                  <li>{t("infoBE.foot4Bullet2")}</li>
                 </ul>
-                <p className="pt-2">Gebaseerd op de huidige wetgeving, onder voorbehoud van wijzigingen.</p>
+                <p className="pt-2">{t("infoBE.basedOn")}</p>
               </div>
             </div>
 
             <div>
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-6">
-                Belgische netwerken &amp; routeplanning
+                {t("infoBE.networksTitle")}
               </h2>
               <ul className="grid sm:grid-cols-2 gap-3">
                 {links.map((l) => (
@@ -176,7 +173,7 @@ const InfoBelgie = () => {
 
             <div className="border-t border-brass-deep/10 pt-8">
               <h2 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-4">
-                Officiële bronnen
+                {t("infoCommon.officialSources")}
               </h2>
               <ul className="space-y-2 text-sm">
                 <li>

@@ -117,77 +117,189 @@ const PrivacyNL = () => (
 
 const PrivacyEN = () => (
   <>
-    <h2>1. Introduction</h2>
-    <p>ViaCust processes personal data in accordance with the GDPR.</p>
+    <p>ViaCust (hereinafter: "we", "us" or "the platform") values the protection of your personal data. This statement explains which data we process via our web application and integrated Google Cloud services, in accordance with the GDPR and the Google API Services User Data Policy.</p>
 
-    <h2>2. Data Collection</h2>
-    <p>We collect names, emails, phone numbers, and company details. If linked, we process Google Calendar tokens to manage availability and ride assignments.</p>
+    <h2>1. Use of Google API Services (Limited Use Policy)</h2>
+    <p>ViaCust uses Google API services to automate transport accompaniment. Our use of information received via Google APIs complies with the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <ul>
+      <li><strong>Google Identity &amp; OAuth 2.0:</strong> Secure sign-in and authorisation. We receive your name, email address and profile photo for account personalisation.</li>
+      <li><strong>Google Calendar API (v3):</strong> Use of <code>freeBusy</code> (availability) and <code>calendar.events</code> (ride synchronisation). Data is used solely to place rides in your personal calendar and is not shared with third parties.</li>
+      <li><strong>Google Maps Platform:</strong> Use of the Maps JavaScript API and Geocoding API for address validation, map display and reverse geocoding GPS coordinates.</li>
+    </ul>
 
-    <h2>3. Purpose</h2>
-    <p>Data is used to facilitate transport accompaniment, manage accounts, and synchronize schedules.</p>
+    <h2>2. Data processing and purposes</h2>
+    <p>We process data exclusively for the following purposes:</p>
+    <ul>
+      <li><strong>Identification &amp; contact:</strong> Name, company details, VAT/CoC number, email and phone number to manage your account, billing and ride notifications.</li>
+      <li><strong>Administrative ride handling:</strong> Data on scheduled rides, order status and expenses entered by the escort for billing purposes.</li>
+      <li><strong>Temporary base location (GPS):</strong> If an escort manually activates the "I am here now" feature, we process the device's current GPS location to accurately calculate the travel time for ad-hoc rides (within 3 hours). This location data is temporary (valid for 2, 4, 8 or 12 hours of your choice), is not permanently stored for tracking and expires automatically.</li>
+      <li><strong>Planned base location:</strong> If an escort enters a future date, time window and location ("Planned base"), we store and process this location data solely to compute matching and pricing logic for future ride requests within that specific window.</li>
+      <li><strong>Push notifications:</strong> We process unique browser tokens to deliver live updates (such as acceptance timers and ride alerts) directly to your device via Web Push.</li>
+      <li><strong>Quality monitoring &amp; reviews:</strong> We process the reviews and feedback users leave about each other on the basis of our legitimate interest in safeguarding platform reliability.</li>
+      <li><strong>Network management and preference lists:</strong>
+        <ul>
+          <li>Clients: may maintain personal exclusion lists to filter specific escorts from their own rides.</li>
+          <li>Escorts: may manage their client portfolio by setting preferences for specific clients.</li>
+        </ul>
+      </li>
+      <li><strong>Multi-vehicle &amp; company accounts:</strong> If a user registers as a Company Planner, we process the company data for central billing. If this planner invites drivers, we process the email addresses and account data of those specific drivers. The Company Planner can view rides assigned to the driver, ride history and digital ride receipts for central planning and quality control.</li>
+    </ul>
 
-    <h2>4. Google API</h2>
-    <p>Our use of Google API data adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <h2>3. Validation of company data (VIES)</h2>
+    <p>To safeguard the platform's fiscal integrity and comply with European legislation on the reverse charge of VAT for cross-border services, ViaCust validates the VAT numbers you provide.</p>
+    <p>We use the European Commission's VIES system (VAT Information Exchange System).</p>
+    <p>During this check, your VAT number is sent to EU central systems to verify validity and the associated company name/address.</p>
+    <p>This data is only used to validate your account and produce fiscally correct invoices based on weekly fuel prices (including the TLN index).</p>
 
-    <h2>5. Storage</h2>
-    <p>Data is stored within the EU.</p>
+    <h2>4. Sub-processors</h2>
+    <p>We use the following trusted partners to operate the platform:</p>
+    <ul>
+      <li><strong>Supabase / Vercel:</strong> Data storage and hosting within the European Union (EU).</li>
+      <li><strong>Stripe:</strong> Secure processing of payments and billing flows.</li>
+      <li><strong>Google Cloud Platform:</strong> Map services, geocoding and OAuth authentication.</li>
+      <li><strong>Push notification services:</strong> The push services of your specific browser/operating system (such as Google Firebase Cloud Messaging or Apple Push Notification service) for delivering live alerts.</li>
+    </ul>
 
-    <h2>6. Rights</h2>
-    <p>You have the right to access, rectify, or delete your data at any time.</p>
+    <h2>5. Retention periods</h2>
+    <ul>
+      <li><strong>Fiscal data &amp; invoices:</strong> 7 years in line with the statutory tax record-keeping obligation.</li>
+      <li><strong>Temporary GPS location:</strong> Maximum 12 hours, or shorter if the selected timer expires or is cleared manually.</li>
+      <li><strong>Planned base location data:</strong> Automatically deleted from the database or anonymised once the time window provided by the escort has passed.</li>
+      <li><strong>Reviews:</strong> For as long as the associated account is active on the platform.</li>
+      <li><strong>OAuth tokens &amp; push tokens:</strong> Immediate and final deletion after disconnection or revocation in your browser.</li>
+      <li><strong>Linked driver accounts:</strong> Data of drivers linked to a company account is retained as long as the link between the driver profile and the company account is active, or until the main account is terminated.</li>
+    </ul>
 
-    <h2>7. Contact</h2>
-    <p><strong>ViaCust</strong> · <a href="mailto:info@viacust.com">info@viacust.com</a></p>
+    <h2>6. Your rights and contact</h2>
+    <p>You have the right to access, correct, transfer and delete your personal data at any time. You may also withdraw consent for push notifications or location services at any time via your browser or device settings.</p>
+    <p>For questions or to exercise your rights, contact us at: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />The Netherlands</p>
   </>
 );
 
 const PrivacyDE = () => (
   <>
-    <h2>1. Einleitung</h2>
-    <p>ViaCust verarbeitet personenbezogene Daten gemäß der DSGVO.</p>
+    <p>ViaCust (im Folgenden: „wir", „uns" oder „die Plattform") legt großen Wert auf den Schutz Ihrer personenbezogenen Daten. In dieser Erklärung erläutern wir, welche Daten wir über unsere Webanwendung und die integrierten Google-Cloud-Dienste verarbeiten, im Einklang mit der DSGVO und der Google API Services User Data Policy.</p>
 
-    <h2>2. Datenerhebung</h2>
-    <p>Wir erheben Namen, E-Mails, Telefonnummern und Unternehmensdaten. Bei Verknüpfung werden Google-Kalender-Tokens zur Verwaltung der Verfügbarkeit verarbeitet.</p>
+    <h2>1. Nutzung von Google API Services (Limited Use Policy)</h2>
+    <p>ViaCust nutzt Google-API-Dienste zur Automatisierung der Transportbegleitung. Unsere Nutzung von Informationen aus Google-APIs entspricht der <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <ul>
+      <li><strong>Google Identity &amp; OAuth 2.0:</strong> Sichere Anmeldung und Autorisierung. Wir erhalten Ihren Namen, Ihre E-Mail-Adresse und Ihr Profilbild zur Personalisierung Ihres Kontos.</li>
+      <li><strong>Google Calendar API (v3):</strong> Nutzung von <code>freeBusy</code> (Verfügbarkeit) und <code>calendar.events</code> (Synchronisierung von Fahrten). Daten werden ausschließlich zum Eintragen von Fahrten in Ihren persönlichen Kalender verwendet und nicht an Dritte weitergegeben.</li>
+      <li><strong>Google Maps Platform:</strong> Nutzung der Maps JavaScript API und der Geocoding API für Adressvalidierung, Kartendarstellung und Reverse-Geocoding von GPS-Koordinaten.</li>
+    </ul>
 
-    <h2>3. Zweck</h2>
-    <p>Die Daten dienen der Vermittlung von Transportbegleitungen und der Synchronisierung von Terminen.</p>
+    <h2>2. Datenverarbeitung und Zwecke</h2>
+    <p>Wir verarbeiten Daten ausschließlich zu folgenden Zwecken:</p>
+    <ul>
+      <li><strong>Identifikation &amp; Kontakt:</strong> Name, Firmendaten, USt-IdNr./HR-Nummer, E-Mail und Telefon zur Verwaltung Ihres Kontos, Rechnungsstellung und Fahrtbenachrichtigungen.</li>
+      <li><strong>Administrative Fahrtabwicklung:</strong> Daten zu geplanten Fahrten, Auftragsstatus und Auslagen des Begleiters zur Rechnungsstellung.</li>
+      <li><strong>Temporärer Standort (GPS):</strong> Aktiviert der Begleiter die Funktion „Ich bin jetzt hier", verarbeiten wir den aktuellen GPS-Standort des Geräts, um die Anfahrtszeit für Ad-hoc-Fahrten (innerhalb von 3 Stunden) präzise zu berechnen. Diese Standortdaten sind temporär (gültig 2, 4, 8 oder 12 Stunden nach Ihrer Wahl), werden nicht dauerhaft gespeichert und verfallen automatisch.</li>
+      <li><strong>Geplanter Standort:</strong> Trägt ein Begleiter ein zukünftiges Datum, Zeitfenster und einen Ort ein („Geplanter Standort"), speichern und verarbeiten wir diese Standortdaten ausschließlich zur Berechnung der Matching- und Tariflogik für künftige Anfragen in diesem Zeitfenster.</li>
+      <li><strong>Push-Benachrichtigungen:</strong> Wir verarbeiten eindeutige Browser-Tokens, um Live-Updates (z. B. Annahmetimer und Fahrthinweise) per Web Push direkt an Ihr Gerät zu senden.</li>
+      <li><strong>Qualitätssicherung &amp; Bewertungen:</strong> Wir verarbeiten Bewertungen und Feedback der Nutzer untereinander auf Grundlage unseres berechtigten Interesses an der Zuverlässigkeit der Plattform.</li>
+      <li><strong>Netzwerkverwaltung und Präferenzlisten:</strong>
+        <ul>
+          <li>Auftraggeber: können persönliche Sperrlisten führen, um bestimmte Begleiter für eigene Fahrten zu filtern.</li>
+          <li>Begleiter: können ihr Kundenportfolio durch Präferenzen für bestimmte Auftraggeber verwalten.</li>
+        </ul>
+      </li>
+      <li><strong>Multi-Fahrzeug- &amp; Firmenkonten:</strong> Registriert sich ein Nutzer als Firmenplaner, verarbeiten wir die Firmendaten für die zentrale Rechnungsstellung. Lädt dieser Planer Fahrer ein, verarbeiten wir deren E-Mail-Adressen und Kontodaten. Der Firmenplaner kann zugewiesene Fahrten, Fahrthistorie und digitale Fahrtbelege zur zentralen Planung und Qualitätskontrolle einsehen.</li>
+    </ul>
 
-    <h2>4. Google API</h2>
-    <p>Die Nutzung von Google-Daten entspricht der <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <h2>3. Validierung von Firmendaten (VIES)</h2>
+    <p>Um die steuerliche Integrität der Plattform zu wahren und die EU-Gesetzgebung zur Umkehrung der Steuerschuldnerschaft bei grenzüberschreitenden Dienstleistungen einzuhalten, validiert ViaCust die von Ihnen angegebenen USt-IdNrn.</p>
+    <p>Wir verwenden dazu das VIES-System (VAT Information Exchange System) der Europäischen Kommission.</p>
+    <p>Bei dieser Prüfung wird Ihre USt-IdNr. an EU-Systeme gesendet, um Gültigkeit sowie Firmenname/Adresse zu prüfen.</p>
+    <p>Diese Daten werden ausschließlich zur Validierung Ihres Kontos und zur Erstellung steuerkonformer Rechnungen anhand wöchentlicher Kraftstoffpreise (u. a. TLN-Index) verwendet.</p>
 
-    <h2>5. Speicherung</h2>
-    <p>Die Daten werden innerhalb der EU gespeichert.</p>
+    <h2>4. Unterauftragsverarbeiter</h2>
+    <p>Wir nutzen folgende vertrauenswürdige Partner für den Betrieb der Plattform:</p>
+    <ul>
+      <li><strong>Supabase / Vercel:</strong> Datenspeicherung und Hosting innerhalb der Europäischen Union (EU).</li>
+      <li><strong>Stripe:</strong> Sichere Verarbeitung von Zahlungen und Rechnungsabläufen.</li>
+      <li><strong>Google Cloud Platform:</strong> Kartendienste, Geocoding und OAuth-Authentifizierung.</li>
+      <li><strong>Push-Benachrichtigungsdienste:</strong> Push-Dienste Ihres Browsers/Betriebssystems (z. B. Google Firebase Cloud Messaging oder Apple Push Notification service) zur Zustellung von Live-Benachrichtigungen.</li>
+    </ul>
 
-    <h2>6. Rechte</h2>
-    <p>Sie haben das Recht auf Auskunft, Berichtigung oder Löschung Ihrer Daten.</p>
+    <h2>5. Speicherfristen</h2>
+    <ul>
+      <li><strong>Steuerdaten &amp; Rechnungen:</strong> 7 Jahre gemäß gesetzlicher Aufbewahrungspflicht.</li>
+      <li><strong>Temporärer GPS-Standort:</strong> maximal 12 Stunden oder kürzer bei Ablauf des Timers bzw. manuellem Löschen.</li>
+      <li><strong>Geplante Standortdaten:</strong> Automatische Löschung oder Anonymisierung nach Ablauf des angegebenen Zeitfensters.</li>
+      <li><strong>Bewertungen:</strong> Solange das zugehörige Konto auf der Plattform aktiv ist.</li>
+      <li><strong>OAuth-Tokens &amp; Push-Tokens:</strong> Sofortige und endgültige Löschung nach Trennung oder Widerruf im Browser.</li>
+      <li><strong>Verknüpfte Fahrerkonten:</strong> Daten verknüpfter Fahrer bleiben gespeichert, solange die Verknüpfung mit dem Firmenkonto aktiv ist oder bis das Hauptkonto beendet wird.</li>
+    </ul>
 
-    <h2>7. Kontakt</h2>
-    <p><strong>ViaCust</strong> · <a href="mailto:info@viacust.com">info@viacust.com</a></p>
+    <h2>6. Ihre Rechte und Kontakt</h2>
+    <p>Sie haben jederzeit das Recht auf Auskunft, Berichtigung, Übertragbarkeit und Löschung Ihrer personenbezogenen Daten. Zudem können Sie die Einwilligung zu Push-Benachrichtigungen oder Standortdiensten jederzeit über die Einstellungen Ihres Browsers oder Geräts widerrufen.</p>
+    <p>Für Fragen oder zur Ausübung Ihrer Rechte kontaktieren Sie uns unter: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Niederlande</p>
   </>
 );
 
 const PrivacyFR = () => (
   <>
-    <h2>1. Introduction</h2>
-    <p>ViaCust traite les données personnelles conformément au RGPD.</p>
+    <p>ViaCust (ci-après : « nous », « notre » ou « la plateforme ») accorde une grande importance à la protection de vos données personnelles. Cette déclaration explique quelles données nous traitons via notre application web et les services Google Cloud intégrés, conformément au RGPD et à la Google API Services User Data Policy.</p>
 
-    <h2>2. Collecte de données</h2>
-    <p>Nous collectons les noms, e-mails, numéros de téléphone et données d'entreprise. En cas de connexion, les jetons Google Calendar sont traités.</p>
+    <h2>1. Utilisation des services API Google (Limited Use Policy)</h2>
+    <p>ViaCust utilise les services API de Google pour automatiser l'accompagnement de transport. Notre utilisation des informations reçues via les API Google est conforme à la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <ul>
+      <li><strong>Google Identity &amp; OAuth 2.0 :</strong> Connexion et autorisation sécurisées. Nous recevons votre nom, votre adresse e-mail et votre photo de profil pour la personnalisation du compte.</li>
+      <li><strong>Google Calendar API (v3) :</strong> Utilisation de <code>freeBusy</code> (disponibilité) et <code>calendar.events</code> (synchronisation des courses). Les données sont utilisées uniquement pour inscrire les courses dans votre agenda personnel et ne sont pas partagées avec des tiers.</li>
+      <li><strong>Google Maps Platform :</strong> Utilisation de Maps JavaScript API et Geocoding API pour la validation d'adresses, l'affichage des cartes et le reverse-geocoding des coordonnées GPS.</li>
+    </ul>
 
-    <h2>3. Finalité</h2>
-    <p>Les données sont utilisées pour la mise en relation et la synchronisation des plannings.</p>
+    <h2>2. Traitement des données et finalités</h2>
+    <p>Nous traitons les données exclusivement pour les finalités suivantes :</p>
+    <ul>
+      <li><strong>Identification &amp; contact :</strong> Nom, données d'entreprise, numéro de TVA/CCI, e-mail et téléphone pour la gestion de votre compte, la facturation et les notifications de course.</li>
+      <li><strong>Traitement administratif des courses :</strong> Données relatives aux courses planifiées, statut de la mission et frais saisis par l'accompagnateur pour la facturation.</li>
+      <li><strong>Localisation temporaire (GPS) :</strong> Si un accompagnateur active manuellement la fonction « Je suis ici », nous traitons la position GPS actuelle de l'appareil afin de calculer précisément le temps de trajet pour les courses ad hoc (dans les 3 heures). Ces données sont temporaires (valables 2, 4, 8 ou 12 heures au choix), ne sont pas stockées de manière permanente et expirent automatiquement.</li>
+      <li><strong>Position planifiée :</strong> Si un accompagnateur saisit à l'avance une date, une plage horaire et un lieu (« Position planifiée »), nous stockons et traitons ces données uniquement pour calculer la logique de mise en relation et de tarification pour les futures demandes dans cette plage.</li>
+      <li><strong>Notifications push :</strong> Nous traitons des jetons de navigateur uniques pour envoyer des mises à jour en direct (minuteurs d'acceptation, alertes de course) directement sur votre appareil via Web Push.</li>
+      <li><strong>Contrôle qualité &amp; avis :</strong> Nous traitons les évaluations et retours laissés par les utilisateurs entre eux sur la base de notre intérêt légitime à garantir la fiabilité de la plateforme.</li>
+      <li><strong>Gestion du réseau et listes de préférences :</strong>
+        <ul>
+          <li>Donneurs d'ordre : peuvent tenir des listes d'exclusion personnelles afin de filtrer certains accompagnateurs pour leurs propres courses.</li>
+          <li>Accompagnateurs : peuvent gérer leur portefeuille clients en indiquant des préférences pour certains donneurs d'ordre.</li>
+        </ul>
+      </li>
+      <li><strong>Multi-véhicules &amp; comptes entreprise :</strong> Si un utilisateur s'inscrit en tant que planificateur d'entreprise, nous traitons les données de l'entreprise pour la facturation centralisée. Si ce planificateur invite des chauffeurs, nous traitons les adresses e-mail et données de compte de ces chauffeurs. Le planificateur d'entreprise peut consulter les courses assignées, l'historique et les bons de course numériques à des fins de planification et de contrôle qualité.</li>
+    </ul>
 
-    <h2>4. API Google</h2>
-    <p>L'utilisation des données Google respecte la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <h2>3. Validation des données d'entreprise (VIES)</h2>
+    <p>Pour garantir l'intégrité fiscale de la plateforme et respecter la législation européenne sur l'autoliquidation de la TVA pour les services transfrontaliers, ViaCust valide les numéros de TVA que vous fournissez.</p>
+    <p>Nous utilisons à cette fin le système VIES (VAT Information Exchange System) de la Commission européenne.</p>
+    <p>Lors de cette vérification, votre numéro de TVA est transmis aux systèmes de l'UE pour vérifier sa validité ainsi que le nom et l'adresse de l'entreprise associés.</p>
+    <p>Ces données sont uniquement utilisées pour valider votre compte et produire des factures fiscalement conformes basées sur les prix hebdomadaires du carburant (notamment l'indice TLN).</p>
 
-    <h2>5. Stockage</h2>
-    <p>Les données sont stockées au sein de l'UE.</p>
+    <h2>4. Sous-traitants</h2>
+    <p>Nous faisons appel aux partenaires de confiance suivants pour l'exploitation de la plateforme :</p>
+    <ul>
+      <li><strong>Supabase / Vercel :</strong> Stockage des données et hébergement au sein de l'Union européenne (UE).</li>
+      <li><strong>Stripe :</strong> Traitement sécurisé des paiements et des flux de facturation.</li>
+      <li><strong>Google Cloud Platform :</strong> Services cartographiques, géocodage et authentification OAuth.</li>
+      <li><strong>Services de notifications push :</strong> Les services push de votre navigateur/système d'exploitation (Google Firebase Cloud Messaging, Apple Push Notification service) pour la livraison des notifications en direct.</li>
+    </ul>
 
-    <h2>6. Droits</h2>
-    <p>Vous disposez d'un droit d'accès, de rectification ou de suppression de vos données.</p>
+    <h2>5. Durées de conservation</h2>
+    <ul>
+      <li><strong>Données fiscales &amp; factures :</strong> 7 ans conformément à l'obligation légale de conservation comptable.</li>
+      <li><strong>Localisation GPS temporaire :</strong> 12 heures maximum, ou moins si le minuteur choisi expire ou est désactivé manuellement.</li>
+      <li><strong>Données de position planifiée :</strong> Supprimées automatiquement de la base de données ou anonymisées une fois la plage horaire indiquée écoulée.</li>
+      <li><strong>Avis :</strong> Tant que le compte associé est actif sur la plateforme.</li>
+      <li><strong>Jetons OAuth &amp; jetons push :</strong> Suppression immédiate et définitive après déconnexion ou révocation depuis votre navigateur.</li>
+      <li><strong>Comptes chauffeurs liés :</strong> Les données des chauffeurs liés à un compte entreprise sont conservées tant que le lien est actif, ou jusqu'à la résiliation du compte principal.</li>
+    </ul>
 
-    <h2>7. Contact</h2>
-    <p><strong>ViaCust</strong> · <a href="mailto:info@viacust.com">info@viacust.com</a></p>
+    <h2>6. Vos droits et contact</h2>
+    <p>Vous disposez à tout moment du droit d'accès, de rectification, de portabilité et de suppression de vos données personnelles. Vous pouvez également retirer votre consentement pour les notifications push ou la localisation à tout moment via les paramètres de votre navigateur ou appareil.</p>
+    <p>Pour toute question ou pour exercer vos droits, contactez-nous à : <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Pays-Bas</p>
   </>
 );
+
 
 export default Privacy;

@@ -1,10 +1,12 @@
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check, MapPin, Star, X, Truck } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { escorts } from "@/data/escorts";
 
 const EscortProfile = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const escort = escorts.find((e) => e.id === id);
 
@@ -14,13 +16,13 @@ const EscortProfile = () => {
         <Nav />
         <main className="max-w-3xl mx-auto px-6 md:px-8 py-32 text-center">
           <h1 className="font-display text-5xl text-brass-deep italic mb-4">
-            Begeleider niet gevonden
+            {t("escortProfile.notFound")}
           </h1>
           <Link
             to="/begeleiders"
             className="inline-flex items-center gap-2 text-brass-gold uppercase tracking-widest text-sm font-semibold mt-6"
           >
-            <ArrowLeft className="size-4" /> Terug naar register
+            <ArrowLeft className="size-4" /> {t("escortProfile.backToRegister")}
           </Link>
         </main>
         <Footer />
@@ -38,13 +40,13 @@ const EscortProfile = () => {
               to="/begeleiders"
               className="inline-flex items-center gap-2 text-brass-deep/60 hover:text-brass-gold uppercase tracking-widest text-xs font-semibold mb-12 transition-colors"
             >
-              <ArrowLeft className="size-4" /> Terug naar register
+              <ArrowLeft className="size-4" /> {t("escortProfile.backToRegister")}
             </Link>
 
             <div className="grid grid-cols-12 gap-8 md:gap-12 items-end">
               <div className="col-span-12 lg:col-span-8">
                 <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
-                  Begeleidersprofiel · Anoniem
+                  {t("escortProfile.kicker")}
                 </p>
                 <div className="flex items-start gap-6">
                   <div className="size-20 md:size-24 bg-patina shadow-etched flex items-center justify-center text-base font-bold text-brass-deep tabular-nums shrink-0">
@@ -52,18 +54,18 @@ const EscortProfile = () => {
                   </div>
                   <div>
                     <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95]">
-                      Begeleider #{escort.anonymousId}
+                      {t("escortProfile.escortHash", { id: escort.anonymousId })}
                     </h1>
                     <p className="mt-3 text-brass-deep/60 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                       <span className="inline-flex items-center gap-1.5">
                         <MapPin className="size-3.5" />
-                        Standplaats {escort.city}, {escort.country}
+                        {t("escortProfile.baseAt", { city: escort.city, country: escort.country })}
                       </span>
                       <span className="inline-flex items-center gap-1.5">
                         <Star className="size-3.5 fill-brass-gold text-brass-gold" />
-                        {escort.rating.toFixed(1)} · {escort.ridesCompleted} konvooien
+                        {escort.rating.toFixed(1)} · {t("escortProfile.ridesCompleted", { n: escort.ridesCompleted })}
                       </span>
-                      <span>{escort.yearsActive}+ jaar actief</span>
+                      <span>{t("escortProfile.yearsActive", { n: escort.yearsActive })}</span>
                     </p>
                   </div>
                 </div>
@@ -75,20 +77,20 @@ const EscortProfile = () => {
               <div className="col-span-12 lg:col-span-4">
                 <div className="bg-card shadow-etched p-8">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
-                    Uurtarief
+                    {t("escortProfile.hourlyRate")}
                   </p>
                   <p className="font-display text-5xl text-brass-deep tabular-nums">
                     €{escort.hourlyRate}
-                    <span className="text-xl text-brass-deep/50">/uur</span>
+                    <span className="text-xl text-brass-deep/50">{t("escortProfile.perHour")}</span>
                   </p>
                   <p className="mt-2 text-[11px] text-brass-deep/50 leading-relaxed">
-                    Vanaf vertrek standplaats tot terugkeer. Servicekosten: 1,5% van het ritbedrag (wekelijks).
+                    {t("escortProfile.fromBaseHint")}
                   </p>
                   <Link
                     to="/aanvragen"
                     className="block text-center mt-6 w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
                   >
-                    Vraag konvooi aan
+                    {t("escortProfile.requestConvoy")}
                   </Link>
                 </div>
               </div>
@@ -99,9 +101,9 @@ const EscortProfile = () => {
         <section className="px-6 md:px-8 py-20 md:py-24 bg-patina/30">
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-px bg-brass-deep/10">
             <article className="bg-card p-8 lg:p-10">
-              <h2 className="font-display text-3xl text-brass-deep mb-1">Certificering</h2>
+              <h2 className="font-display text-3xl text-brass-deep mb-1">{t("escortProfile.certification")}</h2>
               <p className="text-xs uppercase tracking-widest text-brass-gold font-semibold mb-8">
-                Onafhankelijk getoetst
+                {t("escortProfile.independentlyVerified")}
               </p>
               <ul className="space-y-4">
                 {escort.verifications.map((v) => (
@@ -109,11 +111,11 @@ const EscortProfile = () => {
                     <span className="text-sm">{v.label}</span>
                     {v.verified ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brass-gold uppercase tracking-widest shrink-0">
-                        <Check className="size-3.5" strokeWidth={3} /> Geldig
+                        <Check className="size-3.5" strokeWidth={3} /> {t("escortProfile.valid")}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brass-deep/40 uppercase tracking-widest shrink-0">
-                        <X className="size-3.5" strokeWidth={3} /> Niet
+                        <X className="size-3.5" strokeWidth={3} /> {t("escortProfile.notValid")}
                       </span>
                     )}
                   </li>
@@ -122,12 +124,12 @@ const EscortProfile = () => {
             </article>
 
             <article className="bg-card p-8 lg:p-10">
-              <h2 className="font-display text-3xl text-brass-deep mb-1">Categorieën & werkgebied</h2>
+              <h2 className="font-display text-3xl text-brass-deep mb-1">{t("escortProfile.categoriesArea")}</h2>
               <p className="text-xs uppercase tracking-widest text-brass-gold font-semibold mb-8">
-                Mag begeleiden
+                {t("escortProfile.mayEscort")}
               </p>
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
-                Categorieën
+                {t("escortProfile.categoriesLabel")}
               </p>
               <div className="flex flex-wrap gap-2 mb-6">
                 {escort.categories.map((c) => (
@@ -137,18 +139,18 @@ const EscortProfile = () => {
                 ))}
               </div>
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
-                Type begeleiding
+                {t("escortProfile.escortTypes")}
               </p>
               <ul className="space-y-2 mb-6">
-                {escort.escortTypes.map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-sm">
+                {escort.escortTypes.map((et) => (
+                  <li key={et} className="flex items-center gap-3 text-sm">
                     <span className="size-1.5 bg-brass-gold rounded-full" />
-                    {t}
+                    {et}
                   </li>
                 ))}
               </ul>
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
-                Landen
+                {t("escortProfile.countries")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {escort.countries.map((c) => (
@@ -160,9 +162,9 @@ const EscortProfile = () => {
             </article>
 
             <article className="bg-card p-8 lg:p-10">
-              <h2 className="font-display text-3xl text-brass-deep mb-1">Pilotvoertuig & toeslagen</h2>
+              <h2 className="font-display text-3xl text-brass-deep mb-1">{t("escortProfile.pilotVehicleSurcharges")}</h2>
               <p className="text-xs uppercase tracking-widest text-brass-gold font-semibold mb-8">
-                Uitrusting & prijsopbouw
+                {t("escortProfile.equipmentPricing")}
               </p>
               <div className="flex items-start gap-3 mb-4">
                 <Truck className="size-4 mt-0.5 text-brass-gold shrink-0" />
@@ -170,26 +172,26 @@ const EscortProfile = () => {
               </div>
               <ul className="space-y-2 mb-6 text-xs">
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
-                  <span>Hoogte-meetstok</span>
+                  <span>{t("escortProfile.heightPole")}</span>
                   <span className={escort.pilotVehicle.heightPole ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
-                    {escort.pilotVehicle.heightPole ? "Aanwezig" : "Niet"}
+                    {escort.pilotVehicle.heightPole ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
-                  <span>Zwaailichtbalk</span>
+                  <span>{t("escortProfile.lightbar")}</span>
                   <span className={escort.pilotVehicle.lightbar ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
-                    {escort.pilotVehicle.lightbar ? "Aanwezig" : "Niet"}
+                    {escort.pilotVehicle.lightbar ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
-                  <span>Bord 'Konvooi Uitzonderlijk Vervoer'</span>
+                  <span>{t("escortProfile.konvooiSign")}</span>
                   <span className={escort.pilotVehicle.konvooiSign ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
-                    {escort.pilotVehicle.konvooiSign ? "Aanwezig" : "Niet"}
+                    {escort.pilotVehicle.konvooiSign ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
               </ul>
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-3">
-                Toeslagen
+                {t("escortProfile.surcharges")}
               </p>
               <ul className="space-y-3">
                 {escort.surcharges.map((s) => (

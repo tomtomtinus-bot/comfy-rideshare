@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,6 +146,7 @@ function splitAddress(addr: string): { street: string; number: string } {
 }
 
 const Inner = () => {
+  const { t } = useTranslation();
   const { user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -314,19 +316,19 @@ const Inner = () => {
       setCoords({ lat: c.lat, lng: c.lng });
       setDirty(true);
     } else {
-      toast.error("Adres niet gevonden — controleer postcode/huisnummer");
+      toast.error(t("escortSettings.addressNotFound"));
     }
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!user || !e.target.files?.length) return;
     const f = e.target.files[0];
-    if (f.size > 10 * 1024 * 1024) return toast.error("Max 10 MB");
+    if (f.size > 10 * 1024 * 1024) return toast.error(t("escortSettings.maxSize"));
     const path = `${user.id}/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error } = await supabase.storage.from("escort-certificates").upload(path, f);
     if (error) return toast.error(error.message);
     setFiles((s) => [...s, path]);
-    toast.success("Certificaat geüpload");
+    toast.success(t("escortSettings.certUploaded"));
     e.target.value = "";
   };
 
@@ -364,12 +366,12 @@ const Inner = () => {
       insurancePolicy: fd.get("insurancePolicy") ?? "",
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!coords) return toast.error("Locatie niet bepaald — controleer postcode");
-    if (categories.length === 0) return toast.error("Kies minimaal één land/certificering");
+    if (!coords) return toast.error(t("escortSettings.locationNotSet"));
+    if (categories.length === 0) return toast.error(t("escortSettings.pickAtLeastOneCountry"));
 
     const derivedCountries = countriesFromCategories(categories);
     if (derivedCountries.length === 0) {
-      return toast.error("Kies minimaal één land/certificering");
+      return toast.error(t("escortSettings.pickAtLeastOneCountry"));
     }
 
     setBusy(true);
@@ -430,7 +432,7 @@ const Inner = () => {
       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
       draftRef.current = {};
     }
-    toast.success("Profiel bijgewerkt");
+    toast.success(t("escortSettings.profileSaved"));
     navigate("/dashboard");
   };
 
@@ -439,7 +441,7 @@ const Inner = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main className="max-w-2xl mx-auto px-6 py-24">
-          <p className="text-brass-deep/60">Deze pagina is alleen voor begeleiders.</p>
+          <p className="text-brass-deep/60">{t("escortSettings.onlyForEscorts")}</p>
         </main>
         <Footer />
       </div>
@@ -452,14 +454,14 @@ const Inner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Begeleider {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
+            {t("escortSettings.headerKicker")} {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
           </p>
           <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic mb-10">
-            Mijn profiel
+            {t("escortSettings.title")}
           </h1>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : (
             <>
               <GoogleCalendarCard />
@@ -478,12 +480,10 @@ const Inner = () => {
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60">
-                  Je <strong>naam</strong> en <strong>telefoonnummer</strong> worden pas met de opdrachtgever gedeeld nadat je een rit hebt geaccepteerd.
-                </p>
+                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Volledige naam</Label>
+                    <Label>{t("escortSettings.fullName")}</Label>
                     <input
                       value={fullName}
                       onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
@@ -491,7 +491,7 @@ const Inner = () => {
                     />
                   </div>
                   <div>
-                    <Label>Telefoonnummer</Label>
+                    <Label>{t("escortSettings.phone")}</Label>
                     <input
                       type="tel"
                       value={phone}
@@ -503,15 +503,11 @@ const Inner = () => {
               </section>
 
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60">
-                  Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
-                </p>
-                <p className="text-[11px] text-brass-deep/55 italic">
-                  Je standplaats wordt berekend op basis van je postcode en gebruikt om de aan- en afvoertijd (leegrijden naar pickup en terug) per rit te berekenen. Vul daarom je werkelijke vertreklocatie in.
-                </p>
+                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
+                <p className="text-[11px] text-brass-deep/55 italic">{t("escortSettings.baseLocationHint")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Postcode</Label>
+                    <Label>{t("escortSettings.postcode")}</Label>
                     <input
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
@@ -520,7 +516,7 @@ const Inner = () => {
                     />
                   </div>
                   <div>
-                    <Label>Huisnummer</Label>
+                    <Label>{t("escortSettings.houseNumber")}</Label>
                     <input
                       value={houseNumber}
                       onChange={(e) => setHouseNumber(e.target.value)}
@@ -529,31 +525,31 @@ const Inner = () => {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <Label>Straat & plaats (automatisch)</Label>
+                    <Label>{t("escortSettings.streetCityAuto")}</Label>
                     <input
                       readOnly
                       value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
-                      placeholder={lookupBusy ? "Adres ophalen…" : "Wordt ingevuld na postcode + huisnummer"}
+                      placeholder={(lookupBusy ? t("escortSettings.lookingUp") : t("escortSettings.fillFromPostcode")) as string}
                       className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
                     />
                     <p className="text-[10px] text-brass-deep/50 mt-1">
-                      {lookupBusy ? "Adres ophalen…" : street ? `${street} ${houseNumber}, ${city}` : "Voor BE/DE/FR wordt alleen de plaats opgehaald — vul de straat handmatig aan via de postcode/huisnummer."}
+                      {lookupBusy ? t("escortSettings.lookingUp") : street ? `${street} ${houseNumber}, ${city}` : t("escortSettings.addressFooter")}
                     </p>
                   </div>
                   {categories.includes("nl") && (
-                    <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={dv("hourlyRate", String(profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRate" type="number" step="0.01" label={t("escortSettings.hourlyRateNL") as string} defaultValue={dv("hourlyRate", String(profile?.hourly_rate ?? 55))} />
                   )}
                   {(categories.includes("be-1") || categories.includes("be-2")) && (
-                    <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={dv("hourlyRateBe", String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateBe" type="number" step="0.01" label={t("escortSettings.hourlyRateBE") as string} defaultValue={dv("hourlyRateBe", String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
-                    <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={dv("hourlyRateDe", String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateDe" type="number" step="0.01" label={t("escortSettings.hourlyRateDE") as string} defaultValue={dv("hourlyRateDe", String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("fr") && (
-                    <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={dv("hourlyRateFr", String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateFr" type="number" step="0.01" label={t("escortSettings.hourlyRateFR") as string} defaultValue={dv("hourlyRateFr", String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("lu") && (
-                    <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={dv("hourlyRateLu", String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateLu" type="number" step="0.01" label={t("escortSettings.hourlyRateLU") as string} defaultValue={dv("hourlyRateLu", String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
                     <div>
@@ -561,28 +557,28 @@ const Inner = () => {
                         name="kmRateDe"
                         type="number"
                         step="0.01"
-                        label="Km-tarief Duitsland (€/km, optioneel)"
+                        label={t("escortSettings.kmRateDE") as string}
                         defaultValue={dv(
                           "kmRateDe",
                           (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
                         )}
                       />
                       <p className="text-[10px] text-brass-deep/50 mt-1">
-                        Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
+                        {t("escortSettings.kmRateDEHint")}
                       </p>
                     </div>
                   )}
-                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={dv("minBillableHours", String((profile as any)?.min_billable_hours ?? 0))} />
+                  <Input name="minBillableHours" type="number" step="0.25" label={t("escortSettings.minBillable") as string} defaultValue={dv("minBillableHours", String((profile as any)?.min_billable_hours ?? 0))} />
                   <Input
                     name="vehicleType"
-                    label="Pilotvoertuig (type & kenmerk)"
+                    label={t("escortSettings.pilotVehicleType") as string}
                     defaultValue={dv("vehicleType", profile?.vehicle_type ?? "")}
                   />
                 </div>
               </section>
 
               <section>
-                <Label>Landen gecertificeerd</Label>
+                <Label>{t("escortSettings.countriesCertified")}</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {COUNTRY_CERTS.map((c) => (
                     <Toggle key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((s) => toggle(s, c.id))}>
@@ -593,9 +589,9 @@ const Inner = () => {
               </section>
 
               <section>
-                <Label>Talen die ik spreek</Label>
+                <Label>{t("escortSettings.languagesSpoken")}</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-2">
-                  Selecteer alle talen waarin je opdrachtgevers en chauffeurs te woord kunt staan.
+                  {t("escortSettings.languagesHint")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {LANGUAGES.map((l) => (
@@ -615,11 +611,11 @@ const Inner = () => {
                 if (baseCountry === "be" || baseCountry === "fr") return null;
                 return (
               <section>
-                <Label>Brandstoftoeslag (staffel)</Label>
+                <Label>{t("escortSettings.fuelTitle")}</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Wordt automatisch berekend op basis van de gemiddelde Nederlandse dieselprijs (CBS) van de gefactureerde week.
+                  {t("escortSettings.fuelIntro")}
                   {currentFuel && (
-                    <> Huidige weekprijs: <strong>€{Number(currentFuel.eur_per_liter).toFixed(3)}/l</strong> (week {currentFuel.week_start}).</>
+                    <> <span dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelCurrentPrice", { p: Number(currentFuel.eur_per_liter).toFixed(3), w: currentFuel.week_start }) }} /></>
                   )}
                 </p>
                 <label className="flex items-center gap-2 mb-3 text-sm">
@@ -628,13 +624,11 @@ const Inner = () => {
                     checked={fuel.enabled}
                     onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
                   />
-                  Brandstoftoeslag toepassen op mijn facturen
+                  {t("escortSettings.fuelEnable")}
                 </label>
                 {fuel.enabled && (
                   <div className="mb-3 p-3 bg-parchment border border-brass-deep/15">
-                    <p className="text-[11px] text-brass-deep/70 mb-2">
-                      <strong>Staffel-PDF uploaden?</strong> Wij lezen de tiers automatisch uit en vullen de tabel hieronder in. Controleer altijd het resultaat.
-                    </p>
+                    <p className="text-[11px] text-brass-deep/70 mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
                     <input
                       type="file"
                       accept="application/pdf,.pdf"
@@ -643,7 +637,7 @@ const Inner = () => {
                         const file = e.target.files?.[0];
                         if (!file || !user) return;
                         if (file.size > 10 * 1024 * 1024) {
-                          toast.error("PDF mag max 10 MB zijn");
+                          toast.error(t("escortSettings.fuelMaxSize"));
                           return;
                         }
                         setFuelParsing(true);
@@ -691,30 +685,30 @@ const Inner = () => {
                 {fuel.enabled && (
                   <>
                     <div className="flex gap-2 mb-2 text-sm">
-                      <span className="text-brass-deep/60">Toeslag-eenheid:</span>
+                      <span className="text-brass-deep/60">{t("escortSettings.fuelUnit")}</span>
                       <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> € per uur
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> {t("escortSettings.fuelPerHour")}
                       </label>
                       <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> % van uurtarief
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> {t("escortSettings.fuelPercent")}
                       </label>
                     </div>
                     <div className="space-y-2">
                       <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
-                        <div className="col-span-4">Dieselprijs vanaf (€/l)</div>
-                        <div className="col-span-4">tot (€/l, leeg = ∞)</div>
-                        <div className="col-span-3">{fuel.kind === "percent" ? "% uurtarief" : "€ / uur"}</div>
+                        <div className="col-span-4">{t("escortSettings.fuelFromCol")}</div>
+                        <div className="col-span-4">{t("escortSettings.fuelToCol")}</div>
+                        <div className="col-span-3">{fuel.kind === "percent" ? t("escortSettings.fuelValueColPct") : t("escortSettings.fuelValueColEur")}</div>
                       </div>
-                      {fuel.tiers.map((t, i) => (
+                      {fuel.tiers.map((t2, i) => (
                         <div key={i} className="grid grid-cols-12 gap-2">
-                          <input value={t.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
                           <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15">×</button>
                         </div>
                       ))}
                       <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
-                        + Drempel toevoegen
+                        {t("escortSettings.fuelAddTier")}
                       </button>
                     </div>
                   </>
@@ -724,19 +718,15 @@ const Inner = () => {
               })()}
 
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
-                <p className="text-sm text-brass-deep/80">
-                  Je beschikbaarheid loopt voortaan via <strong>Google Agenda</strong>. Plaats verlof,
-                  persoonlijke afspraken of vakantie direct in je eigen agenda — de planner overslaat je
-                  automatisch als je bezet bent (incl. reistijd heen en terug).
-                </p>
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">{t("escortSettings.availability")}</p>
+                <p className="text-sm text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
               </section>
 
               <button
                 disabled={busy}
                 className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
               >
-                {busy ? "Bezig…" : "Profiel opslaan"}
+                {busy ? t("escortSettings.busy") : t("escortSettings.saveProfile")}
               </button>
             </form>
             </>
