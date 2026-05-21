@@ -69,6 +69,11 @@ const MONTHS_NL = [
   "Januari", "Februari", "Maart", "April", "Mei", "Juni",
   "Juli", "Augustus", "September", "Oktober", "November", "December",
 ];
+const monthName = (idx: number, lng: string) => {
+  const locale = lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB";
+  const name = new Date(2000, idx, 1).toLocaleString(locale, { month: "long" });
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
 
 const isoWeek = (date: Date): number => {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
