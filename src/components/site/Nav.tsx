@@ -27,21 +27,21 @@ export const Nav = () => {
     { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
     { to: "/facturen", label: t("nav.invoices"), show: showFinance },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
-    { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
-    { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
-    { to: "/voorkeursopdrachtgevers", label: "Mijn Voorkeursopdrachtgevers", show: showPlannerOnly },
-    { to: "/team", label: "Mijn team", show: showPlannerOnly && isPlanner },
+    { to: "/brandstofprijzen", label: t("landing.navFuel"), show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
+    { to: "/uitgesloten-begeleiders", label: t("landing.navPool"), show: !!user && role === "opdrachtgever" },
+    { to: "/voorkeursopdrachtgevers", label: t("landing.navPreferred"), show: showPlannerOnly },
+    { to: "/team", label: t("landing.navTeam"), show: showPlannerOnly && isPlanner },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
-    { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
-    { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
-    { to: "/faq", label: "FAQ", show: true },
+    { to: "/wat-kost-viacust", label: t("landing.navCost"), show: true },
+    { to: "/hoe-werkt-viacust", label: t("landing.navHow"), show: true },
+    { to: "/faq", label: t("landing.navFaq"), show: true },
   ];
 
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
-    { to: "/abonnement", label: "Abonnement", show: showFinance && (role === "begeleider" || role === "opdrachtgever") },
-    { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
-    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: showFinance },
-    { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
+    { to: "/abonnement", label: t("landing.navSubscription"), show: showFinance && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/profiel", label: t("landing.navProfileSettings"), show: !!user && role === "begeleider" },
+    { to: "/facturatiegegevens", label: t("landing.navBillingDetails"), show: showFinance },
+    { to: "/beveiliging", label: t("landing.navSecurity"), show: !!user },
   ];
 
   return (
