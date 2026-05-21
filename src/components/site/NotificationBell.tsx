@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
-const dfLocale: Record<string, Locale> = { nl, en: enGB, de, fr };
+const dfLocale: Record<string, typeof nl> = { nl, en: enGB, de, fr };
 
 
 type Notification = {
