@@ -27,21 +27,21 @@ export const Nav = () => {
     { to: "/aanvragen", label: t("nav.request"), show: role !== "begeleider" },
     { to: "/facturen", label: t("nav.invoices"), show: showFinance },
     { to: "/geschiedenis", label: t("nav.history"), show: !!user },
-    { to: "/brandstofprijzen", label: "Brandstofprijzen", show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
-    { to: "/uitgesloten-begeleiders", label: "Mijn Begeleiders-pool", show: !!user && role === "opdrachtgever" },
-    { to: "/voorkeursopdrachtgevers", label: "Mijn Voorkeursopdrachtgevers", show: showPlannerOnly },
-    { to: "/team", label: "Mijn team", show: showPlannerOnly && isPlanner },
+    { to: "/brandstofprijzen", label: t("landing.navFuel"), show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
+    { to: "/uitgesloten-begeleiders", label: t("landing.navPool"), show: !!user && role === "opdrachtgever" },
+    { to: "/voorkeursopdrachtgevers", label: t("landing.navPreferred"), show: showPlannerOnly },
+    { to: "/team", label: t("landing.navTeam"), show: showPlannerOnly && isPlanner },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
-    { to: "/wat-kost-viacust", label: "Wat kost ViaCust", show: true },
-    { to: "/hoe-werkt-viacust", label: "Hoe werkt ViaCust", show: true },
-    { to: "/faq", label: "FAQ", show: true },
+    { to: "/wat-kost-viacust", label: t("landing.navCost"), show: true },
+    { to: "/hoe-werkt-viacust", label: t("landing.navHow"), show: true },
+    { to: "/faq", label: t("landing.navFaq"), show: true },
   ];
 
   const settingsLinks: { to: string; label: string; show: boolean }[] = [
-    { to: "/abonnement", label: "Abonnement", show: showFinance && (role === "begeleider" || role === "opdrachtgever") },
-    { to: "/profiel", label: "Profielinstellingen", show: !!user && role === "begeleider" },
-    { to: "/facturatiegegevens", label: "Facturatiegegevens", show: showFinance },
-    { to: "/beveiliging", label: "Beveiliging & e-mail", show: !!user },
+    { to: "/abonnement", label: t("landing.navSubscription"), show: showFinance && (role === "begeleider" || role === "opdrachtgever") },
+    { to: "/profiel", label: t("landing.navProfileSettings"), show: !!user && role === "begeleider" },
+    { to: "/facturatiegegevens", label: t("landing.navBillingDetails"), show: showFinance },
+    { to: "/beveiliging", label: t("landing.navSecurity"), show: !!user },
   ];
 
   return (
@@ -122,7 +122,7 @@ export const Nav = () => {
                 >
                   <span className="flex items-center gap-2">
                     <Settings className="size-4" />
-                    Instellingen
+                    {t("landing.navSettings")}
                   </span>
                   <ChevronDown
                     className={`size-4 transition-transform ${settingsOpen ? "rotate-180" : ""}`}
@@ -146,7 +146,7 @@ export const Nav = () => {
             )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10 px-3 pb-2 md:hidden">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">
-                Taal
+                {t("landing.navLanguage")}
               </p>
               <LanguageSwitcher />
             </div>
@@ -155,7 +155,7 @@ export const Nav = () => {
                 <>
                   <div className="px-3 py-2 mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
-                      Ingelogd als
+                      {t("landing.navLoggedInAs")}
                     </p>
                     <p className="text-sm font-semibold text-brass-deep truncate">
                       {(user.user_metadata as { full_name?: string; name?: string } | null)?.full_name

@@ -34,27 +34,27 @@ export const Footer = () => {
             <ul className="text-sm space-y-2">
               <li>
                 <Link to="/hoe-werkt-viacust" className="hover:text-brass-gold transition-colors">
-                  Over ViaCust
+                  {t("landing.footerAbout")}
                 </Link>
               </li>
               <li>
                 <Link to="/hoe-werkt-viacust" className="hover:text-brass-gold transition-colors">
-                  Hoe werkt het?
+                  {t("landing.footerHow")}
                 </Link>
               </li>
               <li>
                 <Link to="/wat-kost-viacust" className="hover:text-brass-gold transition-colors">
-                  Tarieven
+                  {t("landing.footerPricing")}
                 </Link>
               </li>
               <li>
                 <Link to="/info/nederland" className="hover:text-brass-gold transition-colors">
-                  Info Nederland
+                  {t("landing.footerInfoNL")}
                 </Link>
               </li>
               <li>
                 <Link to="/info/belgie" className="hover:text-brass-gold transition-colors">
-                  Info België
+                  {t("landing.footerInfoBE")}
                 </Link>
               </li>
             </ul>
@@ -66,17 +66,17 @@ export const Footer = () => {
             <ul className="text-sm space-y-2">
               <li>
                 <Link to="/voorwaarden" className="hover:text-brass-gold transition-colors">
-                  Algemene Voorwaarden
+                  {t("landing.footerTerms")}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="hover:text-brass-gold transition-colors">
-                  Privacybeleid
+                  {t("landing.footerPrivacy")}
                 </Link>
               </li>
               <li>
                 <a href="mailto:support@viacust.com" className="hover:text-brass-gold transition-colors">
-                  Contact
+                  {t("landing.footerContact")}
                 </a>
               </li>
             </ul>
@@ -86,10 +86,10 @@ export const Footer = () => {
               {t("home.footer.activeIn")}
             </p>
             <ul className="text-sm space-y-2 tabular-nums">
-              <li>🇳🇱 Nederland</li>
-              <li>🇧🇪 België</li>
-              <li>🇩🇪 Duitsland</li>
-              <li>🇫🇷 Frankrijk</li>
+              <li>🇳🇱 {t("landing.countryNL")}</li>
+              <li>🇧🇪 {t("landing.countryBE")}</li>
+              <li>🇩🇪 {t("landing.countryDE")}</li>
+              <li>🇫🇷 {t("landing.countryFR")}</li>
             </ul>
           </div>
         </div>

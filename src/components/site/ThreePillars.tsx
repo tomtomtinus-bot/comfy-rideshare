@@ -1,24 +1,13 @@
 import { Calendar, Receipt, Globe2 } from "lucide-react";
-
-const pillars = [
-  {
-    icon: Calendar,
-    title: "Google Agenda Sync",
-    body: "Uw agenda is uw planning. Zodra een rit is geaccepteerd, staat deze in uw agenda. Privé-afspraken blokkeren automatisch uw beschikbaarheid. Nooit meer dubbele boekingen.",
-  },
-  {
-    icon: Receipt,
-    title: "Wekelijkse Facturatie",
-    body: "Geen losse facturen meer. ViaCust genereert wekelijks automatische verzamelfacturen inclusief brandstoftoeslagen op maat en onkosten. Administratie op de automatische piloot.",
-  },
-  {
-    icon: Globe2,
-    title: "Europees Netwerk",
-    body: "Grensverleggende begeleiding in Nederland, België, Duitsland en Frankrijk. Volledig meertalig ondersteund en gericht op internationale samenwerking.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export const ThreePillars = () => {
+  const { t } = useTranslation();
+  const pillars = [
+    { icon: Calendar, title: t("landing.pillar1Title"), body: t("landing.pillar1Body") },
+    { icon: Receipt, title: t("landing.pillar2Title"), body: t("landing.pillar2Body") },
+    { icon: Globe2, title: t("landing.pillar3Title"), body: t("landing.pillar3Body") },
+  ];
   return (
     <section className="py-16 md:py-24 px-5 md:px-8 bg-parchment border-b border-brass-deep/10">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14">
