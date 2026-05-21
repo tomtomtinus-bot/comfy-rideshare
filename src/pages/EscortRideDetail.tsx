@@ -78,8 +78,10 @@ interface RideDetail {
   viewer_status?: string;
 }
 
-const fmtDateTime = (d: string) =>
-  new Date(d).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" });
+const fmtDateTime = (d: string, lng: string = "nl") => {
+  const locale = lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB";
+  return new Date(d).toLocaleString(locale, { dateStyle: "full", timeStyle: "short" });
+};
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="bg-card shadow-etched p-6 md:p-8">
@@ -138,7 +140,8 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
   );
 
 const Inner = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const fd = (d: string) => fmtDateTime(d, i18n.language);
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<RideDetail | null>(null);
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
@@ -268,7 +271,7 @@ const Inner = () => {
 
   const submitCancelRequest = async () => {
     if (!myAssignment) return;
-    if (cancelReason.trim().length < 3) { toast.error("Geef een korte reden op."); return; }
+    if (cancelReason.trim().length < 3) { toast.error(t("escortRideDetail.cancelReasonShort")); return; }
     setBusy(true);
     const { error } = await supabase.rpc("escort_request_cancellation", {
       _assignment_id: myAssignment.id,
@@ -276,7 +279,7 @@ const Inner = () => {
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Verzoek verstuurd naar opdrachtgever.");
+    toast.success(t("escortRideDetail.cancelRequestSent"));
     supabase.functions.invoke("notify-ride-event", {
       body: {
         event: "escort_cancelled",
@@ -291,22 +294,22 @@ const Inner = () => {
   };
 
   if (loading) {
-    return <p className="text-sm text-brass-deep/50">Laden…</p>;
+    return <p className="text-sm text-brass-deep/50">{t("escortRideDetail.loading")}</p>;
   }
   if (error || !data) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
         <p className="text-brass-deep/60 mb-4">
-          Geen toegang tot deze ritdetails. Alleen geaccepteerde ritten zijn zichtbaar.
+          {t("escortRideDetail.noAccess")}
         </p>
         <p className="text-xs text-brass-deep/50 mb-4">
-          Ondersteuning nodig?{" "}
+          {t("escortRideDetail.supportNeeded")}{" "}
           <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
             support@viacust.com
           </a>
         </p>
         <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
-          ← Terug naar dashboard
+          {t("escortRideDetail.backToDashboard")}
         </Link>
       </div>
     );
@@ -324,19 +327,19 @@ const Inner = () => {
           to="/dashboard"
           className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
         >
-          ← Terug naar mijn opdrachten
+          {t("escortRideDetail.backToTasks")}
         </Link>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">
-          Opdrachtdetails
+          {t("escortRideDetail.detailsKicker")}
         </p>
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
           {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
         </h1>
         <div className="flex items-center gap-3 mt-2">
-          <p className="text-brass-deep/60">{fmtDateTime(ride.scheduled_at)}</p>
+          <p className="text-brass-deep/60">{fd(ride.scheduled_at)}</p>
           {isCompleted && (
             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold border border-emerald-300">
-              Afgerond
+              {t("escortRideDetail.completed")}
             </span>
           )}
         </div>
@@ -358,7 +361,7 @@ const Inner = () => {
           const { error } = await supabase.rpc("accept_bundle_priority_offer", { _assignment_id: myAssignment.id });
           setBundleBusy(false);
           if (error) return toast.error(error.message);
-          toast.success("Vervolgrit geaccepteerd.");
+          toast.success(t("escortRideDetail.bundleAccepted"));
           load();
         };
         const declineOffer = async () => {
@@ -370,7 +373,7 @@ const Inner = () => {
           });
           setBundleBusy(false);
           if (error) return toast.error(error.message);
-          toast.success("Geweigerd. Uw andere ritten in dit pakket blijven staan.");
+          toast.success(t("escortRideDetail.bundleDeclined"));
           setShowDeclineForm(false);
           setDeclineReason("");
           load();
@@ -378,20 +381,20 @@ const Inner = () => {
         return (
           <section className="bg-brass-gold/10 border-l-4 border-brass-gold p-5 md:p-6">
             <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">
-              📦 {isPriority ? "Vervolgrit binnen pakket" : "Onderdeel van pakket"}
+              {isPriority ? t("escortRideDetail.bundlePriorityKicker") : t("escortRideDetail.bundleKicker")}
             </p>
             <h2 className="font-display text-xl text-brass-deep italic mb-2">{ride.bundle_label}</h2>
             {isPriority ? (
               <>
                 <p className="text-sm text-brass-deep/80 mb-4">
-                  U heeft al een geaccepteerde rit in dit pakket. Daarom krijgt u deze vervolgrit eerst exclusief aangeboden
+                  {t("escortRideDetail.bundlePriorityBody")}
                   {!expired && myAssignment?.responds_by && (
-                    <> tot <span className="font-semibold tabular-nums">{new Date(myAssignment.responds_by).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</span></>
-                  )}.
-                  Daarna gaat het naar andere begeleiders. <strong>Weigeren of niets doen raakt uw andere geaccepteerde ritten in dit pakket niet.</strong>
+                    <> {t("escortRideDetail.bundleUntil")} <span className="font-semibold tabular-nums">{new Date(myAssignment.responds_by).toLocaleString(i18n.language === "nl" ? "nl-NL" : i18n.language === "de" ? "de-DE" : i18n.language === "fr" ? "fr-FR" : "en-GB", { dateStyle: "short", timeStyle: "short" })}</span></>
+                  )}
+                  <span dangerouslySetInnerHTML={{ __html: t("escortRideDetail.bundleAfter") }} />
                 </p>
                 {expired ? (
-                  <p className="text-sm text-amber-800">Aanbod verlopen.</p>
+                  <p className="text-sm text-amber-800">{t("escortRideDetail.bundleExpired")}</p>
                 ) : !showDeclineForm ? (
                   <div className="flex gap-3 flex-wrap">
                     <button
@@ -399,14 +402,14 @@ const Inner = () => {
                       disabled={bundleBusy}
                       className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
                     >
-                      ✓ Accepteer vervolgrit
+                      {t("escortRideDetail.bundleAcceptNext")}
                     </button>
                     <button
                       onClick={() => setShowDeclineForm(true)}
                       disabled={bundleBusy}
                       className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
                     >
-                      ✗ Niet voor mij
+                      {t("escortRideDetail.bundleNotForMe")}
                     </button>
                   </div>
                 ) : (
@@ -415,15 +418,15 @@ const Inner = () => {
                       value={declineReason}
                       onChange={(e) => setDeclineReason(e.target.value)}
                       rows={2}
-                      placeholder="Reden (optioneel)…"
+                      placeholder={t("escortRideDetail.bundleReasonPlaceholder")}
                       className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                     />
                     <div className="flex gap-2">
                       <button onClick={declineOffer} disabled={bundleBusy} className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50">
-                        Weigeren bevestigen
+                        {t("escortRideDetail.bundleConfirmDecline")}
                       </button>
                       <button onClick={() => { setShowDeclineForm(false); setDeclineReason(""); }} className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5">
-                        Terug
+                        {t("escortRideDetail.bundleBack")}
                       </button>
                     </div>
                   </div>
@@ -431,7 +434,7 @@ const Inner = () => {
               </>
             ) : (
               <p className="text-sm text-brass-deep/70">
-                Deze rit hoort bij een groter pakket van dezelfde opdrachtgever. Mogelijk komen er nog meer vervolgritten — die krijgt u dan eerst exclusief aangeboden.
+                {t("escortRideDetail.bundleInfo")}
               </p>
             )}
           </section>
@@ -440,7 +443,7 @@ const Inner = () => {
 
       {isCompleted && myAssignment && (
         <section className="bg-emerald-50/60 border border-emerald-200 p-6 md:p-8">
-          <h2 className="font-display text-xl text-emerald-900 italic mb-5">Jouw uren & kosten</h2>
+          <h2 className="font-display text-xl text-emerald-900 italic mb-5">{t("escortRideDetail.hoursTitle")}</h2>
           {(() => {
             const ceilQ = (m: number) => Math.ceil(m / 15) * 15;
             const fmtH = (m: number | null) => {
@@ -448,7 +451,7 @@ const Inner = () => {
               const q = ceilQ(m);
               const h = Math.floor(q / 60);
               const min = q % 60;
-              return min === 0 ? `${h} uur` : `${h}u${String(min).padStart(2, "0")}`;
+              return min === 0 ? `${h} ${t("escortRideDetail.hoursUnit")}` : `${h}u${String(min).padStart(2, "0")}`;
             };
             const startBegeleiding = myAssignment.departed_base_at && myAssignment.travel_to_pickup_min != null
               ? new Date(new Date(myAssignment.departed_base_at).getTime() + ceilQ(myAssignment.travel_to_pickup_min) * 60_000).toISOString()
@@ -458,25 +461,25 @@ const Inner = () => {
               : null;
             return (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Field label="Aanvoer (heen)" value={fmtH(myAssignment.travel_to_pickup_min)} />
-                <Field label="Vertrokken standplaats" value={myAssignment.departed_base_at ? fmtDateTime(myAssignment.departed_base_at) : "—"} />
-                <Field label="Start begeleiding" value={startBegeleiding ? fmtDateTime(startBegeleiding) : "—"} />
-                <Field label="Einde begeleiding" value={eindeBegeleiding ? fmtDateTime(eindeBegeleiding) : "—"} />
-                <Field label="Aanvoer (terug)" value={fmtH(myAssignment.travel_back_home_min)} />
-                <Field label="Terug op standplaats" value={myAssignment.returned_base_at ? fmtDateTime(myAssignment.returned_base_at) : "—"} />
-                <Field label="Werkelijke uren" value={myAssignment.actual_hours ? `${myAssignment.actual_hours} uur` : "—"} />
-                <Field label="Werkelijke kosten" value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
-                <Field label="Extra kosten" value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
-                <Field label="Totaal" value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.travelIn")} value={fmtH(myAssignment.travel_to_pickup_min)} />
+                <Field label={t("escortRideDetail.departedBase")} value={myAssignment.departed_base_at ? fd(myAssignment.departed_base_at) : "—"} />
+                <Field label={t("escortRideDetail.rideStart")} value={startBegeleiding ? fd(startBegeleiding) : "—"} />
+                <Field label={t("escortRideDetail.rideEnd")} value={eindeBegeleiding ? fd(eindeBegeleiding) : "—"} />
+                <Field label={t("escortRideDetail.travelOut")} value={fmtH(myAssignment.travel_back_home_min)} />
+                <Field label={t("escortRideDetail.returnedBase")} value={myAssignment.returned_base_at ? fd(myAssignment.returned_base_at) : "—"} />
+                <Field label={t("escortRideDetail.actualHours")} value={myAssignment.actual_hours ? `${myAssignment.actual_hours} ${t("escortRideDetail.hoursUnit")}` : "—"} />
+                <Field label={t("escortRideDetail.actualCost")} value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.extraCosts")} value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
+                <Field label={t("escortRideDetail.total")} value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
                 <p className="md:col-span-2 text-xs text-brass-deep/60 italic mt-1">
-                  Let op: de brandstoftoeslag wordt pas op de eerstvolgende maandag berekend en daarna aan het totaal toegevoegd.
+                  {t("escortRideDetail.fuelLater")}
                 </p>
               </div>
             );
           })()}
           {myAssignment.extra_costs && myAssignment.extra_costs.length > 0 && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">Specificatie extra kosten</p>
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-2">{t("escortRideDetail.extraCostsSpec")}</p>
               <ul className="space-y-1">
                 {myAssignment.extra_costs.map((ex, i) => (
                   <li key={i} className="flex justify-between text-sm">
@@ -489,14 +492,14 @@ const Inner = () => {
           )}
           {myAssignment.hours_notes && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">Opmerkingen</p>
+              <p className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1">{t("escortRideDetail.notes")}</p>
               <p className="text-sm text-emerald-900">{myAssignment.hours_notes}</p>
             </div>
           )}
           {myAssignment.hours_dispute_status && myAssignment.hours_dispute_status !== "none" && (
             <div className="mt-4 pt-4 border-t border-emerald-200">
-              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">Uren afgewezen</p>
-              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || "Geen reden opgegeven"}</p>
+              <p className="text-[10px] uppercase tracking-widest text-red-700 font-bold mb-1">{t("escortRideDetail.hoursRejected")}</p>
+              <p className="text-sm text-red-800">{myAssignment.hours_dispute_reason || t("escortRideDetail.noReason")}</p>
             </div>
           )}
         </section>
@@ -519,16 +522,16 @@ const Inner = () => {
 
         return (
           <Accordion type="multiple" defaultValue={defaultOpen} className="space-y-4">
-            <AccSection value="rit" title="Rit">
+            <AccSection value="rit" title={t("escortRideDetail.ride")}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
-                <Field label="Bestemming" value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
-                <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
-                {!isCompleted && <Field label="Aantal begeleiders" value={ride.num_escorts} />}
-                {!isCompleted && <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />}
+                <Field label={t("escortRideDetail.pickup")} value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
+                <Field label={t("escortRideDetail.dropoff")} value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
+                <Field label={t("escortRideDetail.scheduledTime")} value={fd(ride.scheduled_at)} />
+                {!isCompleted && <Field label={t("escortRideDetail.numEscorts")} value={ride.num_escorts} />}
+                {!isCompleted && <Field label={t("escortRideDetail.clientRef")} value={ride.client_reference ?? "—"} />}
                 {!isCompleted && (ride.cargo_length_m || ride.cargo_weight_t) && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.cargo")}</p>
                     <p className="text-sm font-medium tabular-nums">
                       {ride.cargo_length_m ?? "—"}m × {ride.cargo_width_m ?? "—"}m × {ride.cargo_height_m ?? "—"}m ·{" "}
                       {ride.cargo_weight_t ?? "—"}t
@@ -537,15 +540,15 @@ const Inner = () => {
                 )}
                 {ride.notes && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Opmerkingen</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.notes")}</p>
                     <p className="text-sm">{ride.notes}</p>
                   </div>
                 )}
               </div>
               {!isCompleted && (
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
-                  <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
+                  <MiniMap label={t("escortRideDetail.pickup")} address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+                  <MiniMap label={t("escortRideDetail.dropoff")} address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
                 </div>
               )}
               <div className="mt-6">
@@ -556,7 +559,7 @@ const Inner = () => {
             {isInvited && (
               <div className="bg-brass-gold/10 border border-brass-gold/40 px-5 py-4 text-sm text-brass-deep space-y-3">
                 <p>
-                  U bent uitgenodigd voor deze rit. Volledige gegevens (opdrachtgever, ontheffing, mede-begeleiders, chauffeurs) zijn pas zichtbaar nadat u de rit accepteert.
+                  {t("escortRideDetail.invitedNotice")}
                 </p>
                 {myAssignment && myAssignment.status === "invited" && (
                   <div className="flex flex-wrap gap-3 pt-1">
@@ -567,12 +570,12 @@ const Inner = () => {
                         const { error } = await supabase.rpc("express_ride_interest", { _assignment_id: myAssignment.id });
                         setBusy(false);
                         if (error) return toast.error(error.message);
-                        toast.success("Beschikbaar gemeld — selectie binnen 5 min.");
+                        toast.success(t("escortRideDetail.availableReported"));
                         load();
                       }}
                       className="px-5 py-3 bg-emerald-700 text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-emerald-800 transition-colors disabled:opacity-50"
                     >
-                      ✓ Accepteer rit
+                      {t("escortRideDetail.acceptRide")}
                     </button>
                     <button
                       disabled={busy}
@@ -584,12 +587,12 @@ const Inner = () => {
                           .eq("id", myAssignment.id);
                         setBusy(false);
                         if (error) return toast.error(error.message);
-                        toast.success("Rit geweigerd.");
+                        toast.success(t("escortRideDetail.rideDeclined"));
                         load();
                       }}
                       className="px-5 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5 disabled:opacity-50"
                     >
-                      ✗ Weiger
+                      {t("escortRideDetail.declineRide")}
                     </button>
                   </div>
                 )}
@@ -597,23 +600,23 @@ const Inner = () => {
             )}
 
             {!isInvited && (
-              <AccSection value="opdrachtgever" title="Opdrachtgever">
+              <AccSection value="opdrachtgever" title={t("escortRideDetail.client")}>
                 {client ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="Bedrijf" value={client.company_name ?? "—"} />
-                    <Field label="Contactpersoon" value={client.billing_contact_name ?? client.full_name ?? "—"} />
+                    <Field label={t("escortRideDetail.company")} value={client.company_name ?? "—"} />
+                    <Field label={t("escortRideDetail.contactPerson")} value={client.billing_contact_name ?? client.full_name ?? "—"} />
                     {!isCompleted && (
                       <>
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Telefoon</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.phone")}</p>
                           <p className="text-sm"><TelLink phone={client.phone} /></p>
                         </div>
-                        <Field label="E-mail" value={client.billing_email ?? "—"} />
+                        <Field label={t("escortRideDetail.email")} value={client.billing_email ?? "—"} />
                       </>
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">Geen contactgegevens beschikbaar.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noContact")}</p>
                 )}
               </AccSection>
             )}
@@ -621,22 +624,22 @@ const Inner = () => {
             {!isInvited && !isCompleted && myAssignment && userId && (
               <AccSection
                 value="berichten"
-                title="Berichten"
-                badge={unreadMessages > 0 ? <Badge tone="alert">{unreadMessages} nieuw</Badge> : null}
+                title={t("escortRideDetail.messages")}
+                badge={unreadMessages > 0 ? <Badge tone="alert">{t("escortRideDetail.newBadge", { n: unreadMessages })}</Badge> : null}
               >
                 <AssignmentChat
                   assignmentId={myAssignment.id}
                   currentUserId={userId}
-                  counterpartyLabel="opdrachtgever"
+                  counterpartyLabel={t("escortRideDetail.counterpartyClient")}
                 />
               </AccSection>
             )}
 
             {!isInvited && !isCompleted && hasDriversOrPlates && (
-              <AccSection value="chauffeurs" title="Chauffeurs & kentekens">
+              <AccSection value="chauffeurs" title={t("escortRideDetail.driversPlates")}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Chauffeurs</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.drivers")}</p>
                     {drivers.length === 0 ? (
                       <p className="text-sm text-brass-deep/40">—</p>
                     ) : (
@@ -651,7 +654,7 @@ const Inner = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">Kentekens</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.plates")}</p>
                     {plates.length === 0 ? (
                       <p className="text-sm text-brass-deep/40">—</p>
                     ) : (
@@ -669,9 +672,9 @@ const Inner = () => {
             )}
 
             {!isInvited && !isCompleted && (
-              <AccSection value="medebegeleiders" title={`Mede-begeleiders (${others.length})`}>
+              <AccSection value="medebegeleiders" title={t("escortRideDetail.coEscorts", { n: others.length })}>
                 {others.length === 0 ? (
-                  <p className="text-sm text-brass-deep/50">U bent de enige begeleider op deze rit.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.soleEscort")}</p>
                 ) : (
                   <ul className="divide-y divide-brass-deep/10">
                     {others.map((e) => (
@@ -679,7 +682,7 @@ const Inner = () => {
                         <div>
                           <p className="font-medium text-brass-deep">#{e.anonymous_id ?? "—"}</p>
                           <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                            {e.status === "accepted" ? "geaccepteerd" : e.status}
+                            {e.status === "accepted" ? t("escortRideDetail.accepted") : e.status}
                           </p>
                         </div>
                         <div className="text-sm">
@@ -689,7 +692,7 @@ const Inner = () => {
                               <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
                             </>
                           ) : (
-                            <p className="text-brass-deep/40 text-xs italic">Nog niet bevestigd</p>
+                            <p className="text-brass-deep/40 text-xs italic">{t("escortRideDetail.notYetConfirmed")}</p>
                           )}
                         </div>
                         <div className="text-sm">
@@ -704,16 +707,16 @@ const Inner = () => {
             )}
 
             {!isInvited && !isCompleted && (
-              <AccSection value="ontheffing" title="Ontheffing">
+              <AccSection value="ontheffing" title={t("escortRideDetail.permit")}>
                 {permit ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Field label="Vergunningnummer" value={permit.permit_number} />
-                      <Field label="Geldig van" value={permit.valid_from ?? "—"} />
-                      <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
+                      <Field label={t("escortRideDetail.permitNumber")} value={permit.permit_number} />
+                      <Field label={t("escortRideDetail.validFrom")} value={permit.valid_from ?? "—"} />
+                      <Field label={t("escortRideDetail.validTo")} value={permit.valid_to ?? "—"} />
                       <div className="md:col-span-2">
                         <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
-                          Maximale afmetingen
+                          {t("escortRideDetail.maxDims")}
                         </p>
                         <p className="text-sm font-medium tabular-nums">
                           {permit.max_length_m ?? "—"}m × {permit.max_width_m ?? "—"}m × {permit.max_height_m ?? "—"}m ·{" "}
@@ -725,23 +728,23 @@ const Inner = () => {
                       {permit.pdf_path && (
                         <button
                           type="button"
-                          onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
+                          onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(t("escortRideDetail.pdfOpenFail", { e: e?.message ?? e })))}
                           className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
                         >
-                          PDF openen
+                          {t("escortRideDetail.openPdf")}
                         </button>
                       )}
                       {permit.permit_number && (
                         <button
                           type="button"
                           onClick={async () => {
-                            const tid = toast.loading("Route ophalen van RDW…");
+                            const tid = toast.loading(t("escortRideDetail.gpxLoading"));
                             try {
                               const { data, error } = await supabase.functions.invoke("fetch-rdw-route", {
                                 body: { exemptionId: permit.permit_number },
                               });
                               if (error) throw error;
-                              if (!data?.gpx) throw new Error(data?.error ?? "Geen GPX ontvangen");
+                              if (!data?.gpx) throw new Error(data?.error ?? t("escortRideDetail.gpxNoData"));
                               const blob = new Blob([data.gpx], { type: "application/gpx+xml" });
                               const url = URL.createObjectURL(blob);
                               const a = document.createElement("a");
@@ -751,26 +754,25 @@ const Inner = () => {
                               a.click();
                               a.remove();
                               URL.revokeObjectURL(url);
-                              toast.success(`GPX gedownload (${data.points} punten)`, { id: tid });
+                              toast.success(t("escortRideDetail.gpxDownloaded", { n: data.points }), { id: tid });
                             } catch (e: any) {
-                              toast.error(`GPX ophalen mislukt: ${e?.message ?? e}`, { id: tid });
+                              toast.error(t("escortRideDetail.gpxFail", { e: e?.message ?? e }), { id: tid });
                             }
                           }}
                           className="inline-block px-6 py-3 border-2 border-brass-deep text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
                         >
-                          GPX van RDW-route
+                          {t("escortRideDetail.gpxButton")}
                         </button>
                       )}
                     </div>
                     <p className="text-xs text-brass-deep/50 mt-2">
-                      Let op: gebruik dit enkel als hulpmiddel. De begeleider is zelf verantwoordelijk voor de route.
-                      ViaCust is op geen enkele manier aansprakelijk voor een verkeerde route en alles wat daaruit voortvloeit.
+                      {t("escortRideDetail.rdwDisclaimer")}
                     </p>
                   </div>
                 ) : ride.permit_number ? (
-                  <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
+                  <p className="text-sm text-brass-deep/60">{t("escortRideDetail.permitNoDoc", { n: ride.permit_number })}</p>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noPermit")}</p>
                 )}
               </AccSection>
             )}
@@ -778,7 +780,7 @@ const Inner = () => {
             {showAnnulering && (
               <AccSection
                 value="annulering"
-                title="Annulering"
+                title={t("escortRideDetail.annuleringTitle")}
                 badge={
                   cancelPending
                     ? <Badge tone="info">{t("escortRideDetail.badgePending")}</Badge>
@@ -789,34 +791,34 @@ const Inner = () => {
               >
                 {myAssignment!.cancel_request_status === "pending" ? (
                   <div className="bg-brass-gold/10 border border-brass-gold/40 p-4 text-sm text-brass-deep">
-                    <p className="font-semibold mb-1">Verzoek in behandeling</p>
+                    <p className="font-semibold mb-1">{t("escortRideDetail.requestPending")}</p>
                     {myAssignment!.cancel_request_reason && (
                       <p className="italic text-brass-deep/70">"{myAssignment!.cancel_request_reason}"</p>
                     )}
-                    <p className="mt-2 text-xs text-brass-deep/60">De opdrachtgever moet je verzoek goedkeuren.</p>
+                    <p className="mt-2 text-xs text-brass-deep/60">{t("escortRideDetail.clientMustApprove")}</p>
                   </div>
                 ) : myAssignment!.cancel_request_status === "rejected" ? (
                   <div className="bg-red-50 border border-red-200 p-4 text-sm text-red-900 mb-3">
-                    Vorig verzoek afgewezen. Je kunt opnieuw aanvragen.
+                    {t("escortRideDetail.prevRejected")}
                     <button
                       type="button"
                       onClick={() => setShowCancelForm(true)}
                       className="ml-3 underline font-semibold"
                     >
-                      Opnieuw aanvragen
+                      {t("escortRideDetail.reapply")}
                     </button>
                   </div>
                 ) : !showCancelForm ? (
                   <>
                     <p className="text-sm text-brass-deep/70 mb-3">
-                      Annuleren kan alleen in overleg met de opdrachtgever. Stuur een verzoek met reden; bij goedkeuring vervalt de toewijzing zonder kosten.
+                      {t("escortRideDetail.cancelExplain")}
                     </p>
                     <button
                       type="button"
                       onClick={() => setShowCancelForm(true)}
                       className="px-6 py-3 border border-red-700 text-red-700 uppercase tracking-widest text-xs font-semibold hover:bg-red-700 hover:text-parchment transition-colors"
                     >
-                      Annulering aanvragen
+                      {t("escortRideDetail.requestCancel")}
                     </button>
                   </>
                 ) : (
@@ -825,7 +827,7 @@ const Inner = () => {
                       value={cancelReason}
                       onChange={(e) => setCancelReason(e.target.value)}
                       rows={3}
-                      placeholder="Reden voor annulering (verplicht)…"
+                      placeholder={t("escortRideDetail.cancelReasonPlaceholder")}
                       className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                     />
                     <div className="flex gap-2">
@@ -835,14 +837,14 @@ const Inner = () => {
                         onClick={submitCancelRequest}
                         className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold disabled:opacity-50"
                       >
-                        Verzoek versturen
+                        {t("escortRideDetail.submitRequest")}
                       </button>
                       <button
                         type="button"
                         onClick={() => { setShowCancelForm(false); setCancelReason(""); }}
                         className="px-5 py-2.5 border border-brass-deep/30 uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/5"
                       >
-                        Annuleren
+                        {t("escortRideDetail.cancelBack")}
                       </button>
                     </div>
                   </div>
