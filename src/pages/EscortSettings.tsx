@@ -441,7 +441,7 @@ const Inner = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main className="max-w-2xl mx-auto px-6 py-24">
-          <p className="text-brass-deep/60">Deze pagina is alleen voor begeleiders.</p>
+          <p className="text-brass-deep/60">{t("escortSettings.onlyForEscorts")}</p>
         </main>
         <Footer />
       </div>
@@ -454,14 +454,14 @@ const Inner = () => {
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            Begeleider {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
+            {t("escortSettings.headerKicker")} {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
           </p>
           <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic mb-10">
-            Mijn profiel
+            {t("escortSettings.title")}
           </h1>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">Laden…</p>
+            <p className="text-sm text-brass-deep/50">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : (
             <>
               <GoogleCalendarCard />
@@ -480,12 +480,10 @@ const Inner = () => {
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60">
-                  Je <strong>naam</strong> en <strong>telefoonnummer</strong> worden pas met de opdrachtgever gedeeld nadat je een rit hebt geaccepteerd.
-                </p>
+                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Volledige naam</Label>
+                    <Label>{t("escortSettings.fullName")}</Label>
                     <input
                       value={fullName}
                       onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
@@ -493,7 +491,7 @@ const Inner = () => {
                     />
                   </div>
                   <div>
-                    <Label>Telefoonnummer</Label>
+                    <Label>{t("escortSettings.phone")}</Label>
                     <input
                       type="tel"
                       value={phone}
@@ -505,15 +503,11 @@ const Inner = () => {
               </section>
 
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60">
-                  Vul je <strong>postcode</strong> en <strong>huisnummer</strong> in — straat en plaats worden automatisch ingevuld. Opdrachtgevers zien alleen de plaats/regio.
-                </p>
-                <p className="text-[11px] text-brass-deep/55 italic">
-                  Je standplaats wordt berekend op basis van je postcode en gebruikt om de aan- en afvoertijd (leegrijden naar pickup en terug) per rit te berekenen. Vul daarom je werkelijke vertreklocatie in.
-                </p>
+                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
+                <p className="text-[11px] text-brass-deep/55 italic">{t("escortSettings.baseLocationHint")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Postcode</Label>
+                    <Label>{t("escortSettings.postcode")}</Label>
                     <input
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
@@ -522,7 +516,7 @@ const Inner = () => {
                     />
                   </div>
                   <div>
-                    <Label>Huisnummer</Label>
+                    <Label>{t("escortSettings.houseNumber")}</Label>
                     <input
                       value={houseNumber}
                       onChange={(e) => setHouseNumber(e.target.value)}
@@ -531,15 +525,15 @@ const Inner = () => {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <Label>Straat & plaats (automatisch)</Label>
+                    <Label>{t("escortSettings.streetCityAuto")}</Label>
                     <input
                       readOnly
                       value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
-                      placeholder={lookupBusy ? "Adres ophalen…" : "Wordt ingevuld na postcode + huisnummer"}
+                      placeholder={(lookupBusy ? t("escortSettings.lookingUp") : t("escortSettings.fillFromPostcode")) as string}
                       className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
                     />
                     <p className="text-[10px] text-brass-deep/50 mt-1">
-                      {lookupBusy ? "Adres ophalen…" : street ? `${street} ${houseNumber}, ${city}` : "Voor BE/DE/FR wordt alleen de plaats opgehaald — vul de straat handmatig aan via de postcode/huisnummer."}
+                      {lookupBusy ? t("escortSettings.lookingUp") : street ? `${street} ${houseNumber}, ${city}` : t("escortSettings.addressFooter")}
                     </p>
                   </div>
                   {categories.includes("nl") && (
