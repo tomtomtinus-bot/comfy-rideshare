@@ -685,30 +685,30 @@ const Inner = () => {
                 {fuel.enabled && (
                   <>
                     <div className="flex gap-2 mb-2 text-sm">
-                      <span className="text-brass-deep/60">Toeslag-eenheid:</span>
+                      <span className="text-brass-deep/60">{t("escortSettings.fuelUnit")}</span>
                       <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> € per uur
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> {t("escortSettings.fuelPerHour")}
                       </label>
                       <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> % van uurtarief
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> {t("escortSettings.fuelPercent")}
                       </label>
                     </div>
                     <div className="space-y-2">
                       <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
-                        <div className="col-span-4">Dieselprijs vanaf (€/l)</div>
-                        <div className="col-span-4">tot (€/l, leeg = ∞)</div>
-                        <div className="col-span-3">{fuel.kind === "percent" ? "% uurtarief" : "€ / uur"}</div>
+                        <div className="col-span-4">{t("escortSettings.fuelFromCol")}</div>
+                        <div className="col-span-4">{t("escortSettings.fuelToCol")}</div>
+                        <div className="col-span-3">{fuel.kind === "percent" ? t("escortSettings.fuelValueColPct") : t("escortSettings.fuelValueColEur")}</div>
                       </div>
-                      {fuel.tiers.map((t, i) => (
+                      {fuel.tiers.map((t2, i) => (
                         <div key={i} className="grid grid-cols-12 gap-2">
-                          <input value={t.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                          <input value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
                           <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15">×</button>
                         </div>
                       ))}
                       <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
-                        + Drempel toevoegen
+                        {t("escortSettings.fuelAddTier")}
                       </button>
                     </div>
                   </>
@@ -718,19 +718,15 @@ const Inner = () => {
               })()}
 
               <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">Beschikbaarheid</p>
-                <p className="text-sm text-brass-deep/80">
-                  Je beschikbaarheid loopt voortaan via <strong>Google Agenda</strong>. Plaats verlof,
-                  persoonlijke afspraken of vakantie direct in je eigen agenda — de planner overslaat je
-                  automatisch als je bezet bent (incl. reistijd heen en terug).
-                </p>
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">{t("escortSettings.availability")}</p>
+                <p className="text-sm text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
               </section>
 
               <button
                 disabled={busy}
                 className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
               >
-                {busy ? "Bezig…" : "Profiel opslaan"}
+                {busy ? t("escortSettings.busy") : t("escortSettings.saveProfile")}
               </button>
             </form>
             </>
