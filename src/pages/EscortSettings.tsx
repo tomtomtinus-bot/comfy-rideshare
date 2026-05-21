@@ -537,19 +537,19 @@ const Inner = () => {
                     </p>
                   </div>
                   {categories.includes("nl") && (
-                    <Input name="hourlyRate" type="number" step="0.01" label="Uurtarief NL (€)" defaultValue={dv("hourlyRate", String(profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRate" type="number" step="0.01" label={t("escortSettings.hourlyRateNL") as string} defaultValue={dv("hourlyRate", String(profile?.hourly_rate ?? 55))} />
                   )}
                   {(categories.includes("be-1") || categories.includes("be-2")) && (
-                    <Input name="hourlyRateBe" type="number" step="0.01" label="Uurtarief België (€)" defaultValue={dv("hourlyRateBe", String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateBe" type="number" step="0.01" label={t("escortSettings.hourlyRateBE") as string} defaultValue={dv("hourlyRateBe", String((profile as any)?.hourly_rate_be ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
-                    <Input name="hourlyRateDe" type="number" step="0.01" label="Uurtarief Duitsland (€)" defaultValue={dv("hourlyRateDe", String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateDe" type="number" step="0.01" label={t("escortSettings.hourlyRateDE") as string} defaultValue={dv("hourlyRateDe", String((profile as any)?.hourly_rate_de ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("fr") && (
-                    <Input name="hourlyRateFr" type="number" step="0.01" label="Uurtarief Frankrijk (€)" defaultValue={dv("hourlyRateFr", String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateFr" type="number" step="0.01" label={t("escortSettings.hourlyRateFR") as string} defaultValue={dv("hourlyRateFr", String((profile as any)?.hourly_rate_fr ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("lu") && (
-                    <Input name="hourlyRateLu" type="number" step="0.01" label="Uurtarief Luxemburg (€)" defaultValue={dv("hourlyRateLu", String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55))} />
+                    <Input name="hourlyRateLu" type="number" step="0.01" label={t("escortSettings.hourlyRateLU") as string} defaultValue={dv("hourlyRateLu", String((profile as any)?.hourly_rate_lu ?? profile?.hourly_rate ?? 55))} />
                   )}
                   {categories.includes("de") && (
                     <div>
@@ -557,28 +557,28 @@ const Inner = () => {
                         name="kmRateDe"
                         type="number"
                         step="0.01"
-                        label="Km-tarief Duitsland (€/km, optioneel)"
+                        label={t("escortSettings.kmRateDE") as string}
                         defaultValue={dv(
                           "kmRateDe",
                           (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
                         )}
                       />
                       <p className="text-[10px] text-brass-deep/50 mt-1">
-                        Bij ingevuld: kosten voor DE-ritten = km × dit tarief. Brandstoftoeslag vervalt dan voor Duitsland.
+                        {t("escortSettings.kmRateDEHint")}
                       </p>
                     </div>
                   )}
-                  <Input name="minBillableHours" type="number" step="0.25" label="Minimumtarief (uren) — 0 = geen minimum" defaultValue={dv("minBillableHours", String((profile as any)?.min_billable_hours ?? 0))} />
+                  <Input name="minBillableHours" type="number" step="0.25" label={t("escortSettings.minBillable") as string} defaultValue={dv("minBillableHours", String((profile as any)?.min_billable_hours ?? 0))} />
                   <Input
                     name="vehicleType"
-                    label="Pilotvoertuig (type & kenmerk)"
+                    label={t("escortSettings.pilotVehicleType") as string}
                     defaultValue={dv("vehicleType", profile?.vehicle_type ?? "")}
                   />
                 </div>
               </section>
 
               <section>
-                <Label>Landen gecertificeerd</Label>
+                <Label>{t("escortSettings.countriesCertified")}</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {COUNTRY_CERTS.map((c) => (
                     <Toggle key={c.id} on={categories.includes(c.id)} onClick={() => setCategories((s) => toggle(s, c.id))}>
@@ -589,9 +589,9 @@ const Inner = () => {
               </section>
 
               <section>
-                <Label>Talen die ik spreek</Label>
+                <Label>{t("escortSettings.languagesSpoken")}</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-2">
-                  Selecteer alle talen waarin je opdrachtgevers en chauffeurs te woord kunt staan.
+                  {t("escortSettings.languagesHint")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {LANGUAGES.map((l) => (
@@ -611,11 +611,11 @@ const Inner = () => {
                 if (baseCountry === "be" || baseCountry === "fr") return null;
                 return (
               <section>
-                <Label>Brandstoftoeslag (staffel)</Label>
+                <Label>{t("escortSettings.fuelTitle")}</Label>
                 <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
-                  Wordt automatisch berekend op basis van de gemiddelde Nederlandse dieselprijs (CBS) van de gefactureerde week.
+                  {t("escortSettings.fuelIntro")}
                   {currentFuel && (
-                    <> Huidige weekprijs: <strong>€{Number(currentFuel.eur_per_liter).toFixed(3)}/l</strong> (week {currentFuel.week_start}).</>
+                    <> <span dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelCurrentPrice", { p: Number(currentFuel.eur_per_liter).toFixed(3), w: currentFuel.week_start }) }} /></>
                   )}
                 </p>
                 <label className="flex items-center gap-2 mb-3 text-sm">
@@ -624,13 +624,11 @@ const Inner = () => {
                     checked={fuel.enabled}
                     onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
                   />
-                  Brandstoftoeslag toepassen op mijn facturen
+                  {t("escortSettings.fuelEnable")}
                 </label>
                 {fuel.enabled && (
                   <div className="mb-3 p-3 bg-parchment border border-brass-deep/15">
-                    <p className="text-[11px] text-brass-deep/70 mb-2">
-                      <strong>Staffel-PDF uploaden?</strong> Wij lezen de tiers automatisch uit en vullen de tabel hieronder in. Controleer altijd het resultaat.
-                    </p>
+                    <p className="text-[11px] text-brass-deep/70 mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
                     <input
                       type="file"
                       accept="application/pdf,.pdf"
@@ -639,7 +637,7 @@ const Inner = () => {
                         const file = e.target.files?.[0];
                         if (!file || !user) return;
                         if (file.size > 10 * 1024 * 1024) {
-                          toast.error("PDF mag max 10 MB zijn");
+                          toast.error(t("escortSettings.fuelMaxSize"));
                           return;
                         }
                         setFuelParsing(true);
