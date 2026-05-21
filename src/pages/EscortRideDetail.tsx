@@ -373,7 +373,7 @@ const Inner = () => {
           });
           setBundleBusy(false);
           if (error) return toast.error(error.message);
-          toast.success("Geweigerd. Uw andere ritten in dit pakket blijven staan.");
+          toast.success(t("escortRideDetail.bundleDeclined"));
           setShowDeclineForm(false);
           setDeclineReason("");
           load();
