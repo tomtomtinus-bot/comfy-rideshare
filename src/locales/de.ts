@@ -946,5 +946,14 @@ const de: Dict = {
     cancel: "Abbrechen",
     delete: "Löschen",
   },
+  notifBell: {
+    ariaLabel: "Benachrichtigungen",
+    title: "Benachrichtigungen",
+    markAllRead: "Alle gelesen",
+    clear: "Löschen",
+    loading: "Lädt…",
+    empty: "Keine Benachrichtigungen",
+    confirmClear: "Alle Benachrichtigungen löschen?",
+  },
 };
 export default de;

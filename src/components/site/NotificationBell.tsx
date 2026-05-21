@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enGB, de, fr } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+
+const dfLocale: Record<string, typeof nl> = { nl, en: enGB, de, fr };
+
 
 type Notification = {
   id: string;
@@ -23,10 +27,14 @@ const PAGE = 15;
 export const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "nl").slice(0, 2);
+  const fnsLoc = dfLocale[lang] ?? nl;
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+
 
   const openNotification = async (n: Notification) => {
     setOpen(false);
@@ -124,7 +132,7 @@ export const NotificationBell = () => {
 
   const clearAll = async () => {
     if (!user || items.length === 0) return;
-    if (!window.confirm("Alle meldingen wissen?")) return;
+    if (!window.confirm(t("notifBell.confirmClear"))) return;
     const ids = items.map((n) => n.id);
     setItems([]);
     await supabase.from("notifications").delete().in("id", ids);
@@ -137,7 +145,7 @@ export const NotificationBell = () => {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Meldingen"
+        aria-label={t("notifBell.ariaLabel")}
         aria-expanded={open}
         className="relative p-2 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors"
       >
@@ -152,14 +160,14 @@ export const NotificationBell = () => {
       {open && (
         <div className="fixed left-3 right-3 top-[5.25rem] w-auto sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[340px] sm:max-w-[calc(100vw-2rem)] bg-parchment border border-brass-deep/15 shadow-etched z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-brass-deep/10">
-            <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">Meldingen</p>
+            <p className="text-xs uppercase tracking-widest font-bold text-brass-deep">{t("notifBell.title")}</p>
             <div className="flex items-center gap-3">
               {unread > 0 && (
                 <button
                   onClick={markAllRead}
                   className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold inline-flex items-center gap-1"
                 >
-                  <CheckCheck className="size-3.5" /> Alles gelezen
+                  <CheckCheck className="size-3.5" /> {t("notifBell.markAllRead")}
                 </button>
               )}
               {items.length > 0 && (
@@ -167,7 +175,7 @@ export const NotificationBell = () => {
                   onClick={clearAll}
                   className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-destructive inline-flex items-center gap-1"
                 >
-                  <Trash2 className="size-3.5" /> Wissen
+                  <Trash2 className="size-3.5" /> {t("notifBell.clear")}
                 </button>
               )}
             </div>
@@ -175,9 +183,9 @@ export const NotificationBell = () => {
 
           <div className="max-h-[60vh] overflow-y-auto">
             {loading && items.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-brass-deep/60">Laden…</p>
+              <p className="px-4 py-6 text-sm text-brass-deep/60">{t("notifBell.loading")}</p>
             ) : items.length === 0 ? (
-              <p className="px-4 py-8 text-sm text-brass-deep/60 text-center">Geen meldingen</p>
+              <p className="px-4 py-8 text-sm text-brass-deep/60 text-center">{t("notifBell.empty")}</p>
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
@@ -203,7 +211,7 @@ export const NotificationBell = () => {
                               <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
                               <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
                               <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
-                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: nl })}
+                                {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fnsLoc })}
                               </p>
                             </div>
                           </div>
