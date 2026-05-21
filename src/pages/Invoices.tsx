@@ -627,7 +627,7 @@ const InvoicesInner = () => {
                     onClick={() => setPayInvoiceId(inv.id)}
                     className="ml-auto px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
                   >
-                    Betaal nu
+                    {t("invoices.payNow")}
                   </button>
                 )}
               </div>
