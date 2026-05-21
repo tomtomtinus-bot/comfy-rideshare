@@ -88,8 +88,8 @@ function groupByYMW<T extends { period_start: string }>(items: T[]) {
   for (const inv of items) {
     const d = new Date(inv.period_start);
     const y = String(d.getFullYear());
-    const m = MONTHS_NL[d.getMonth()];
-    const w = `Week ${isoWeek(d)}`;
+    const m = String(d.getMonth()).padStart(2, "0");
+    const w = String(isoWeek(d)).padStart(2, "0");
     tree[y] ??= {};
     tree[y][m] ??= {};
     tree[y][m][w] ??= [];
@@ -99,9 +99,7 @@ function groupByYMW<T extends { period_start: string }>(items: T[]) {
 }
 
 const sortYearDesc = (a: string, b: string) => b.localeCompare(a, undefined, { numeric: true });
-const sortMonthDesc = (a: string, b: string) => MONTHS_NL.indexOf(b) - MONTHS_NL.indexOf(a);
-const sortWeekDesc = (a: string, b: string) =>
-  parseInt(b.replace("Week ", ""), 10) - parseInt(a.replace("Week ", ""), 10);
+const sortDescNum = (a: string, b: string) => parseInt(b, 10) - parseInt(a, 10);
 
 const InvoicesInner = () => {
   const { user, role } = useAuth();
