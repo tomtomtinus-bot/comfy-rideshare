@@ -486,7 +486,7 @@ const InvoicesInner = () => {
       <CheckoutDialog
         open={!!payInvoiceId}
         onOpenChange={(v) => !v && setPayInvoiceId(null)}
-        title="Platformfactuur betalen"
+        title={t("invoices.payDialogTitle")}
         platformInvoiceId={payInvoiceId ?? undefined}
         customerEmail={user?.email}
         userId={user?.id}
