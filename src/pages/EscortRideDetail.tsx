@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -137,6 +138,7 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
   );
 
 const Inner = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<RideDetail | null>(null);
   const [permitUrl, setPermitUrl] = useState<string | null>(null);
