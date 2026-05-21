@@ -327,19 +327,19 @@ const Inner = () => {
           to="/dashboard"
           className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
         >
-          ← Terug naar mijn opdrachten
+          {t("escortRideDetail.backToTasks")}
         </Link>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">
-          Opdrachtdetails
+          {t("escortRideDetail.detailsKicker")}
         </p>
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
           {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
         </h1>
         <div className="flex items-center gap-3 mt-2">
-          <p className="text-brass-deep/60">{fmtDateTime(ride.scheduled_at)}</p>
+          <p className="text-brass-deep/60">{fd(ride.scheduled_at)}</p>
           {isCompleted && (
             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold border border-emerald-300">
-              Afgerond
+              {t("escortRideDetail.completed")}
             </span>
           )}
         </div>
