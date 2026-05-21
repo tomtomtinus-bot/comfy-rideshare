@@ -146,7 +146,7 @@ export const Nav = () => {
             )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10 px-3 pb-2 md:hidden">
               <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">
-                Taal
+                {t("landing.navLanguage")}
               </p>
               <LanguageSwitcher />
             </div>
@@ -155,7 +155,7 @@ export const Nav = () => {
                 <>
                   <div className="px-3 py-2 mb-1">
                     <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
-                      Ingelogd als
+                      {t("landing.navLoggedInAs")}
                     </p>
                     <p className="text-sm font-semibold text-brass-deep truncate">
                       {(user.user_metadata as { full_name?: string; name?: string } | null)?.full_name
