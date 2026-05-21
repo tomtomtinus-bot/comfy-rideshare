@@ -27,10 +27,14 @@ const PAGE = 15;
 export const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || "nl").slice(0, 2);
+  const fnsLoc = dfLocale[lang] ?? nl;
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+
 
   const openNotification = async (n: Notification) => {
     setOpen(false);
