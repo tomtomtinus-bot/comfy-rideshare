@@ -183,9 +183,9 @@ export const NotificationBell = () => {
 
           <div className="max-h-[60vh] overflow-y-auto">
             {loading && items.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-brass-deep/60">Laden…</p>
+              <p className="px-4 py-6 text-sm text-brass-deep/60">{t("notifBell.loading")}</p>
             ) : items.length === 0 ? (
-              <p className="px-4 py-8 text-sm text-brass-deep/60 text-center">Geen meldingen</p>
+              <p className="px-4 py-8 text-sm text-brass-deep/60 text-center">{t("notifBell.empty")}</p>
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
