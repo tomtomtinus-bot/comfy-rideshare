@@ -361,7 +361,7 @@ const Inner = () => {
           const { error } = await supabase.rpc("accept_bundle_priority_offer", { _assignment_id: myAssignment.id });
           setBundleBusy(false);
           if (error) return toast.error(error.message);
-          toast.success("Vervolgrit geaccepteerd.");
+          toast.success(t("escortRideDetail.bundleAccepted"));
           load();
         };
         const declineOffer = async () => {
