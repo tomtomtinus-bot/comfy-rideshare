@@ -1077,6 +1077,15 @@ const nl = {
     cancel: "Annuleren",
     delete: "Verwijderen",
   },
+  notifBell: {
+    ariaLabel: "Meldingen",
+    title: "Meldingen",
+    markAllRead: "Alles gelezen",
+    clear: "Wissen",
+    loading: "Laden…",
+    empty: "Geen meldingen",
+    confirmClear: "Alle meldingen wissen?",
+  },
 };
 export default nl;
 export type Dict = typeof nl;
