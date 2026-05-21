@@ -366,12 +366,12 @@ const Inner = () => {
       insurancePolicy: fd.get("insurancePolicy") ?? "",
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    if (!coords) return toast.error("Locatie niet bepaald — controleer postcode");
-    if (categories.length === 0) return toast.error("Kies minimaal één land/certificering");
+    if (!coords) return toast.error(t("escortSettings.locationNotSet"));
+    if (categories.length === 0) return toast.error(t("escortSettings.pickAtLeastOneCountry"));
 
     const derivedCountries = countriesFromCategories(categories);
     if (derivedCountries.length === 0) {
-      return toast.error("Kies minimaal één land/certificering");
+      return toast.error(t("escortSettings.pickAtLeastOneCountry"));
     }
 
     setBusy(true);
@@ -432,7 +432,7 @@ const Inner = () => {
       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
       draftRef.current = {};
     }
-    toast.success("Profiel bijgewerkt");
+    toast.success(t("escortSettings.profileSaved"));
     navigate("/dashboard");
   };
 
