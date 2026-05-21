@@ -748,12 +748,12 @@ const nl = {
     basedOn: "Gebaseerd op de huidige wetgeving, onder voorbehoud van wijzigingen.",
     networksTitle: "Belgische netwerken & routeplanning",
   },
-  request: {
+  requestExtra: {
     removePermitTitle: "Vergunning verwijderen?",
     removePermitBody: "De PDF en alle ingelezen routes worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.",
     cancel: "Annuleren",
     remove: "Verwijderen",
-  } as any,
+  },
 };
 export default nl;
 export type Dict = typeof nl;
