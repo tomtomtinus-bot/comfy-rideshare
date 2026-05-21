@@ -1041,6 +1041,7 @@ export type Database = {
           kvk_number: string | null
           last_platform_invoice_at: string | null
           phone: string | null
+          preferred_language: string
           privacy_accepted_at: string | null
           rejection_reason: string | null
           terms_accepted_at: string | null
@@ -1067,6 +1068,7 @@ export type Database = {
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
+          preferred_language?: string
           privacy_accepted_at?: string | null
           rejection_reason?: string | null
           terms_accepted_at?: string | null
@@ -1093,6 +1095,7 @@ export type Database = {
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
           phone?: string | null
+          preferred_language?: string
           privacy_accepted_at?: string | null
           rejection_reason?: string | null
           terms_accepted_at?: string | null
