@@ -728,23 +728,23 @@ const Inner = () => {
                       {permit.pdf_path && (
                         <button
                           type="button"
-                          onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(`Kan PDF niet openen: ${e?.message ?? e}`))}
+                          onClick={() => openPermitPdf(permit.pdf_path!).catch((e) => toast.error(t("escortRideDetail.pdfOpenFail", { e: e?.message ?? e })))}
                           className="inline-block px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
                         >
-                          PDF openen
+                          {t("escortRideDetail.openPdf")}
                         </button>
                       )}
                       {permit.permit_number && (
                         <button
                           type="button"
                           onClick={async () => {
-                            const tid = toast.loading("Route ophalen van RDW…");
+                            const tid = toast.loading(t("escortRideDetail.gpxLoading"));
                             try {
                               const { data, error } = await supabase.functions.invoke("fetch-rdw-route", {
                                 body: { exemptionId: permit.permit_number },
                               });
                               if (error) throw error;
-                              if (!data?.gpx) throw new Error(data?.error ?? "Geen GPX ontvangen");
+                              if (!data?.gpx) throw new Error(data?.error ?? t("escortRideDetail.gpxNoData"));
                               const blob = new Blob([data.gpx], { type: "application/gpx+xml" });
                               const url = URL.createObjectURL(blob);
                               const a = document.createElement("a");
@@ -754,26 +754,25 @@ const Inner = () => {
                               a.click();
                               a.remove();
                               URL.revokeObjectURL(url);
-                              toast.success(`GPX gedownload (${data.points} punten)`, { id: tid });
+                              toast.success(t("escortRideDetail.gpxDownloaded", { n: data.points }), { id: tid });
                             } catch (e: any) {
-                              toast.error(`GPX ophalen mislukt: ${e?.message ?? e}`, { id: tid });
+                              toast.error(t("escortRideDetail.gpxFail", { e: e?.message ?? e }), { id: tid });
                             }
                           }}
                           className="inline-block px-6 py-3 border-2 border-brass-deep text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
                         >
-                          GPX van RDW-route
+                          {t("escortRideDetail.gpxButton")}
                         </button>
                       )}
                     </div>
                     <p className="text-xs text-brass-deep/50 mt-2">
-                      Let op: gebruik dit enkel als hulpmiddel. De begeleider is zelf verantwoordelijk voor de route.
-                      ViaCust is op geen enkele manier aansprakelijk voor een verkeerde route en alles wat daaruit voortvloeit.
+                      {t("escortRideDetail.rdwDisclaimer")}
                     </p>
                   </div>
                 ) : ride.permit_number ? (
-                  <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
+                  <p className="text-sm text-brass-deep/60">{t("escortRideDetail.permitNoDoc", { n: ride.permit_number })}</p>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
+                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noPermit")}</p>
                 )}
               </AccSection>
             )}
