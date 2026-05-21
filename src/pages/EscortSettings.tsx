@@ -316,7 +316,7 @@ const Inner = () => {
       setCoords({ lat: c.lat, lng: c.lng });
       setDirty(true);
     } else {
-      toast.error("Adres niet gevonden — controleer postcode/huisnummer");
+      toast.error(t("escortSettings.addressNotFound"));
     }
   };
 
