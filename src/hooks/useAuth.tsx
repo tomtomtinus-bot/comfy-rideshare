@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
+import i18n from "@/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "opdrachtgever" | "begeleider" | "admin";
