@@ -522,16 +522,16 @@ const Inner = () => {
 
         return (
           <Accordion type="multiple" defaultValue={defaultOpen} className="space-y-4">
-            <AccSection value="rit" title="Rit">
+            <AccSection value="rit" title={t("escortRideDetail.ride")}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field label="Vertrek" value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
-                <Field label="Bestemming" value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
-                <Field label="Geplande tijd" value={fmtDateTime(ride.scheduled_at)} />
-                {!isCompleted && <Field label="Aantal begeleiders" value={ride.num_escorts} />}
-                {!isCompleted && <Field label="Referentie opdrachtgever" value={ride.client_reference ?? "—"} />}
+                <Field label={t("escortRideDetail.pickup")} value={<MapsLink address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />} />
+                <Field label={t("escortRideDetail.dropoff")} value={<MapsLink address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />} />
+                <Field label={t("escortRideDetail.scheduledTime")} value={fd(ride.scheduled_at)} />
+                {!isCompleted && <Field label={t("escortRideDetail.numEscorts")} value={ride.num_escorts} />}
+                {!isCompleted && <Field label={t("escortRideDetail.clientRef")} value={ride.client_reference ?? "—"} />}
                 {!isCompleted && (ride.cargo_length_m || ride.cargo_weight_t) && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.cargo")}</p>
                     <p className="text-sm font-medium tabular-nums">
                       {ride.cargo_length_m ?? "—"}m × {ride.cargo_width_m ?? "—"}m × {ride.cargo_height_m ?? "—"}m ·{" "}
                       {ride.cargo_weight_t ?? "—"}t
@@ -540,15 +540,15 @@ const Inner = () => {
                 )}
                 {ride.notes && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Opmerkingen</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.notes")}</p>
                     <p className="text-sm">{ride.notes}</p>
                   </div>
                 )}
               </div>
               {!isCompleted && (
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <MiniMap label="Vertrek" address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
-                  <MiniMap label="Bestemming" address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
+                  <MiniMap label={t("escortRideDetail.pickup")} address={`${ride.pickup_address}, ${ride.pickup_city}`} lat={ride.pickup_lat} lng={ride.pickup_lng} />
+                  <MiniMap label={t("escortRideDetail.dropoff")} address={`${ride.dropoff_address}, ${ride.dropoff_city}`} lat={ride.dropoff_lat} lng={ride.dropoff_lng} />
                 </div>
               )}
               <div className="mt-6">
