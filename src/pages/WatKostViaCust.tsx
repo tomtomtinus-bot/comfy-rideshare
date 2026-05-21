@@ -1,6 +1,7 @@
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Section = ({
   kicker,
@@ -34,140 +35,80 @@ const Bullet = ({ label, value }: { label: string; value: string }) => (
 );
 
 const WatKostViaCust = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
       <main>
-        {/* Hero */}
         <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
           <div className="max-w-4xl mx-auto">
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
-              ViaCust — Tarieven
+              {t("pricing.kicker")}
             </p>
             <h1 className="font-display text-4xl sm:text-5xl md:text-7xl text-brass-deep leading-[1] italic mb-8">
-              Wat kost ViaCust?
+              {t("pricing.title")}
             </h1>
-            <p className="text-brass-gold/70 text-sm tracking-wide italic mb-6">
-              {" "}
-            </p>
             <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
-              Bij ViaCust kiest u voor volledige ontzorging en een professionele administratieve
-              afhandeling. Wij hanteren een transparante prijsstructuur zonder verborgen kosten,
-              gericht op een duurzame samenwerking tussen opdrachtgevers en begeleiders.
+              {t("pricing.intro")}
             </p>
           </div>
         </section>
 
-        {/* Opdrachtgever */}
-        <Section
-          kicker="Voor de Opdrachtgever (Transportonderneming)"
-          title="Stroomlijn uw planning en administratie met één centraal systeem."
-        >
-          <Bullet label="Abonnement" value="€ 50,- per maand. (ex. BTW)" />
+        <Section kicker={t("pricing.clientKicker")} title={t("pricing.clientTitle")}>
+          <Bullet label={t("pricing.subscription")} value={t("pricing.plan50")} />
           <div className="border-l-2 border-brass-gold pl-5 py-1">
-            <span className="font-semibold text-brass-deep">Introductieaanbieding: </span>
-            <span>Nu voor slechts € 25,- per maand (ex. BTW) gedurende de eerste 12 maanden! Profiteer van 50% lanceringskorting en krijg direct toegang tot onze begeleiders.</span>
+            <span className="font-semibold text-brass-deep">{t("pricing.introOfferLabel")}: </span>
+            <span>{t("pricing.introOfferBody")}</span>
           </div>
-          <Bullet label="Platformcommissie" value="Slechts 1,5% per voltooide rit." />
+          <Bullet label={t("pricing.commissionLabel")} value={t("pricing.commissionValue")} />
           <p>
-            <span className="font-semibold text-brass-deep">Uw voordeel: </span>U ontvangt per
-            begeleider een overzichtelijke wekelijkse verzamelfactuur. Geen losse stroom aan
-            facturen meer, maar één helder overzicht voor uw boekhouding.
+            <span className="font-semibold text-brass-deep">{t("pricing.advantageLabel")}: </span>
+            {t("pricing.advantageBody")}
           </p>
         </Section>
 
-        {/* Begeleider */}
-        <Section
-          kicker="Voor de Begeleider (Professional)"
-          title="Focus op de weg, terwijl ons systeem uw backoffice beheert."
-        >
-          <Bullet label="Abonnement" value="€ 2,50 per maand." />
-          <Bullet
-            label="Onbeperkt ritten"
-            value="Er is geen limiet aan het aantal opdrachten dat u kunt accepteren."
-          />
-          <Bullet
-            label="Google Agenda Sync"
-            value="Uw planning wordt volledig automatisch beheerd."
-          />
+        <Section kicker={t("pricing.escortKicker")} title={t("pricing.escortTitle")}>
+          <Bullet label={t("pricing.subscription")} value={t("pricing.plan250")} />
+          <Bullet label={t("pricing.unlimitedLabel")} value={t("pricing.unlimitedValue")} />
+          <Bullet label={t("pricing.calendarLabel")} value={t("pricing.calendarValue")} />
         </Section>
 
-        {/* Bedrijfsaccount */}
-        <Section
-          kicker="Voor het Bedrijfsaccount (Bedrijfsplanner met chauffeurs)"
-          title="Eén centraal account voor uw begeleidingsbedrijf met meerdere chauffeurs."
-        >
-          <Bullet label="Abonnement hoofdaccount" value="€ 10,- per maand." />
-          <Bullet
-            label="Per gekoppelde begeleider"
-            value="€ 1,50 per begeleider per maand (seat-based)."
-          />
-          <Bullet
-            label="Centrale aansturing"
-            value="De Bedrijfsplanner accepteert ritten namens de chauffeurs en beheert facturatie, uitbetalingen en het team vanuit één dashboard."
-          />
-          <Bullet
-            label="Schaalbaar"
-            value="U betaalt alleen voor het aantal actieve chauffeurs onder uw bedrijf. Seats eenvoudig uitbreiden of verlagen in uw abonnementsinstellingen."
-          />
+        <Section kicker={t("pricing.companyKicker")} title={t("pricing.companyTitle")}>
+          <Bullet label={t("pricing.mainAccountLabel")} value={t("pricing.mainAccountValue")} />
+          <Bullet label={t("pricing.perSeatLabel")} value={t("pricing.perSeatValue")} />
+          <Bullet label={t("pricing.centralLabel")} value={t("pricing.centralValue")} />
+          <Bullet label={t("pricing.scalableLabel")} value={t("pricing.scalableValue")} />
         </Section>
 
-        {/* Facturatie */}
-        <Section
-          kicker="Geavanceerde Automatische Facturatie"
-          title="Wij nemen de volledige financiële afwikkeling uit uw handen."
-        >
-          <p>ViaCust gaat verder waar andere platformen stoppen.</p>
-          <Bullet
-            label="Wekelijkse verzamelfacturen"
-            value="Het systeem genereert wekelijks automatisch de facturen. Opdrachtgevers ontvangen per begeleider één verzamelfactuur van alle ritten van die week."
-          />
-          <Bullet
-            label="Brandstoftoeslagen op maat"
-            value="U kunt als begeleider uw eigen voorkeuren instellen voor brandstoftoeslagen. Het systeem berekent en verwerkt deze toeslagen automatisch in elke factuur, op basis van de actuele marktwaarden of uw eigen afspraken."
-          />
-          <Bullet
-            label="Extra kosten"
-            value="Heeft u tijdens de rit extra kosten gemaakt (zoals tolkosten of onvoorziene uitgaven)? U kunt deze eenvoudig kenbaar maken in de app, waarna ze direct worden meegenomen op de eerstvolgende verzamelfactuur."
-          />
+        <Section kicker={t("pricing.billingKicker")} title={t("pricing.billingTitle")}>
+          <p>{t("pricing.billingIntro")}</p>
+          <Bullet label={t("pricing.weeklyLabel")} value={t("pricing.weeklyValue")} />
+          <Bullet label={t("pricing.fuelLabel")} value={t("pricing.fuelValue")} />
+          <Bullet label={t("pricing.extrasLabel")} value={t("pricing.extrasValue")} />
         </Section>
 
-        {/* Incasso */}
-        <Section
-          kicker="Automatische incasso & gemak"
-          title="Een volledig geautomatiseerd betaalsysteem."
-        >
-          <p>
-            Om uw administratieve last tot een minimum te beperken, werkt ViaCust met een volledig
-            geautomatiseerd betaalsysteem.
-          </p>
-          <Bullet
-            label="Automatische afschrijving"
-            value="De maandelijkse vaste kosten en de verzamelde platformcommissie worden automatisch afgeschreven via de door u gekoppelde betaalmethode (incasso of creditcard)."
-          />
-          <Bullet
-            label="Geen handmatige handelingen"
-            value="U hoeft geen losse facturen voor het platformgebruik over te boeken; alles wordt wekelijks gespecificeerd en automatisch verrekend."
-          />
+        <Section kicker={t("pricing.debitKicker")} title={t("pricing.debitTitle")}>
+          <p>{t("pricing.debitIntro")}</p>
+          <Bullet label={t("pricing.autoLabel")} value={t("pricing.autoValue")} />
+          <Bullet label={t("pricing.manualLabel")} value={t("pricing.manualValue")} />
           <p className="font-display italic text-2xl md:text-3xl text-brass-deep pt-4">
-            Efficiëntie, precisie en gemak. Dat is de standaard van ViaCust.
+            {t("pricing.closing")}
           </p>
         </Section>
 
-        {/* CTA */}
         <section className="py-14 md:py-20 px-5 md:px-8">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4">
             <Link
               to="/auth?role=client"
               className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
             >
-              Meld aan als opdrachtgever
+              {t("pricing.ctaClient")}
             </Link>
             <Link
               to="/auth?role=escort"
               className="inline-block px-7 py-4 border-2 border-brass-deep text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-brass-deep hover:text-parchment transition-colors text-center"
             >
-              Meld aan als begeleider
+              {t("pricing.ctaEscort")}
             </Link>
           </div>
         </section>
