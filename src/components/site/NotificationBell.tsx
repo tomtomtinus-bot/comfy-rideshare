@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enGB, de, fr } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+
+const dfLocale: Record<string, Locale> = { nl, en: enGB, de, fr };
+
 
 type Notification = {
   id: string;
