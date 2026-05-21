@@ -78,8 +78,10 @@ interface RideDetail {
   viewer_status?: string;
 }
 
-const fmtDateTime = (d: string) =>
-  new Date(d).toLocaleString("nl-NL", { dateStyle: "full", timeStyle: "short" });
+const fmtDateTime = (d: string, lng: string = "nl") => {
+  const locale = lng === "nl" ? "nl-NL" : lng === "de" ? "de-DE" : lng === "fr" ? "fr-FR" : "en-GB";
+  return new Date(d).toLocaleString(locale, { dateStyle: "full", timeStyle: "short" });
+};
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="bg-card shadow-etched p-6 md:p-8">
