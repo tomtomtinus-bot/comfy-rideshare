@@ -279,7 +279,7 @@ const Inner = () => {
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Verzoek verstuurd naar opdrachtgever.");
+    toast.success(t("escortRideDetail.cancelRequestSent"));
     supabase.functions.invoke("notify-ride-event", {
       body: {
         event: "escort_cancelled",
