@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,6 +146,7 @@ function splitAddress(addr: string): { street: string; number: string } {
 }
 
 const Inner = () => {
+  const { t } = useTranslation();
   const { user, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
