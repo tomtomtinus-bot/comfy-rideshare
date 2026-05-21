@@ -167,7 +167,7 @@ export const NotificationBell = () => {
                   onClick={markAllRead}
                   className="text-[11px] uppercase tracking-widest font-semibold text-brass-deep/70 hover:text-brass-gold inline-flex items-center gap-1"
                 >
-                  <CheckCheck className="size-3.5" /> Alles gelezen
+                  <CheckCheck className="size-3.5" /> {t("notifBell.markAllRead")}
                 </button>
               )}
               {items.length > 0 && (
