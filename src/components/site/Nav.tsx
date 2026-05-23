@@ -30,7 +30,7 @@ export const Nav = () => {
     { to: "/brandstofprijzen", label: t("landing.navFuel"), show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
     { to: "/uitgesloten-begeleiders", label: t("landing.navPool"), show: !!user && role === "opdrachtgever" },
     { to: "/voorkeursopdrachtgevers", label: t("landing.navPreferred"), show: showPlannerOnly },
-    { to: "/team", label: t("landing.navTeam"), show: showPlannerOnly && isPlanner },
+    { to: "/team", label: t("landing.navTeam"), show: showPlannerOnly },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: t("landing.navCost"), show: true },
     { to: "/hoe-werkt-viacust", label: t("landing.navHow"), show: true },
