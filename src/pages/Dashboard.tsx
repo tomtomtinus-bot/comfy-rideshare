@@ -1066,6 +1066,29 @@ const EscortDashboard = () => {
                       <strong>{t("dash.travelFromBase")}</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
                       <strong>{t("dash.back")}</strong> {fmtHours(a.travel_back_home_min)} {t("dash.roundedQuarter")}
                     </div>
+                    {a.ride.bundle_id && (() => {
+                      const siblings = items
+                        .filter((x) => x.ride?.bundle_id === a.ride.bundle_id)
+                        .sort((x, y) => new Date(x.ride.scheduled_at).getTime() - new Date(y.ride.scheduled_at).getTime());
+                      const idx = siblings.findIndex((s) => s.id === a.id);
+                      const isFirst = idx === 0;
+                      const isLast = idx === siblings.length - 1;
+                      const pos = isFirst && isLast
+                        ? ""
+                        : isFirst
+                        ? t("dash.bundleFirstHint", { defaultValue: "Eerste rit in pakket — reistijd heen wordt meegerekend, reistijd terug pas bij de laatste rit." })
+                        : isLast
+                        ? t("dash.bundleLastHint", { defaultValue: "Laatste rit in pakket — reistijd terug wordt meegerekend, reistijd heen is al bij de eerste rit verrekend." })
+                        : t("dash.bundleMidHint", { defaultValue: "Tussenliggende rit in pakket — vul alleen de begeleidingstijd in. Reistijd heen/terug is verrekend bij de eerste en laatste rit." });
+                      return (
+                        <div className="pt-2 mt-1 border-t border-brass-deep/10 text-brass-deep">
+                          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5 mr-2">
+                            📦 {t("dash.bundleBadge", { current: idx + 1, total: siblings.length, defaultValue: "Rit {{current}} van {{total}}" })}
+                          </span>
+                          {pos}
+                        </div>
+                      );
+                    })()}
                   </div>
                   {(() => {
                     const sched = new Date(a.ride.scheduled_at);
