@@ -788,6 +788,7 @@ const EscortDashboard = () => {
     const extrasTotal = +extras.reduce((s, e) => s + e.amount, 0).toFixed(2);
     const cost = +(baseCost + extrasTotal).toFixed(2);
 
+    const nowIso = new Date().toISOString();
     const { error } = await supabase
       .from("ride_assignments")
       .update({
@@ -798,7 +799,11 @@ const EscortDashboard = () => {
         extra_costs: extras as never,
         extra_costs_total: extrasTotal,
         hours_notes: parsed.data.hours_notes || null,
-        hours_submitted_at: new Date().toISOString(),
+        hours_submitted_at: nowIso,
+        // Planner (escort) vult zelf de uren in → automatisch goedgekeurd.
+        // Alleen wanneer een aparte chauffeur de uren indient (DriverDashboard) blijft goedkeuring nodig.
+        hours_approved_at: nowIso,
+        hours_approved_by: user.id,
         hours_dispute_status: "none",
         hours_dispute_reason: null,
       } as never)

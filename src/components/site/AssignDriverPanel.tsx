@@ -101,7 +101,7 @@ export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
   };
 
   const currentDriver = drivers.find((d) => d.user_id === assignment.assigned_driver_id);
-  const awaitingApproval = !!assignment.hours_submitted_at && !assignment.hours_approved_at;
+  const awaitingApproval = !!assignment.hours_submitted_at && !assignment.hours_approved_at && !!assignment.assigned_driver_id && assignment.assigned_driver_id !== user?.id;
 
   return (
     <section className="bg-card shadow-etched p-6 md:p-8 border-l-4 border-brass-gold">

@@ -936,7 +936,7 @@ const en: Dict = {
     navFuel: "Fuel prices",
     navPool: "My escort pool",
     navPreferred: "My preferred clients",
-    navTeam: "My team",
+    navTeam: "Company profile",
     navCost: "Pricing",
     navHow: "How ViaCust works",
     navFaq: "FAQ",

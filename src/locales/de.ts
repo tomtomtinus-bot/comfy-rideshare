@@ -803,7 +803,7 @@ const de: Dict = {
     navFuel: "Kraftstoffpreise",
     navPool: "Mein Begleiter-Pool",
     navPreferred: "Meine Vorzugsauftraggeber",
-    navTeam: "Mein Team",
+    navTeam: "Firmenprofil",
     navCost: "Was kostet ViaCust",
     navHow: "Wie ViaCust funktioniert",
     navFaq: "FAQ",
