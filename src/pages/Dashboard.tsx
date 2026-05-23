@@ -777,9 +777,9 @@ const EscortDashboard = () => {
     const end = new Date(rideEnd.getTime() + travelBack * 60_000);
 
     const rawHours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
-    // Minimumtarief op urenbasis: alleen toepassen op single ritten of de eerste rit in een bundle,
-    // anders wordt de minimum-uren per rit dubbel geteld in de bundle totalen.
-    const applyMin = !bundleId || isFirstInBundle;
+    // Minimum-uurtarief geldt NIET bij gecombineerde ritten (bundle): de totale duur
+    // van de gekoppelde ritten is leidend.
+    const applyMin = !bundleId;
     const billableHours = applyMin ? Math.max(rawHours, item.min_billable_hours || 0) : rawHours;
     const hours = +billableHours.toFixed(2);
     let baseCost = +(hours * item.hourly_rate).toFixed(2);
