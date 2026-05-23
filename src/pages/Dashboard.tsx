@@ -756,16 +756,31 @@ const EscortDashboard = () => {
 
     // Reistijd afronden naar boven op kwartieren
     const ceilQuarter = (min: number) => Math.ceil(min / 15) * 15;
-    const travelTo = ceilQuarter(item.travel_to_pickup_min);
-    const travelBack = ceilQuarter(item.travel_back_home_min);
+
+    // Bij gecombineerde ritten (bundle): reistijd heen telt alleen mee bij de eerste rit
+    // en reistijd terug alleen bij de laatste. Tussenliggende ritten worden naadloos
+    // gekoppeld zodat de begeleider niet dubbel wordt uitbetaald voor reistijd.
+    const bundleId = item.ride?.bundle_id ?? null;
+    const bundleSiblings = bundleId
+      ? items
+          .filter((x) => x.ride?.bundle_id === bundleId)
+          .sort((a, b) => new Date(a.ride.scheduled_at).getTime() - new Date(b.ride.scheduled_at).getTime())
+      : [item];
+    const isFirstInBundle = bundleSiblings[0]?.id === item.id;
+    const isLastInBundle = bundleSiblings[bundleSiblings.length - 1]?.id === item.id;
+
+    const travelTo = isFirstInBundle ? ceilQuarter(item.travel_to_pickup_min) : 0;
+    const travelBack = isLastInBundle ? ceilQuarter(item.travel_back_home_min) : 0;
     // Vertrek standplaats = starttijd rit − reistijd heen
     // Terug standplaats = eindtijd rit + reistijd terug
     const start = new Date(rideStart.getTime() - travelTo * 60_000);
     const end = new Date(rideEnd.getTime() + travelBack * 60_000);
 
     const rawHours = +((end.getTime() - start.getTime()) / 1000 / 3600).toFixed(2);
-    // Minimumtarief op urenbasis toepassen
-    const billableHours = Math.max(rawHours, item.min_billable_hours || 0);
+    // Minimumtarief op urenbasis: alleen toepassen op single ritten of de eerste rit in een bundle,
+    // anders wordt de minimum-uren per rit dubbel geteld in de bundle totalen.
+    const applyMin = !bundleId || isFirstInBundle;
+    const billableHours = applyMin ? Math.max(rawHours, item.min_billable_hours || 0) : rawHours;
     const hours = +billableHours.toFixed(2);
     let baseCost = +(hours * item.hourly_rate).toFixed(2);
     // Duitsland km-modus: kosten = afstand × km-tarief (uurtarief & brandstoftoeslag vervallen voor DE)
@@ -1051,6 +1066,29 @@ const EscortDashboard = () => {
                       <strong>{t("dash.travelFromBase")}</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
                       <strong>{t("dash.back")}</strong> {fmtHours(a.travel_back_home_min)} {t("dash.roundedQuarter")}
                     </div>
+                    {a.ride.bundle_id && (() => {
+                      const siblings = items
+                        .filter((x) => x.ride?.bundle_id === a.ride.bundle_id)
+                        .sort((x, y) => new Date(x.ride.scheduled_at).getTime() - new Date(y.ride.scheduled_at).getTime());
+                      const idx = siblings.findIndex((s) => s.id === a.id);
+                      const isFirst = idx === 0;
+                      const isLast = idx === siblings.length - 1;
+                      const pos = isFirst && isLast
+                        ? ""
+                        : isFirst
+                        ? t("dash.bundleFirstHint", { defaultValue: "Eerste rit in pakket — reistijd heen wordt meegerekend, reistijd terug pas bij de laatste rit." })
+                        : isLast
+                        ? t("dash.bundleLastHint", { defaultValue: "Laatste rit in pakket — reistijd terug wordt meegerekend, reistijd heen is al bij de eerste rit verrekend." })
+                        : t("dash.bundleMidHint", { defaultValue: "Tussenliggende rit in pakket — vul alleen de begeleidingstijd in. Reistijd heen/terug is verrekend bij de eerste en laatste rit." });
+                      return (
+                        <div className="pt-2 mt-1 border-t border-brass-deep/10 text-brass-deep">
+                          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5 mr-2">
+                            📦 {t("dash.bundleBadge", { current: idx + 1, total: siblings.length, defaultValue: "Rit {{current}} van {{total}}" })}
+                          </span>
+                          {pos}
+                        </div>
+                      );
+                    })()}
                   </div>
                   {(() => {
                     const sched = new Date(a.ride.scheduled_at);
