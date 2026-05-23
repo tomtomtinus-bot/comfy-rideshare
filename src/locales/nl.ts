@@ -934,7 +934,7 @@ const nl = {
     navFuel: "Brandstofprijzen",
     navPool: "Mijn Begeleiders-pool",
     navPreferred: "Mijn Voorkeursopdrachtgevers",
-    navTeam: "Mijn team",
+    navTeam: "Bedrijfsprofiel",
     navCost: "Wat kost ViaCust",
     navHow: "Hoe werkt ViaCust",
     navFaq: "FAQ",
