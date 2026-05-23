@@ -809,7 +809,7 @@ const fr: Dict = {
     navFuel: "Prix des carburants",
     navPool: "Mon pool d'accompagnateurs",
     navPreferred: "Mes donneurs d'ordre préférés",
-    navTeam: "Mon équipe",
+    navTeam: "Profil d'entreprise",
     navCost: "Tarifs ViaCust",
     navHow: "Comment fonctionne ViaCust",
     navFaq: "FAQ",
