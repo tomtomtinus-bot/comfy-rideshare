@@ -49,8 +49,15 @@ const AdminFuel = () => {
         : "fetch-fuel-prices-fr";
     const { data, error } = await supabase.functions.invoke(fn);
     setSyncing(null);
-    if (error) return toast.error(error.message);
-    toast.success(`${COUNTRY_LABEL[country]}: bijgewerkt`);
+    if (error) return toast.error(`${COUNTRY_LABEL[country]}: ${error.message}`);
+    if (data && (data as any).ok === false) {
+      return toast.error(`${COUNTRY_LABEL[country]}: ${(data as any).error ?? "onbekende fout"}`);
+    }
+    const weeks = (data as any)?.weeks_upserted;
+    const latest = (data as any)?.latest?.slice(-1)?.[0]?.week_start;
+    toast.success(
+      `${COUNTRY_LABEL[country]}: bijgewerkt${weeks ? ` (${weeks} weken)` : ""}${latest ? `, laatst: ${latest}` : ""}`
+    );
     load();
   };
 
