@@ -129,6 +129,48 @@ Deno.serve(async (req) => {
       console.error("dagprijzen parse warn:", e);
     }
 
+    // Extra bron: aparte "Dagelijkse-dieselprijs.xlsx" (loopt verder door dan de
+    // dagprijzen-tab in het weekgemiddelde-bestand). Hieruit berekenen we ook
+    // gemiddelden per ISO-week en voegen die toe.
+    try {
+      const DAG_URL =
+        "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/Dagelijkse-dieselprijs.xlsx";
+      const dRes = await fetch(DAG_URL);
+      if (dRes.ok) {
+        const dBuf = new Uint8Array(await dRes.arrayBuffer());
+        const dWb = XLSX.read(dBuf, { type: "array", cellDates: true });
+        const dSheet = dWb.Sheets[dWb.SheetNames[0]];
+        const dRows = XLSX.utils.sheet_to_json<any[]>(dSheet, { header: 1, raw: true });
+        const buckets = new Map<string, number[]>();
+        for (const row of dRows) {
+          if (!Array.isArray(row)) continue;
+          const dateCell = row[0];
+          const price = row[1];
+          if (!(dateCell instanceof Date) || typeof price !== "number") continue;
+          if (!isFinite(price) || price <= 0) continue;
+          buckets.get(isoMonday(dateCell))?.push(price) ?? buckets.set(isoMonday(dateCell), [price]);
+        }
+        const today = new Date();
+        const todayMonday = isoMonday(today);
+        for (const [ws, prices] of buckets.entries()) {
+          if (prices.length < 1) continue;
+          const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+          const partial = ws >= todayMonday || prices.length < 7;
+          upserts.push({
+            week_start: ws,
+            eur_per_liter: +avg.toFixed(4),
+            source: partial ? "TLN-dagelijks (partial)" : "TLN-dagelijks",
+            country: "NL",
+          } as any);
+        }
+      } else {
+        console.warn("Dagelijkse-dieselprijs fetch failed:", dRes.status);
+      }
+    } catch (e) {
+      console.error("Dagelijkse-dieselprijs parse warn:", e);
+    }
+
+
     // Fallback wanneer parse niets oplevert
     if (upserts.length === 0) {
       upserts.push({
