@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     const res = await fetch(TLN_XLSX_URL);
     if (!res.ok) throw new Error(`TLN download failed: ${res.status}`);
     const buf = new Uint8Array(await res.arrayBuffer());
-    const wb = XLSX.read(buf, { type: "array" });
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
 
     // Voorkeur: weekgemiddelde-sheet ('weekgemiddelde 2024 - Heden')
     const wkSheetName =
@@ -114,13 +114,13 @@ Deno.serve(async (req) => {
         const today = new Date();
         const todayMonday = isoMonday(today);
         for (const [ws, prices] of buckets.entries()) {
-          if (ws >= todayMonday) continue; // huidige of toekomstige week overslaan
-          if (prices.length < 7) continue; // alleen volledige weken
+          if (prices.length < 1) continue;
           const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+          const partial = ws >= todayMonday || prices.length < 7;
           upserts.push({
             week_start: ws,
             eur_per_liter: +avg.toFixed(4),
-            source: "TLN-dag",
+            source: partial ? "TLN-dag (partial)" : "TLN-dag",
             country: "NL",
           } as any);
         }
