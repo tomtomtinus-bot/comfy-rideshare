@@ -42,16 +42,19 @@ Deno.serve(async (req) => {
       issues.push(`Geen platform-facturen aangemaakt op ${monday}.`);
     }
 
-    // 2. Brandstofprijzen deze week per land
+    // 2. Brandstofprijzen voor de net afgesloten week (vorige maandag)
+    const prevMondayDate = new Date(`${monday}T00:00:00Z`);
+    prevMondayDate.setUTCDate(prevMondayDate.getUTCDate() - 7);
+    const prevMonday = prevMondayDate.toISOString().slice(0, 10);
     const { data: fuelRows, error: fuelErr } = await admin
       .from("weekly_fuel_prices")
       .select("country")
-      .eq("week_start", monday);
+      .eq("week_start", prevMonday);
     if (fuelErr) throw fuelErr;
     const haveCountries = new Set((fuelRows ?? []).map((r: any) => r.country));
     for (const c of ["NL", "BE", "FR"] as const) {
       if (!haveCountries.has(c)) {
-        issues.push(`Brandstofprijs ${c} ontbreekt voor week van ${monday}.`);
+        issues.push(`Brandstofprijs ${c} ontbreekt voor week van ${prevMonday}.`);
       }
     }
 

@@ -114,13 +114,13 @@ Deno.serve(async (req) => {
         const today = new Date();
         const todayMonday = isoMonday(today);
         for (const [ws, prices] of buckets.entries()) {
+          if (ws >= todayMonday) continue; // lopende week pas op (volgende) maandag
           if (prices.length < 1) continue;
           const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-          const partial = ws >= todayMonday || prices.length < 7;
           upserts.push({
             week_start: ws,
             eur_per_liter: +avg.toFixed(4),
-            source: partial ? "TLN-dag (partial)" : "TLN-dag",
+            source: prices.length < 7 ? "TLN-dag (partial)" : "TLN-dag",
             country: "NL",
           } as any);
         }
@@ -153,13 +153,13 @@ Deno.serve(async (req) => {
         const today = new Date();
         const todayMonday = isoMonday(today);
         for (const [ws, prices] of buckets.entries()) {
+          if (ws >= todayMonday) continue; // lopende week pas op (volgende) maandag
           if (prices.length < 1) continue;
           const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-          const partial = ws >= todayMonday || prices.length < 7;
           upserts.push({
             week_start: ws,
             eur_per_liter: +avg.toFixed(4),
-            source: partial ? "TLN-dagelijks (partial)" : "TLN-dagelijks",
+            source: prices.length < 7 ? "TLN-dagelijks (partial)" : "TLN-dagelijks",
             country: "NL",
           } as any);
         }
