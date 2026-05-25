@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     const res = await fetch(TLN_XLSX_URL);
     if (!res.ok) throw new Error(`TLN download failed: ${res.status}`);
     const buf = new Uint8Array(await res.arrayBuffer());
-    const wb = XLSX.read(buf, { type: "array" });
+    const wb = XLSX.read(buf, { type: "array", cellDates: true });
 
     // Voorkeur: weekgemiddelde-sheet ('weekgemiddelde 2024 - Heden')
     const wkSheetName =
