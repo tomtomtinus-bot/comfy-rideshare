@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
 
   const { data: assn } = await supabase
     .from('ride_assignments')
-    .select('id, status, ride_id, escort_id, responds_by, interest_expressed_at, broadcast_closes_at')
+    .select('id, status, ride_id, escort_id, responds_by, interest_expressed_at, broadcast_closes_at, travel_to_pickup_min, travel_back_home_min, estimated_hours')
     .eq('id', assignmentId)
     .maybeSingle()
 
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Compute score (same formula as RPC)
+  // Compute score
   const { data: ride } = await supabase
     .from('rides')
     .select('id, client_id, pickup_lat, pickup_lng, pickup_city, dropoff_city, status')
@@ -138,18 +138,10 @@ Deno.serve(async (req) => {
   }
   const { data: escort } = await supabase
     .from('escort_profiles')
-    .select('base_lat, base_lng, rating')
+    .select('rating')
     .eq('id', assn.escort_id).maybeSingle()
-  const distKm = escort
-    ? haversineKm(escort.base_lat, escort.base_lng, ride.pickup_lat, ride.pickup_lng)
-    : 0
-  const { count: repeatCount } = await supabase
-    .from('ride_assignments')
-    .select('id', { count: 'exact', head: true })
-    .eq('escort_id', assn.escort_id)
-    .eq('status', 'accepted')
-    .neq('id', assignmentId)
-  // Repeat is *with same client* — fetch via join
+
+  // Repeat is *with same client*
   const { data: repeats } = await supabase
     .from('ride_assignments')
     .select('id, ride:rides!inner(client_id)')
@@ -157,8 +149,42 @@ Deno.serve(async (req) => {
     .eq('status', 'accepted')
     .neq('id', assignmentId)
   const sameClient = (repeats ?? []).filter((r: any) => r.ride?.client_id === ride.client_id).length
-  const score = 100 - (distKm * 1.5) + ((escort?.rating ?? 5) * 10) + (Math.min(sameClient, 5) * 4)
-  void repeatCount
+
+  // Favoriet?
+  const { data: fav } = await supabase
+    .from('client_favorite_escorts')
+    .select('id')
+    .eq('client_id', ride.client_id)
+    .eq('escort_id', assn.escort_id)
+    .maybeSingle()
+  const isFavorite = !!fav
+
+  // Reistijd via de weg (Google Directions, exclusief files) — opgeslagen bij rit-aanmaak
+  const travelTo = assn.travel_to_pickup_min ?? 0
+  const travelBack = assn.travel_back_home_min ?? 0
+  const totalTravelMin = travelTo + travelBack
+
+  // Score-componenten
+  // - Reistijd: −0,4 punt per minuut totale aan+afvoer (=−24/uur)
+  // - Rating: ×10
+  // - Eerdere ritten met deze klant: +4 per stuk (max 5)
+  // - Favorietbonus: +30 als favoriet ÉN aanvoer ≤ 90 min (cap voorkomt dat een
+  //   favoriet met 3u aanvoer een lokale begeleider verdringt). Tussen 60–90 min
+  //   wordt de bonus lineair afgebouwd van +30 naar 0.
+  let favoriteBonus = 0
+  if (isFavorite) {
+    if (travelTo <= 60) favoriteBonus = 30
+    else if (travelTo <= 90) favoriteBonus = 30 * (1 - (travelTo - 60) / 30)
+    else favoriteBonus = 0
+  }
+
+  const score =
+    100
+    - (totalTravelMin * 0.4)
+    + ((escort?.rating ?? 5) * 10)
+    + (Math.min(sameClient, 5) * 4)
+    + favoriteBonus
+  void haversineKm
 
   const closesAt = new Date(Math.min(
     Date.now() + 5 * 60_000,
