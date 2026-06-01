@@ -930,30 +930,30 @@ export type Database = {
           amount: number
           created_at: string
           id: string
-          num_escorts: number
+          num_escorts: number | null
           platform_invoice_id: string
-          ride_date: string
-          ride_id: string
+          ride_date: string | null
+          ride_id: string | null
           route: string | null
         }
         Insert: {
           amount: number
           created_at?: string
           id?: string
-          num_escorts: number
+          num_escorts?: number | null
           platform_invoice_id: string
-          ride_date: string
-          ride_id: string
+          ride_date?: string | null
+          ride_id?: string | null
           route?: string | null
         }
         Update: {
           amount?: number
           created_at?: string
           id?: string
-          num_escorts?: number
+          num_escorts?: number | null
           platform_invoice_id?: string
-          ride_date?: string
-          ride_id?: string
+          ride_date?: string | null
+          ride_id?: string | null
           route?: string | null
         }
         Relationships: [
@@ -976,9 +976,11 @@ export type Database = {
           pdf_path: string | null
           period_end: string
           period_start: string
+          rides_amount: number
           status: string
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
+          subscription_amount: number
           total_amount: number
           total_escorts: number
           updated_at: string
@@ -993,9 +995,11 @@ export type Database = {
           pdf_path?: string | null
           period_end: string
           period_start: string
+          rides_amount?: number
           status?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          subscription_amount?: number
           total_amount?: number
           total_escorts?: number
           updated_at?: string
@@ -1010,9 +1014,11 @@ export type Database = {
           pdf_path?: string | null
           period_end?: string
           period_start?: string
+          rides_amount?: number
           status?: string
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
+          subscription_amount?: number
           total_amount?: number
           total_escorts?: number
           updated_at?: string
@@ -1040,6 +1046,7 @@ export type Database = {
           id: string
           kvk_number: string | null
           last_platform_invoice_at: string | null
+          monthly_subscription_fee: number
           phone: string | null
           preferred_language: string
           privacy_accepted_at: string | null
@@ -1067,6 +1074,7 @@ export type Database = {
           id: string
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
+          monthly_subscription_fee?: number
           phone?: string | null
           preferred_language?: string
           privacy_accepted_at?: string | null
@@ -1094,6 +1102,7 @@ export type Database = {
           id?: string
           kvk_number?: string | null
           last_platform_invoice_at?: string | null
+          monthly_subscription_fee?: number
           phone?: string | null
           preferred_language?: string
           privacy_accepted_at?: string | null
@@ -1981,7 +1990,9 @@ export type Database = {
         }[]
       }
       fuel_country_code: { Args: { p_country: string }; Returns: string }
-      generate_platform_invoices: { Args: never; Returns: number }
+      generate_platform_invoices:
+        | { Args: never; Returns: number }
+        | { Args: { _catch_up?: boolean }; Returns: number }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_bundle_rides_for_escort: {
         Args: { _bundle_id: string }
