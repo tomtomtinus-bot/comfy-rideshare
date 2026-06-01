@@ -171,7 +171,7 @@ Deno.serve(async (req) => {
     }
 
     // Notifications
-    for (const w of list.slice(0, slotsLeft)) {
+    for (const w of eligible.slice(0, slotsLeft)) {
       notifications.push({
         user_id: w.escort_id,
         type: 'broadcast_won',
@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
         ride_id: rideId,
       })
     }
-    for (const l of list.slice(slotsLeft)) {
+    for (const l of eligible.slice(slotsLeft)) {
       notifications.push({
         user_id: l.escort_id,
         type: 'broadcast_lost',
