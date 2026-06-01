@@ -1,127 +1,43 @@
-# Plan: Bedrijfsaccounts (Planner + Chauffeurs)
-
 ## Doel
-Een hoofdaccount ("Bedrijfsplanner") kan extra chauffeurs uitnodigen via e-mail. De planner regelt financiën, abonnement, ritacceptatie en toewijzing. Chauffeurs hebben een eigen login, zien alleen hun toegewezen ritten, vullen uren in (planner keurt goed), en zien geen tarieven/facturen.
+Platform-facturen 2× per maand i.p.v. wekelijks, en abonnementskosten (opdrachtgever €50/maand) op die facturen meenemen i.p.v. via Stripe-abo.
 
----
+## Schema-wijzigingen (1 migration)
+- `platform_invoices`: nieuwe kolommen
+  - `subscription_amount numeric NOT NULL DEFAULT 0` — €25 (50% van €50) per factuur
+  - `rides_amount numeric NOT NULL DEFAULT 0` — fee-deel (huidige `total_amount` logica)
+  - `total_amount` blijft = rides_amount + subscription_amount
+- `profiles`: `monthly_subscription_fee numeric NOT NULL DEFAULT 50` — zodat we het later per klant kunnen aanpassen
+- `last_platform_invoice_at` blijft als cursor (nu op factuur-`created_at`-basis i.p.v. ride-datum)
 
-## 1. Datamodel (nieuwe tabellen)
+## `generate_platform_invoices()` herschrijven
+- Bepaal huidige periode op basis van vandaag:
+  - Dag 15 → periode = `[1e 00:00, 15e 23:59:59]` van huidige maand
+  - Laatste dag (28/30/31) → periode = `[16e 00:00, laatste dag 23:59:59]` van huidige maand
+- Ritten geselecteerd via `invoices.created_at` (escort-factuur) binnen periode i.p.v. `r.scheduled_at`. Hierdoor valt een escort-factuur die op de 31e is gemaakt automatisch in de eerstvolgende 1–15 periode.
+- App-fee = 1,5% van `invoice_items.amount` (ongewijzigd) → `rides_amount`
+- `subscription_amount` = ROUND(monthly_subscription_fee × 0.5, 2)
+- Bug fix uit vorig gesprek: cursor alleen bumpen als er ook daadwerkelijk een factuur is aangemaakt
+- Extra factuurregel voor abonnement: rij in `platform_invoice_items` met `ride_id = NULL`, `route = 'Abonnement (½ maand)'`. Vereist dat `ride_id` nullable wordt (migration).
 
-**`companies`**
-- `id`, `owner_id` (= planner = begeleider-account), `name`, `seat_limit`, `created_at`
+## Cron-schema
+- Bestaande wekelijkse cron uitschakelen
+- Twee nieuwe schedules:
+  - `0 6 15 * *` → 15e om 06:00
+  - `0 6 28 2 *` (alleen feb) + `0 6 L * *` is niet ondersteund door pg_cron; gebruik in plaats daarvan dagelijks `0 6 * * *` met een check in de functie: alleen draaien als vandaag = 15 OF = laatste dag van de maand.
+- Eenvoudiger: 1 dagelijkse cron `0 6 * * *` → functie bepaalt zelf of vandaag een factuurdag is.
 
-**`company_members`**
-- `id`, `company_id`, `user_id`, `role` (`planner` | `driver`), `status` (`active` | `removed`), `joined_at`
-- Unique (company_id, user_id). Eén user kan slechts bij één bedrijf horen.
+## Catch-up
+Direct na deploy: handmatig `generate_platform_invoices()` aanroepen met override-periode `[2026-05-19, 2026-05-31]` voor de 2 betroffen klanten zodat de 3 openstaande ritten alsnog gefactureerd worden.
 
-**`company_invitations`**
-- `id`, `company_id`, `email`, `token` (uniek), `role` (`driver`), `invited_by`, `expires_at`, `accepted_at`, `status` (`pending`|`accepted`|`expired`|`revoked`)
+## Stripe-abo opdrachtgevers stopzetten
+- Edge-functie `cancel-client-subscription` (eenmalige run) die voor elke profiel met rol 'opdrachtgever' het lopende Stripe-abo cancelt (immediate, geen refund — abo eindigt einde lopende periode).
+- Nieuwe checkout-flow voor opdrachtgevers wordt **niet** meer via Stripe-abo gestart; pricing-pagina/checkout aanpassen valt buiten deze stap (alleen back-end fix nu). UI-vermelding kan later.
 
-**Uitbreiding `ride_assignments`**
-- `assigned_driver_id uuid null` → de chauffeur die de rit fysiek uitvoert. `escort_id` blijft de planner (= account dat de rit accepteerde / wordt gefactureerd).
-- `hours_approved_at`, `hours_approved_by` voor goedkeuringsflow.
+## Te wijzigen bestanden
+- `supabase/migrations/*` — schema + functie-herdefinitie
+- `supabase/functions/cancel-client-subscription/index.ts` — nieuw (eenmalig)
+- `supabase/functions/charge-platform-invoice/index.ts` — ongewijzigd
+- Cron: via `supabase--insert` SQL (job_id van oude weeklycron uitschakelen, nieuwe dagelijkse cron toevoegen)
 
-**RLS-principes**
-- Planner ziet alle company-data + alle assignments van zijn bedrijf.
-- Driver ziet: eigen `company_members`-rij, eigen profiel, **enkel** assignments waar `assigned_driver_id = auth.uid()`, met beperkte kolommen (geen tarieven, geen `estimated_cost`, `actual_cost`, `extra_costs_total`, `cancellation_fee`, `invoice_id`).
-- Driver mag uren indienen op eigen toegewezen assignment (status → `hours_submitted` blijft, maar pas finaal na planner-goedkeuring).
-- Voor kolom-niveau beperkingen: dedicated view `driver_ride_assignments_view` + RLS die `assigned_driver_id = auth.uid()`. Frontend chauffeur leest enkel die view.
-
-Security definer functies: `is_company_planner(uid)`, `is_company_driver(uid)`, `same_company(uid1, uid2)`.
-
----
-
-## 2. Uitnodigingsflow
-
-1. Planner opent **"Mijn team"** (nieuwe pagina `/team`) — alleen zichtbaar voor begeleiders met actief abonnement.
-2. Voert e-mailadres in → edge function `invite-company-driver`:
-   - Maakt rij in `company_invitations` met token + 7 dagen geldig.
-   - Verstuurt transactionele mail (Lovable Email) met link `/uitnodiging?token=...`.
-3. Ontvanger landt op `/uitnodiging`:
-   - Niet ingelogd → moet account aanmaken / inloggen (e-mail uit invitatie pre-filled, vergrendeld).
-   - Ingelogd met andere e-mail → fout.
-4. Edge function `accept-company-invitation`: maakt `company_members` rij (`role=driver`), kent `begeleider` rol toe, koppelt aan bedrijf, markeert invitatie `accepted`.
-5. Driver krijgt verkort onboarding (geen tarieven, geen IBAN, geen Stripe — enkel persoonsgegevens, certificaat, voertuig).
-
-**Seat enforcement:** vóór invite + accept controleert function `active_member_count < seat_limit` (komt uit Stripe-abonnement subscription quantity).
-
----
-
-## 3. Abonnement (per seat)
-
-- Bestaand `subscriptions` product wordt aangepast naar **per-seat pricing** (Stripe `quantity`).
-- `seat_limit` op `companies` = huidige `subscription.quantity`.
-- Planner kan in `/abonnement` chauffeur-seats toevoegen/verlagen → update via Stripe portal of via "Aantal chauffeurs aanpassen" knop → edge function past `subscription_item.quantity` aan.
-- Webhook (`payments-webhook`) synchroniseert `seat_limit` bij elke wijziging.
-- Driver-accounts hebben zelf geen abonnement; `RequireSubscription` checkt bedrijf-abonnement van planner.
-
----
-
-## 4. UI-wijzigingen
-
-**Planner**
-- Nieuwe pagina `/team` (`Team.tsx`):
-  - Lijst chauffeurs (naam, e-mail, status, koppel-/verwijder-knop).
-  - Lijst openstaande uitnodigingen + "Nieuwe chauffeur uitnodigen" dialog.
-  - Knop "Seats beheren" → naar `/abonnement`.
-- Op `EscortRideDetail.tsx` (accepteerde rit):
-  - Nieuwe sectie **"Toewijzen aan chauffeur"** met dropdown van eigen chauffeurs + zichzelf. Default = zichzelf.
-  - Wijzigbaar tot start van rit; daarna niet meer.
-- Op `Dashboard.tsx` (planner): nieuw kaartje "Mijn team" met aantal chauffeurs / seats.
-- **Urenoverzicht**: bestaande urenflow krijgt extra status. Wanneer driver uren indient → planner ziet "Uren ter goedkeuring" badge → goedkeuren/aanpassen → pas dan komt het op factuur.
-
-**Chauffeur**
-- Aparte minimal dashboard `/chauffeur` (of hergebruik `Dashboard.tsx` met `driverMode` flag):
-  - Vandaag/komende ritten (alleen toegewezen).
-  - Geen tarieven/facturen/abonnement/team in navigatie.
-  - GPS live-locatie + geplande standplaatsen (eigen, persoonlijk).
-  - Rit-detail toont route, opdrachtgever, voertuiginfo — **geen** prijzen/uurtarief.
-  - Uren-invoer scherm.
-- `Nav.tsx`: verbergt "Facturen", "Facturatiegegevens", "Abonnement", "Team", "Brandstofprijzen" voor drivers.
-- `RoleSwitch`/`useAuth`: nieuwe afgeleide flag `companyRole` (`planner` | `driver` | `solo`).
-
-**Matching / RequestRide (opdrachtgever-zijde)**
-- Een bedrijf telt als één entiteit. Opdrachtgever ziet planner-profiel (anonymous_id van planner) met label "Bedrijf · X chauffeurs". Tijdelijke standplaats / geplande standplaats worden geaggregeerd uit alle chauffeurs van het bedrijf (dichtsbijzijnde wint).
-
----
-
-## 5. Notificaties / e-mails
-
-- Nieuwe transactionele mail: **`company-invitation`** (token-link).
-- Push/in-app notificatie naar driver bij toewijzing.
-- Push naar planner bij ingediende uren.
-
----
-
-## 6. Edge functions (nieuw / aangepast)
-
-- `invite-company-driver` (nieuw) — valideert seat-limiet, maakt invitatie, queuet e-mail.
-- `accept-company-invitation` (nieuw) — token check, member creatie.
-- `assign-driver` (nieuw) — planner wijst chauffeur aan assignment; check zelfde bedrijf.
-- `approve-driver-hours` (nieuw) — planner accordeert ingediende uren → triggert bestaande facturatieflow.
-- `payments-webhook` (uitbreiden) — sync seat_limit bij quantity-wijziging.
-
----
-
-## 7. Migratie bestaande accounts
-
-Bestaande begeleider-accounts blijven werken als "solo planner" zonder chauffeurs (impliciet bedrijf met `seat_limit = 1`). Bij eerste invite wordt automatisch `companies`-rij aangemaakt indien nog niet aanwezig.
-
----
-
-## 8. Juridisch (Privacy + AV update later)
-
-Korte addendum nodig: bedrijfsstructuur, gegevensdeling planner↔chauffeur, verantwoordelijkheid planner voor toewijzing. (apart op te voeren na implementatie).
-
----
-
-## Implementatie-volgorde (voorgesteld)
-
-1. Migratie: tabellen + RLS + helper-functies.
-2. Backend: invite + accept + assign edge functions, e-mailtemplate.
-3. Planner UI: `/team` pagina, toewijzen-dropdown op ride detail.
-4. Chauffeur UI: aangepaste navigatie, dashboard-filter, ride-detail zonder financiën.
-5. Urengoedkeuringsflow.
-6. Seat-based pricing (Stripe quantity) — kan eventueel later als losse stap.
-
-Akkoord met dit plan? Of wil je aanpassingen (bv. seat-pricing later, andere naam, extra rechten voor chauffeur)?
+## Open vraag
+Klopt het dat alle huidige opdrachtgevers nog geen actief Stripe-abo hebben (alleen 1 begeleider-abo gevonden)? Zo ja, dan kunnen we de cancel-stap overslaan.
