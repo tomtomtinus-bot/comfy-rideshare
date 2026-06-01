@@ -18,7 +18,9 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
     return <div className="min-h-screen grid place-items-center text-sm text-brass-deep/50">Laden…</div>;
   }
   if (isAdmin || isActive) return <>{children}</>;
-  if (role !== "begeleider" && role !== "opdrachtgever") return <>{children}</>;
+  // Opdrachtgevers worden 2-wekelijks gefactureerd via platformfacturen
+  // (geen Stripe-abo meer), dus geen gating op subscription-status.
+  if (role !== "begeleider") return <>{children}</>;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
