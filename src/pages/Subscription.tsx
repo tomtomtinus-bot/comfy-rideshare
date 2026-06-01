@@ -66,7 +66,48 @@ const SubscriptionInner = () => {
       </main>
     );
   }
-  const plan = role === "begeleider" ? PLANS.begeleider : role === "opdrachtgever" ? PLANS.opdrachtgever : null;
+  // Opdrachtgevers: geen Stripe-abo meer. Toon info-kaart.
+  if (role === "opdrachtgever") {
+    return (
+      <main className="container mx-auto px-4 py-10 md:py-16 max-w-3xl">
+        <header className="mb-10">
+          <h1 className="font-display text-3xl md:text-4xl text-brass-deep">{t("subscription.title")}</h1>
+          <p className="text-sm text-brass-deep/60 mt-2">{t("subscription.subtitle")}</p>
+        </header>
+        <section className="bg-card shadow-etched p-6 md:p-10 space-y-5">
+          <div>
+            <h2 className="font-display text-2xl text-brass-deep">{PLANS.opdrachtgever.title}</h2>
+            <p className="text-sm text-brass-deep/60 mt-1">{PLANS.opdrachtgever.description}</p>
+          </div>
+          <div className="flex items-baseline gap-3">
+            <p className="font-display text-3xl text-brass-gold tabular-nums">€50</p>
+            <p className="text-xs uppercase tracking-widest text-brass-deep/55 font-bold">per maand</p>
+          </div>
+          <ul className="space-y-2 text-sm">
+            {PLANS.opdrachtgever.features.map((f) => (
+              <li key={f} className="flex gap-2">
+                <span className="text-brass-gold">✓</span>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="pt-4 border-t border-brass-deep/10 space-y-2 text-sm text-brass-deep/80">
+            <p>
+              <strong className="text-brass-deep">Eerste 30 dagen gratis.</strong>{" "}
+              Daarna €25 per halve maand op je platformfactuur (€50/maand).
+            </p>
+            <p className="text-xs text-brass-deep/60">
+              Facturatie loopt automatisch — je ontvangt 2× per maand (op de 15e en
+              de laatste dag van de maand) een platformfactuur met de ritfee én
+              het abonnementsdeel. Geen aparte aanmelding nodig.
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const plan = role === "begeleider" ? PLANS.begeleider : null;
   if (!plan) {
     return (
       <main className="container mx-auto px-4 py-12">
