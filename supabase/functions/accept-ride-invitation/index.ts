@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
 
   const { data: assn } = await supabase
     .from('ride_assignments')
-    .select('id, status, ride_id, escort_id, responds_by, interest_expressed_at, broadcast_closes_at')
+    .select('id, status, ride_id, escort_id, responds_by, interest_expressed_at, broadcast_closes_at, travel_to_pickup_min, travel_back_home_min, estimated_hours')
     .eq('id', assignmentId)
     .maybeSingle()
 
