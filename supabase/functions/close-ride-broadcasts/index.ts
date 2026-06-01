@@ -48,10 +48,31 @@ Deno.serve(async (req) => {
   let closedRides = 0
   const notifications: Array<Record<string, unknown>> = []
 
+  // Compute a [start, end] busy window for an accepted ride so we can detect
+  // overlaps with this ride's window. Adds a 30-min buffer on each side plus
+  // the escort's travel-to-pickup and travel-back-home margins.
+  const BUFFER_MIN = 30
+  const DEFAULT_HOURS = 4
+  const windowFor = (
+    scheduledAt: string,
+    timeWindowEnd: string | null,
+    estimatedHours: number | null,
+    travelToPickupMin: number | null,
+    travelBackHomeMin: number | null,
+  ): { start: number; end: number } => {
+    const startBase = new Date(scheduledAt).getTime()
+    const start = startBase - ((travelToPickupMin ?? 0) + BUFFER_MIN) * 60_000
+    const endBase = timeWindowEnd
+      ? new Date(timeWindowEnd).getTime()
+      : startBase + (estimatedHours ?? DEFAULT_HOURS) * 3_600_000
+    const end = endBase + ((travelBackHomeMin ?? 0) + BUFFER_MIN) * 60_000
+    return { start, end }
+  }
+
   for (const rideId of rideIds) {
     const { data: ride } = await supabase
       .from('rides')
-      .select('id, client_id, num_escorts, pickup_city, dropoff_city, status')
+      .select('id, client_id, num_escorts, pickup_city, dropoff_city, status, scheduled_at, time_window_end')
       .eq('id', rideId)
       .maybeSingle()
     if (!ride || ride.status === 'cancelled') continue
@@ -70,7 +91,7 @@ Deno.serve(async (req) => {
     // Get all expressed-interest assignments still 'invited'
     const { data: interested } = await supabase
       .from('ride_assignments')
-      .select('id, escort_id, interest_score, interest_expressed_at')
+      .select('id, escort_id, interest_score, interest_expressed_at, estimated_hours, travel_to_pickup_min, travel_back_home_min')
       .eq('ride_id', rideId)
       .eq('status', 'invited')
       .not('interest_expressed_at', 'is', null)
@@ -80,8 +101,42 @@ Deno.serve(async (req) => {
     const list = interested ?? []
     if (list.length === 0) continue
 
-    const winners = list.slice(0, slotsLeft).map(x => x.id)
-    const losers = list.slice(slotsLeft).map(x => x.id)
+    // CONFLICT CHECK: skip escorts who already have an accepted ride whose
+    // time window overlaps this one. Prevents double-booking when an escort
+    // expresses interest in multiple overlapping broadcasts.
+    const candidateEscortIds = [...new Set(list.map(x => x.escort_id))]
+    const conflictingEscortIds = new Set<string>()
+    if (candidateEscortIds.length > 0) {
+      const { data: otherAccepted } = await supabase
+        .from('ride_assignments')
+        .select('escort_id, estimated_hours, travel_to_pickup_min, travel_back_home_min, ride:rides!inner(scheduled_at, time_window_end, status)')
+        .in('escort_id', candidateEscortIds)
+        .eq('status', 'accepted')
+        .neq('ride_id', rideId)
+      for (const oa of (otherAccepted ?? []) as Array<{
+        escort_id: string
+        estimated_hours: number | null
+        travel_to_pickup_min: number | null
+        travel_back_home_min: number | null
+        ride: { scheduled_at: string; time_window_end: string | null; status: string } | null
+      }>) {
+        if (!oa.ride || oa.ride.status === 'cancelled') continue
+        const otherWin = windowFor(oa.ride.scheduled_at, oa.ride.time_window_end, oa.estimated_hours, oa.travel_to_pickup_min, oa.travel_back_home_min)
+        const cand = list.find(x => x.escort_id === oa.escort_id)
+        if (!cand) continue
+        const thisWin = windowFor(ride.scheduled_at, ride.time_window_end, cand.estimated_hours, cand.travel_to_pickup_min, cand.travel_back_home_min)
+        if (thisWin.start < otherWin.end && otherWin.start < thisWin.end) {
+          conflictingEscortIds.add(oa.escort_id)
+        }
+      }
+    }
+
+    const eligible = list.filter(x => !conflictingEscortIds.has(x.escort_id))
+    const conflicted = list.filter(x => conflictingEscortIds.has(x.escort_id))
+
+    const winners = eligible.slice(0, slotsLeft).map(x => x.id)
+    const losers = eligible.slice(slotsLeft).map(x => x.id)
+    const conflictedIds = conflicted.map(x => x.id)
 
     if (winners.length > 0) {
       await supabase
@@ -97,9 +152,26 @@ Deno.serve(async (req) => {
         .in('id', losers)
         .eq('status', 'invited')
     }
+    if (conflictedIds.length > 0) {
+      await supabase
+        .from('ride_assignments')
+        .update({ status: 'declined', responded_at: nowIso })
+        .in('id', conflictedIds)
+        .eq('status', 'invited')
+      for (const c of conflicted) {
+        notifications.push({
+          user_id: c.escort_id,
+          type: 'broadcast_conflict',
+          title: 'Niet gekozen — overlapt met andere rit',
+          body: `Voor ${ride.pickup_city} → ${ride.dropoff_city} ben je niet gekozen omdat je al een bevestigde rit hebt in dezelfde tijdsperiode.`,
+          ride_assignment_id: c.id,
+          ride_id: rideId,
+        })
+      }
+    }
 
     // Notifications
-    for (const w of list.slice(0, slotsLeft)) {
+    for (const w of eligible.slice(0, slotsLeft)) {
       notifications.push({
         user_id: w.escort_id,
         type: 'broadcast_won',
@@ -109,7 +181,7 @@ Deno.serve(async (req) => {
         ride_id: rideId,
       })
     }
-    for (const l of list.slice(slotsLeft)) {
+    for (const l of eligible.slice(slotsLeft)) {
       notifications.push({
         user_id: l.escort_id,
         type: 'broadcast_lost',
