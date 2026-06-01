@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
 
   return new Response(htmlPage(
     'Beschikbaarheid genoteerd ✓',
-    'Bedankt — je staat genoteerd. Binnen 5 minuten wordt de beste match gekozen op basis van afstand, rating en eerdere samenwerkingen. Je krijgt direct bericht of je gekozen bent.',
+    'Bedankt — je staat genoteerd. Binnen 5 minuten wordt de beste match gekozen op basis van reistijd (aan- en afvoer via de weg), rating, eerdere samenwerkingen en of je een favoriete begeleider van de klant bent. Je krijgt direct bericht of je gekozen bent.',
     `${origin}/dashboard`,
     'Open dashboard',
   ), {
