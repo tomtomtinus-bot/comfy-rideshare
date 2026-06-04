@@ -764,6 +764,28 @@ const RequestRideInner = () => {
       setBusy(false);
       return toast.error(aErr.message);
     }
+
+    // Upload attachments (best-effort, don't fail the ride creation if one fails)
+    if (attachments.length > 0) {
+      const uploaded: Array<{ path: string; name: string; size: number; type: string }> = [];
+      for (const file of attachments) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${user.id}/${ride.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("ride-attachments")
+          .upload(path, file, { upsert: false, contentType: file.type || undefined });
+        if (upErr) {
+          console.error("attachment upload failed", upErr);
+          toast.error(`Bijlage ${file.name} kon niet worden geüpload`);
+          continue;
+        }
+        uploaded.push({ path, name: file.name, size: file.size, type: file.type });
+      }
+      if (uploaded.length > 0) {
+        await supabase.from("rides").update({ attachments: uploaded as never }).eq("id", ride.id);
+      }
+    }
+
     setBusy(false);
 
     // Send ride confirmation email to the client (best-effort; do not block on errors)
