@@ -1359,6 +1359,7 @@ export type Database = {
       rides: {
         Row: {
           app_fee: number
+          attachments: Json
           be_escort_type: string | null
           bundle_id: string | null
           bundle_label: string | null
@@ -1400,6 +1401,7 @@ export type Database = {
         }
         Insert: {
           app_fee?: number
+          attachments?: Json
           be_escort_type?: string | null
           bundle_id?: string | null
           bundle_label?: string | null
@@ -1441,6 +1443,7 @@ export type Database = {
         }
         Update: {
           app_fee?: number
+          attachments?: Json
           be_escort_type?: string | null
           bundle_id?: string | null
           bundle_label?: string | null
