@@ -208,6 +208,7 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(
     (initial?.extraLegs ?? []).map((l: Partial<ExtraLeg>) => ({
       pickup_address: l.pickup_address ?? "",
