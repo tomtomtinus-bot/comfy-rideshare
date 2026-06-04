@@ -208,6 +208,7 @@ const RequestRideInner = () => {
 
   const [drivers, setDrivers] = useState<{ name: string; phone: string }[]>(initial?.drivers ?? []);
   const [licensePlates, setLicensePlates] = useState<string[]>(initial?.licensePlates ?? []);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [extraLegs, setExtraLegs] = useState<ExtraLeg[]>(
     (initial?.extraLegs ?? []).map((l: Partial<ExtraLeg>) => ({
       pickup_address: l.pickup_address ?? "",
@@ -763,6 +764,28 @@ const RequestRideInner = () => {
       setBusy(false);
       return toast.error(aErr.message);
     }
+
+    // Upload attachments (best-effort, don't fail the ride creation if one fails)
+    if (attachments.length > 0) {
+      const uploaded: Array<{ path: string; name: string; size: number; type: string }> = [];
+      for (const file of attachments) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const path = `${user.id}/${ride.id}/${Date.now()}-${safeName}`;
+        const { error: upErr } = await supabase.storage
+          .from("ride-attachments")
+          .upload(path, file, { upsert: false, contentType: file.type || undefined });
+        if (upErr) {
+          console.error("attachment upload failed", upErr);
+          toast.error(`Bijlage ${file.name} kon niet worden geüpload`);
+          continue;
+        }
+        uploaded.push({ path, name: file.name, size: file.size, type: file.type });
+      }
+      if (uploaded.length > 0) {
+        await supabase.from("rides").update({ attachments: uploaded as never }).eq("id", ride.id);
+      }
+    }
+
     setBusy(false);
 
     // Send ride confirmation email to the client (best-effort; do not block on errors)
@@ -1380,6 +1403,50 @@ const RequestRideInner = () => {
                 rows={3}
                 className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
               />
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                Bijlagen (optioneel)
+              </label>
+              <p className="text-xs text-brass-deep/60 mt-1">
+                Voeg extra documenten of foto's toe (bijv. tekeningen, route-instructies). Max. 10 MB per bestand.
+              </p>
+              <input
+                type="file"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  const ok = files.filter((f) => {
+                    if (f.size > 10 * 1024 * 1024) {
+                      toast.error(`${f.name} is groter dan 10 MB`);
+                      return false;
+                    }
+                    return true;
+                  });
+                  setAttachments((prev) => [...prev, ...ok]);
+                  e.target.value = "";
+                }}
+                className="mt-2 block w-full text-xs text-brass-deep file:mr-3 file:py-2 file:px-4 file:border-0 file:bg-brass-gold/20 file:text-brass-deep file:text-xs file:font-bold file:uppercase file:tracking-widest file:cursor-pointer hover:file:bg-brass-gold/30"
+              />
+              {attachments.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {attachments.map((f, i) => (
+                    <li key={i} className="flex items-center justify-between gap-2 text-xs bg-parchment border border-brass-deep/10 px-3 py-2">
+                      <span className="truncate">
+                        {f.name} <span className="text-brass-deep/50">({(f.size / 1024).toFixed(0)} KB)</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="text-brass-deep/60 hover:text-destructive font-bold"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="border border-brass-deep/15 bg-parchment/40 p-5">
