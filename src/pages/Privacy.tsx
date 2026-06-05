@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
-  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.6 — Laatst bijgewerkt op: 18 mei 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
+  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.7 — Laatst bijgewerkt op: 5 juni 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
   en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 11, 2026", back: "← Back", toTerms: "Terms and Conditions" },
   de: { kicker: "Datenschutz", title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: 11. Mai 2026", back: "← Zurück", toTerms: "AGB" },
   fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 11 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
@@ -58,14 +58,24 @@ const PrivacyNL = () => (
     <p>ViaCust (hierna: "wij", "ons" of "het platform") hecht grote waarde aan de bescherming van uw persoonsgegevens. In deze verklaring leggen wij uit welke gegevens wij verwerken via onze webapplicatie en de geïntegreerde Google Cloud-services, conform de Algemene Verordening Gegevensbescherming (AVG/GDPR) en het Google API Services User Data Policy.</p>
 
     <h2>1. Gebruik van Google API Services (Limited Use Policy)</h2>
-    <p>ViaCust maakt gebruik van Google API-services om transportbegeleiding te automatiseren. Ons gebruik van informatie ontvangen via Google API's voldoet aan het <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <p>ViaCust maakt gebruik van Google API-services om transportbegeleiding te automatiseren. Ons gebruik van informatie ontvangen via Google API's voldoet strikt aan het Google API Services User Data Policy, inclusief de vereisten voor beperkt gebruik (Limited Use).</p>
     <ul>
       <li><strong>Google Identity &amp; OAuth 2.0:</strong> Veilig inloggen en autorisatie. Wij ontvangen uw naam, e-mailadres en profielfoto voor accountpersonalisatie.</li>
-      <li><strong>Google Calendar API (v3):</strong> Gebruik van <code>freeBusy</code> (beschikbaarheid) en <code>calendar.events</code> (synchronisatie van ritten). Gegevens worden uitsluitend gebruikt om ritten in uw persoonlijke agenda te plaatsen en worden niet gedeeld met derden.</li>
+      <li><strong>Google Calendar API (v3):</strong> Gebruik van freeBusy (beschikbaarheid) en calendar.events (synchronisatie van ritten). Gegevens worden uitsluitend gebruikt om ritten in uw persoonlijke agenda te plaatsen en te synchroniseren.</li>
       <li><strong>Google Maps Platform:</strong> Gebruik van Maps JavaScript API en Geocoding API voor adresvalidatie, kaartweergave en het omzetten van GPS-coördinaten naar een fysiek adres (reverse-geocoding).</li>
     </ul>
+    <p><strong>Beperking van gegevensdeling (Data Sharing Disclosure):</strong><br />
+    Wij verkopen, verhandelen of verhuren uw Google-gebruikersgegevens niet aan derden. Gegevens die via de Google API's worden verkregen, worden op geen enkele wijze gedeeld met, overgedragen aan, of openbaar gemaakt aan externe diensten, commerciële partners, advertentienetwerken of marketingplatformen, tenzij dit strikt noodzakelijk is voor de kernfunctionaliteit en technische exploitatie van het platform (zoals de hostingpartners genoemd in Artikel 5) of om te voldoen aan dwingende wettelijke verplichtingen.</p>
 
-    <h2>2. Gegevensverwerking en Doeleinden</h2>
+    <h2>2. Gegevensbeschermingsmechanismen voor Gevoelige Gegevens</h2>
+    <p>Wij hanteren strikte en robuuste technische en organisatorische beveiligingsmaatregelen om misbruik, verlies, onbevoegde toegang en ongeoorloofde wijziging van uw (gevoelige) persoonsgegevens en Google-gebruikersdata te voorkomen.</p>
+    <ul>
+      <li><strong>Versleuteling in transit (TLS/SSL):</strong> Alle datacommunicatie tussen de ViaCust-webapplicatie, onze servers en de Google API's verloopt via een beveiligde verbinding en is volledig versleuteld met behulp van up-to-date Transport Layer Security (TLS/SSL) protocollen.</li>
+      <li><strong>Strikte data-isolatie (RLS):</strong> Binnen onze databaseomgeving dwingen wij strikte Row Level Security (RLS) policies af. Dit garandeert dat transportdata, ritten en agenda-instellingen uitsluitend toegankelijk zijn voor de specifiek geautoriseerde gebruiker en dat cross-site data-inzage technisch onmogelijk is.</li>
+      <li><strong>Veilige server-side opslag:</strong> Google OAuth toegangstokens (access tokens en refresh tokens) worden nooit blootgesteld aan de frontend (de browser van de gebruiker) of onbevoegde partijen. Deze tokens worden strikt versleuteld en beveiligd opgeslagen in onze server-side databaseomgeving.</li>
+    </ul>
+
+    <h2>3. Gegevensverwerking en Doeleinden</h2>
     <p>Wij verwerken gegevens uitsluitend voor de volgende doelen:</p>
     <ul>
       <li><strong>Identificatie &amp; Contact:</strong> Naam, bedrijfsgegevens, BTW/KVK-nummer, e-mail en telefoonnummer voor het beheren van uw account, facturatie en rit-notificaties.</li>
@@ -80,16 +90,16 @@ const PrivacyNL = () => (
           <li>Begeleiders: Hebben het recht hun cliëntenportefeuille te beheren door voorkeuren aan te geven voor specifieke opdrachtgevers.</li>
         </ul>
       </li>
-      <li><strong>Multi-voertuig &amp; Bedrijfsaccounts:</strong> Indien een gebruiker zich registreert als Bedrijfsplanner, verwerken wij de bedrijfsgegevens voor centrale facturatie en administratie. Indien deze planner chauffeurs uitnodigt, verwerken wij de e-mailadressen en accountgegevens van deze specifieke chauffeurs. De Bedrijfsplanner heeft inzicht in de aan de chauffeur toegewezen ritten, de rithistorie en de digitale ritbonnen ten behoeve van de centrale planning en kwaliteitsbewaking.</li>
+      <li><strong>Multi-voertuig &amp; Bedrijfsaccounts:</strong> Indien een gebruiker zich registraat als Bedrijfsplanner, verwerken wij de bedrijfsgegevens voor centrale facturatie en administratie. Indien deze planner chauffeurs uitnodigt, verwerken wij de e-mailadressen en accountgegevens van deze specifieke chauffeurs. De Bedrijfsplanner heeft inzicht in de aan de chauffeur toegewezen ritten, de rithistorie en de digitale ritbonnen ten behoeve van de centrale planning en kwaliteitsbewaking.</li>
     </ul>
 
-    <h2>3. Validatie van bedrijfsgegevens (VIES)</h2>
+    <h2>4. Validatie van bedrijfsgegevens (VIES)</h2>
     <p>Om de fiscale integriteit van het platform te waarborgen en te voldoen aan de Europese wetgeving met betrekking tot de verlegging van BTW bij grensoverschrijdende diensten, voert ViaCust een validatie uit van de door u verstrekte BTW-nummers.</p>
     <p>Wij maken hiervoor gebruik van het VIES-systeem (VAT Information Exchange System) van de Europese Commissie.</p>
     <p>Tijdens deze controle wordt uw BTW-nummer verzonden naar de centrale systemen van de Europese Unie om de geldigheid en de bijbehorende bedrijfsnaam/adresgegevens te verifiëren.</p>
     <p>Deze gegevens worden uitsluitend gebruikt voor het valideren van uw account en het opstellen van fiscaal correcte facturen op basis van de wekelijkse brandstofprijzen (o.a. conform TLN-index).</p>
 
-    <h2>4. Sub-verwerkers</h2>
+    <h2>5. Sub-verwerkers</h2>
     <p>Wij maken gebruik van de volgende betrouwbare partners voor de exploitatie van het platform:</p>
     <ul>
       <li><strong>Supabase / Vercel:</strong> Data-opslag en hosting binnen de Europese Unie (EU).</li>
@@ -98,7 +108,7 @@ const PrivacyNL = () => (
       <li><strong>Push Notification Services:</strong> De push-diensten van uw specifieke browser/besturingssysteem (zoals Google Firebase Cloud Messaging of Apple Push Notification service) voor het afleveren van live meldingen.</li>
     </ul>
 
-    <h2>5. Bewaartermijnen</h2>
+    <h2>6. Bewaartermijnen</h2>
     <ul>
       <li><strong>Fiscale data &amp; Facturen:</strong> 7 jaar conform de wettelijke fiscale administratieplicht.</li>
       <li><strong>Tijdelijke GPS-locatie:</strong> Maximaal 12 uur, of korter indien de gekozen timer afloopt of handmatig wordt gewist.</li>
@@ -108,7 +118,7 @@ const PrivacyNL = () => (
       <li><strong>Gekoppelde Chauffeursaccounts:</strong> Gegevens van chauffeurs gekoppeld aan een bedrijfsaccount blijven bewaard zolang de koppeling tussen het chauffeursprofiel en het bedrijfsaccount actief is, of totdat het hoofdaccount wordt beëindigd.</li>
     </ul>
 
-    <h2>6. Uw Rechten en Contact</h2>
+    <h2>7. Uw Rechten en Contact</h2>
     <p>U heeft te allen tijde het recht op inzage, correctie, dataportabiliteit en verwijdering van uw persoonsgegevens. Daarnaast kunt u de gegeven toestemming voor push-notificaties of locatievoorzieningen op elk moment zelfstandig intrekken via de instellingen van uw browser of mobiele toestel.</p>
     <p>Voor vragen of het uitoefenen van uw rechten kunt u contact met ons opnemen via: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Nederland</p>
