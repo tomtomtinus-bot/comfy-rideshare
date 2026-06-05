@@ -7,7 +7,7 @@ type Lang = "nl" | "en" | "de" | "fr";
 
 const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
   nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.7 — Laatst bijgewerkt op: 5 juni 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
-  en: { kicker: "Privacy", title: "Privacy Policy", updated: "Last updated: May 11, 2026", back: "← Back", toTerms: "Terms and Conditions" },
+  en: { kicker: "Privacy", title: "Privacy Policy ViaCust", updated: "Version 1.7 — Last updated: June 5, 2026", back: "← Back", toTerms: "Terms and Conditions" },
   de: { kicker: "Datenschutz", title: "Datenschutzerklärung ViaCust", updated: "Version 1.7 — Zuletzt aktualisiert am: 5. Juni 2026", back: "← Zurück", toTerms: "AGB" },
   fr: { kicker: "Confidentialité", title: "Politique de Confidentialité", updated: "Dernière mise à jour : 11 mai 2026", back: "← Retour", toTerms: "Conditions générales" },
 };
@@ -127,62 +127,72 @@ const PrivacyNL = () => (
 
 const PrivacyEN = () => (
   <>
-    <p>ViaCust (hereinafter: "we", "us" or "the platform") values the protection of your personal data. This statement explains which data we process via our web application and integrated Google Cloud services, in accordance with the GDPR and the Google API Services User Data Policy.</p>
+    <p>ViaCust (hereinafter: "we", "us", or "the platform") is highly committed to protecting your personal data. In this privacy policy, we explain how we process your data through our web application and integrated Google Cloud services, in accordance with the General Data Protection Regulation (GDPR) and the Google API Services User Data Policy.</p>
 
-    <h2>1. Use of Google API Services (Limited Use Policy)</h2>
-    <p>ViaCust uses Google API services to automate transport accompaniment. Our use of information received via Google APIs complies with the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>.</p>
+    <h2>1. Use of Google API Services &amp; Data Sharing (Limited Use Policy)</h2>
+    <p>ViaCust utilizes Google API services to automate transport guidance and escorting workflows. Our use of information received from Google APIs strictly adheres to the Google API Services User Data Policy, including the Limited Use requirements.</p>
     <ul>
-      <li><strong>Google Identity &amp; OAuth 2.0:</strong> Secure sign-in and authorisation. We receive your name, email address and profile photo for account personalisation.</li>
-      <li><strong>Google Calendar API (v3):</strong> Use of <code>freeBusy</code> (availability) and <code>calendar.events</code> (ride synchronisation). Data is used solely to place rides in your personal calendar and is not shared with third parties.</li>
-      <li><strong>Google Maps Platform:</strong> Use of the Maps JavaScript API and Geocoding API for address validation, map display and reverse geocoding GPS coordinates.</li>
+      <li><strong>Google Identity &amp; OAuth 2.0:</strong> Secure login and authorization. We receive your name, email address, and profile picture for account personalization.</li>
+      <li><strong>Google Calendar API (v3):</strong> Use of freeBusy (availability) and calendar.events (ride synchronization). This data is exclusively used to inject and synchronize transport rides directly within your personal calendar.</li>
+      <li><strong>Google Maps Platform:</strong> Use of Maps JavaScript API and Geocoding API for address validation, map rendering, and converting GPS coordinates into physical addresses (reverse-geocoding).</li>
+    </ul>
+    <p><strong>Data Sharing Disclosure:</strong><br />
+    We do not sell, trade, or rent your Google user data to third parties. Data obtained via Google APIs is not shared with, transferred to, or disclosed to external services, commercial partners, advertising networks, or marketing platforms in any way, shape, or form, except as strictly required to provide the core scheduling functionalities and technical operation of the application (such as the hosting partners listed in Section 5) or to comply with compelling legal obligations.</p>
+
+    <h2>2. Data Protection Mechanisms for Sensitive Data</h2>
+    <p>We implement robust, enterprise-grade technical and organizational security measures to prevent the misuse, loss, unauthorized access, and unauthorized alteration of your (sensitive) personal data and Google user data.</p>
+    <ul>
+      <li><strong>Encryption in Transit (TLS/SSL):</strong> All data communication between the ViaCust application, our servers, and Google APIs is strongly encrypted using industry-standard Transport Layer Security (TLS/SSL) protocols.</li>
+      <li><strong>Strict Data Isolation (RLS):</strong> Within our database infrastructure, we enforce strict Row Level Security (RLS) policies. This guarantees that transport data, rides, and calendar settings are isolated and only accessible to the specifically authorized user, making cross-site data exposure technically impossible.</li>
+      <li><strong>Secure Server-Side Storage:</strong> Google OAuth authentication tokens (access tokens and refresh tokens) are never exposed to the frontend (the user's browser) or unauthorized third parties. These tokens are securely stored using encrypted, server-side database storage.</li>
     </ul>
 
-    <h2>2. Data processing and purposes</h2>
-    <p>We process data exclusively for the following purposes:</p>
+    <h2>3. Data Processing and Purposes</h2>
+    <p>We process personal data solely for the following objectives:</p>
     <ul>
-      <li><strong>Identification &amp; contact:</strong> Name, company details, VAT/CoC number, email and phone number to manage your account, billing and ride notifications.</li>
-      <li><strong>Administrative ride handling:</strong> Data on scheduled rides, order status and expenses entered by the escort for billing purposes.</li>
-      <li><strong>Temporary base location (GPS):</strong> If an escort manually activates the "I am here now" feature, we process the device's current GPS location to accurately calculate the travel time for ad-hoc rides (within 3 hours). This location data is temporary (valid for 2, 4, 8 or 12 hours of your choice), is not permanently stored for tracking and expires automatically.</li>
-      <li><strong>Planned base location:</strong> If an escort enters a future date, time window and location ("Planned base"), we store and process this location data solely to compute matching and pricing logic for future ride requests within that specific window.</li>
-      <li><strong>Push notifications:</strong> We process unique browser tokens to deliver live updates (such as acceptance timers and ride alerts) directly to your device via Web Push.</li>
-      <li><strong>Quality monitoring &amp; reviews:</strong> We process the reviews and feedback users leave about each other on the basis of our legitimate interest in safeguarding platform reliability.</li>
-      <li><strong>Network management and preference lists:</strong>
+      <li><strong>Identification &amp; Contact:</strong> Name, business details, VAT/CoC (KVK) number, email, and phone number to manage your account, billing, and ride notifications.</li>
+      <li><strong>Administrative Ride Management:</strong> Data regarding scheduled rides, assignment statuses, and expenses entered by the escort for invoicing purposes.</li>
+      <li><strong>Temporary Base Location (GPS):</strong> If an escort manually activates the "I am here now" feature, we process the active GPS location of the device to accurately calculate arrival times for ad-hoc rides (within 3 hours). This location data is temporary (valid for 2, 4, 8, or 12 hours by choice), is not permanently stored for tracking purposes, and expires automatically after the selected duration or upon manual deactivation.</li>
+      <li><strong>Scheduled Base Location:</strong> If an escort pre-enters a date, time window, and location for future availability ("Scheduled base location"), we store and process this location data exclusively to calculate the matching and pricing logic for future ride requests within that specific timeframe.</li>
+      <li><strong>Push Notifications:</strong> We process unique browser tokens to send live updates (such as acceptance timers and ride alerts) directly to your device via Web Push Notifications.</li>
+      <li><strong>Quality Control &amp; Reviews:</strong> We process ratings and feedback that users leave about each other based on our legitimate interest to ensure the reliability and safety of the platform.</li>
+      <li><strong>Network Management and Preference Lists:</strong>
         <ul>
-          <li>Clients: may maintain personal exclusion lists to filter specific escorts from their own rides.</li>
-          <li>Escorts: may manage their client portfolio by setting preferences for specific clients.</li>
+          <li><strong>Clients:</strong> Can maintain personal exclusion lists to filter out specific escorts for their own rides.</li>
+          <li><strong>Escorts:</strong> Have the right to manage their client portfolio by indicating preferences for specific clients.</li>
         </ul>
       </li>
-      <li><strong>Multi-vehicle &amp; company accounts:</strong> If a user registers as a Company Planner, we process the company data for central billing. If this planner invites drivers, we process the email addresses and account data of those specific drivers. The Company Planner can view rides assigned to the driver, ride history and digital ride receipts for central planning and quality control.</li>
+      <li><strong>Multi-Vehicle &amp; Corporate Accounts:</strong> If a user registers as a Corporate Planner, we process business data for centralized invoicing and administration. If this planner invites drivers, we process the email addresses and account details of those specific drivers. The Corporate Planner has insight into the rides assigned to the driver, ride history, and digital ride logs for centralized scheduling and quality assurance purposes.</li>
     </ul>
 
-    <h2>3. Validation of company data (VIES)</h2>
-    <p>To safeguard the platform's fiscal integrity and comply with European legislation on the reverse charge of VAT for cross-border services, ViaCust validates the VAT numbers you provide.</p>
-    <p>We use the European Commission's VIES system (VAT Information Exchange System).</p>
-    <p>During this check, your VAT number is sent to EU central systems to verify validity and the associated company name/address.</p>
-    <p>This data is only used to validate your account and produce fiscally correct invoices based on weekly fuel prices (including the TLN index).</p>
+    <h2>4. Validation of Corporate Data (VIES)</h2>
+    <p>To ensure the fiscal integrity of the platform and to comply with European legislation regarding the reverse charge of VAT on cross-border services, ViaCust validates the VAT numbers provided by you.</p>
+    <p>We utilize the VIES (VAT Information Exchange System) system of the European Commission for this verification.</p>
+    <p>During this check, your VAT number is transmitted to the central systems of the European Union to verify its validity and the associated company name/address details.</p>
+    <p>This data is used solely for validating your account and generating fiscally compliant invoices based on weekly fuel prices (including compliance with the TLN index).</p>
 
-    <h2>4. Sub-processors</h2>
-    <p>We use the following trusted partners to operate the platform:</p>
+    <h2>5. Third-Party Sub-Processors</h2>
+    <p>We utilize the following trusted partners for the operation and infrastructure of the platform:</p>
     <ul>
       <li><strong>Supabase / Vercel:</strong> Data storage and hosting within the European Union (EU).</li>
-      <li><strong>Stripe:</strong> Secure processing of payments and billing flows.</li>
-      <li><strong>Google Cloud Platform:</strong> Map services, geocoding and OAuth authentication.</li>
-      <li><strong>Push notification services:</strong> The push services of your specific browser/operating system (such as Google Firebase Cloud Messaging or Apple Push Notification service) for delivering live alerts.</li>
+      <li><strong>Stripe:</strong> Secure processing of payments, subscriptions, and invoicing workflows.</li>
+      <li><strong>Google Cloud Platform:</strong> Map services, geocoding, and OAuth authentication.</li>
+      <li><strong>Push Notification Services:</strong> The native push services of your specific browser/operating system (such as Google Firebase Cloud Messaging or Apple Push Notification service) to deliver live alerts.</li>
     </ul>
 
-    <h2>5. Retention periods</h2>
+    <h2>6. Data Retention Periods</h2>
     <ul>
-      <li><strong>Fiscal data &amp; invoices:</strong> 7 years in line with the statutory tax record-keeping obligation.</li>
-      <li><strong>Temporary GPS location:</strong> Maximum 12 hours, or shorter if the selected timer expires or is cleared manually.</li>
-      <li><strong>Planned base location data:</strong> Automatically deleted from the database or anonymised once the time window provided by the escort has passed.</li>
-      <li><strong>Reviews:</strong> For as long as the associated account is active on the platform.</li>
-      <li><strong>OAuth tokens &amp; push tokens:</strong> Immediate and final deletion after disconnection or revocation in your browser.</li>
-      <li><strong>Linked driver accounts:</strong> Data of drivers linked to a company account is retained as long as the link between the driver profile and the company account is active, or until the main account is terminated.</li>
+      <li><strong>Fiscal Data &amp; Invoices:</strong> 7 years in accordance with statutory tax administration obligations.</li>
+      <li><strong>Temporary GPS Location:</strong> Maximum of 12 hours, or shorter if the selected timer expires or is manually deleted.</li>
+      <li><strong>Scheduled Base Location Data:</strong> This data is automatically deleted or anonymized from the database as soon as the time window specified by the escort expires.</li>
+      <li><strong>Reviews &amp; Ratings:</strong> As long as the associated account remains active on the platform.</li>
+      <li><strong>OAuth Tokens &amp; Push Tokens:</strong> Immediate and permanent deletion upon disconnecting the integration or revoking permission in your browser settings.</li>
+      <li><strong>Linked Driver Accounts:</strong> Data of drivers linked to a corporate account will be retained as long as the connection between the driver profile and the corporate account is active, or until the primary account is terminated.</li>
     </ul>
 
-    <h2>6. Your rights and contact</h2>
-    <p>You have the right to access, correct, transfer and delete your personal data at any time. You may also withdraw consent for push notifications or location services at any time via your browser or device settings.</p>
-    <p>For questions or to exercise your rights, contact us at: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
+    <h2>7. Your Rights and Contact Information</h2>
+    <p>You retain the right to access, rectify, transfer, and request the erasure of your personal data at any time. Additionally, you can independently revoke your consent for push notifications or location services at any moment through the settings of your browser or mobile device.</p>
+    <p>For any questions or to exercise your rights, please contact us at: <a href="mailto:privacy@viacust.com">privacy@viacust.com</a>.</p>
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />The Netherlands</p>
   </>
 );
