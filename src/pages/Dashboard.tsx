@@ -262,29 +262,85 @@ const ClientDashboard = () => {
       filtered = filtered.filter((r) => new Date(r.scheduled_at).getTime() <= endMs);
     }
     if (filtered.length === 0) return toast.error(t("dash.noRidesInRange"));
-    const rows = filtered.map((r) => {
+
+    // Haal factuurregels op voor toegewezen ritten (voor brandstoftoeslag-uitsplitsing).
+    const allAssignments = filtered.flatMap((r) => assignments[r.id] ?? []);
+    const invoicedIds = allAssignments
+      .map((a) => (a as any).invoice_id as string | null)
+      .filter((v): v is string => !!v);
+    const itemsByAssignment: Record<string, { base: number; fuel: number }> = {};
+    if (invoicedIds.length) {
+      const { data: items } = await supabase
+        .from("invoice_items")
+        .select("ride_assignment_id, description, amount")
+        .in("invoice_id", [...new Set(invoicedIds)]);
+      (items ?? []).forEach((it: any) => {
+        const aid = it.ride_assignment_id as string;
+        const desc = (it.description ?? "").toLowerCase();
+        const amt = Number(it.amount) || 0;
+        const bucket = (itemsByAssignment[aid] ||= { base: 0, fuel: 0 });
+        if (/brandstof|fuel/.test(desc)) bucket.fuel += amt;
+        else bucket.base += amt;
+      });
+    }
+
+    const rows: Record<string, unknown>[] = [];
+    filtered.forEach((r) => {
       const ass = assignments[r.id] ?? [];
-      const escortIds = ass.map((a) => `#${a.anon}`).join(", ");
-      const totalEst = ass.reduce((s, a) => s + Number(a.estimated_cost ?? 0), 0);
-      const totalActual = ass.reduce((s, a) => s + Number(a.actual_cost ?? 0), 0);
-      const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
-      return {
-        [t("common.date")]: fd(r.scheduled_at),
-        [t("xlsx.rideId")]: r.id.slice(0, 8),
-        [t("xlsx.reference")]: r.client_reference ?? "",
-        [t("xlsx.permit")]: r.permit_number ?? "",
-        [t("xlsx.pickup")]: `${r.pickup_address} (${r.pickup_city})`,
-        [t("xlsx.dropoff")]: `${r.dropoff_address} (${r.dropoff_city})`,
-        [t("xlsx.numEscorts")]: r.num_escorts,
-        [t("xlsx.escorts")]: escortIds,
-        [t("xlsx.status")]: r.status,
-        [t("xlsx.estCost")]: +totalEst.toFixed(2),
-        [t("xlsx.actualCost")]: allSubmitted ? +totalActual.toFixed(2) : null,
-        [t("xlsx.serviceFee")]: Number(r.app_fee ?? 0),
-        [t("xlsx.totalIncl")]: allSubmitted ? +(totalActual + Number(r.app_fee ?? 0)).toFixed(2) : null,
-        [t("xlsx.notes")]: r.notes ?? "",
-      };
+      if (ass.length === 0) {
+        rows.push({
+          [t("common.date")]: fd(r.scheduled_at),
+          [t("xlsx.rideId")]: r.id.slice(0, 8),
+          [t("xlsx.reference")]: r.client_reference ?? "",
+          [t("xlsx.permit")]: r.permit_number ?? "",
+          [t("xlsx.pickup")]: `${r.pickup_address} (${r.pickup_city})`,
+          [t("xlsx.dropoff")]: `${r.dropoff_address} (${r.dropoff_city})`,
+          [t("xlsx.escort")]: "",
+          [t("xlsx.hours")]: null,
+          [t("xlsx.baseCost")]: null,
+          [t("xlsx.fuelSurcharge")]: null,
+          [t("xlsx.extraCosts")]: null,
+          [t("xlsx.serviceFee")]: Number(r.app_fee ?? 0),
+          [t("xlsx.totalCost")]: null,
+          [t("xlsx.status")]: r.status,
+          [t("xlsx.notes")]: r.notes ?? "",
+        });
+        return;
+      }
+      ass.forEach((a, idx) => {
+        const submitted = !!a.hours_submitted_at;
+        const extras = Number((a as any).extra_costs_total ?? 0);
+        const invBuckets = itemsByAssignment[a.id];
+        const base = invBuckets
+          ? +invBuckets.base.toFixed(2)
+          : submitted
+            ? +(Number(a.actual_cost ?? 0) - extras).toFixed(2)
+            : 0;
+        const fuel = invBuckets ? +invBuckets.fuel.toFixed(2) : 0;
+        const fee = idx === 0 ? Number(r.app_fee ?? 0) : 0;
+        const total = submitted || invBuckets
+          ? +(base + fuel + extras + fee).toFixed(2)
+          : null;
+        rows.push({
+          [t("common.date")]: fd(r.scheduled_at),
+          [t("xlsx.rideId")]: r.id.slice(0, 8),
+          [t("xlsx.reference")]: r.client_reference ?? "",
+          [t("xlsx.permit")]: r.permit_number ?? "",
+          [t("xlsx.pickup")]: `${r.pickup_address} (${r.pickup_city})`,
+          [t("xlsx.dropoff")]: `${r.dropoff_address} (${r.dropoff_city})`,
+          [t("xlsx.escort")]: `#${a.anon}`,
+          [t("xlsx.hours")]: submitted ? Number(a.actual_hours ?? 0) : null,
+          [t("xlsx.baseCost")]: submitted || invBuckets ? base : null,
+          [t("xlsx.fuelSurcharge")]: invBuckets ? fuel : null,
+          [t("xlsx.extraCosts")]: submitted ? extras : null,
+          [t("xlsx.serviceFee")]: fee,
+          [t("xlsx.totalCost")]: total,
+          [t("xlsx.status")]: idx === 0 ? r.status : "",
+          [t("xlsx.notes")]: idx === 0 ? (r.notes ?? "") : "",
+        });
+      });
     });
+
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet(t("dash.myRides"));
     const headers = Object.keys(rows[0]);
