@@ -132,7 +132,7 @@ const de: Dict = {
     invited: "Eingeladen", accepted: "Angenommen", declined: "Abgelehnt", expired: "Abgelaufen",
     paid: "Bezahlt", sent: "Versendet", draft: "Entwurf",
   },
-  xlsx: { rideId: "Fahrt-ID", reference: "Referenz", permit: "Genehmigung", pickup: "Abfahrt", dropoff: "Ziel", numEscorts: "Anzahl Begleiter", escorts: "Begleiter", status: "Status", estCost: "Geschätzte Kosten (€)", actualCost: "Tatsächliche Kosten (€)", serviceFee: "Servicegebühr (€)", totalIncl: "Gesamt inkl. Gebühr (€)", notes: "Anmerkungen" },
+  xlsx: { rideId: "Fahrt-ID", reference: "Referenz", permit: "Genehmigung", pickup: "Abfahrt", dropoff: "Ziel", numEscorts: "Anzahl Begleiter", escorts: "Begleiter", escort: "Begleiter", hours: "Stunden", baseCost: "Begleiterkosten (€)", fuelSurcharge: "Kraftstoffzuschlag (€)", extraCosts: "Zusatzkosten (€)", totalCost: "Gesamtkosten (€)", status: "Status", estCost: "Geschätzte Kosten (€)", actualCost: "Tatsächliche Kosten (€)", serviceFee: "Servicegebühr (€)", totalIncl: "Gesamt inkl. Gebühr (€)", notes: "Anmerkungen" },
 
   dash: {
     clientKicker: "Auftraggeber", escortKicker: "Begleiter", myRides: "Meine Fahrten", myAssignments: "Meine Aufträge",
