@@ -165,7 +165,7 @@ const nl = {
     sent: "Verzonden",
     draft: "Concept",
   },
-  xlsx: { rideId: "Rit ID", reference: "Referentie", permit: "Vergunning", pickup: "Vertrek", dropoff: "Bestemming", numEscorts: "Aantal begeleiders", escorts: "Begeleiders", status: "Status", estCost: "Geschatte kosten (€)", actualCost: "Werkelijke kosten (€)", serviceFee: "Servicekosten (€)", totalIncl: "Totaal incl. fee (€)", notes: "Opmerkingen" },
+  xlsx: { rideId: "Rit ID", reference: "Referentie", permit: "Vergunning", pickup: "Vertrek", dropoff: "Bestemming", numEscorts: "Aantal begeleiders", escorts: "Begeleiders", escort: "Begeleider", hours: "Uren", baseCost: "Kosten begeleider (€)", fuelSurcharge: "Brandstoftoeslag (€)", extraCosts: "Extra kosten (€)", totalCost: "Totale kosten (€)", status: "Status", estCost: "Geschatte kosten (€)", actualCost: "Werkelijke kosten (€)", serviceFee: "Servicekosten (€)", totalIncl: "Totaal incl. fee (€)", notes: "Opmerkingen" },
 
   dash: {
     clientKicker: "Opdrachtgever",

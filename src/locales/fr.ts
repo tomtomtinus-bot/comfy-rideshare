@@ -133,7 +133,7 @@ const fr: Dict = {
     invited: "Invité", accepted: "Accepté", declined: "Refusé", expired: "Expiré",
     paid: "Payé", sent: "Envoyé", draft: "Brouillon",
   },
-  xlsx: { rideId: "ID transport", reference: "Référence", permit: "Permis", pickup: "Départ", dropoff: "Destination", numEscorts: "Nombre d'escortes", escorts: "Escortes", status: "Statut", estCost: "Coût estimé (€)", actualCost: "Coût réel (€)", serviceFee: "Frais de service (€)", totalIncl: "Total avec frais (€)", notes: "Notes" },
+  xlsx: { rideId: "ID transport", reference: "Référence", permit: "Permis", pickup: "Départ", dropoff: "Destination", numEscorts: "Nombre d'escortes", escorts: "Escortes", escort: "Escorte", hours: "Heures", baseCost: "Coût escorte (€)", fuelSurcharge: "Surtaxe carburant (€)", extraCosts: "Frais supplémentaires (€)", totalCost: "Coût total (€)", status: "Statut", estCost: "Coût estimé (€)", actualCost: "Coût réel (€)", serviceFee: "Frais de service (€)", totalIncl: "Total avec frais (€)", notes: "Notes" },
 
   dash: {
     clientKicker: "Donneur d'ordre", escortKicker: "Accompagnateur",
