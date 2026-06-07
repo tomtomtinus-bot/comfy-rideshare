@@ -3,14 +3,15 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { Button } from "@/components/ui/button";
 
 type Lang = "nl" | "en" | "de" | "fr";
 
-const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string }> = {
-  nl: { kicker: "Juridisch", title: "Algemene Voorwaarden ViaCust", updated: "Versie 1.6 — Laatst bijgewerkt op: 18 mei 2026", back: "← Terug" },
-  en: { kicker: "Legal", title: "Terms and Conditions", updated: "Last updated: May 10, 2026", back: "← Back" },
-  de: { kicker: "Rechtliches", title: "Allgemeine Geschäftsbedingungen", updated: "Zuletzt aktualisiert: 10. Mai 2026", back: "← Zurück" },
-  fr: { kicker: "Mentions légales", title: "Conditions Générales d'Utilisation", updated: "Dernière mise à jour : 10 mai 2026", back: "← Retour" },
+const labels: Record<Lang, { title: string; updated: string; back: string; privacy: string }> = {
+  nl: { title: "Algemene Voorwaarden", updated: "Laatst bijgewerkt: juni 2026", back: "Terug", privacy: "Privacyverklaring" },
+  en: { title: "Terms and Conditions", updated: "Last updated: June 2026", back: "Back", privacy: "Privacy Policy" },
+  de: { title: "Allgemeine Geschäftsbedingungen", updated: "Zuletzt aktualisiert: Juni 2026", back: "Zurück", privacy: "Datenschutzerklärung" },
+  fr: { title: "Conditions Générales d'Utilisation", updated: "Dernière mise à jour : juin 2026", back: "Retour", privacy: "Politique de confidentialité" },
 };
 
 const Terms = () => {
@@ -21,35 +22,31 @@ const Terms = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
-        title="Algemene Voorwaarden | ViaCust"
+        title={`${L.title} | ViaCust`}
         description="Lees de algemene voorwaarden van ViaCust voor het gebruik van ons dispatchplatform, rittenplanning en de contractuele afspraken."
       />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-24">
-        <article className="max-w-3xl mx-auto bg-card shadow-etched p-8 md:p-12 space-y-6">
-          <header>
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {L.kicker}
-            </p>
-            <h1 className="font-display text-4xl text-brass-deep italic">{L.title}</h1>
-            <p className="text-sm text-brass-deep/80 italic mt-2"> </p>
-            <p className="text-sm text-brass-deep/80 mt-2">{L.updated}</p>
+      <main className="px-6 md:px-8 py-8 md:py-12">
+        <article className="max-w-3xl mx-auto space-y-8">
+          <header className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">{L.title}</h1>
+            <p className="text-sm text-muted-foreground">{L.updated}</p>
           </header>
 
-          <div className="space-y-5 text-sm leading-relaxed text-brass-deep/85 [&_h2]:font-display [&_h2]:text-xl [&_h2]:text-brass-deep [&_h2]:italic [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-brass-gold [&_a]:underline">
+          <div className="space-y-5 text-sm leading-relaxed text-foreground/85 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:underline [&_a:hover]:text-primary/80">
             {lang === "nl" && <TermsNL />}
             {lang === "en" && <TermsEN />}
             {lang === "de" && <TermsDE />}
             {lang === "fr" && <TermsFR />}
           </div>
 
-          <div className="pt-6 border-t border-brass-deep/10 flex justify-between items-center">
-            <Link to="/auth" className="text-xs uppercase tracking-widest font-semibold text-brass-gold hover:text-brass-deep">
-              {L.back}
-            </Link>
-            <Link to="/privacy" className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-gold">
-              {lang === "nl" ? "Privacyverklaring" : lang === "de" ? "Datenschutzerklärung" : lang === "fr" ? "Politique de confidentialité" : "Privacy Policy"} →
-            </Link>
+          <div className="pt-6 border-t border-border flex justify-between items-center">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/auth">{L.back}</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/privacy">{L.privacy}</Link>
+            </Button>
           </div>
         </article>
       </main>
