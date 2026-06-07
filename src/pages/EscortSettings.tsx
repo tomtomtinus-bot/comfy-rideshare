@@ -486,10 +486,10 @@ const Inner = () => {
                 }
               }}
               onChange={() => setDirty(true)}
-              className="bg-card shadow-etched p-8 md:p-10 space-y-8"
+              className="space-y-6"
             >
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
+                <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.fullName")}</Label>
