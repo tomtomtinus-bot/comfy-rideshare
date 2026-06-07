@@ -38,7 +38,7 @@
     /* Legacy token names mapped to the new industrial palette
        so existing components keep working without rewrites. */
     --brass-deep: 215 45% 18%;         /* steel navy */
-    --brass-gold: 32 100% 38%;         /* safety amber — darkened for WCAG AA contrast on parchment */
+    --brass-gold: 32 100% 34%;         /* safety amber — WCAG AA contrast on parchment */
     --parchment: 210 20% 97%;          /* off-white */
     --patina: 215 16% 92%;             /* cool steel */
     --ink: 215 30% 12%;
