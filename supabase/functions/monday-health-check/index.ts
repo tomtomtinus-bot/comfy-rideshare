@@ -103,20 +103,32 @@ Deno.serve(async (req) => {
     }
 
     let sent = 0;
+    const emailUrl = `${Deno.env.get("SUPABASE_URL")!}/functions/v1/send-transactional-email`;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     for (const recipient of adminEmails) {
-      const { error: invErr } = await admin.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "payment-failed-admin",
-          recipientEmail: recipient,
-          idempotencyKey: `monday-health-${monday}-${recipient}`,
-          templateData: {
-            eventType: "Wekelijkse controle",
-            errorMessage: body,
-            adminUrl: "https://viacust.com/admin/invoices",
+      try {
+        const res = await fetch(emailUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${serviceKey}`,
+            "apikey": serviceKey,
           },
-        },
-      });
-      if (!invErr) sent++;
+          body: JSON.stringify({
+            templateName: "payment-failed-admin",
+            recipientEmail: recipient,
+            idempotencyKey: `monday-health-${monday}-${recipient}`,
+            templateData: {
+              eventType: "Wekelijkse controle",
+              errorMessage: body,
+              adminUrl: "https://viacust.com/admin/invoices",
+            },
+          }),
+        });
+        if (res.ok) sent++;
+      } catch (e) {
+        console.error("monday-health-check email failed:", e);
+      }
     }
 
     return new Response(
