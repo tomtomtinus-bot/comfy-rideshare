@@ -655,14 +655,14 @@ const ClientDashboard = () => {
               };
 
               const tableHeader = (
-                <TableHeader>
-                  <TableRow className="bg-muted/40 hover:bg-muted/40">
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Ritnummer</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Datum &amp; tijd</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Route</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold text-center">Begeleiders</TableHead>
-                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
-                    <TableHead className="h-9 w-[60px]" />
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent border-b border-border">
+                    <TableHead className="h-10 text-[11px] uppercase tracking-wider font-semibold text-foreground">Ritnummer</TableHead>
+                    <TableHead className="h-10 text-[11px] uppercase tracking-wider font-semibold text-foreground">Datum &amp; tijd</TableHead>
+                    <TableHead className="h-10 text-[11px] uppercase tracking-wider font-semibold text-foreground">Route</TableHead>
+                    <TableHead className="h-10 text-[11px] uppercase tracking-wider font-semibold text-foreground text-center">Begeleiders</TableHead>
+                    <TableHead className="h-10 text-[11px] uppercase tracking-wider font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="h-10 w-[60px]" />
                   </TableRow>
                 </TableHeader>
               );
