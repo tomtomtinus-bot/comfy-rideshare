@@ -142,7 +142,7 @@ const Security = () => {
                   <ShieldAlert className="h-5 w-5 text-muted-foreground" />
                 )}
                 <CardTitle className="text-base font-semibold">
-                  {verified ? t("security.active") : t("security.inactive")}
+                  {t("security.title")}
                 </CardTitle>
               </div>
             </CardHeader>
