@@ -57,7 +57,7 @@ const Faq = () => {
       <Nav />
       <main className="max-w-3xl mx-auto px-5 md:px-8">
         <section className="pt-6 md:pt-8 pb-8">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {t("faq.title")}
           </h1>
           <p className="text-sm text-muted-foreground mt-2 mb-8">
