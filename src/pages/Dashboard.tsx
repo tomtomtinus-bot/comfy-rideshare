@@ -662,7 +662,7 @@ const EscortDashboard = () => {
   const [overdueDismissed, setOverdueDismissed] = useState(false);
   const [escortSearch, setEscortSearch] = useState("");
   const [escortStatusFilter, setEscortStatusFilter] = useState<string>("all");
-  const [clientNamesByRide, setClientNamesByRide] = useState<Record<string, string>>({});
+  
 
   const hasGoogleConflict = (scheduledAt: string) => {
     const ts = new Date(scheduledAt).getTime();
