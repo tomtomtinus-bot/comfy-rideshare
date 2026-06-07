@@ -262,7 +262,7 @@ export const AddressAutocomplete = ({
   return (
     <div className="relative" ref={wrapRef}>
       <div className="flex items-end justify-between gap-2">
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{label}</label>
+        <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{label}</label>
         <button
           type="button"
           onClick={async () => {
@@ -270,7 +270,7 @@ export const AddressAutocomplete = ({
             setShowBorders((s) => !s);
             await ensureBordersLoaded();
           }}
-          className="text-[10px] uppercase tracking-widest text-brass-gold font-bold hover:underline"
+          className="text-[11px] uppercase tracking-wider text-foreground font-medium hover:underline"
         >
           🌍 Alle grensovergangen
         </button>
@@ -280,59 +280,59 @@ export const AddressAutocomplete = ({
         onChange={(e) => handleChange(e.target.value)}
         onFocus={() => results.length && setOpen(true)}
         placeholder={placeholder ?? "Adres, stad of grensovergang…"}
-        className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+        className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         autoComplete="off"
       />
-      <p className="text-[10px] text-brass-deep/80 mt-1 min-h-[14px]">
+      <p className="text-[10px] text-muted-foreground mt-1 min-h-[14px]">
         {busy ? "Adres zoeken…" : bordersBusy ? "Grensovergangen laden…" : "Selecteer een adres of grensovergang uit de lijst"}
       </p>
 
       {showBorders && (
-        <div className="absolute z-30 left-0 right-0 bg-card border border-brass-gold/40 shadow-lg max-h-80 overflow-hidden flex flex-col">
-          <div className="px-3 py-2 bg-parchment border-b border-brass-deep/10 sticky top-0">
+        <div className="absolute z-30 left-0 right-0 bg-popover border border-border shadow-md rounded-md max-h-80 overflow-hidden flex flex-col">
+          <div className="px-2 py-2 bg-muted/40 border-b border-border sticky top-0">
             <input
               autoFocus
               value={borderFilter}
               onChange={(e) => setBorderFilter(e.target.value)}
               placeholder={`Filter ${allBorders.length || ""} grensovergangen…`}
-              className="w-full bg-card border border-brass-deep/15 px-3 py-1.5 text-sm focus:outline-none focus:border-brass-gold"
+              className="flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
           <ul className="overflow-auto">
             {bordersBusy && !allBorders.length && (
-              <li className="px-4 py-3 text-sm text-brass-deep/80">Grensovergangen laden uit OpenStreetMap…</li>
+              <li className="px-4 py-3 text-sm text-muted-foreground">Grensovergangen laden uit OpenStreetMap…</li>
             )}
             {!bordersBusy && filteredBorders.length === 0 && allBorders.length > 0 && (
-              <li className="px-4 py-3 text-sm text-brass-deep/80">Geen resultaten voor "{borderFilter}"</li>
+              <li className="px-4 py-3 text-sm text-muted-foreground">Geen resultaten voor "{borderFilter}"</li>
             )}
             {filteredBorders.slice(0, 200).map((b, i) => (
               <li
                 key={i}
                 onClick={() => pickBorder(b)}
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
+                className="px-4 py-2 text-sm cursor-pointer hover:bg-muted border-b border-border/60 last:border-0"
               >
                 {b.display}
               </li>
             ))}
             {filteredBorders.length > 200 && (
-              <li className="px-4 py-2 text-[10px] text-brass-deep/80 italic">+{filteredBorders.length - 200} meer — verfijn de zoekterm</li>
+              <li className="px-4 py-2 text-[10px] text-muted-foreground italic">+{filteredBorders.length - 200} meer — verfijn de zoekterm</li>
             )}
           </ul>
         </div>
       )}
 
       {open && (results.length > 0 || borderHits.length > 0) && (
-        <ul className="absolute z-20 left-0 right-0 bg-card border border-brass-deep/20 shadow-lg max-h-72 overflow-auto">
+        <ul className="absolute z-20 left-0 right-0 bg-popover border border-border shadow-md rounded-md max-h-72 overflow-auto">
           {borderHits.length > 0 && (
             <>
-              <li className="px-4 py-1.5 text-[10px] uppercase tracking-widest text-brass-gold font-bold bg-parchment">
+              <li className="px-4 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-medium bg-muted/40">
                 Grensovergangen
               </li>
               {borderHits.map((b, i) => (
                 <li
                   key={`b${i}`}
                   onClick={() => pickBorder(b)}
-                  className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10"
+                  className="px-4 py-2 text-sm cursor-pointer hover:bg-muted border-b border-border/60"
                 >
                   {b.display}
                 </li>
@@ -341,17 +341,17 @@ export const AddressAutocomplete = ({
           )}
           {results.length > 0 && (
             <>
-              <li className="px-4 py-1.5 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold bg-parchment/60">
+              <li className="px-4 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground font-medium bg-parchment/60">
                 Adressen (Google)
               </li>
               {results.map((r) => (
                 <li
                   key={r.place_id}
                   onClick={() => pickPrediction(r)}
-                  className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
+                  className="px-4 py-2 text-sm cursor-pointer hover:bg-muted border-b border-border/60 last:border-0"
                 >
                   <div className="font-medium">{r.main}</div>
-                  {r.secondary && <div className="text-xs text-brass-deep/80">{r.secondary}</div>}
+                  {r.secondary && <div className="text-xs text-muted-foreground">{r.secondary}</div>}
                 </li>
               ))}
             </>
