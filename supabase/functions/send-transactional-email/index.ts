@@ -53,6 +53,18 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Strict service-role auth: only the service role key may call this function
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader || authHeader !== `Bearer ${supabaseServiceKey}`) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized' }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
+  }
+
   // Parse request body
   let templateName: string
   let recipientEmail: string
