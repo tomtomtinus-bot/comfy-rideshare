@@ -59,7 +59,15 @@ export const GoogleAgendaStatus = () => {
   const [blockOpen, setBlockOpen] = useState(false);
   const [blockDate, setBlockDate] = useState<string>("");
   const [blockTitle, setBlockTitle] = useState<string>("[ViaCust] Bezet/Verlof");
+  const [blockSlots, setBlockSlots] = useState<string[]>([]);
   const [blocking, setBlocking] = useState(false);
+
+  const SLOTS: { id: string; label: string; time: string }[] = [
+    { id: "night",     label: "Nacht",   time: "00:00 – 06:00" },
+    { id: "morning",   label: "Ochtend", time: "06:00 – 12:00" },
+    { id: "afternoon", label: "Middag",  time: "12:00 – 18:00" },
+    { id: "evening",   label: "Avond",   time: "18:00 – 23:59" },
+  ];
 
   const load = async () => {
     setSyncing(true);
