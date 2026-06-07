@@ -625,25 +625,19 @@ const ClientDashboard = () => {
 
                     const rows: JSX.Element[] = [];
                     for (const m of sortedMonths) {
-                      const monthOpen = isOpen(m.key, !m.isPast);
+                      const monthOpen = isOpen(m.key, m.isCurrent);
+                      const monthCount = Array.from(m.weeks.values()).reduce((n, w) => n + w.rides.length, 0);
                       rows.push(
-                        <TableRow key={`mhdr-${m.key}`} className="hover:bg-transparent border-b-0">
+                        <TableRow key={`mhdr-${m.key}`} className="hover:bg-muted/60 border-y border-border bg-muted/50">
                           <TableCell
                             colSpan={6}
-                            className={
-                              (m.isPast
-                                ? "text-sm font-medium text-muted-foreground pt-8 pb-2 "
-                                : "text-lg font-semibold text-foreground pt-6 pb-2 ") +
-                              "capitalize cursor-pointer select-none"
-                            }
+                            className="py-3 px-4 cursor-pointer select-none"
                             onClick={() => toggleSection(m.key)}
                           >
-                            <span className="inline-flex items-center gap-1.5">
-                              {monthOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                              {m.label}
-                              <span className="ml-2 text-xs font-normal text-muted-foreground tabular-nums">
-                                ({Array.from(m.weeks.values()).reduce((n, w) => n + w.rides.length, 0)})
-                              </span>
+                            <span className="inline-flex items-center gap-2">
+                              {monthOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                              <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
+                              <span className="text-xs font-normal text-muted-foreground tabular-nums">({monthCount})</span>
                             </span>
                           </TableCell>
                         </TableRow>
@@ -654,24 +648,16 @@ const ClientDashboard = () => {
                         m.isPast ? b.sortKey - a.sortKey : a.sortKey - b.sortKey
                       );
                       for (const w of sortedWeeks) {
-                        const weekDefaultOpen = !w.isPast || w.key === currentWeekKey;
-                        const weekOpen = isOpen(w.key, weekDefaultOpen);
                         rows.push(
-                          <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b-0 bg-muted/20">
+                          <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b border-border/50 bg-muted/30">
                             <TableCell
                               colSpan={6}
-                              className="text-xs font-medium text-muted-foreground py-1.5 pl-6 cursor-pointer select-none"
-                              onClick={() => toggleSection(w.key)}
+                              className="text-xs font-semibold tracking-wider uppercase text-muted-foreground py-2 px-4"
                             >
-                              <span className="inline-flex items-center gap-1.5">
-                                {weekOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                                {w.label}
-                                <span className="ml-1.5 tabular-nums">({w.rides.length})</span>
-                              </span>
+                              {w.label} <span className="ml-1 normal-case tracking-normal font-normal tabular-nums">({w.rides.length} {w.rides.length === 1 ? "rit" : "ritten"})</span>
                             </TableCell>
                           </TableRow>
                         );
-                        if (!weekOpen) continue;
                         const sortedRides = [...w.rides].sort((a, b) => {
                           const da = new Date(a.scheduled_at).getTime();
                           const db = new Date(b.scheduled_at).getTime();
