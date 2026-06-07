@@ -12,6 +12,9 @@ import { AccountDeletionCard } from "@/components/AccountDeletionCard";
 import { NotificationPreferencesCard } from "@/components/site/NotificationPreferencesCard";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const makeSchemas = (t: (k: string) => string) => {
   const baseSchema = {
