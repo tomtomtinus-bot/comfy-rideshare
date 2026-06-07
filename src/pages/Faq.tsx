@@ -17,7 +17,7 @@ const Faq = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
         title="Veelgestelde vragen | ViaCust"
-        description="Vind antwoorden op al uw vragen over rittenplanning, automatische dispatching en Stripe-facturatie binnen ViaCust."
+        description="Antwoorden voor planners en begeleiders: rittenplanning, automatische dispatching, vergunningen en facturatie binnen ViaCust — zonder twijfels aan de slag."
         jsonLd={[
           {
             "@context": "https://schema.org",
