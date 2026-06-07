@@ -93,35 +93,44 @@ const recipientBlock = (p: BillingParty) =>
     [p.billing_postcode, p.billing_city].filter(Boolean).join(" "),
   ].filter(Boolean);
 
-// --- shared header in Paashuis-style ---
-const drawShell = (doc: jsPDF, opts: BasePdfOpts, logoDataUrl: string | null) => {
+// --- shared header in ViaCust brand style ---
+const drawShell = (
+  doc: jsPDF,
+  opts: BasePdfOpts,
+  logoDataUrl: string | null,
+  bannerDataUrl: string | null,
+) => {
   const pageW = doc.internal.pageSize.getWidth();
   const left = 18;
   const right = pageW - 18;
 
-  // Sender logo + name (top-left)
-  let nameX = left;
-  if (logoDataUrl) {
+  // Brand banner top-left (21:9). 78mm wide → ~29.7mm tall.
+  let headerBottom = 34;
+  if (bannerDataUrl) {
     try {
-      doc.addImage(logoDataUrl, "PNG", left, 14, 16, 16);
-      nameX = left + 20;
+      const bw = 78;
+      const bh = bw * (312 / 820);
+      doc.addImage(bannerDataUrl, "JPEG", left, 12, bw, bh);
+      headerBottom = 12 + bh;
     } catch {
       // ignore
     }
+  } else if (logoDataUrl) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", left, 14, 16, 16);
+    } catch {
+      // ignore
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(26, 42, 68);
+    doc.text("ViaCust", left + 20, 25);
   }
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor(20);
-  doc.text("ViaCust", nameX, 25);
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
-  doc.setTextColor(120);
-  doc.text("Verstuurd via viacust.app", nameX, 30);
 
-  // Sender details (top-right, small)
+  // Sender details (top-right, small) — steel-navy ink
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.setTextColor(40);
+  doc.setTextColor(26, 42, 68);
   let y = 18;
   doc.setFont("helvetica", "bold");
   doc.text((opts.from.company_name || opts.from.full_name || "").toString(), right, y, { align: "right" });
@@ -133,10 +142,14 @@ const drawShell = (doc: jsPDF, opts: BasePdfOpts, logoDataUrl: string | null) =>
     y += 4.5;
   });
 
-  // Horizontal divider
-  doc.setDrawColor(20);
-  doc.setLineWidth(0.4);
-  doc.line(left, 56, right, 56);
+  // Amber accent divider (safety-amber #F59E0B)
+  const dividerY = Math.max(headerBottom + 4, y + 2, 50);
+  doc.setDrawColor(245, 158, 11);
+  doc.setLineWidth(1.2);
+  doc.line(left, dividerY, right, dividerY);
+  doc.setDrawColor(26, 42, 68);
+  doc.setLineWidth(0.2);
+  doc.line(left, dividerY + 1.6, right, dividerY + 1.6);
 
   // Recipient block (left)
   doc.setFontSize(10);
