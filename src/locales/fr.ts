@@ -659,6 +659,8 @@ const fr: Dict = {
     kicker: "ViaCust — Questions fréquentes",
     title: "Questions Fréquentes",
     intro: "Réponses aux questions les plus fréquentes sur le fonctionnement, la facturation, la confidentialité et la qualité de notre plateforme.",
+    sectionGeneral: "Général",
+    sectionBusiness: "Compte entreprise",
     items: [
       { q: "Comment fonctionnent le paiement et la facturation ?", a: "ViaCust automatise l'ensemble du processus de facturation. Dès qu'un trajet est marqué comme terminé par l'accompagnateur, la plateforme génère une facture au nom de l'accompagnateur pour le donneur d'ordre. Les factures sont créées automatiquement chaque lundi et envoyées par e-mail, regroupant tous les trajets de la semaine précédente en une seule facture claire. Le paiement est traité en toute sécurité via Stripe. Les accompagnateurs n'ont pas à envoyer leurs propres factures ; ViaCust s'occupe de l'administration et assure un versement transparent." },
       { q: "Pourquoi mes factures n'ont-elles pas encore été générées ?", a: "ViaCust automatise la facturation (self-billing) pour vous décharger des tâches administratives. Comme le supplément carburant dans le secteur du transport fluctue chaque semaine, nous basons nos calculs sur les chiffres officiels.\n\nLes factures des trajets de la semaine écoulée sont finalisées dès que le prix moyen officiel du diesel de cette semaine est publié par TLN (Transport en Logistiek Nederland). Une fois ce prix intégré dans notre système au début de la nouvelle semaine, les factures sont générées automatiquement et mises à disposition dans votre tableau de bord. Vous recevez immédiatement une notification." },

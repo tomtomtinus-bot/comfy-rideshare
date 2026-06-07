@@ -13,6 +13,9 @@ const Faq = () => {
   const { t } = useTranslation();
   const items = (t("faq.items", { returnObjects: true }) as { q: string; a: string }[]) || [];
 
+  const generalItems = items.slice(0, 11);
+  const businessItems = items.slice(11);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
@@ -52,40 +55,62 @@ const Faq = () => {
         ]}
       />
       <Nav />
-      <main>
-        <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
-              {t("faq.kicker")}
-            </p>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl text-brass-deep leading-[1] italic mb-8">
-              {t("faq.title")}
-            </h1>
-            <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
-              {t("faq.intro")}
-            </p>
-          </div>
+      <main className="max-w-3xl mx-auto px-5 md:px-8">
+        <section className="pt-6 md:pt-8 pb-8">
+          <h1 className="text-3xl font-bold tracking-tight mb-3">
+            {t("faq.title")}
+          </h1>
+          <p className="text-muted-foreground leading-relaxed max-w-2xl">
+            {t("faq.intro")}
+          </p>
         </section>
 
-        <section className="py-14 md:py-20 px-5 md:px-8">
-          <div className="max-w-4xl mx-auto">
+        <section className="pb-10 md:pb-14">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
+            {t("faq.sectionGeneral")}
+          </h2>
+          <Accordion type="single" collapsible className="w-full">
+            {generalItems.map((item, i) => (
+              <AccordionItem key={i} value={`general-${i}`}>
+                <AccordionTrigger className="text-left text-base font-medium hover:no-underline py-4">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
+
+        {businessItems.length > 0 && (
+          <section className="pb-10 md:pb-14">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
+              {t("faq.sectionBusiness")}
+            </h2>
             <Accordion type="single" collapsible className="w-full">
-              {items.map((item, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`item-${i}`}
-                  className="border-b border-brass-deep/15"
-                >
-                  <AccordionTrigger className="text-left font-display text-lg md:text-xl text-brass-deep italic hover:text-brass-gold py-5">
+              {businessItems.map((item, i) => (
+                <AccordionItem key={i} value={`business-${i}`}>
+                  <AccordionTrigger className="text-left text-base font-medium hover:no-underline py-4">
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-brass-deep/80 leading-relaxed text-base pb-6 whitespace-pre-line">
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
-          </div>
+          </section>
+        )}
+
+        <section className="pb-16 md:pb-20 text-center">
+          <p className="text-sm text-muted-foreground">
+            Staat je vraag er niet tussen? Neem gerust contact met ons op via{" "}
+            <a href="mailto:info@viacust.com" className="underline underline-offset-4 hover:text-foreground transition-colors">
+              info@viacust.com
+            </a>
+            .
+          </p>
         </section>
       </main>
       <Footer />

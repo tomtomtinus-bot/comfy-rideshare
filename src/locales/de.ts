@@ -653,6 +653,8 @@ const de: Dict = {
     kicker: "ViaCust — Häufig gestellte Fragen",
     title: "Häufig gestellte Fragen",
     intro: "Antworten auf die häufigsten Fragen zur Funktionsweise, Abrechnung, Privatsphäre und Qualität unserer Plattform.",
+    sectionGeneral: "Allgemein",
+    sectionBusiness: "Firmenkonto",
     items: [
       { q: "Wie funktionieren Zahlung und Rechnungsstellung?", a: "ViaCust automatisiert den gesamten Rechnungsprozess. Sobald eine Fahrt vom Begleiter als abgeschlossen markiert wird, erstellt die Plattform im Namen des Begleiters eine Rechnung an den Auftraggeber. Rechnungen werden jeden Montag automatisch erstellt und per E-Mail verschickt, sodass alle Fahrten der Vorwoche in einer übersichtlichen Rechnung gebündelt sind. Die Zahlung erfolgt sicher über Stripe. Begleiter müssen keine eigenen Rechnungen versenden; ViaCust übernimmt die Verwaltung und sorgt für eine transparente Auszahlung." },
       { q: "Warum wurden meine Rechnungen noch nicht erstellt?", a: "ViaCust automatisiert die Rechnungsstellung (Self-Billing), um Ihnen Verwaltungsarbeit abzunehmen. Da der Kraftstoffzuschlag im Transportsektor wöchentlich schwankt, basieren unsere Berechnungen auf den offiziellen Zahlen.\n\nDie Rechnungen für die Fahrten der letzten Woche werden endgültig erstellt, sobald der offizielle durchschnittliche Dieselpreis dieser Woche von TLN (Transport en Logistiek Nederland) veröffentlicht wird. Sobald dieser Preis zu Beginn der neuen Woche in unserem System verarbeitet ist, werden die Rechnungen automatisch erstellt und in Ihrem Dashboard bereitgestellt. Sie erhalten sofort eine Benachrichtigung." },
