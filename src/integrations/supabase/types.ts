@@ -1314,6 +1314,24 @@ export type Database = {
           },
         ]
       }
+      ride_number_sequences: {
+        Row: {
+          last_seq: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          last_seq?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          last_seq?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       ride_swap_requests: {
         Row: {
           client_id: string
@@ -1408,6 +1426,7 @@ export type Database = {
           pickup_lat: number
           pickup_lng: number
           platform_invoice_id: string | null
+          ride_number: string
           scheduled_at: string
           status: Database["public"]["Enums"]["ride_status"]
           time_window_end: string | null
@@ -1450,6 +1469,7 @@ export type Database = {
           pickup_lat: number
           pickup_lng: number
           platform_invoice_id?: string | null
+          ride_number?: string
           scheduled_at: string
           status?: Database["public"]["Enums"]["ride_status"]
           time_window_end?: string | null
@@ -1492,6 +1512,7 @@ export type Database = {
           pickup_lat?: number
           pickup_lng?: number
           platform_invoice_id?: string | null
+          ride_number?: string
           scheduled_at?: string
           status?: Database["public"]["Enums"]["ride_status"]
           time_window_end?: string | null
@@ -2011,6 +2032,7 @@ export type Database = {
       generate_platform_invoices:
         | { Args: never; Returns: number }
         | { Args: { _catch_up?: boolean }; Returns: number }
+      generate_ride_number: { Args: never; Returns: string }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_bundle_rides_for_escort: {
         Args: { _bundle_id: string }

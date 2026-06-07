@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface RideRow {
   id: string;
+  ride_number: string | null;
   client_id: string;
   pickup_city: string;
   dropoff_city: string;
@@ -32,7 +33,7 @@ const AdminRides = () => {
     setLoading(true);
     const { data: rs, error } = await supabase
       .from("rides")
-      .select("id, client_id, pickup_city, dropoff_city, pickup_address, dropoff_address, scheduled_at, num_escorts, status, app_fee")
+      .select("id, ride_number, client_id, pickup_city, dropoff_city, pickup_address, dropoff_address, scheduled_at, num_escorts, status, app_fee")
       .order("scheduled_at", { ascending: false })
       .limit(500);
     if (error) {
@@ -96,6 +97,7 @@ const AdminRides = () => {
     if (!q) return true;
     return (
       r.id.toLowerCase().includes(q) ||
+      (r.ride_number ?? "").toLowerCase().includes(q) ||
       r.pickup_city.toLowerCase().includes(q) ||
       r.dropoff_city.toLowerCase().includes(q) ||
       (r.client_name ?? "").toLowerCase().includes(q)
@@ -140,7 +142,7 @@ const AdminRides = () => {
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-3">
                   <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Ritnr · Datum</p>
-                  <p className="font-mono text-[11px] text-brass-deep/80 tabular-nums">#{r.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="font-mono text-[11px] text-brass-deep/80 tabular-nums">{r.ride_number ?? `#${r.id.slice(0, 8).toUpperCase()}`}</p>
                   <p className="font-medium tabular-nums text-sm">{fmt(r.scheduled_at)}</p>
                   <p className="text-[10px] text-brass-deep/80 mt-1">{r.client_name}</p>
                 </div>
