@@ -49,6 +49,7 @@ import InfoNederland from "./pages/InfoNederland.tsx";
 import InfoBelgie from "./pages/InfoBelgie.tsx";
 import Faq from "./pages/Faq.tsx";
 import Team from "./pages/Team.tsx";
+import ChecklistSpeciaalTransport from "./pages/ChecklistSpeciaalTransport.tsx";
 import AcceptInvitation from "./pages/AcceptInvitation.tsx";
 import { Navigate } from "react-router-dom";
 
@@ -74,6 +75,7 @@ const App = () => (
             <Route path="/faq" element={<Faq />} />
             <Route path="/info/nederland" element={<InfoNederland />} />
             <Route path="/info/belgie" element={<InfoBelgie />} />
+            <Route path="/checklist-speciaal-transport" element={<ChecklistSpeciaalTransport />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/kies-rol" element={<RolePicker />} />
