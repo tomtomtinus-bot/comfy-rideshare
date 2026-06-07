@@ -16,9 +16,9 @@ export const ThreePillars = () => {
             <div className="size-12 flex items-center justify-center bg-brass-deep text-parchment">
               <Icon className="size-6" />
             </div>
-            <h3 className="font-display text-2xl md:text-3xl italic text-brass-deep leading-tight">
+            <h2 className="font-display text-2xl md:text-3xl italic text-brass-deep leading-tight">
               {title}
-            </h3>
+            </h2>
             <p className="text-sm md:text-base text-brass-deep/75 leading-relaxed">
               {body}
             </p>
