@@ -20,7 +20,7 @@ const InfoNederland = () => {
       <SeoHead
         title="Regels Transportbegeleiding Nederland | ViaCust"
         description="Alles over de wetgeving, RDW-ontheffingen en inzet van transportbegeleiders in Nederland. Ontdek hoe ViaCust uw Nederlandse ritten compliant automatiseert."
-        canonical="https://viacust.com/nederland"
+        canonical="https://viacust.com/info/nederland"
       />
       <Nav />
       <main>
