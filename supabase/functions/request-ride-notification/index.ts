@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         .from("ride_assignments")
         .select("id")
         .eq("ride_id", rideId)
-        .eq("escort_user_id", userId)
+        .eq("escort_id", userId)
         .maybeSingle();
       if (assignment) allowed = true;
     }
