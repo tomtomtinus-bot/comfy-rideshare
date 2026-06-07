@@ -1,3 +1,4 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient, resolveOrCreateCustomer } from "../_shared/stripe.ts";
 
 const corsHeaders = {
@@ -6,37 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-// Coupon-config per priceId voor terugkerende kortingen op nieuwe abonnementen.
-// Wordt idempotent in Stripe aangemaakt op basis van id.
-const SUBSCRIPTION_COUPONS: Record<string, {
-  id: string;
-  percent_off: number;
-  duration: "repeating";
-  duration_in_months: number;
-  name: string;
-}> = {
-  opdrachtgever_monthly: {
-    id: "opdrachtgever_first_year_50",
-    percent_off: 50,
-    duration: "repeating",
-    duration_in_months: 12,
-    name: "Eerstejaars korting 50%",
-  },
-};
-
-async function ensureCoupon(stripe: any, cfg: typeof SUBSCRIPTION_COUPONS[string]) {
-  try {
-    return await stripe.coupons.retrieve(cfg.id);
-  } catch (_) {
-    return await stripe.coupons.create({
-      id: cfg.id,
-      percent_off: cfg.percent_off,
-      duration: cfg.duration,
-      duration_in_months: cfg.duration_in_months,
-      name: cfg.name,
-    });
-  }
-}
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -45,15 +19,26 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth-guard: alleen ingelogde gebruikers mogen een checkout starten.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
-    const { priceId, quantity, customerEmail, userId, returnUrl, environment } = body as {
+    const { priceId, quantity, customerEmail, returnUrl, environment } = body as {
       priceId: string;
       quantity?: number;
       customerEmail?: string;
-      userId?: string;
       returnUrl: string;
       environment: StripeEnv;
     };
+    // userId komt altijd uit het JWT, nooit uit de body.
+    const userId = user.id;
+    const safeEmail = customerEmail ?? user.email ?? undefined;
 
     if (!priceId || !/^[a-zA-Z0-9_-]+$/.test(priceId)) throw new Error("Invalid priceId");
     if (!returnUrl) throw new Error("Missing returnUrl");
@@ -74,24 +59,19 @@ Deno.serve(async (req) => {
       extraLineItems.push({ price: baseLookup.data[0].id, quantity: 1 });
     }
 
-    const customerId = (customerEmail || userId)
-      ? await resolveOrCreateCustomer(stripe, { email: customerEmail, userId })
-      : undefined;
+    const customerId = await resolveOrCreateCustomer(stripe, { email: safeEmail, userId });
 
+    // Alleen begeleider-abonnementen krijgen 30 dagen proefperiode.
+    // Opdrachtgevers worden via platform-facturen achteraf afgerekend.
     const SUBSCRIPTION_TRIALS: Record<string, number> = {
-      opdrachtgever_monthly: 30,
       begeleider_monthly: 30,
     };
     const trialDays = isRecurring ? SUBSCRIPTION_TRIALS[priceId] : undefined;
 
-    const couponCfg = isRecurring ? SUBSCRIPTION_COUPONS[priceId] : undefined;
-    if (couponCfg) await ensureCoupon(stripe, couponCfg);
-
     const subscriptionData = isRecurring
       ? {
           ...(trialDays && { trial_period_days: trialDays }),
-          ...(couponCfg && { discounts: [{ coupon: couponCfg.id }] }),
-          ...(userId && { metadata: { userId } }),
+          metadata: { userId },
         }
       : undefined;
 
@@ -104,11 +84,9 @@ Deno.serve(async (req) => {
       ui_mode: "embedded_page",
       return_url: returnUrl,
       payment_method_types: ["card", "ideal"],
-      ...(customerId && { customer: customerId }),
-      ...(subscriptionData && Object.keys(subscriptionData).length > 0 && {
-        subscription_data: subscriptionData,
-      }),
-      ...(userId && { metadata: { userId } }),
+      customer: customerId,
+      ...(subscriptionData && { subscription_data: subscriptionData }),
+      metadata: { userId },
     });
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {

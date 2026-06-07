@@ -22,8 +22,12 @@ import { template as escortInvoiceReady } from './escort-invoice-ready.tsx'
 import { template as paymentFailedAdmin } from './payment-failed-admin.tsx'
 import { template as companyInvitation } from './company-invitation.tsx'
 import { template as invoiceToClient } from './invoice-to-client.tsx'
+import { template as paymentFailedClient } from './payment-failed-client.tsx'
+import { template as accountDeletionScheduled } from './account-deletion-scheduled.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'payment-failed-client': paymentFailedClient,
+  'account-deletion-scheduled': accountDeletionScheduled,
   'company-invitation': companyInvitation,
   'ride-confirmation': rideConfirmation,
   'ride-invitation': rideInvitation,
