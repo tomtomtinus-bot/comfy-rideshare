@@ -475,8 +475,18 @@ Deno.serve(async (req) => {
     // (called by DB trigger; only generates+stores, no signed URL returned).
     let uid: string | null = null;
     const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim() ?? "";
-    const isInternal = !bearer || bearer === anonKey || bearer === serviceKey;
+    // STRICT auth: only the service-role key counts as an internal/system caller.
+    // The published anon key MUST NOT be treated as internal — otherwise anyone
+    // on the internet could trigger invoice PDF regeneration & emailing.
+    const isInternal = !!bearer && bearer === serviceKey;
     if (!isInternal) {
+      // Reject missing tokens and reject the anon key explicitly.
+      if (!bearer || bearer === anonKey) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const userClient = createClient(url, anonKey, {
         global: { headers: { Authorization: authHeader! } },
       });
