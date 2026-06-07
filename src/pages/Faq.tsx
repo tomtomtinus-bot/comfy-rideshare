@@ -15,6 +15,10 @@ const Faq = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead
+        title="Veelgestelde vragen | ViaCust"
+        description="Vind antwoorden op al uw vragen over rittenplanning, automatische dispatching en Stripe-facturatie binnen ViaCust."
+      />
       <Nav />
       <main>
         <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">

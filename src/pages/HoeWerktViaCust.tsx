@@ -26,6 +26,10 @@ const HoeWerktViaCust = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead
+        title="Hoe werkt ViaCust? | Slimme Logistieke Software"
+        description="Ontdek hoe eenvoudig het is om als transportplanner of gecertificeerd begeleider ritten te beheren, te matchen en te factureren."
+      />
       <Nav />
       <main>
         <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
