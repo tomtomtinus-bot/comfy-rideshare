@@ -237,7 +237,7 @@ const Inner = () => {
       summary.push("Aansluitende ritten aangepast.");
     }
     await supabase.rpc("notify_ride_updated", { _ride_id: ride.id, _summary: summary.join(" ") });
-    supabase.functions.invoke("notify-ride-event", {
+    supabase.functions.invoke("request-ride-notification", {
       body: { event: "ride_updated", rideId: ride.id, summary: summary.join(" ") },
     }).catch(() => { /* stil falen */ });
 
