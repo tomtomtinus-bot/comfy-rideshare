@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { Nav } from "@/components/site/Nav";
 import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const HoeWerktViaCust = () => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState("client");
 
   const clientSteps = [
     { n: 1, title: t("howItWorks.c1t"), body: t("howItWorks.c1b") },
@@ -31,96 +36,93 @@ const HoeWerktViaCust = () => {
         description="Ontdek hoe eenvoudig het is om als transportplanner of gecertificeerd begeleider ritten te beheren, te matchen en te factureren."
       />
       <Nav />
-      <main>
-        <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
-              {t("howItWorks.kicker")}
-            </p>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl text-brass-deep leading-[1] italic mb-8">
-              {t("howItWorks.title")}
-            </h1>
-            <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
-              {t("howItWorks.intro")}
-            </p>
+      <main className="max-w-5xl mx-auto px-5 md:px-8">
+        <section className="pt-6 md:pt-8 pb-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight mb-3">
+            {t("howItWorks.title")}
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            {t("howItWorks.intro")}
+          </p>
+        </section>
+
+        <section className="pb-10 md:pb-14">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full grid grid-cols-2 mb-8">
+              <TabsTrigger value="client">Voor Opdrachtgevers</TabsTrigger>
+              <TabsTrigger value="escort">Voor Begeleiders</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="client">
+              <div className="grid md:grid-cols-3 gap-4">
+                {clientSteps.map((s) => (
+                  <Card key={s.n} className="border-input">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                          {s.n}
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("howItWorks.step")} {s.n}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {s.body}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="escort">
+              <div className="grid md:grid-cols-3 gap-4">
+                {escortSteps.map((s) => (
+                  <Card key={s.n} className="border-input">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                          {s.n}
+                        </span>
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          {t("howItWorks.step")} {s.n}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {s.body}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        <section className="pb-10 md:pb-14">
+          <h2 className="text-2xl font-semibold tracking-tight mb-6">
+            {t("howItWorks.whyTitle")}
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {why.map(([title, body]) => (
+              <Card key={title} className="border-input">
+                <CardContent className="p-6">
+                  <h3 className="text-base font-semibold mb-1">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {body}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
-        <section className="py-14 md:py-20 px-5 md:px-8 border-b border-brass-deep/10">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-              {t("howItWorks.clientKicker")}
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight mb-10">
-              {t("howItWorks.clientTitle")}
-            </h2>
-            <div className="space-y-8">
-              {clientSteps.map((s) => (
-                <div key={s.n} className="border-l-2 border-brass-gold pl-6 py-2">
-                  <div className="text-brass-gold uppercase tracking-[0.25em] text-xs font-semibold mb-2">
-                    {t("howItWorks.step")} {s.n}
-                  </div>
-                  <h3 className="font-display text-2xl md:text-3xl text-brass-deep italic mb-3">
-                    {s.title}
-                  </h3>
-                  <p className="text-brass-deep/80 leading-relaxed">{s.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 md:py-20 px-5 md:px-8 border-b border-brass-deep/10 bg-brass-deep text-parchment">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-              {t("howItWorks.escortKicker")}
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl italic leading-tight mb-10">
-              {t("howItWorks.escortTitle")}
-            </h2>
-            <div className="space-y-8">
-              {escortSteps.map((s) => (
-                <div key={s.n} className="border-l-2 border-brass-gold pl-6 py-2">
-                  <div className="text-brass-gold uppercase tracking-[0.25em] text-xs font-semibold mb-2">
-                    {t("howItWorks.step")} {s.n}
-                  </div>
-                  <h3 className="font-display text-2xl md:text-3xl italic mb-3">{s.title}</h3>
-                  <p className="text-parchment/80 leading-relaxed">{s.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 md:py-20 px-5 md:px-8 border-b border-brass-deep/10">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight mb-10">
-              {t("howItWorks.whyTitle")}
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {why.map(([title, body]) => (
-                <div key={title} className="p-6 border border-brass-deep/15 bg-parchment/40">
-                  <h3 className="font-display text-xl text-brass-deep italic mb-2">{title}</h3>
-                  <p className="text-brass-deep/80 leading-relaxed text-sm">{body}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-12 flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/auth?role=escort"
-                className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
-              >
-                {t("howItWorks.ctaEscort")}
-              </Link>
-              <Link
-                to="/auth?role=client"
-                className="inline-block px-7 py-4 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:border-brass-gold hover:text-brass-gold transition-colors text-center"
-              >
-                {t("howItWorks.ctaClient")}
-              </Link>
-            </div>
-          </div>
+        <section className="pb-16 md:pb-20 text-center">
+          <Button asChild size="lg">
+            <Link to="/auth">{t("howItWorks.ctaClient")}</Link>
+          </Button>
         </section>
       </main>
       <Footer />
