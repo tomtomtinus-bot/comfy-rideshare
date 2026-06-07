@@ -284,8 +284,8 @@ export interface EscortInvoicePdfData extends BasePdfOpts {
 
 export const downloadEscortInvoicePdf = async (data: EscortInvoicePdfData) => {
   const doc = new jsPDF();
-  const logo = await loadLogoDataUrl();
-  drawShell(doc, data, logo);
+  const [logo, banner] = await Promise.all([loadLogoDataUrl(), loadBannerDataUrl()]);
+  drawShell(doc, data, logo, banner);
 
   const subtotal = data.rows.reduce((s, r) => s + Number(r.amount), 0);
   const vatRate = vatRateFor(data.from, data.to);
