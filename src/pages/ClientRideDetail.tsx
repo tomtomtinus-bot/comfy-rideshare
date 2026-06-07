@@ -122,7 +122,7 @@ const Inner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
-  const [hoursMap, setHoursMap] = useState<Record<string, { actual_hours: number | null; actual_cost: number | null; hours_submitted_at: string | null; hours_notes: string | null; departed_base_at: string | null; returned_base_at: string | null; extra_costs: any; extra_costs_total: number | null; hours_dispute_status: string; hours_dispute_reason: string | null; }>>({});
+  const [hoursMap, setHoursMap] = useState<Record<string, { actual_hours: number | null; actual_cost: number | null; hours_submitted_at: string | null; hours_notes: string | null; departed_base_at: string | null; returned_base_at: string | null; extra_costs: any; extra_costs_total: number | null; hours_dispute_status: string; hours_dispute_reason: string | null; travel_to_pickup_min: number | null; travel_back_home_min: number | null; }>>({});
   const [disputeFor, setDisputeFor] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState("");
   const [busy, setBusy] = useState(false);
