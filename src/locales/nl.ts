@@ -55,7 +55,7 @@ const nl = {
     join: "Sluit u aan.",
     client: "Opdrachtgever",
     escort: "Begeleider",
-    fullName: "Volledige naam",
+    fullName: "BEDRIJFSNAAM",
     phone: "Telefoon",
     email: "E-mail",
     password: "Wachtwoord",
