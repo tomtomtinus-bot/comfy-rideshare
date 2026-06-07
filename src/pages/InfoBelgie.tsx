@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
+import { SeoHead } from "@/components/SeoHead";
 
 const Th = ({ children }: { children: React.ReactNode }) => (
   <th className="border border-brass-deep/20 bg-brass-deep text-parchment px-3 py-2 text-left text-xs uppercase tracking-widest font-semibold">
@@ -28,6 +29,11 @@ const InfoBelgie = () => {
   const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead
+        title="Wetgeving Uitzonderlijk Vervoer België | ViaCust"
+        description="Inzicht in de Belgische regelgeving, gewestelijke vergunningen en begeleidingsregels. ViaCust helpt transporteurs en begeleiders in België naadloos te matchen."
+        canonical="https://viacust.com/belgie"
+      />
       <Nav />
       <main>
         <section className="pt-12 md:pt-20 pb-8 md:pb-12 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
