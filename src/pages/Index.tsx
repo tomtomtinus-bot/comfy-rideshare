@@ -23,8 +23,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
-        title="ViaCust | Digital Escort Solutions"
-        description="Het alles-in-één platform voor transportbegeleiders en planners. Automatiseer ritten, planningen en vergunningen in heel Europa."
+        title="ViaCust | Digitaal dispatchplatform voor uitzonderlijk vervoer"
+        description="Het alles-in-één dispatchplatform voor planners en begeleiders van uitzonderlijk vervoer. Automatiseer ritten, planningen en vergunningen in heel Europa."
         canonical="https://viacust.com/"
         jsonLd={[
           {
