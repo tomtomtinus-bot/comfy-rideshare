@@ -1,5 +1,5 @@
 import { Menu, X, Settings, ChevronDown } from "lucide-react";
-import logo from "@/assets/viacust-logo.png";
+import logo from "@/assets/viacust-logo-full.png";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,22 +47,12 @@ export const Nav = () => {
   return (
     <nav className="sticky top-0 z-50 bg-parchment/85 backdrop-blur-md border-b border-brass-deep/10 pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3" onClick={close}>
+        <Link to="/" className="flex items-center" onClick={close}>
           <img
             src={logo}
-            alt="ViaCust Logo - Terug naar de startpagina"
-            width={32}
-            height={32}
-            className="size-8 object-contain"
+            alt="ViaCust - Digital Escort Solutions"
+            className="h-12 md:h-14 w-auto object-contain"
           />
-          <div className="flex items-center gap-2">
-            <span className="font-display text-2xl tracking-tight text-brass-deep italic">
-              ViaCust
-            </span>
-            <span className="hidden md:block text-[10px] uppercase tracking-widest text-brass-deep/80 font-medium border-l border-brass-deep/15 pl-2 ml-1 leading-none">
-              Digital Escort Solutions
-            </span>
-          </div>
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
           <Link
