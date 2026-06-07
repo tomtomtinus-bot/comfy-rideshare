@@ -124,7 +124,7 @@ const AdminRides = () => {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Zoek op stad of opdrachtgever…"
+          placeholder="Zoek op ritnummer, stad of opdrachtgever…"
           className="flex-1 min-w-[200px] bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
         />
       </div>
