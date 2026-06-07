@@ -288,10 +288,10 @@ const Inner = () => {
     if (loading) return;
     writeDraft({
       fullName, phone, postcode, houseNumber, street, city,
-      categories, languages, surcharges, fuel,
+      categories, languages, surcharges, fuel, isBusiness,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, loading]);
+  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, isBusiness, loading]);
 
 
   const toggle = (arr: string[], v: string) =>
