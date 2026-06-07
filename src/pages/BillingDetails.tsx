@@ -420,9 +420,12 @@ const BillingDetailsInner = () => {
 
               {isEscort && (
                 <section className="space-y-4">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    {t("billing.payout")}
-                  </h2>
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-medium text-muted-foreground">
+                      {t("billing.payout")}
+                    </h2>
+                    <Separator />
+                  </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     {renderField({ label: t("billing.f.iban"), name: "iban", placeholder: "NL00BANK0123456789" })}
                     {renderField({ label: t("billing.f.holder"), name: "bank_account_holder" })}
@@ -432,10 +435,13 @@ const BillingDetailsInner = () => {
 
               {isEscort && (
                 <section className="space-y-4">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    {t("billing.weroSection")}
-                  </h2>
-                  <p className="text-xs text-brass-deep/80 -mt-2">
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-medium text-muted-foreground">
+                      {t("billing.weroSection")}
+                    </h2>
+                    <Separator />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
                     {t("billing.weroIntro")}
                   </p>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -443,9 +449,9 @@ const BillingDetailsInner = () => {
                       type="checkbox"
                       checked={!!form.wero_enabled}
                       onChange={(e) => setBool("wero_enabled")(e.target.checked)}
-                      className="h-4 w-4 accent-brass-gold"
+                      className="h-4 w-4 accent-primary"
                     />
-                    <span className="text-sm text-brass-deep">
+                    <span className="text-sm text-foreground">
                       {t("billing.weroToggle")}
                     </span>
                   </label>
@@ -468,8 +474,8 @@ const BillingDetailsInner = () => {
               )}
 
               {isEscort && (
-                <section className="space-y-3 border-t border-brass-deep/10 pt-6">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                <section className="space-y-3 border-t border-border pt-6">
+                  <h2 className="text-sm font-medium text-muted-foreground">
                     {t("billingExtra.selfBillingTitle")}
                   </h2>
                   <label className="flex items-start gap-3 cursor-pointer">
@@ -477,26 +483,22 @@ const BillingDetailsInner = () => {
                       type="checkbox"
                       checked={!!form.self_billing_mandate}
                       onChange={(e) => setBool("self_billing_mandate")(e.target.checked)}
-                      className="h-4 w-4 mt-0.5 accent-brass-gold shrink-0"
+                      className="h-4 w-4 mt-0.5 accent-primary shrink-0"
                     />
-                    <span className="text-sm text-brass-deep/85 leading-relaxed">
+                    <span className="text-sm text-foreground/85 leading-relaxed">
                       {t("billingExtra.selfBillingText")}
                     </span>
                   </label>
                   {errors.self_billing_mandate && (
-                    <p className="text-xs text-red-700">{errors.self_billing_mandate}</p>
+                    <p className="text-xs text-destructive">{errors.self_billing_mandate}</p>
                   )}
                 </section>
               )}
 
               <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
-                >
+                <Button type="submit" disabled={saving}>
                   {saving ? t("common.saving") : t("common.save")}
-                </button>
+                </Button>
               </div>
             </form>
           )}
