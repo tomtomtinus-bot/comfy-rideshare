@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const DURATIONS = [2, 4, 8, 12];
 
