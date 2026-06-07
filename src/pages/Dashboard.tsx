@@ -232,6 +232,8 @@ const ClientDashboard = () => {
   const [exportFrom, setExportFrom] = useState("");
   const [exportTo, setExportTo] = useState("");
   const [escortNames, setEscortNames] = useState<Record<string, string>>({});
+  const [clientSearch, setClientSearch] = useState("");
+  const [clientStatusFilter, setClientStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
   const addRideToBundle = (r: RideRow) => {
     if (!r.bundle_id || !r.bundle_label) return;
