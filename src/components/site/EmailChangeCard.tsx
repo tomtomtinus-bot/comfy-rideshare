@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 export const EmailChangeCard = () => {
   const { user } = useAuth();
@@ -45,43 +49,43 @@ export const EmailChangeCard = () => {
   if (!user) return null;
 
   return (
-    <div className="bg-parchment/60 border border-brass-deep/10 p-5 space-y-3">
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Huidig e-mailadres</p>
-        <p className="text-sm font-semibold text-brass-deep break-all">{user.email}</p>
-      </div>
+    <Card className="mb-6">
+      <CardContent className="py-5 space-y-4">
+        <div>
+          <Label className="text-xs text-muted-foreground uppercase tracking-wider">Huidig e-mailadres</Label>
+          <p className="text-sm font-medium text-foreground break-all mt-1">{user.email}</p>
+        </div>
 
-      {pending ? (
-        <div className="bg-brass-gold/10 border border-brass-gold/30 p-3 text-xs text-brass-deep">
-          Aanvraag in afwachting van goedkeuring naar <strong className="break-all">{pending.new_email}</strong>.
-          Na goedkeuring ontvang je op het nieuwe adres een bevestigingsmail. Pas na bevestiging kun je met dat adres inloggen.
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
-            Aanvragen e-mailadres veranderen
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="nieuw@voorbeeld.nl"
-              className="flex-1 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
-            />
-            <button
-              onClick={submit}
-              disabled={busy || !newEmail.trim()}
-              className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
-            >
-              Aanvraag indienen
-            </button>
+        {pending ? (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-md p-3 text-sm text-foreground">
+            Aanvraag in afwachting van goedkeuring naar <strong className="break-all">{pending.new_email}</strong>.
+            Na goedkeuring ontvang je op het nieuwe adres een bevestigingsmail. Pas na bevestiging kun je met dat adres inloggen.
           </div>
-          <p className="text-[11px] text-brass-deep/80">
-            Een admin keurt je aanvraag goed. Daarna ontvang je op het nieuwe adres een bevestigingsmail.
-          </p>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider">E-mailadres wijzigen</Label>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="nieuw@voorbeeld.nl"
+                className="flex-1"
+              />
+              <Button
+                onClick={submit}
+                disabled={busy || !newEmail.trim()}
+                size="sm"
+              >
+                Aanvraag Indienen
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Een admin keurt je aanvraag goed. Daarna ontvang je op het nieuwe adres een bevestigingsmail.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

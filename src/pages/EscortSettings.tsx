@@ -14,6 +14,9 @@ import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input as BaseInput } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland", country: "Nederland" },
@@ -446,7 +449,7 @@ const Inner = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main className="max-w-2xl mx-auto px-6 py-24">
-          <p className="text-brass-deep/80">{t("escortSettings.onlyForEscorts")}</p>
+          <p className="text-muted-foreground">{t("escortSettings.onlyForEscorts")}</p>
         </main>
         <Footer />
       </div>
@@ -456,17 +459,17 @@ const Inner = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
+      <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            {t("escortSettings.headerKicker")} {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic mb-10">
-            {t("escortSettings.title")}
-          </h1>
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-foreground">{t("escortSettings.title")}</h1>
+            {profile?.anonymous_id && (
+              <p className="text-xs text-muted-foreground mt-1">#{profile.anonymous_id}</p>
+            )}
+          </div>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : (
             <>
               <GoogleCalendarCard />
@@ -483,34 +486,34 @@ const Inner = () => {
                 }
               }}
               onChange={() => setDirty(true)}
-              className="bg-card shadow-etched p-8 md:p-10 space-y-8"
+              className="space-y-6"
             >
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
+                <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.fullName")}</Label>
-                    <input
+                    <BaseInput
                       value={fullName}
                       onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                   <div>
                     <Label>{t("escortSettings.phone")}</Label>
-                    <input
+                    <BaseInput
                       type="tel"
                       value={phone}
                       onChange={(e) => { setPhone(e.target.value); setDirty(true); }}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-start justify-between gap-4 border-t border-brass-deep/10 pt-4">
+                <div className="mt-4 flex items-start justify-between gap-4 border-t border-border pt-4">
                   <div>
                     <Label>Ik ben een bedrijf met meerdere chauffeurs</Label>
-                    <p className="text-[11px] text-brass-deep/70 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Schakel dit in als je onder je bedrijfsnaam meerdere chauffeurs wil laten rijden. Je krijgt dan toegang tot "Mijn team" waar je chauffeurs kunt uitnodigen en seats kunt beheren.
                     </p>
                   </div>
@@ -522,36 +525,36 @@ const Inner = () => {
               </section>
 
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
-                <p className="text-[11px] text-brass-deep/80 italic">{t("escortSettings.baseLocationHint")}</p>
+                <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
+                <p className="text-xs text-muted-foreground">{t("escortSettings.baseLocationHint")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.postcode")}</Label>
-                    <input
+                    <BaseInput
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
                       onBlur={runAddressLookup}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold uppercase"
+                      className="mt-1 uppercase"
                     />
                   </div>
                   <div>
                     <Label>{t("escortSettings.houseNumber")}</Label>
-                    <input
+                    <BaseInput
                       value={houseNumber}
                       onChange={(e) => setHouseNumber(e.target.value)}
                       onBlur={runAddressLookup}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                   <div className="md:col-span-2">
                     <Label>{t("escortSettings.streetCityAuto")}</Label>
-                    <input
+                    <BaseInput
                       readOnly
                       value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
                       placeholder={(lookupBusy ? t("escortSettings.lookingUp") : t("escortSettings.fillFromPostcode")) as string}
-                      className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
+                      className="mt-1 bg-muted/40"
                     />
-                    <p className="text-[10px] text-brass-deep/80 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {lookupBusy ? t("escortSettings.lookingUp") : street ? `${street} ${houseNumber}, ${city}` : t("escortSettings.addressFooter")}
                     </p>
                   </div>
@@ -582,7 +585,7 @@ const Inner = () => {
                           (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
                         )}
                       />
-                      <p className="text-[10px] text-brass-deep/80 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {t("escortSettings.kmRateDEHint")}
                       </p>
                     </div>
@@ -609,7 +612,7 @@ const Inner = () => {
 
               <section>
                 <Label>{t("escortSettings.languagesSpoken")}</Label>
-                <p className="text-[11px] text-brass-deep/80 mt-1 mb-2">
+                <p className="text-xs text-muted-foreground mt-1 mb-2">
                   {t("escortSettings.languagesHint")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -631,23 +634,22 @@ const Inner = () => {
                 return (
               <section>
                 <Label>{t("escortSettings.fuelTitle")}</Label>
-                <p className="text-[11px] text-brass-deep/80 mt-1 mb-3">
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
                   {t("escortSettings.fuelIntro")}
                   {currentFuel && (
                     <> <span dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelCurrentPrice", { p: Number(currentFuel.eur_per_liter).toFixed(3), w: currentFuel.week_start }) }} /></>
                   )}
                 </p>
-                <label className="flex items-center gap-2 mb-3 text-sm">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center gap-2 mb-3">
+                  <Switch
                     checked={fuel.enabled}
-                    onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
+                    onCheckedChange={(v) => setFuel((f) => ({ ...f, enabled: !!v }))}
                   />
-                  {t("escortSettings.fuelEnable")}
-                </label>
+                  <span className="text-sm">{t("escortSettings.fuelEnable")}</span>
+                </div>
                 {fuel.enabled && (
-                  <div className="mb-3 p-3 bg-parchment border border-brass-deep/15">
-                    <p className="text-[11px] text-brass-deep/70 mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
+                  <div className="mb-3 p-3 bg-muted/40 border border-border rounded-md">
+                    <p className="text-xs text-muted-foreground mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
                     <input
                       type="file"
                       accept="application/pdf,.pdf"
@@ -696,39 +698,39 @@ const Inner = () => {
                           e.target.value = "";
                         }
                       }}
-                      className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold disabled:opacity-50"
+                      className="text-xs text-muted-foreground file:mr-3 file:px-3 file:py-2 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:font-medium disabled:opacity-50"
                     />
-                    {fuelParsing && <p className="text-[11px] text-brass-gold mt-2">{t("escortSettingsExtra.fuelParsing")}</p>}
+                    {fuelParsing && <p className="text-xs text-amber-600 mt-2">{t("escortSettingsExtra.fuelParsing")}</p>}
                   </div>
                 )}
                 {fuel.enabled && (
                   <>
-                    <div className="flex gap-2 mb-2 text-sm">
-                      <span className="text-brass-deep/80">{t("escortSettings.fuelUnit")}</span>
-                      <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> {t("escortSettings.fuelPerHour")}
+                    <div className="flex flex-wrap items-center gap-4 mb-2 text-sm">
+                      <span className="text-muted-foreground">{t("escortSettings.fuelUnit")}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} className="accent-primary" /> {t("escortSettings.fuelPerHour")}
                       </label>
-                      <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> {t("escortSettings.fuelPercent")}
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} className="accent-primary" /> {t("escortSettings.fuelPercent")}
                       </label>
                     </div>
                     <div className="space-y-2">
-                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
+                      <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground">
                         <div className="col-span-4">{t("escortSettings.fuelFromCol")}</div>
                         <div className="col-span-4">{t("escortSettings.fuelToCol")}</div>
                         <div className="col-span-3">{fuel.kind === "percent" ? t("escortSettings.fuelValueColPct") : t("escortSettings.fuelValueColEur")}</div>
                       </div>
                       {fuel.tiers.map((t2, i) => (
                         <div key={i} className="grid grid-cols-12 gap-2">
-                          <input value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/80 hover:text-brass-deep border border-brass-deep/15">×</button>
+                          <BaseInput value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4" />
+                          <BaseInput value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4" />
+                          <BaseInput value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3" />
+                          <Button type="button" variant="ghost" size="icon" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 h-9 w-9">×</Button>
                         </div>
                       ))}
-                      <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
+                      <Button type="button" variant="outline" size="sm" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))}>
                         {t("escortSettings.fuelAddTier")}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 )}
@@ -736,17 +738,14 @@ const Inner = () => {
                 );
               })()}
 
-              <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">{t("escortSettings.availability")}</p>
-                <p className="text-sm text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
+              <section className="bg-accent/5 border border-accent/20 rounded-md p-4">
+                <p className="text-xs font-medium text-accent mb-1">{t("escortSettings.availability")}</p>
+                <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
               </section>
 
-              <button
-                disabled={busy}
-                className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
-              >
+              <Button type="submit" disabled={busy} className="w-full">
                 {busy ? t("escortSettings.busy") : t("escortSettings.saveProfile")}
-              </button>
+              </Button>
             </form>
             </>
           )}
@@ -758,7 +757,7 @@ const Inner = () => {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{children}</label>
+  <label className="text-sm font-medium text-foreground">{children}</label>
 );
 
 const Input = ({
@@ -776,12 +775,12 @@ const Input = ({
 }) => (
   <div>
     <Label>{label}</Label>
-    <input
+    <BaseInput
       name={name}
       type={type}
       step={step}
       defaultValue={defaultValue}
-      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+      className="mt-1"
     />
   </div>
 );
@@ -798,9 +797,12 @@ const Toggle = ({
   <button
     type="button"
     onClick={onClick}
-    className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
-      on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
-    }`}
+    className={cn(
+      "px-3 py-2 text-xs font-medium rounded-md border transition-colors",
+      on
+        ? "bg-primary text-primary-foreground border-primary"
+        : "bg-background text-muted-foreground border-input hover:border-muted-foreground/50"
+    )}
   >
     {children}
   </button>
