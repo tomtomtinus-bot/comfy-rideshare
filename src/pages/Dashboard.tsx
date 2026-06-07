@@ -704,7 +704,7 @@ const ClientDashboard = () => {
                       <Accordion type="multiple" className="border border-border rounded-md bg-card overflow-hidden divide-y">
                         {sortedPastMonths.map((m) => (
                           <AccordionItem key={m.key} value={m.key} className="border-b-0">
-                            <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline">
+                            <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline flex items-center">
                               <span className="inline-flex items-center gap-2">
                                 <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
                                 <span className="text-xs font-normal text-muted-foreground tabular-nums">({m.rides.length})</span>
