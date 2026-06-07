@@ -97,18 +97,17 @@ const FieldImpl = ({
   error?: string;
 }) => (
   <label className="block">
-    <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
+    <span className="text-sm font-medium text-muted-foreground mb-1.5 block">
       {label}
     </span>
-    <input
+    <Input
       type={type}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className="w-full bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
     />
-    {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+    {error && <span className="text-xs text-destructive mt-1.5 block">{error}</span>}
   </label>
 );
 
@@ -163,11 +162,11 @@ const VatField = ({
 
   return (
     <label className="block">
-      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
+      <span className="text-sm font-medium text-muted-foreground mb-1.5 block">
         {label}
       </span>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={value}
           onChange={(e) => {
@@ -175,32 +174,32 @@ const VatField = ({
             setResult({ status: "idle" });
           }}
           placeholder="NL000000000B01"
-          className="flex-1 bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+          className="flex-1"
         />
-        <button
+        <Button
           type="button"
+          size="sm"
           onClick={check}
           disabled={result.status === "checking"}
-          className="px-3 py-2 bg-brass-deep text-parchment text-[10px] uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50 whitespace-nowrap"
         >
           {result.status === "checking" ? t("billingExtra.viesBusy") : t("billingExtra.viesCheckBtn")}
-        </button>
+        </Button>
       </div>
-      {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+      {error && <span className="text-xs text-destructive mt-1.5 block">{error}</span>}
       {result.status === "valid" && (
-        <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2 rounded-sm">
           {t("billingExtra.viesValidBox")}
           {result.name ? <div className="mt-1 opacity-80">{result.name}</div> : null}
           {result.address ? <div className="opacity-70 whitespace-pre-line">{result.address}</div> : null}
         </div>
       )}
       {result.status === "invalid" && (
-        <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2 rounded-sm">
           {t("billingExtra.viesInvalidBox")}
         </div>
       )}
       {result.status === "error" && (
-        <div className="mt-2 text-xs bg-amber-50 border border-amber-300 text-amber-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-amber-50 border border-amber-300 text-amber-900 px-3 py-2 rounded-sm">
           {result.message}
         </div>
       )}
