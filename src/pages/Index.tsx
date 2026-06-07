@@ -26,6 +26,46 @@ const Index = () => {
         title="ViaCust | Platform voor Transportbegeleiding & Uitzonderlijk Vervoer"
         description="Het alles-in-één platform voor transportbegeleiders en planners. Automatiseer ritten, planningen en vergunningen in heel Europa."
         canonical="https://viacust.com/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": ["SoftwareApplication", "Organization"],
+            "name": "ViaCust",
+            "operatingSystem": "All",
+            "applicationCategory": "BusinessApplication / Dispatch & Logistics",
+            "description": "Geautomatiseerd dispatchsysteem en platform voor transportbegeleiding en uitzonderlijk vervoer."
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Wat is ViaCust?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "ViaCust is een Europees B2B SaaS-platform dat transportplanners en gecertificeerde transportbegeleiders (uitzonderlijk vervoer) efficiënt met elkaar verbindt via geautomatiseerde rittenplanning."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Hoe synchroniseert ViaCust ritten?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "ViaCust integreert naadloos met de Google Calendar API om geaccepteerde transportritten automatisch en in real-time in de persoonlijke agenda van de begeleider te plaatsen."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is ViaCust AVG-proof?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ja, ViaCust voldoet volledig aan de AVG (GDPR). Locatiegegevens zijn tijdelijk en strikt opt-in, en Google-gebruikersdata wordt via beveiligde Row Level Security (RLS) geïsoleerd."
+                }
+              }
+            ]
+          }
+        ]}
       />
       <Nav />
       <main>

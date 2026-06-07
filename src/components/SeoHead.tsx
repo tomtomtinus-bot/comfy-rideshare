@@ -7,6 +7,7 @@ interface SeoHeadProps {
   title?: string;
   description?: string;
   canonical?: string;
+  jsonLd?: Record<string, unknown>[];
 }
 
 /**
@@ -14,7 +15,7 @@ interface SeoHeadProps {
  * If `canonical` is omitted, it is derived from the current pathname so any future
  * route automatically gets the correct self-referencing URL.
  */
-export const SeoHead = ({ title, description, canonical }: SeoHeadProps) => {
+export const SeoHead = ({ title, description, canonical, jsonLd }: SeoHeadProps) => {
   const location = useLocation();
   const url = canonical ?? `${BASE_URL}${location.pathname}`;
 
@@ -28,6 +29,11 @@ export const SeoHead = ({ title, description, canonical }: SeoHeadProps) => {
       {title && <meta name="twitter:title" content={title} />}
       {description && <meta property="og:description" content={description} />}
       {description && <meta name="twitter:description" content={description} />}
+      {jsonLd?.map((schema, index) => (
+        <script key={index} type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      ))}
     </Helmet>
   );
 };
