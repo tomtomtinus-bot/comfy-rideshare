@@ -530,31 +530,31 @@ const Inner = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.postcode")}</Label>
-                    <input
+                    <BaseInput
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
                       onBlur={runAddressLookup}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold uppercase"
+                      className="mt-1 uppercase"
                     />
                   </div>
                   <div>
                     <Label>{t("escortSettings.houseNumber")}</Label>
-                    <input
+                    <BaseInput
                       value={houseNumber}
                       onChange={(e) => setHouseNumber(e.target.value)}
                       onBlur={runAddressLookup}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                   <div className="md:col-span-2">
                     <Label>{t("escortSettings.streetCityAuto")}</Label>
-                    <input
+                    <BaseInput
                       readOnly
                       value={street || city ? `${street}${street && city ? ", " : ""}${city}` : ""}
                       placeholder={(lookupBusy ? t("escortSettings.lookingUp") : t("escortSettings.fillFromPostcode")) as string}
-                      className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
+                      className="mt-1 bg-muted/40"
                     />
-                    <p className="text-[10px] text-brass-deep/80 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {lookupBusy ? t("escortSettings.lookingUp") : street ? `${street} ${houseNumber}, ${city}` : t("escortSettings.addressFooter")}
                     </p>
                   </div>
@@ -585,7 +585,7 @@ const Inner = () => {
                           (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
                         )}
                       />
-                      <p className="text-[10px] text-brass-deep/80 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {t("escortSettings.kmRateDEHint")}
                       </p>
                     </div>
