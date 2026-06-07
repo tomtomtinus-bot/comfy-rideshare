@@ -569,100 +569,165 @@ const ClientDashboard = () => {
                       <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Geen ritten gevonden.</TableCell>
                     </TableRow>
                   ) : (() => {
-                    // Group by year-month
                     const now = new Date();
-                    const currentKey = `${now.getFullYear()}-${now.getMonth()}`;
-                    const groups = new Map<string, { label: string; isPast: boolean; isCurrent: boolean; sortKey: number; rides: typeof filtered }>();
+                    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+                    // Monday of given date
+                    const mondayOf = (d: Date) => {
+                      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                      const day = (x.getDay() + 6) % 7; // 0 = Monday
+                      x.setDate(x.getDate() - day);
+                      return x;
+                    };
+                    const currentWeekKey = `w-${mondayOf(now).toISOString().slice(0, 10)}`;
+
+                    type WeekGroup = { key: string; label: string; isPast: boolean; sortKey: number; rides: typeof filtered };
+                    type MonthGroup = { key: string; label: string; isPast: boolean; isCurrent: boolean; sortKey: number; weeks: Map<string, WeekGroup> };
+                    const months = new Map<string, MonthGroup>();
+
                     for (const r of filtered) {
                       const d = new Date(r.scheduled_at);
-                      const key = `${d.getFullYear()}-${d.getMonth()}`;
-                      if (!groups.has(key)) {
-                        const isCurrent = key === currentKey;
-                        const isPast = d.getFullYear() < now.getFullYear() || (d.getFullYear() === now.getFullYear() && d.getMonth() < now.getMonth());
-                        groups.set(key, {
+                      const mKey = `${d.getFullYear()}-${d.getMonth()}`;
+                      if (!months.has(mKey)) {
+                        const isPastM = d.getFullYear() < now.getFullYear() || (d.getFullYear() === now.getFullYear() && d.getMonth() < now.getMonth());
+                        months.set(mKey, {
+                          key: mKey,
                           label: d.toLocaleDateString("nl-NL", { month: "long", year: "numeric" }),
-                          isPast,
-                          isCurrent,
+                          isPast: isPastM,
+                          isCurrent: mKey === currentMonthKey,
                           sortKey: d.getFullYear() * 12 + d.getMonth(),
-                          rides: [],
+                          weeks: new Map(),
                         });
                       }
-                      groups.get(key)!.rides.push(r);
+                      const m = months.get(mKey)!;
+                      const wMon = mondayOf(d);
+                      const wKey = `w-${wMon.toISOString().slice(0, 10)}`;
+                      if (!m.weeks.has(wKey)) {
+                        const wEnd = new Date(wMon); wEnd.setDate(wEnd.getDate() + 6);
+                        const sameMonth = wMon.getMonth() === wEnd.getMonth();
+                        const label = sameMonth
+                          ? `Week ${wMon.getDate()}–${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`
+                          : `Week ${wMon.getDate()} ${wMon.toLocaleDateString("nl-NL", { month: "short" })} – ${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`;
+                        const isPastW = wEnd.getTime() < new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                        m.weeks.set(wKey, { key: wKey, label, isPast: isPastW, sortKey: wMon.getTime(), rides: [] });
+                      }
+                      m.weeks.get(wKey)!.rides.push(r);
                     }
-                    const sorted = Array.from(groups.values()).sort((a, b) => {
-                      // Current + future ascending first, then past descending
-                      const aFuture = !a.isPast;
-                      const bFuture = !b.isPast;
-                      if (aFuture && !bFuture) return -1;
-                      if (!aFuture && bFuture) return 1;
-                      return aFuture ? a.sortKey - b.sortKey : b.sortKey - a.sortKey;
+
+                    const sortedMonths = Array.from(months.values()).sort((a, b) => {
+                      const aF = !a.isPast, bF = !b.isPast;
+                      if (aF && !bF) return -1;
+                      if (!aF && bF) return 1;
+                      return aF ? a.sortKey - b.sortKey : b.sortKey - a.sortKey;
                     });
-                    for (const g of sorted) {
-                      g.rides.sort((a, b) => {
-                        const da = new Date(a.scheduled_at).getTime();
-                        const db = new Date(b.scheduled_at).getTime();
-                        return g.isPast ? db - da : da - db;
-                      });
-                    }
-                    return sorted.flatMap((g) => [
-                      <TableRow key={`hdr-${g.label}`} className="hover:bg-transparent border-b-0">
-                        <TableCell colSpan={6} className={
-                          g.isPast
-                            ? "text-sm font-medium text-muted-foreground pt-8 pb-2 capitalize"
-                            : "text-lg font-semibold text-foreground pt-6 pb-2 capitalize"
-                        }>
-                          {g.label}
-                        </TableCell>
-                      </TableRow>,
-                      ...g.rides.map((r) => {
-                        const ass = assignments[r.id] ?? [];
-                        const acceptedCount = ass.filter((a) => a.status === "accepted").length;
-                        return (
-                          <TableRow
-                            key={r.id}
-                            className="hover:bg-muted/30 cursor-pointer"
-                            onClick={() => navigate(`/rit/${r.id}`)}
+
+                    const isOpen = (key: string, defaultOpen: boolean) =>
+                      collapsedSections.has(key) ? !defaultOpen : defaultOpen;
+
+                    const rows: JSX.Element[] = [];
+                    for (const m of sortedMonths) {
+                      const monthOpen = isOpen(m.key, !m.isPast);
+                      rows.push(
+                        <TableRow key={`mhdr-${m.key}`} className="hover:bg-transparent border-b-0">
+                          <TableCell
+                            colSpan={6}
+                            className={
+                              (m.isPast
+                                ? "text-sm font-medium text-muted-foreground pt-8 pb-2 "
+                                : "text-lg font-semibold text-foreground pt-6 pb-2 ") +
+                              "capitalize cursor-pointer select-none"
+                            }
+                            onClick={() => toggleSection(m.key)}
                           >
-                            <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
-                            <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
-                            <TableCell className="text-xs py-2">
-                              <span className="font-medium">{r.pickup_city}</span>
-                              <span className="text-muted-foreground mx-1.5">→</span>
-                              <span className="font-medium">{r.dropoff_city}</span>
-                              {r.bundle_label && (
-                                <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-1.5 py-0.5">📦 {r.bundle_label}</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-xs tabular-nums text-center py-2">
-                              {acceptedCount} / {r.num_escorts}
-                            </TableCell>
-                            <TableCell className="py-2"><TableStatusBadge status={r.status} /></TableCell>
-                            <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Meer opties</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                  <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
-                                    Rit bekijken
-                                  </DropdownMenuItem>
-                                  {r.bundle_id && (r.status === "open" || r.status === "matched") && (
-                                    <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
-                                      + extra rit aan pakket
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                            <span className="inline-flex items-center gap-1.5">
+                              {monthOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                              {m.label}
+                              <span className="ml-2 text-xs font-normal text-muted-foreground tabular-nums">
+                                ({Array.from(m.weeks.values()).reduce((n, w) => n + w.rides.length, 0)})
+                              </span>
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                      if (!monthOpen) continue;
+
+                      const sortedWeeks = Array.from(m.weeks.values()).sort((a, b) =>
+                        m.isPast ? b.sortKey - a.sortKey : a.sortKey - b.sortKey
+                      );
+                      for (const w of sortedWeeks) {
+                        const weekDefaultOpen = !w.isPast || w.key === currentWeekKey;
+                        const weekOpen = isOpen(w.key, weekDefaultOpen);
+                        rows.push(
+                          <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b-0 bg-muted/20">
+                            <TableCell
+                              colSpan={6}
+                              className="text-xs font-medium text-muted-foreground py-1.5 pl-6 cursor-pointer select-none"
+                              onClick={() => toggleSection(w.key)}
+                            >
+                              <span className="inline-flex items-center gap-1.5">
+                                {weekOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                                {w.label}
+                                <span className="ml-1.5 tabular-nums">({w.rides.length})</span>
+                              </span>
                             </TableCell>
                           </TableRow>
                         );
-                      }),
-                    ]);
+                        if (!weekOpen) continue;
+                        const sortedRides = [...w.rides].sort((a, b) => {
+                          const da = new Date(a.scheduled_at).getTime();
+                          const db = new Date(b.scheduled_at).getTime();
+                          return m.isPast ? db - da : da - db;
+                        });
+                        for (const r of sortedRides) {
+                          const ass = assignments[r.id] ?? [];
+                          const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+                          rows.push(
+                            <TableRow
+                              key={r.id}
+                              className="hover:bg-muted/30 cursor-pointer"
+                              onClick={() => navigate(`/rit/${r.id}`)}
+                            >
+                              <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
+                              <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
+                              <TableCell className="text-xs py-2">
+                                <span className="font-medium">{r.pickup_city}</span>
+                                <span className="text-muted-foreground mx-1.5">→</span>
+                                <span className="font-medium">{r.dropoff_city}</span>
+                                {r.bundle_label && (
+                                  <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-1.5 py-0.5">📦 {r.bundle_label}</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-xs tabular-nums text-center py-2">
+                                {acceptedCount} / {r.num_escorts}
+                              </TableCell>
+                              <TableCell className="py-2"><TableStatusBadge status={r.status} /></TableCell>
+                              <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                      <span className="sr-only">Meer opties</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-44">
+                                    <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
+                                      Rit bekijken
+                                    </DropdownMenuItem>
+                                    {r.bundle_id && (r.status === "open" || r.status === "matched") && (
+                                      <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
+                                        + extra rit aan pakket
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        }
+                      }
+                    }
+                    return rows;
                   })()}
                 </TableBody>
               </Table>
