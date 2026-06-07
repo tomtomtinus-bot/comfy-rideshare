@@ -426,7 +426,6 @@ const Auth = () => {
             <form
               onSubmit={mode === "login" ? handleLogin : handleSignup}
               className="space-y-4"
-              autoComplete="on"
             >
               {mode === "signup" && (
                 <>
@@ -439,7 +438,7 @@ const Auth = () => {
                 type="email"
                 label={t("auth.email")}
                 required
-                autoComplete={mode === "signup" ? "email" : "username"}
+                autoComplete="email"
               />
               <Field
                 name="password"
