@@ -12,6 +12,9 @@ import { AccountDeletionCard } from "@/components/AccountDeletionCard";
 import { NotificationPreferencesCard } from "@/components/site/NotificationPreferencesCard";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 const makeSchemas = (t: (k: string) => string) => {
   const baseSchema = {
@@ -94,18 +97,17 @@ const FieldImpl = ({
   error?: string;
 }) => (
   <label className="block">
-    <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
+    <span className="text-sm font-medium text-muted-foreground mb-1.5 block">
       {label}
     </span>
-    <input
+    <Input
       type={type}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className="w-full bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
     />
-    {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+    {error && <span className="text-xs text-destructive mt-1.5 block">{error}</span>}
   </label>
 );
 
@@ -160,11 +162,11 @@ const VatField = ({
 
   return (
     <label className="block">
-      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
+      <span className="text-sm font-medium text-muted-foreground mb-1.5 block">
         {label}
       </span>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={value}
           onChange={(e) => {
@@ -172,32 +174,32 @@ const VatField = ({
             setResult({ status: "idle" });
           }}
           placeholder="NL000000000B01"
-          className="flex-1 bg-parchment border border-brass-deep/20 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+          className="flex-1"
         />
-        <button
+        <Button
           type="button"
+          size="sm"
           onClick={check}
           disabled={result.status === "checking"}
-          className="px-3 py-2 bg-brass-deep text-parchment text-[10px] uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50 whitespace-nowrap"
         >
           {result.status === "checking" ? t("billingExtra.viesBusy") : t("billingExtra.viesCheckBtn")}
-        </button>
+        </Button>
       </div>
-      {error && <span className="text-xs text-red-700 mt-1 block">{error}</span>}
+      {error && <span className="text-xs text-destructive mt-1.5 block">{error}</span>}
       {result.status === "valid" && (
-        <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-green-50 border border-green-300 text-green-900 px-3 py-2 rounded-sm">
           {t("billingExtra.viesValidBox")}
           {result.name ? <div className="mt-1 opacity-80">{result.name}</div> : null}
           {result.address ? <div className="opacity-70 whitespace-pre-line">{result.address}</div> : null}
         </div>
       )}
       {result.status === "invalid" && (
-        <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-red-50 border border-red-300 text-red-900 px-3 py-2 rounded-sm">
           {t("billingExtra.viesInvalidBox")}
         </div>
       )}
       {result.status === "error" && (
-        <div className="mt-2 text-xs bg-amber-50 border border-amber-300 text-amber-900 px-3 py-2">
+        <div className="mt-2 text-xs bg-amber-50 border border-amber-300 text-amber-900 px-3 py-2 rounded-sm">
           {result.message}
         </div>
       )}
@@ -348,29 +350,29 @@ const BillingDetailsInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title="Facturatiegegevens | ViaCust" description="Beheer je bedrijfsgegevens, BTW-nummer en factuuradres voor ViaCust." />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
-        <div className="max-w-3xl mx-auto space-y-10">
-          <header>
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {isEscort ? t("common.escort") : t("common.client")}
-            </p>
-            <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">
+      <main className="px-6 md:px-8 py-6 md:py-8 bg-background min-h-[calc(100vh-5rem)]">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {t("billing.title")}
             </h1>
-            <p className="text-sm text-brass-deep/80 mt-3">
+            <p className="text-sm text-muted-foreground">
               {t("billing.intro")}
               {isEscort ? t("billing.introEscort") : "."}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : (
-            <form onSubmit={save} className="bg-card shadow-etched p-6 md:p-8 space-y-8">
+            <form onSubmit={save} className="bg-card border rounded-sm p-6 md:p-8 space-y-8">
               <section className="space-y-4">
-                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  {t("billing.company")}
-                </h2>
+                <div className="space-y-2">
+                  <h2 className="text-sm font-medium text-muted-foreground">
+                    {t("billing.company")}
+                  </h2>
+                  <Separator />
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   {renderField({ label: t("billing.f.companyName"), name: "company_name", autoComplete: "organization" })}
                   {renderField({
@@ -396,9 +398,12 @@ const BillingDetailsInner = () => {
               </section>
 
               <section className="space-y-4">
-                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  {t("billing.address")}
-                </h2>
+                <div className="space-y-2">
+                  <h2 className="text-sm font-medium text-muted-foreground">
+                    {t("billing.address")}
+                  </h2>
+                  <Separator />
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     {renderField({
@@ -415,9 +420,12 @@ const BillingDetailsInner = () => {
 
               {isEscort && (
                 <section className="space-y-4">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    {t("billing.payout")}
-                  </h2>
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-medium text-muted-foreground">
+                      {t("billing.payout")}
+                    </h2>
+                    <Separator />
+                  </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     {renderField({ label: t("billing.f.iban"), name: "iban", placeholder: "NL00BANK0123456789" })}
                     {renderField({ label: t("billing.f.holder"), name: "bank_account_holder" })}
@@ -427,10 +435,13 @@ const BillingDetailsInner = () => {
 
               {isEscort && (
                 <section className="space-y-4">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                    {t("billing.weroSection")}
-                  </h2>
-                  <p className="text-xs text-brass-deep/80 -mt-2">
+                  <div className="space-y-2">
+                    <h2 className="text-sm font-medium text-muted-foreground">
+                      {t("billing.weroSection")}
+                    </h2>
+                    <Separator />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
                     {t("billing.weroIntro")}
                   </p>
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -438,9 +449,9 @@ const BillingDetailsInner = () => {
                       type="checkbox"
                       checked={!!form.wero_enabled}
                       onChange={(e) => setBool("wero_enabled")(e.target.checked)}
-                      className="h-4 w-4 accent-brass-gold"
+                      className="h-4 w-4 accent-primary"
                     />
-                    <span className="text-sm text-brass-deep">
+                    <span className="text-sm text-foreground">
                       {t("billing.weroToggle")}
                     </span>
                   </label>
@@ -463,8 +474,8 @@ const BillingDetailsInner = () => {
               )}
 
               {isEscort && (
-                <section className="space-y-3 border-t border-brass-deep/10 pt-6">
-                  <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
+                <section className="space-y-3 border-t border-border pt-6">
+                  <h2 className="text-sm font-medium text-muted-foreground">
                     {t("billingExtra.selfBillingTitle")}
                   </h2>
                   <label className="flex items-start gap-3 cursor-pointer">
@@ -472,26 +483,22 @@ const BillingDetailsInner = () => {
                       type="checkbox"
                       checked={!!form.self_billing_mandate}
                       onChange={(e) => setBool("self_billing_mandate")(e.target.checked)}
-                      className="h-4 w-4 mt-0.5 accent-brass-gold shrink-0"
+                      className="h-4 w-4 mt-0.5 accent-primary shrink-0"
                     />
-                    <span className="text-sm text-brass-deep/85 leading-relaxed">
+                    <span className="text-sm text-foreground/85 leading-relaxed">
                       {t("billingExtra.selfBillingText")}
                     </span>
                   </label>
                   {errors.self_billing_mandate && (
-                    <p className="text-xs text-red-700">{errors.self_billing_mandate}</p>
+                    <p className="text-xs text-destructive">{errors.self_billing_mandate}</p>
                   )}
                 </section>
               )}
 
               <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-3 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
-                >
+                <Button type="submit" disabled={saving}>
                   {saving ? t("common.saving") : t("common.save")}
-                </button>
+                </Button>
               </div>
             </form>
           )}
