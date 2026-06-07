@@ -1469,7 +1469,7 @@ export type Database = {
           pickup_lat: number
           pickup_lng: number
           platform_invoice_id?: string | null
-          ride_number: string
+          ride_number?: string
           scheduled_at: string
           status?: Database["public"]["Enums"]["ride_status"]
           time_window_end?: string | null
