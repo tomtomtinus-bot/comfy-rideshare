@@ -57,7 +57,7 @@ const de: Dict = {
     join: "Werden Sie Teil.",
     client: "Auftraggeber",
     escort: "Begleiter",
-    fullName: "Vollständiger Name",
+    fullName: "FIRMENNAME",
     phone: "Telefon",
     email: "E-Mail",
     password: "Passwort",
