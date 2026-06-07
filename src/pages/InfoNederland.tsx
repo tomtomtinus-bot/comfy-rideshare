@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
+import { SeoHead } from "@/components/SeoHead";
 
 const Th = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <th className={`border border-brass-deep/20 bg-brass-deep text-parchment px-3 py-2 text-left text-xs uppercase tracking-widest font-semibold ${className}`}>
