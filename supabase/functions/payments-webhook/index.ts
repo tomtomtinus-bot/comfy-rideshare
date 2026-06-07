@@ -19,7 +19,6 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     return;
   }
   const items = subscription.items?.data ?? [];
-  // Kies "primair" item: seat-item bij bedrijfsabo, anders eerste item.
   const SEAT_PRICE_IDS = ["begeleider_company_seat_v2_monthly", "begeleider_company_seat_monthly"];
   const seatItem = items.find((it: any) => {
     const id = it?.price?.lookup_key || it?.price?.metadata?.lovable_external_id || it?.price?.id;
@@ -33,8 +32,6 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
   const periodStart = item?.current_period_start ?? subscription.current_period_start;
   const periodEnd = item?.current_period_end ?? subscription.current_period_end;
 
-  // Bepaal het einde van een terugkerende korting (bijv. eerstejaars 50% korting).
-  // Stripe geeft kortingen via subscription.discounts (nieuwe API) of subscription.discount (oud).
   let discountEndsAt: string | null = null;
   const discounts = subscription.discounts ?? (subscription.discount ? [subscription.discount] : []);
   for (const d of discounts) {
@@ -69,13 +66,11 @@ async function handleSubscriptionUpsert(subscription: any, env: StripeEnv) {
     { onConflict: "stripe_subscription_id" },
   );
 
-  // Sync seat_limit op het bedrijf voor het per-seat bedrijfsabonnement.
   if (SEAT_PRICE_IDS.includes(priceId)) {
     const quantity = Number(seatItem?.quantity ?? item?.quantity ?? 1);
     const activeStatuses = ["active", "trialing", "past_due"];
     const isActive = activeStatuses.includes(subscription.status)
       || (subscription.status === "canceled" && periodEnd && periodEnd * 1000 > Date.now());
-    // seat_limit = planner (1) + ingekochte chauffeur-seats
     const newLimit = isActive ? 1 + Math.max(0, quantity) : 1;
     await getSupabase()
       .from("companies")
@@ -91,7 +86,6 @@ async function handleSubscriptionDeleted(subscription: any, env: StripeEnv) {
     .eq("stripe_subscription_id", subscription.id)
     .eq("environment", env);
 
-  // Reset seat_limit voor opgezegd per-seat abonnement.
   const userId = subscription.metadata?.userId;
   const SEAT_PRICE_IDS = ["begeleider_company_seat_v2_monthly", "begeleider_company_seat_monthly"];
   const hasSeat = (subscription.items?.data ?? []).some((it: any) => {
@@ -116,6 +110,8 @@ async function handleCheckoutCompleted(session: any) {
       status: "paid",
       paid_at: new Date().toISOString(),
       stripe_payment_intent_id: session.payment_intent,
+      last_charge_failed_at: null,
+      last_charge_error: null,
     })
     .eq("id", invoiceId);
 }
@@ -129,9 +125,85 @@ async function handlePaymentIntentSucceeded(intent: any) {
       status: "paid",
       paid_at: new Date().toISOString(),
       stripe_payment_intent_id: intent.id,
+      last_charge_failed_at: null,
+      last_charge_error: null,
     })
     .eq("id", invoiceId)
     .neq("status", "paid");
+}
+
+async function notifyPaymentFailed(opts: {
+  userId?: string;
+  invoiceNumber?: string;
+  amount?: number;
+  reason?: string;
+  invoiceId?: string;
+}) {
+  if (!opts.userId) return;
+  const { data: profile } = await getSupabase()
+    .from("profiles")
+    .select("full_name, billing_email")
+    .eq("id", opts.userId)
+    .maybeSingle();
+  const { data: authUser } = await getSupabase().auth.admin.getUserById(opts.userId);
+  const email = (profile as any)?.billing_email || authUser?.user?.email;
+  if (!email) return;
+  await getSupabase().functions.invoke("send-transactional-email", {
+    body: {
+      templateName: "payment-failed-client",
+      recipientEmail: email,
+      idempotencyKey: `pi-failed-${opts.invoiceId ?? opts.userId}-${Date.now()}`,
+      templateData: {
+        name: (profile as any)?.full_name ?? "",
+        invoiceNumber: opts.invoiceNumber ?? "",
+        amount: opts.amount
+          ? (opts.amount / 100).toLocaleString("nl-NL", { style: "currency", currency: "EUR" })
+          : "",
+        reason: opts.reason ?? "",
+      },
+    },
+  });
+}
+
+async function handlePaymentIntentFailed(intent: any) {
+  const invoiceId = intent.metadata?.platform_invoice_id;
+  const userId = intent.metadata?.userId;
+  const reason = intent.last_payment_error?.message ?? "Betaling mislukt";
+  if (invoiceId) {
+    await getSupabase().from("platform_invoices").update({
+      last_charge_failed_at: new Date().toISOString(),
+      last_charge_error: reason,
+    }).eq("id", invoiceId);
+  }
+  await notifyPaymentFailed({
+    userId,
+    invoiceId,
+    invoiceNumber: intent.metadata?.invoice_number,
+    amount: intent.amount,
+    reason,
+  });
+}
+
+async function handleInvoicePaymentFailed(invoice: any, env: StripeEnv) {
+  // Stripe-subscription renewal mislukt: subscription krijgt status past_due
+  // via customer.subscription.updated. Hier sturen we de mail.
+  const subId = invoice.subscription;
+  let userId: string | undefined;
+  if (subId) {
+    const { data: sub } = await getSupabase()
+      .from("subscriptions")
+      .select("user_id")
+      .eq("stripe_subscription_id", subId)
+      .eq("environment", env)
+      .maybeSingle();
+    userId = (sub as any)?.user_id;
+  }
+  await notifyPaymentFailed({
+    userId,
+    invoiceNumber: invoice.number ?? "",
+    amount: invoice.amount_due ?? invoice.total ?? 0,
+    reason: "Automatische incasso mislukt — werk je betaalmethode bij.",
+  });
 }
 
 Deno.serve(async (req) => {
@@ -140,8 +212,7 @@ Deno.serve(async (req) => {
   if (rawEnv !== "sandbox" && rawEnv !== "live") {
     console.error("Webhook invalid env:", rawEnv);
     return new Response(JSON.stringify({ received: true, ignored: "invalid env" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+      status: 200, headers: { "Content-Type": "application/json" },
     });
   }
   const env: StripeEnv = rawEnv;
@@ -150,6 +221,7 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case "customer.subscription.created":
       case "customer.subscription.updated":
+      case "customer.subscription.paused":
         await handleSubscriptionUpsert(event.data.object, env);
         break;
       case "customer.subscription.deleted":
@@ -161,12 +233,17 @@ Deno.serve(async (req) => {
       case "payment_intent.succeeded":
         await handlePaymentIntentSucceeded(event.data.object);
         break;
+      case "payment_intent.payment_failed":
+        await handlePaymentIntentFailed(event.data.object);
+        break;
+      case "invoice.payment_failed":
+        await handleInvoicePaymentFailed(event.data.object, env);
+        break;
       default:
         console.log("Unhandled event:", event.type);
     }
     return new Response(JSON.stringify({ received: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+      status: 200, headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Webhook error:", e);

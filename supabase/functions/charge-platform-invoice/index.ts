@@ -1,7 +1,10 @@
 // Probeert een platform-factuur automatisch af te schrijven van de
 // opgeslagen Stripe-betaalmethode van de opdrachtgever (off-session).
 // Bij succes wordt de factuur op 'paid' gezet. Bij mislukking blijft
-// de factuur 'open' staan zodat de klant alsnog handmatig kan betalen.
+// de factuur 'open' staan, krijgt de klant een mail én een banner-melding.
+//
+// Auth: alleen toegankelijk voor admins (ingelogd) of voor cron-aanroepen
+// met de service-role key in de Authorization-header.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 
@@ -11,19 +14,66 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, SERVICE_KEY);
 
-function pickEnv(): StripeEnv {
-  return Deno.env.get("STRIPE_LIVE_API_KEY") ? "live" : "sandbox";
+function defaultEnv(): StripeEnv {
+  // Standaard sandbox; live moet expliciet aangevraagd worden via body.environment.
+  return "sandbox";
+}
+
+async function isAuthorized(req: Request): Promise<boolean> {
+  const auth = req.headers.get("Authorization")?.replace("Bearer ", "") ?? "";
+  if (!auth) return false;
+  // Cron / interne aanroep met service-role key.
+  if (auth === SERVICE_KEY) return true;
+  // Admin user check
+  const { data: { user } } = await supabase.auth.getUser(auth);
+  if (!user) return false;
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id);
+  return (roles ?? []).some((r: any) => r.role === "admin");
+}
+
+async function sendFailureEmail(invoice: any) {
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, billing_email")
+      .eq("id", invoice.client_id)
+      .maybeSingle();
+    const { data: authUser } = await supabase.auth.admin.getUserById(invoice.client_id);
+    const email = profile?.billing_email || authUser?.user?.email;
+    if (!email) return;
+    await supabase.functions.invoke("send-transactional-email", {
+      body: {
+        templateName: "payment-failed-client",
+        recipientEmail: email,
+        idempotencyKey: `pi-failed-${invoice.id}-${invoice.last_charge_failed_at ?? Date.now()}`,
+        templateData: {
+          name: profile?.full_name ?? "",
+          invoiceNumber: invoice.invoice_number,
+          amount: Number(invoice.total_amount).toLocaleString("nl-NL", { style: "currency", currency: "EUR" }),
+        },
+      },
+    });
+  } catch (e) {
+    console.error("send failure email error:", e);
+  }
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
+  }
+
+  if (!(await isAuthorized(req))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -33,40 +83,49 @@ Deno.serve(async (req) => {
 
     const env: StripeEnv = body?.environment === "sandbox" || body?.environment === "live"
       ? body.environment
-      : pickEnv();
+      : defaultEnv();
 
-    const { data: inv, error } = await supabase
+    // Atomisch 'claimen' van de factuur door stripe_payment_intent_id van NULL
+    // naar 'pending:<random>' te zetten. Een tweede gelijktijdige aanroep
+    // krijgt 0 rows terug en stopt.
+    const claimToken = `pending:${crypto.randomUUID()}`;
+    const { data: claimed, error: claimErr } = await supabase
       .from("platform_invoices")
-      .select("id, invoice_number, total_amount, client_id, status, stripe_payment_intent_id")
+      .update({ stripe_payment_intent_id: claimToken })
       .eq("id", invoiceId)
+      .is("stripe_payment_intent_id", null)
+      .eq("status", "open")
+      .select("id, invoice_number, total_amount, client_id")
       .maybeSingle();
-    if (error || !inv) throw new Error("Invoice not found");
-    if (inv.status === "paid") {
-      return new Response(JSON.stringify({ status: "already_paid" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (inv.stripe_payment_intent_id) {
-      return new Response(JSON.stringify({ status: "already_attempted" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (claimErr) throw claimErr;
+    if (!claimed) {
+      // Geen rij — al betaald of al een poging gedaan.
+      const { data: existing } = await supabase
+        .from("platform_invoices")
+        .select("status, stripe_payment_intent_id")
+        .eq("id", invoiceId)
+        .maybeSingle();
+      return new Response(JSON.stringify({
+        status: existing?.status === "paid" ? "already_paid" : "already_attempted",
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const amountCents = Math.round(Number(inv.total_amount) * 100);
+    const amountCents = Math.round(Number(claimed.total_amount) * 100);
     if (amountCents < 50) throw new Error("Bedrag te laag");
 
-    // Customer ophalen via lopend abonnement van de opdrachtgever.
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("stripe_customer_id, status")
-      .eq("user_id", inv.client_id)
+      .select("stripe_customer_id")
+      .eq("user_id", claimed.client_id)
       .eq("environment", env)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (!sub?.stripe_customer_id) {
-      console.log(`No Stripe customer for client ${inv.client_id}; skipping auto-charge`);
+      await supabase.from("platform_invoices")
+        .update({ stripe_payment_intent_id: null })
+        .eq("id", invoiceId);
       return new Response(JSON.stringify({ status: "no_customer" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -74,23 +133,18 @@ Deno.serve(async (req) => {
 
     const stripe = createStripeClient(env);
 
-    // Default betaalmethode bepalen.
     const customer = await stripe.customers.retrieve(sub.stripe_customer_id) as any;
     let pmId: string | undefined =
       customer?.invoice_settings?.default_payment_method ||
-      customer?.default_source ||
-      undefined;
-
+      customer?.default_source || undefined;
     if (!pmId) {
-      const pms = await stripe.paymentMethods.list({
-        customer: sub.stripe_customer_id,
-        limit: 1,
-      });
+      const pms = await stripe.paymentMethods.list({ customer: sub.stripe_customer_id, limit: 1 });
       pmId = pms.data[0]?.id;
     }
-
     if (!pmId) {
-      console.log(`No saved payment method for customer ${sub.stripe_customer_id}`);
+      await supabase.from("platform_invoices")
+        .update({ stripe_payment_intent_id: null })
+        .eq("id", invoiceId);
       return new Response(JSON.stringify({ status: "no_payment_method" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -105,34 +159,37 @@ Deno.serve(async (req) => {
         payment_method: pmId,
         off_session: true,
         confirm: true,
-        description: `Platformfactuur ${inv.invoice_number}`,
+        description: `Platformfactuur ${claimed.invoice_number}`,
         metadata: {
-          platform_invoice_id: inv.id,
-          invoice_number: inv.invoice_number,
-          userId: inv.client_id,
+          platform_invoice_id: claimed.id,
+          invoice_number: claimed.invoice_number,
+          userId: claimed.client_id,
         },
       });
     } catch (e: any) {
       const piId = e?.payment_intent?.id ?? null;
-      console.error(`Auto-charge failed for ${inv.invoice_number}:`, e?.message);
-      await supabase
-        .from("platform_invoices")
-        .update({ stripe_payment_intent_id: piId })
-        .eq("id", inv.id);
-      return new Response(
-        JSON.stringify({ status: "failed", error: e?.message ?? "charge failed" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      const msg = e?.message ?? "charge failed";
+      console.error(`Auto-charge failed for ${claimed.invoice_number}:`, msg);
+      const now = new Date().toISOString();
+      await supabase.from("platform_invoices").update({
+        stripe_payment_intent_id: piId,
+        last_charge_failed_at: now,
+        last_charge_error: msg,
+      }).eq("id", invoiceId);
+      await sendFailureEmail({ ...claimed, last_charge_failed_at: now });
+      return new Response(JSON.stringify({ status: "failed", error: msg }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const update: Record<string, unknown> = {
-      stripe_payment_intent_id: intent.id,
-    };
+    const update: Record<string, unknown> = { stripe_payment_intent_id: intent.id };
     if (intent.status === "succeeded") {
       update.status = "paid";
       update.paid_at = new Date().toISOString();
+      update.last_charge_failed_at = null;
+      update.last_charge_error = null;
     }
-    await supabase.from("platform_invoices").update(update).eq("id", inv.id);
+    await supabase.from("platform_invoices").update(update).eq("id", invoiceId);
 
     return new Response(JSON.stringify({ status: intent.status, intent_id: intent.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -140,8 +197,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error("charge-platform-invoice error:", e);
     return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

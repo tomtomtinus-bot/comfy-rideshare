@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { EmailChangeCard } from "@/components/site/EmailChangeCard";
+import { AccountDeletionCard } from "@/components/AccountDeletionCard";
 import { NotificationPreferencesCard } from "@/components/site/NotificationPreferencesCard";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -466,6 +467,7 @@ const Inner = () => {
             <>
               <GoogleCalendarCard />
               <div className="mb-6"><EmailChangeCard /></div>
+              <div className="mb-6"><AccountDeletionCard /></div>
               <NotificationPreferencesCard />
               <form
               onSubmit={save}

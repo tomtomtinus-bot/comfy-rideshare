@@ -972,6 +972,8 @@ export type Database = {
           created_at: string
           id: string
           invoice_number: string
+          last_charge_error: string | null
+          last_charge_failed_at: string | null
           paid_at: string | null
           pdf_path: string | null
           period_end: string
@@ -991,6 +993,8 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_number: string
+          last_charge_error?: string | null
+          last_charge_failed_at?: string | null
           paid_at?: string | null
           pdf_path?: string | null
           period_end: string
@@ -1010,6 +1014,8 @@ export type Database = {
           created_at?: string
           id?: string
           invoice_number?: string
+          last_charge_error?: string | null
+          last_charge_failed_at?: string | null
           paid_at?: string | null
           pdf_path?: string | null
           period_end?: string
@@ -1041,6 +1047,8 @@ export type Database = {
           billing_postcode: string | null
           company_name: string | null
           created_at: string
+          deletion_requested_at: string | null
+          deletion_scheduled_at: string | null
           email_preferences: Json
           full_name: string | null
           id: string
@@ -1069,6 +1077,8 @@ export type Database = {
           billing_postcode?: string | null
           company_name?: string | null
           created_at?: string
+          deletion_requested_at?: string | null
+          deletion_scheduled_at?: string | null
           email_preferences?: Json
           full_name?: string | null
           id: string
@@ -1097,6 +1107,8 @@ export type Database = {
           billing_postcode?: string | null
           company_name?: string | null
           created_at?: string
+          deletion_requested_at?: string | null
+          deletion_scheduled_at?: string | null
           email_preferences?: Json
           full_name?: string | null
           id?: string
@@ -2064,6 +2076,10 @@ export type Database = {
       get_user_company_id_as_owner: { Args: { _uid: string }; Returns: string }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
+      has_escort_active_subscription: {
+        Args: { _user: string }
         Returns: boolean
       }
       has_role: {
