@@ -1,8 +1,31 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { MoreHorizontal, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EscortRow {
   id: string;
@@ -23,13 +46,28 @@ interface EscortRow {
 }
 
 const ALL_COUNTRIES = ["Nederland", "België", "Duitsland", "Frankrijk", "Luxemburg"] as const;
+const COUNTRY_SHORT: Record<string, string> = {
+  Nederland: "NL",
+  België: "BE",
+  Duitsland: "DE",
+  Frankrijk: "FR",
+  Luxemburg: "LU",
+};
 
-const fmt = (d: string | null) =>
-  d ? new Date(d).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const fmtDate = (d: string | null) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
 
 const AdminEscorts = () => {
   const [list, setList] = useState<EscortRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -69,7 +107,6 @@ const AdminEscorts = () => {
     const next = current.includes(country)
       ? current.filter((c) => c !== country)
       : [...current, country];
-    // Optimistic
     setList((l) => l.map((e) => (e.id === escort.id ? { ...e, cert_verified_countries: next } : e)));
     const { error } = await supabase.rpc("admin_set_cert_verified_countries", {
       _escort_id: escort.id,
@@ -83,111 +120,189 @@ const AdminEscorts = () => {
     }
   };
 
-  const expired = (d: string | null) => d && new Date(d) < new Date();
+  const expired = (d: string | null) => !!d && new Date(d) < new Date();
+
+  const filtered = list.filter((e) => {
+    if (filter === "available" && !e.available) return false;
+    if (filter === "inactive" && e.available) return false;
+    if (filter === "expired" && !expired(e.cert_expires_on)) return false;
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      (e.full_name ?? "").toLowerCase().includes(q) ||
+      (e.company_name ?? "").toLowerCase().includes(q) ||
+      e.base_city.toLowerCase().includes(q) ||
+      e.anonymous_id.toLowerCase().includes(q) ||
+      (e.cert_number ?? "").toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Begeleiders</h2>
         <p className="text-sm text-brass-deep/80 mt-1">
-          {list.length} profiel{list.length === 1 ? "" : "en"} · modereer beschikbaarheid en certificering per land.
+          {filtered.length} profiel{filtered.length === 1 ? "" : "en"} · modereer beschikbaarheid en certificering per land.
         </p>
       </header>
 
-      {loading ? (
-        <p className="text-sm text-brass-deep/80">Laden…</p>
-      ) : list.length === 0 ? (
-        <p className="text-sm text-brass-deep/80">Geen begeleiders.</p>
-      ) : (
-        <ul className="space-y-px bg-brass-deep/10">
-          {list.map((e) => (
-            <li key={e.id} className="bg-card p-4 md:p-5">
-              <div className="grid grid-cols-12 gap-3 items-start">
-                <div className="col-span-12 md:col-span-3">
-                  <p className="font-medium">{e.full_name || e.company_name || "—"}</p>
-                  <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">
-                    #{e.anonymous_id} · {e.base_city}
-                  </p>
-                  {e.company_name && e.full_name && (
-                    <p className="text-[10px] text-brass-deep/80 mt-1">{e.company_name}</p>
-                  )}
-                  {e.languages && e.languages.length > 0 && (
-                    <p className="text-[10px] text-brass-deep/80 mt-2">
-                      <span className="uppercase tracking-widest font-bold">Talen:</span>{" "}
-                      {e.languages.join(", ")}
-                    </p>
-                  )}
-                </div>
-                <div className="col-span-6 md:col-span-2 text-xs">
-                  <p className="text-brass-deep/80">Tarief</p>
-                  <p className="tabular-nums">€{Number(e.hourly_rate).toFixed(2)}/u</p>
-                  <p className="mt-2 text-brass-deep/80">Ritten</p>
-                  <p className="tabular-nums">{e.rides_completed} · ★ {Number(e.rating).toFixed(1)}</p>
-                </div>
-                <div className="col-span-6 md:col-span-2 text-xs">
-                  <p className="text-brass-deep/80">Certificaat</p>
-                  <p className="tabular-nums">
-                    {e.cert_number || "—"}
-                    {e.cert_expires_on && (
-                      <span className={`block text-[10px] ${expired(e.cert_expires_on) ? "text-red-700 font-bold" : "text-brass-deep/80"}`}>
-                        Verloopt {fmt(e.cert_expires_on)}
-                        {expired(e.cert_expires_on) ? " (verlopen!)" : ""}
-                      </span>
-                    )}
-                  </p>
-                  {e.vca_number && <p className="mt-1 text-[10px] text-brass-deep/80">VCA {e.vca_number}</p>}
-                </div>
-                <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
-                    Geverifieerd per land
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {ALL_COUNTRIES.map((c) => {
-                      const verified = (e.cert_verified_countries ?? []).includes(c);
-                      const offers = (e.countries ?? []).includes(c);
-                      return (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => toggleCertCountry(e, c)}
-                          title={offers ? "Begeleider werkt in dit land" : "Begeleider heeft dit land niet aangevinkt"}
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-widest font-semibold border transition-colors ${
-                            verified
-                              ? "bg-brass-gold text-brass-deep border-brass-gold"
-                              : offers
-                                ? "bg-card text-brass-deep/70 border-brass-deep/20 hover:bg-parchment"
-                                : "bg-card text-brass-deep/80 border-brass-deep/10 hover:bg-parchment"
-                          }`}
-                        >
-                          {verified && <Check className="size-3" strokeWidth={3} />}
-                          {c}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="col-span-12 md:col-span-2 md:text-right space-y-2">
-                  <p className={`text-[10px] uppercase tracking-widest font-bold ${e.available ? "text-brass-gold" : "text-brass-deep/80"}`}>
-                    {e.available ? "Beschikbaar" : "Inactief"}
-                  </p>
-                  <button
-                    onClick={() => toggleAvailable(e.id, !e.available)}
-                    className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
-                  >
-                    {e.available ? "Deactiveer" : "Activeer"}
-                  </button>
-                  <Link
-                    to={`/admin/escorts/${e.id}`}
-                    className="block text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-brass-deep text-parchment hover:bg-brass-gold text-center"
-                  >
-                    Bekijk gegevens
-                  </Link>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="flex flex-wrap gap-2 items-center">
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle begeleiders</SelectItem>
+            <SelectItem value="available">Beschikbaar</SelectItem>
+            <SelectItem value="inactive">Inactief</SelectItem>
+            <SelectItem value="expired">Certificaat verlopen</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Zoek op naam, bedrijf, anoniem ID of standplaats…"
+          className="flex-1 min-w-[240px] h-9"
+        />
+      </div>
+
+      <div className="border border-border rounded-md bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Anoniem ID</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Standplaats</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold text-right">Tarief</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold text-right">Ritten · ★</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Certificaat</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Geverifieerd</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+              <TableHead className="h-9 w-[60px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+              </TableRow>
+            ) : filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">Geen begeleiders gevonden.</TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((e) => {
+                const certExpired = expired(e.cert_expires_on);
+                return (
+                  <TableRow key={e.id} className="hover:bg-muted/30">
+                    <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">
+                      #{e.anonymous_id}
+                    </TableCell>
+                    <TableCell className="text-xs py-2 max-w-[200px]">
+                      <p className="font-medium truncate">{e.full_name || e.company_name || "—"}</p>
+                      {e.company_name && e.full_name && (
+                        <p className="text-[10px] text-muted-foreground truncate">{e.company_name}</p>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs py-2 whitespace-nowrap">{e.base_city}</TableCell>
+                    <TableCell className="text-xs tabular-nums text-right py-2">€{Number(e.hourly_rate).toFixed(2)}</TableCell>
+                    <TableCell className="text-xs tabular-nums text-right py-2 whitespace-nowrap">
+                      {e.rides_completed} · ★ {Number(e.rating).toFixed(1)}
+                    </TableCell>
+                    <TableCell className="text-xs py-2 whitespace-nowrap">
+                      <span className="tabular-nums">{e.cert_number || "—"}</span>
+                      {e.cert_expires_on && (
+                        <span className={`block text-[10px] ${certExpired ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
+                          {certExpired ? "verlopen " : "t/m "}{fmtDate(e.cert_expires_on)}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs py-2">
+                      <div className="flex gap-1">
+                        {ALL_COUNTRIES.map((c) => {
+                          const verified = (e.cert_verified_countries ?? []).includes(c);
+                          const offers = (e.countries ?? []).includes(c);
+                          return (
+                            <span
+                              key={c}
+                              title={`${c}${verified ? " · geverifieerd" : offers ? " · aangeboden" : ""}`}
+                              className={`inline-flex items-center justify-center w-6 h-5 text-[9px] font-bold rounded-sm border ${
+                                verified
+                                  ? "bg-brass-gold text-brass-deep border-brass-gold"
+                                  : offers
+                                    ? "bg-background text-foreground border-border"
+                                    : "bg-background text-muted-foreground/50 border-border/50"
+                              }`}
+                            >
+                              {COUNTRY_SHORT[c]}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] font-semibold uppercase ${
+                          e.available
+                            ? "bg-green-100 text-green-800 hover:bg-green-100 border-green-200"
+                            : "bg-muted text-muted-foreground hover:bg-muted border-border"
+                        }`}
+                      >
+                        {e.available ? "actief" : "inactief"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Meer opties</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuLabel className="text-xs">#{e.anonymous_id}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild className="text-xs">
+                            <Link to={`/admin/escorts/${e.id}`}>Bekijk gegevens</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-xs"
+                            onClick={() => toggleAvailable(e.id, !e.available)}
+                          >
+                            {e.available ? "Deactiveer begeleider" : "Activeer begeleider"}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="text-xs">Certificering per land</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              {ALL_COUNTRIES.map((c) => (
+                                <DropdownMenuCheckboxItem
+                                  key={c}
+                                  className="text-xs"
+                                  checked={(e.cert_verified_countries ?? []).includes(c)}
+                                  onCheckedChange={() => toggleCertCountry(e, c)}
+                                  onSelect={(ev) => ev.preventDefault()}
+                                >
+                                  <span className="inline-flex items-center gap-2">
+                                    {(e.cert_verified_countries ?? []).includes(c) && <Check className="size-3" />}
+                                    {c}
+                                  </span>
+                                </DropdownMenuCheckboxItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
