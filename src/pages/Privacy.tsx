@@ -295,7 +295,7 @@ const PrivacyDE = () => (
       <li><strong>Geplante Standortdaten:</strong> Diese Daten werden automatisch aus der Datenbank gelöscht oder anonymisiert, sobald das vom Begleiter angegebene Zeitfenster abgelaufen ist.</li>
       <li><strong>Bewertungen &amp; Rezensionen:</strong> Solange das zugehörige Konto auf der Plattform aktiv bleibt.</li>
       <li><strong>OAuth-Token &amp; Push-Token:</strong> Sofortige und dauerhafte Löschung bei Trennung der Integration oder Widerruf der Einwilligung in Ihren Browsereinstellungen.</li>
-      <li><strong>Verknüpfte Fahrerkonten:</strong> Daten von Fahrern, die mit einem Unternehmenskonto verknüpft sind, werden so lange aufbewahrt, wie die Verknüpfung zwischen dem Fahrerprofil und dem Unternehmenskonto aktiv ist, ofer bis das Hauptkonto gekündigt wird.</li>
+      <li><strong>Verknüpfte Fahrerkonten:</strong> Daten von Fahrern, die mit einem Unternehmenskonto verknüpft sind, werden so lange aufbewahrt, wie die Verknüpfung zwischen dem Fahrerprofil und dem Unternehmenskonto aktiv ist, oder bis das Hauptkonto gekündigt wird.</li>
       <li><strong>Kontodaten nach Kündigung:</strong> Nach Kündigung des Kontos werden personenbezogene Daten 30 Tage lang aufbewahrt und danach automatisch gelöscht.</li>
     </ul>
 
