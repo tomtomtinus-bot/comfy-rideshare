@@ -234,6 +234,7 @@ const Inner = () => {
 
       if (p) {
         setProfile(p);
+        setIsBusiness(((d.isBusiness as boolean | undefined) ?? !!(p as any).is_business));
         setCategories((d.categories as string[]) ?? (((p as any).categories ?? []) as string[]));
         setFiles(((p as any).certificate_files ?? []) as string[]);
         setLanguages((d.languages as string[]) ?? (((p as any).languages ?? ["Nederlands"]) as string[]));
