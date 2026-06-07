@@ -1,7 +1,7 @@
 /// <reference types="npm:@types/react@18.3.1" />
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Button, Container, Head, Heading, Html, Preview, Section, Text,
+  Body, Container, Head, Heading, Html, Link, Preview, Section, Text,
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
@@ -52,16 +52,18 @@ const RideInvitationEmail = ({
           {plannedAt && (<Text style={row}><strong>Starttijd:</strong> {plannedAt}</Text>)}
         </Section>
 
-        {acceptUrl && (
-          <Button style={acceptButton} href={acceptUrl}>
-            {driverName ? `✓ Bevestig — ${driverName} doet deze rit` : '✓ Ik ben beschikbaar'}
-          </Button>
-        )}
-        {rideUrl && (
-          <Button style={button} href={rideUrl}>
-            Open uitnodiging
-          </Button>
-        )}
+        <Section style={actions}>
+          {acceptUrl && (
+            <Link style={acceptButton} href={acceptUrl}>
+              {driverName ? `✓ Bevestig — ${driverName} doet deze rit` : '✓ Ik ben beschikbaar'}
+            </Link>
+          )}
+          {rideUrl && (
+            <Link style={button} href={rideUrl}>
+              Open uitnodiging
+            </Link>
+          )}
+        </Section>
         <Text style={hint}>
           {driverName
             ? `Tip: bevestig in één klik — geen inlog nodig. Jij blijft eindverantwoordelijk voor acceptatie en facturatie.`
@@ -99,16 +101,22 @@ const card = {
   margin: '0 0 24px',
 }
 const row = { fontSize: '14px', color: '#161f2b', margin: '0 0 8px', lineHeight: '1.5' }
+const actions = { margin: '0 0 18px' }
 const button = {
+  display: 'block',
   backgroundColor: '#1a2a3f',
   color: '#f5f7f9',
   fontSize: '14px',
+  fontWeight: 'bold' as const,
   borderRadius: '2px',
   padding: '12px 20px',
   textDecoration: 'none',
+  textAlign: 'center' as const,
+  margin: '10px 0 0',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0', lineHeight: '1.5' }
 const acceptButton = {
+  display: 'block',
   backgroundColor: '#1f8a4c',
   color: '#ffffff',
   fontSize: '14px',
@@ -116,6 +124,7 @@ const acceptButton = {
   borderRadius: '2px',
   padding: '12px 20px',
   textDecoration: 'none',
-  marginRight: '10px',
+  textAlign: 'center' as const,
+  margin: '0',
 }
 const hint = { fontSize: '12px', color: '#888', margin: '14px 0 0', lineHeight: '1.5' }
