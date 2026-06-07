@@ -104,28 +104,30 @@ const drawShell = (
   const left = 18;
   const right = pageW - 18;
 
-  // Brand banner top-left (21:9). 78mm wide → ~29.7mm tall.
+  // Brand lockup top-left: transparent logo + ViaCust wordmark + tagline
   let headerBottom = 34;
-  if (bannerDataUrl) {
+  const logoSize = 22;
+  if (logoDataUrl) {
     try {
-      const bw = 78;
-      const bh = bw * (312 / 820);
-      doc.addImage(bannerDataUrl, "JPEG", left, 12, bw, bh);
-      headerBottom = 12 + bh;
+      doc.addImage(logoDataUrl, "PNG", left, 12, logoSize, logoSize);
     } catch {
       // ignore
     }
-  } else if (logoDataUrl) {
-    try {
-      doc.addImage(logoDataUrl, "PNG", left, 14, 16, 16);
-    } catch {
-      // ignore
-    }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.setTextColor(26, 42, 68);
-    doc.text("ViaCust", left + 20, 25);
   }
+  const textX = left + logoSize + 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(26, 42, 68);
+  doc.text("ViaCust", textX, 24);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(245, 158, 11);
+  doc.setCharSpace(0.6);
+  doc.text("DIGITAL ESCORT SOLUTIONS", textX, 30);
+  doc.setCharSpace(0);
+  headerBottom = 12 + logoSize;
+  // suppress unused-banner warning
+  void bannerDataUrl;
 
   // Sender details (top-right, small) — steel-navy ink
   doc.setFont("helvetica", "normal");
