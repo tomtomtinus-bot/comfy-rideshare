@@ -13,6 +13,7 @@ interface RideInvitationProps {
   pickup?: string
   dropoff?: string
   plannedAt?: string
+  rideId?: string
   rideUrl?: string
   acceptUrl?: string
 }
