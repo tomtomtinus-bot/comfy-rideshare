@@ -2,41 +2,18 @@ import { SeoHead } from "@/components/SeoHead";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-const Section = ({
-  kicker,
-  title,
-  children,
-}: {
-  kicker: string;
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <section className="py-14 md:py-20 px-5 md:px-8 border-b border-brass-deep/10">
-    <div className="max-w-4xl mx-auto">
-      <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-        {kicker}
-      </p>
-      <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight mb-8">
-        {title}
-      </h2>
-      <div className="space-y-5 text-brass-deep/80 leading-relaxed text-base md:text-lg">
-        {children}
-      </div>
-    </div>
-  </section>
-);
-
-const Bullet = ({ label, value }: { label: string; value: string }) => (
-  <div className="border-l-2 border-brass-gold pl-5 py-1">
-    <span className="font-semibold text-brass-deep">{label}: </span>
-    <span>{value}</span>
+const FeatureItem = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-start gap-3 text-sm text-muted-foreground">
+    <span className="mt-0.5 text-primary">&#10003;</span>
+    <span>{children}</span>
   </div>
 );
 
 const WatKostViaCust = () => {
-  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
@@ -45,76 +22,91 @@ const WatKostViaCust = () => {
       />
       <Nav />
       <main>
-        <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
+        <section className="py-6 md:py-8 px-5 md:px-8 text-center">
           <div className="max-w-4xl mx-auto">
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-6">
-              {t("pricing.kicker")}
-            </p>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl text-brass-deep leading-[1] italic mb-8">
-              {t("pricing.title")}
+            <h1 className="text-3xl font-bold tracking-tight mb-3">
+              Wat kost ViaCust
             </h1>
-            <p className="text-base md:text-lg text-brass-deep/80 leading-relaxed max-w-3xl">
-              {t("pricing.intro")}
+            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Transparante tarieven zonder verborgen kosten. Kies het abonnement dat past bij jouw rol.
             </p>
           </div>
         </section>
 
-        <Section kicker={t("pricing.clientKicker")} title={t("pricing.clientTitle")}>
-          <Bullet label={t("pricing.subscription")} value={t("pricing.plan50")} />
-          <div className="border-l-2 border-brass-gold pl-5 py-1">
-            <span className="font-semibold text-brass-deep">{t("pricing.introOfferLabel")}: </span>
-            <span>{t("pricing.introOfferBody")}</span>
+        <section className="py-8 md:py-12 px-5 md:px-8">
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+            {/* Card 1: Voor Opdrachtgevers */}
+            <Card className="border-input flex flex-col">
+              <CardHeader className="pb-4">
+                <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
+                  Voor Opdrachtgevers
+                </CardDescription>
+                <CardTitle className="text-2xl font-semibold tracking-tight">
+                  <span className="text-muted-foreground line-through text-lg mr-2">€50,00</span>
+                  <span className="text-3xl font-bold">€25,00</span>
+                  <span className="text-muted-foreground text-base font-normal"> / maand</span>
+                </CardTitle>
+                <div className="pt-2">
+                  <Badge variant="default">50% introductiekorting</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground pt-2">
+                  Eerste 30 dagen gratis
+                </p>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col gap-3 pt-0">
+                <div className="border-t border-border pt-4 flex-1 flex flex-col gap-3">
+                  <FeatureItem>Onbeperkt ritten plaatsen</FeatureItem>
+                  <FeatureItem>Koppel begeleiders eenvoudig</FeatureItem>
+                  <FeatureItem>Automatische ritfacturatie</FeatureItem>
+                  <FeatureItem>Realtime rit-tracking</FeatureItem>
+                  <FeatureItem>Centraal dashboard</FeatureItem>
+                  <FeatureItem>Wekelijkse betalingen</FeatureItem>
+                </div>
+                <div className="pt-4">
+                  <Button asChild className="w-full">
+                    <Link to="/auth?role=client">Start als opdrachtgever</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card 2: Voor Begeleiders */}
+            <Card className="border-input flex flex-col">
+              <CardHeader className="pb-4">
+                <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
+                  Voor Begeleiders
+                </CardDescription>
+                <CardTitle className="text-3xl font-bold tracking-tight">
+                  Gratis
+                </CardTitle>
+                <p className="text-sm text-muted-foreground pt-2">
+                  €0,00 — altijd
+                </p>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col gap-3 pt-0">
+                <div className="border-t border-border pt-4 flex-1 flex flex-col gap-3">
+                  <FeatureItem>Ontvang ritopdrachten</FeatureItem>
+                  <FeatureItem>Gebruik je eigen voertuig</FeatureItem>
+                  <FeatureItem>Agenda-integratie</FeatureItem>
+                  <FeatureItem>Directe communicatie</FeatureItem>
+                  <FeatureItem>Gratis registratie</FeatureItem>
+                  <FeatureItem>Flexibele planning</FeatureItem>
+                </div>
+                <div className="pt-4">
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/auth?role=escort">Start als begeleider</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <Bullet label={t("pricing.commissionLabel")} value={t("pricing.commissionValue")} />
-          <p>
-            <span className="font-semibold text-brass-deep">{t("pricing.advantageLabel")}: </span>
-            {t("pricing.advantageBody")}
-          </p>
-        </Section>
+        </section>
 
-        <Section kicker={t("pricing.escortKicker")} title={t("pricing.escortTitle")}>
-          <Bullet label={t("pricing.subscription")} value={t("pricing.plan250")} />
-          <Bullet label={t("pricing.unlimitedLabel")} value={t("pricing.unlimitedValue")} />
-          <Bullet label={t("pricing.calendarLabel")} value={t("pricing.calendarValue")} />
-        </Section>
-
-        <Section kicker={t("pricing.companyKicker")} title={t("pricing.companyTitle")}>
-          <Bullet label={t("pricing.mainAccountLabel")} value={t("pricing.mainAccountValue")} />
-          <Bullet label={t("pricing.perSeatLabel")} value={t("pricing.perSeatValue")} />
-          <Bullet label={t("pricing.centralLabel")} value={t("pricing.centralValue")} />
-          <Bullet label={t("pricing.scalableLabel")} value={t("pricing.scalableValue")} />
-        </Section>
-
-        <Section kicker={t("pricing.billingKicker")} title={t("pricing.billingTitle")}>
-          <p>{t("pricing.billingIntro")}</p>
-          <Bullet label={t("pricing.weeklyLabel")} value={t("pricing.weeklyValue")} />
-          <Bullet label={t("pricing.fuelLabel")} value={t("pricing.fuelValue")} />
-          <Bullet label={t("pricing.extrasLabel")} value={t("pricing.extrasValue")} />
-        </Section>
-
-        <Section kicker={t("pricing.debitKicker")} title={t("pricing.debitTitle")}>
-          <p>{t("pricing.debitIntro")}</p>
-          <Bullet label={t("pricing.autoLabel")} value={t("pricing.autoValue")} />
-          <Bullet label={t("pricing.manualLabel")} value={t("pricing.manualValue")} />
-          <p className="font-display italic text-2xl md:text-3xl text-brass-deep pt-4">
-            {t("pricing.closing")}
-          </p>
-        </Section>
-
-        <section className="py-14 md:py-20 px-5 md:px-8">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4">
-            <Link
-              to="/auth?role=client"
-              className="inline-block px-7 py-4 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors text-center"
-            >
-              {t("pricing.ctaClient")}
-            </Link>
-            <Link
-              to="/auth?role=escort"
-              className="inline-block px-7 py-4 border-2 border-brass-deep text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-brass-deep hover:text-parchment transition-colors text-center"
-            >
-              {t("pricing.ctaEscort")}
-            </Link>
+        <section className="py-10 md:py-14 px-5 md:px-8 text-center">
+          <div className="max-w-4xl mx-auto">
+            <Button asChild size="lg">
+              <Link to="/auth">Direct starten</Link>
+            </Button>
           </div>
         </section>
       </main>
