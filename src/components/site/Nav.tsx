@@ -112,7 +112,7 @@ export const Nav = () => {
 
         {/* Right side */}
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
-          {!user && <RoleSwitch />}
+          
           {user && <NotificationBell />}
           <div className="hidden md:block">
             <LanguageSwitcher />
