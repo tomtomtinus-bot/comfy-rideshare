@@ -786,6 +786,8 @@ const en: Dict = {
     kicker: "ViaCust — Frequently asked questions",
     title: "Frequently Asked Questions",
     intro: "Answers to the most common questions about how our platform works, billing, privacy and quality.",
+    sectionGeneral: "General",
+    sectionBusiness: "Company account",
     items: [
       { q: "How does payment and invoicing work?", a: "ViaCust fully automates the invoicing process. As soon as an escort marks a ride as completed, the platform generates an invoice on behalf of the escort for the client. Invoices are created automatically every Monday and sent by email, bundling all rides from the previous week into one clear invoice. Payment is processed securely via Stripe. Escorts don't need to send invoices themselves; ViaCust handles the administration and ensures a transparent payout." },
       { q: "Why haven't my invoices been generated yet?", a: "ViaCust automates invoicing (self-billing) to take administrative work off your hands. Because the fuel surcharge in the transport sector fluctuates weekly, we base our calculations on official figures.\n\nInvoices for last week's rides are finalised once the official average diesel price for that week is published by TLN (Transport en Logistiek Nederland). Once this price is processed in our system at the start of the new week, invoices are generated automatically and made available in your dashboard. You'll receive a notification immediately." },
