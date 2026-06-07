@@ -6,7 +6,7 @@ export const Hero = () => {
   return (
     <section className="relative pt-12 md:pt-24 pb-12 md:pb-20 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero text-left">
       <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6 md:gap-12 items-end">
-        <div className="col-span-12 lg:col-span-8 animate-fade-up">
+        <div className="col-span-12 lg:col-span-8">
           <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-[10px] md:text-xs mb-4 md:mb-6">
             {t("landing.heroKicker")}
           </p>
