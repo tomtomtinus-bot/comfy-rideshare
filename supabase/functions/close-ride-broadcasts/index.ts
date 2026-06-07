@@ -204,9 +204,17 @@ Deno.serve(async (req) => {
     closedRides += 1
 
     if (winners.length > 0) {
-      supabase.functions.invoke("notify-ride-event", {
-        body: { event: "match_confirmed", rideId },
-      }).catch((e) => console.error("notify match_confirmed", e));
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      fetch(`${supabaseUrl}/functions/v1/notify-ride-event`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+        },
+        body: JSON.stringify({ event: 'match_confirmed', rideId }),
+      }).catch((e) => console.error('notify match_confirmed', e));
     }
   }
 
