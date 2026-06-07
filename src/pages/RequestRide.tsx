@@ -399,11 +399,7 @@ const RequestRideInner = () => {
         .eq("client_id", user!.id),
       supabase.rpc("escort_ids_excluding_client", { _client_id: user!.id }),
       // Geplande standplaatsen die de ritstart omsluiten (start ≤ ritstart ≤ einde).
-      supabase
-        .from("escort_scheduled_locations")
-        .select("escort_id, address, lat, lng, start_at, end_at")
-        .lte("start_at", scheduledISOForQuery)
-        .gte("end_at", scheduledISOForQuery),
+      supabase.rpc("scheduled_locations_at", { _at: scheduledISOForQuery }),
     ]);
     setBusy(false);
     if (error) return toast.error(error.message);
