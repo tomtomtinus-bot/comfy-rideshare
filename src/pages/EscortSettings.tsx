@@ -698,34 +698,34 @@ const Inner = () => {
                           e.target.value = "";
                         }
                       }}
-                      className="text-xs text-brass-deep/70 file:mr-3 file:px-3 file:py-2 file:border-0 file:bg-brass-deep file:text-parchment file:uppercase file:tracking-widest file:text-[10px] file:font-semibold disabled:opacity-50"
+                      className="text-xs text-muted-foreground file:mr-3 file:px-3 file:py-2 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground file:text-xs file:font-medium disabled:opacity-50"
                     />
-                    {fuelParsing && <p className="text-[11px] text-brass-gold mt-2">{t("escortSettingsExtra.fuelParsing")}</p>}
+                    {fuelParsing && <p className="text-xs text-amber-600 mt-2">{t("escortSettingsExtra.fuelParsing")}</p>}
                   </div>
                 )}
                 {fuel.enabled && (
                   <>
-                    <div className="flex gap-2 mb-2 text-sm">
-                      <span className="text-brass-deep/80">{t("escortSettings.fuelUnit")}</span>
-                      <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> {t("escortSettings.fuelPerHour")}
+                    <div className="flex flex-wrap items-center gap-4 mb-2 text-sm">
+                      <span className="text-muted-foreground">{t("escortSettings.fuelUnit")}</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} className="accent-primary" /> {t("escortSettings.fuelPerHour")}
                       </label>
-                      <label className="flex items-center gap-1">
-                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} /> {t("escortSettings.fuelPercent")}
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" checked={fuel.kind === "percent"} onChange={() => setFuel((f) => ({ ...f, kind: "percent" }))} className="accent-primary" /> {t("escortSettings.fuelPercent")}
                       </label>
                     </div>
                     <div className="space-y-2">
-                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
+                      <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground">
                         <div className="col-span-4">{t("escortSettings.fuelFromCol")}</div>
                         <div className="col-span-4">{t("escortSettings.fuelToCol")}</div>
                         <div className="col-span-3">{fuel.kind === "percent" ? t("escortSettings.fuelValueColPct") : t("escortSettings.fuelValueColEur")}</div>
                       </div>
                       {fuel.tiers.map((t2, i) => (
                         <div key={i} className="grid grid-cols-12 gap-2">
-                          <input value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <input value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/80 hover:text-brass-deep border border-brass-deep/15">×</button>
+                          <BaseInput value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4" />
+                          <BaseInput value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4" />
+                          <BaseInput value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3" />
+                          <Button type="button" variant="ghost" size="icon" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 h-9 w-9">×</Button>
                         </div>
                       ))}
                       <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
