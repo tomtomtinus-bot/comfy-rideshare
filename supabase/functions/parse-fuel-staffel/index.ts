@@ -1,9 +1,26 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Auth-guard: alleen ingelogde gebruikers mogen de AI-parser gebruiken.
+    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = user.id;
+
     const { pdf_base64, mime_type } = await req.json();
     if (!pdf_base64 || typeof pdf_base64 !== "string") {
       return new Response(JSON.stringify({ error: "pdf_base64 ontbreekt" }), {
