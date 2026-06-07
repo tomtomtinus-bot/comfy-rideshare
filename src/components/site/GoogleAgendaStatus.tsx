@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Calendar, AlertTriangle, RefreshCw, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, RefreshCw, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface BusyWindow { start: string; end: string }
 interface SyncResult { connected: boolean; busy?: BusyWindow[] }
@@ -33,28 +35,24 @@ export const GoogleAgendaStatus = () => {
 
   useEffect(() => { load(); }, []);
 
-  if (loading) return <p className="text-sm text-brass-deep/80">{t("google.checking")}</p>;
+  if (loading) return null;
 
   if (!data?.connected) {
     return (
-      <div className="bg-brass-gold/10 border-2 border-brass-gold p-6 shadow-etched">
-        <div className="flex items-start gap-4">
-          <AlertTriangle className="size-6 text-brass-gold shrink-0 mt-1" />
-          <div className="flex-1">
-            <h3 className="font-display text-2xl text-brass-deep italic">{t("google.connectTitle")}</h3>
-            <p className="text-sm text-brass-deep/70 mt-1">{t("google.connectBody")}</p>
-            <p className="text-xs text-brass-deep font-semibold mt-2">
-              ⚠ Let op: zorg dat je browser pop-ups van deze site toestaat.
-            </p>
-            <Link
-              to="/profiel"
-              className="inline-block mt-4 px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-gold transition-colors"
-            >
-              {t("google.connectCta")}
-            </Link>
+      <Card className="p-4 border-input">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="size-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">{t("google.connectTitle")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("google.connectBody")}</p>
+            </div>
           </div>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/profiel">{t("google.connectCta")}</Link>
+          </Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -77,53 +75,60 @@ export const GoogleAgendaStatus = () => {
   const locale = localeMap[i18n.resolvedLanguage ?? "nl"] ?? "nl-NL";
 
   return (
-    <div className="bg-card shadow-etched p-6">
-      <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
-        <div className="flex items-start gap-3">
-          <CheckCircle2 className="size-5 text-brass-gold mt-0.5" />
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("google.connected")}</p>
-            <h3 className="font-display text-xl text-brass-deep italic">{t("google.avail7days")}</h3>
-            <p className="text-[11px] text-brass-deep/80 mt-1">{t("google.availHint")}</p>
-          </div>
+    <Card className="p-4 border-input">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0">
+          <Calendar className="size-4 text-muted-foreground shrink-0" />
+          <p className="text-sm text-foreground truncate">
+            <span className="font-medium">Google Agenda gekoppeld</span>
+            <span className="text-muted-foreground"> — Beschikbaarheid komende 7 dagen</span>
+          </p>
         </div>
-        <button
+        <Button
           onClick={load}
           disabled={syncing}
-          className="px-4 py-2 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-40 inline-flex items-center gap-2"
+          size="sm"
+          variant="ghost"
+          className="h-8 gap-1.5 text-xs"
         >
-          <RefreshCw className={`size-3 ${syncing ? "animate-spin" : ""}`} /> {t("google.refresh")}
-        </button>
+          <RefreshCw className={`size-3.5 ${syncing ? "animate-spin" : ""}`} />
+          {t("google.refresh")}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="mt-3 flex items-center gap-1.5">
         {days.map((d) => {
           const k = ymd(d);
           const min = busyByDay.get(k) ?? 0;
           const heavy = min >= 240;
-          const some = min > 0;
-          const label = d.toLocaleDateString(locale, { weekday: "short", day: "numeric" });
+          const some = min > 0 && !heavy;
+          const dayLabel = d.toLocaleDateString(locale, { weekday: "short" }).replace(".", "");
+          const dayNum = d.getDate();
+          const title = min === 0
+            ? `${dayLabel} ${dayNum} — ${t("google.free")}`
+            : `${dayLabel} ${dayNum} — ${t("google.busyHours", { h: Math.round(min / 60 * 10) / 10 })}`;
           return (
-            <div key={k} className={`p-2 text-center border ${
-              heavy
-                ? "bg-brass-deep text-parchment border-brass-deep"
-                : some
-                ? "bg-brass-gold/30 border-brass-gold/60 text-brass-deep"
-                : "bg-parchment border-brass-deep/15 text-brass-deep/70"
-            }`}>
-              <p className="text-[10px] uppercase tracking-widest font-bold">{label}</p>
-              <p className="text-[10px] mt-1 tabular-nums">
-                {min === 0 ? t("google.free") : t("google.busyHours", { h: Math.round(min / 60 * 10) / 10 })}
-              </p>
+            <div
+              key={k}
+              title={title}
+              className="flex-1 flex flex-col items-center gap-1"
+            >
+              <span className="text-[10px] text-muted-foreground tabular-nums">
+                {dayLabel} {dayNum}
+              </span>
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  heavy
+                    ? "bg-muted-foreground/40"
+                    : some
+                    ? "bg-amber-500/70"
+                    : "bg-emerald-500/80"
+                }`}
+              />
             </div>
           );
         })}
       </div>
-
-      <div className="flex items-center gap-2 mt-3 text-[10px] text-brass-deep/80">
-        <Calendar className="size-3" />
-        {t("google.tip")}
-      </div>
-    </div>
+    </Card>
   );
 };
