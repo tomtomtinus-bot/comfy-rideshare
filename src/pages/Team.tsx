@@ -6,12 +6,29 @@ import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Mail, Trash2, UserPlus, Minus, Plus, CreditCard } from "lucide-react";
+import { Loader2, Mail, Trash2, UserPlus, Minus, Plus, CreditCard, MoreHorizontal } from "lucide-react";
 import { CheckoutDialog } from "@/components/CheckoutDialog";
 import { Navigate } from "react-router-dom";
 
@@ -33,6 +50,14 @@ interface InvitationRow {
   expires_at: string;
 }
 
+const fmtDate = (d: string) => {
+  const date = new Date(d);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
+
 const TeamInner = () => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language?.startsWith("fr") ? "fr-BE" : i18n.language?.startsWith("de") ? "de-DE" : i18n.language?.startsWith("en") ? "en-GB" : "nl-NL";
@@ -48,6 +73,7 @@ const TeamInner = () => {
   const [seatsOpen, setSeatsOpen] = useState(false);
   const [seatQty, setSeatQty] = useState(1);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     if (!companyId) return;
@@ -61,9 +87,13 @@ const TeamInner = () => {
     const memberRows = (m.data as MemberRow[]) ?? [];
     if (memberRows.length) {
       const ids = memberRows.map((r) => r.user_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", ids);
-      const map = new Map((profs ?? []).map((p: any) => [p.id, p.full_name]));
-      memberRows.forEach((r) => { r.full_name = map.get(r.user_id) ?? null; });
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+      const nameMap = new Map((profs ?? []).map((p: any) => [p.id, p.full_name]));
+      const emailMap = new Map((profs ?? []).map((p: any) => [p.id, p.email]));
+      memberRows.forEach((r) => {
+        r.full_name = nameMap.get(r.user_id) ?? null;
+        r.email = emailMap.get(r.user_id) ?? null;
+      });
     }
     setMembers(memberRows);
     setInvitations((inv.data as InvitationRow[]) ?? []);
@@ -119,6 +149,21 @@ const TeamInner = () => {
   const seatsUsed = driverMembers.length + invitations.length;
   const seatsAvailable = (company?.seat_limit ?? 1) - 1;
   const seatsLeft = Math.max(0, seatsAvailable - seatsUsed);
+
+  const filteredDrivers = driverMembers.filter((m) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return (
+      (m.full_name ?? "").toLowerCase().includes(q) ||
+      (m.email ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const filteredInvites = invitations.filter((inv) => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    return inv.email.toLowerCase().includes(q);
+  });
 
   return (
     <div className="min-h-screen bg-parchment">
@@ -226,53 +271,138 @@ const TeamInner = () => {
           </div>
         )}
 
+        <div className="mb-6">
+          <Input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Zoek op naam of e-mail…"
+            className="h-9"
+          />
+        </div>
+
         <section className="mb-10">
           <h2 className="text-sm uppercase tracking-widest text-brass-deep/80 mb-3">{t("team.activeDrivers")}</h2>
-          {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</p>
-          ) : driverMembers.length === 0 ? (
-            <p className="text-sm text-brass-deep/80 italic">{t("team.noDrivers")}</p>
-          ) : (
-            <div className="border border-brass-deep/10 bg-white divide-y divide-brass-deep/10">
-              {driverMembers.map((m) => (
-                <div key={m.id} className="flex items-center justify-between px-4 py-3">
-                  <div>
-                    <p className="font-medium text-brass-deep">{m.full_name || t("team.driverFallback")}</p>
-                    <p className="text-xs text-brass-deep/80">{t("team.joinedOn", { date: new Date(m.joined_at).toLocaleDateString(locale) })}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => removeDriver(m.id, m.user_id)} className="text-red-600 hover:text-red-700">
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="border border-border rounded-md bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">E-mail</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Lid sinds</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+                  <TableHead className="h-9 w-[60px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+                  </TableRow>
+                ) : filteredDrivers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">{driverMembers.length === 0 ? t("team.noDrivers") : "Geen resultaten."}</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredDrivers.map((m) => (
+                    <TableRow key={m.id} className="hover:bg-muted/30">
+                      <TableCell className="text-xs py-2 font-medium">{m.full_name || t("team.driverFallback")}</TableCell>
+                      <TableCell className="text-xs py-2">{m.email ?? "—"}</TableCell>
+                      <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(m.joined_at)}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="text-[10px] font-semibold uppercase bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+                          Actief
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Meer opties</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel className="text-xs">{m.full_name || t("team.driverFallback")}</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-xs text-destructive focus:text-destructive"
+                              onClick={() => removeDriver(m.id, m.user_id)}
+                            >
+                              <Trash2 className="size-3 mr-2" />
+                              Verwijderen
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </section>
 
         <section>
           <h2 className="text-sm uppercase tracking-widest text-brass-deep/80 mb-3">{t("team.openInvites")}</h2>
-          {invitations.length === 0 ? (
-            <p className="text-sm text-brass-deep/80 italic">{t("team.noOpenInvites")}</p>
-          ) : (
-            <div className="border border-brass-deep/10 bg-white divide-y divide-brass-deep/10">
-              {invitations.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Mail className="size-4 text-brass-deep/80" />
-                    <div>
-                      <p className="text-sm font-medium text-brass-deep">{inv.email}</p>
-                      <p className="text-xs text-brass-deep/80">
-                        {t("team.invSent", { sent: new Date(inv.created_at).toLocaleDateString(locale), exp: new Date(inv.expires_at).toLocaleDateString(locale) })}
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => revokeInvitation(inv.id)}>
-                    {t("team.revoke")}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="border border-border rounded-md bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">E-mail</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Verstuurd</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Verloopt</TableHead>
+                  <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+                  <TableHead className="h-9 w-[60px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+                  </TableRow>
+                ) : filteredInvites.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">{invitations.length === 0 ? t("team.noOpenInvites") : "Geen resultaten."}</TableCell>
+                  </TableRow>
+                ) : (
+                  filteredInvites.map((inv) => (
+                    <TableRow key={inv.id} className="hover:bg-muted/30">
+                      <TableCell className="text-xs py-2 font-medium">{inv.email}</TableCell>
+                      <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(inv.created_at)}</TableCell>
+                      <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(inv.expires_at)}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="text-[10px] font-semibold uppercase bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
+                          In afwachting
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Meer opties</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel className="text-xs">{inv.email}</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-xs text-destructive focus:text-destructive"
+                              onClick={() => revokeInvitation(inv.id)}
+                            >
+                              <Mail className="size-3 mr-2" />
+                              {t("team.revoke")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </section>
       </main>
       <Footer />
