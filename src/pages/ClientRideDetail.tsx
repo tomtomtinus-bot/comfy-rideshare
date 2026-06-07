@@ -156,7 +156,7 @@ const Inner = () => {
     // Fetch cancel-request status + hours per assignment
     const { data: ras } = await supabase
       .from("ride_assignments")
-      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason")
+      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason, travel_to_pickup_min, travel_back_home_min")
       .eq("ride_id", id);
     const map: Record<string, { status: string; reason: string | null }> = {};
     const hmap: Record<string, any> = {};
@@ -173,6 +173,8 @@ const Inner = () => {
         extra_costs_total: r.extra_costs_total,
         hours_dispute_status: r.hours_dispute_status ?? "none",
         hours_dispute_reason: r.hours_dispute_reason ?? null,
+        travel_to_pickup_min: r.travel_to_pickup_min,
+        travel_back_home_min: r.travel_back_home_min,
       };
     });
     setCancelReqs(map);
