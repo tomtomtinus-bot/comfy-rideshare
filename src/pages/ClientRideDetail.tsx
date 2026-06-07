@@ -122,7 +122,7 @@ const Inner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelReqs, setCancelReqs] = useState<Record<string, { status: string; reason: string | null }>>({});
-  const [hoursMap, setHoursMap] = useState<Record<string, { actual_hours: number | null; actual_cost: number | null; hours_submitted_at: string | null; hours_notes: string | null; departed_base_at: string | null; returned_base_at: string | null; extra_costs: any; extra_costs_total: number | null; hours_dispute_status: string; hours_dispute_reason: string | null; }>>({});
+  const [hoursMap, setHoursMap] = useState<Record<string, { actual_hours: number | null; actual_cost: number | null; hours_submitted_at: string | null; hours_notes: string | null; departed_base_at: string | null; returned_base_at: string | null; extra_costs: any; extra_costs_total: number | null; hours_dispute_status: string; hours_dispute_reason: string | null; travel_to_pickup_min: number | null; travel_back_home_min: number | null; }>>({});
   const [disputeFor, setDisputeFor] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -156,7 +156,7 @@ const Inner = () => {
     // Fetch cancel-request status + hours per assignment
     const { data: ras } = await supabase
       .from("ride_assignments")
-      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason")
+      .select("id, cancel_request_status, cancel_request_reason, actual_hours, actual_cost, hours_submitted_at, hours_notes, departed_base_at, returned_base_at, extra_costs, extra_costs_total, hours_dispute_status, hours_dispute_reason, travel_to_pickup_min, travel_back_home_min")
       .eq("ride_id", id);
     const map: Record<string, { status: string; reason: string | null }> = {};
     const hmap: Record<string, any> = {};
@@ -173,6 +173,8 @@ const Inner = () => {
         extra_costs_total: r.extra_costs_total,
         hours_dispute_status: r.hours_dispute_status ?? "none",
         hours_dispute_reason: r.hours_dispute_reason ?? null,
+        travel_to_pickup_min: r.travel_to_pickup_min,
+        travel_back_home_min: r.travel_back_home_min,
       };
     });
     setCancelReqs(map);
@@ -535,10 +537,37 @@ const Inner = () => {
                                 {h.actual_hours}u · €{Number(h.actual_cost ?? 0).toFixed(2)}
                               </p>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 text-xs text-brass-deep/70">
-                              <div><span className="opacity-60">Vertrek standplaats:</span> {fmt(h.departed_base_at)}</div>
-                              <div><span className="opacity-60">Terug standplaats:</span> {fmt(h.returned_base_at)}</div>
-                            </div>
+                            {(() => {
+                              const aanvoerMin = h.travel_to_pickup_min ?? 0;
+                              const afvoerMin = h.travel_back_home_min ?? 0;
+                              const totalMin = h.departed_base_at && h.returned_base_at
+                                ? Math.max(0, (new Date(h.returned_base_at).getTime() - new Date(h.departed_base_at).getTime()) / 60000)
+                                : (h.actual_hours ?? 0) * 60;
+                              const begeleidingMin = Math.max(0, totalMin - aanvoerMin - afvoerMin);
+                              const fmtDur = (m: number) => {
+                                const hh = Math.floor(m / 60);
+                                const mm = Math.round(m % 60);
+                                return mm === 0 ? `${hh}u` : `${hh}u ${mm}m`;
+                              };
+                              return (
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-brass-deep/80">
+                                  <div className="bg-parchment/60 border border-brass-deep/10 p-2">
+                                    <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold mb-0.5">Aanvoer</p>
+                                    <p className="font-semibold tabular-nums">{fmtDur(aanvoerMin)}</p>
+                                    <p className="text-[10px] opacity-60 mt-0.5">Vertrek standplaats: {fmt(h.departed_base_at)}</p>
+                                  </div>
+                                  <div className="bg-parchment/60 border border-brass-deep/10 p-2">
+                                    <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold mb-0.5">Begeleidingstijd</p>
+                                    <p className="font-semibold tabular-nums">{fmtDur(begeleidingMin)}</p>
+                                  </div>
+                                  <div className="bg-parchment/60 border border-brass-deep/10 p-2">
+                                    <p className="text-[10px] uppercase tracking-widest opacity-60 font-bold mb-0.5">Afvoer</p>
+                                    <p className="font-semibold tabular-nums">{fmtDur(afvoerMin)}</p>
+                                    <p className="text-[10px] opacity-60 mt-0.5">Terug standplaats: {fmt(h.returned_base_at)}</p>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                             {h.extra_costs_total != null && Number(h.extra_costs_total) > 0 && (
                               <p className="text-xs text-brass-deep/70">Extra kosten: €{Number(h.extra_costs_total).toFixed(2)}</p>
                             )}
