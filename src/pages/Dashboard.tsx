@@ -194,6 +194,25 @@ const ClientDashboard = () => {
   useEffect(() => {
     (async () => {
       if (!user) return;
+
+      // Auto-annuleer eigen openstaande ritten waarvan de geplande datum > 3 dagen verstreken is.
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: stale } = await supabase
+        .from("rides")
+        .select("id")
+        .eq("client_id", user.id)
+        .eq("status", "open")
+        .lt("scheduled_at", threeDaysAgo);
+      const staleIds = (stale ?? []).map((r: any) => r.id);
+      if (staleIds.length) {
+        await supabase.from("rides").update({ status: "cancelled" as any }).in("id", staleIds);
+        await supabase
+          .from("ride_assignments")
+          .update({ status: "cancelled" as any })
+          .in("ride_id", staleIds)
+          .in("status", ["invited", "accepted"]);
+      }
+
       const { data: rs } = await supabase
         .from("rides")
         .select("*")
