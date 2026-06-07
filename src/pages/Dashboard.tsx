@@ -511,142 +511,117 @@ const ClientDashboard = () => {
           </Link>
         </div>
       ) : (() => {
-        const categorize = (r: RideRow) => {
+        // Hide rides whose assignments are all invoiced
+        const visible = rides.filter((r) => {
           const ass = assignments[r.id] ?? [];
-          const allSubmitted = ass.length > 0 && ass.every((a) => a.hours_submitted_at);
-          const allInvoiced = ass.length > 0 && ass.every((a) => (a as any).invoiced_at);
-          if (allInvoiced) return "history"; // verdwijnt naar geschiedenis
-          if (r.status === "completed" || allSubmitted) return "afgerond";
-          const hasAccepted = ass.some((a) => a.status === "accepted");
-          if (hasAccepted) return "geaccepteerd";
-          return "openstaand";
-        };
-        const buckets = {
-          openstaand: rides.filter((r) => categorize(r) === "openstaand"),
-          geaccepteerd: rides.filter((r) => categorize(r) === "geaccepteerd"),
-          afgerond: rides.filter((r) => categorize(r) === "afgerond"),
-        };
-
-        const renderList = (list: RideRow[], bucketKey: "openstaand" | "geaccepteerd" | "afgerond") => {
-          if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/80 p-6">{t("dash.noRidesInBucket")}</p>;
-          }
-          const order: "asc" | "desc" = bucketKey === "afgerond" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (r) => r.scheduled_at, order, t);
-          const renderRide = (r: RideRow) => {
-            const ass = assignments[r.id] ?? [];
-            const acceptedCount = ass.filter((a) => a.status === "accepted").length;
-            const invitedCount = ass.filter((a) => a.status === "invited").length;
-            const declinedCount = ass.filter((a) => a.status === "declined" || a.status === "expired").length;
-            const needsNewEscort =
-              r.status !== "cancelled" &&
-              r.status !== "completed" &&
-              acceptedCount === 0 &&
-              invitedCount === 0 &&
-              declinedCount > 0;
-            const inBundle = !!r.bundle_id;
-            const canExtendBundle = inBundle && (bucketKey === "openstaand" || bucketKey === "geaccepteerd");
-            return (
-              <li key={r.id} className="relative">
-                <Link
-                  to={`/rit/${r.id}`}
-                  className={
-                    "block px-4 py-3 transition-colors " +
-                    (needsNewEscort
-                      ? "bg-red-50 hover:bg-red-100 border-l-4 border-red-600"
-                      : "bg-card hover:bg-parchment/40")
-                  }
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-medium tabular-nums text-sm">{fd(r.scheduled_at)}</p>
-                    <span className="text-brass-gold text-lg leading-none shrink-0">›</span>
-                  </div>
-                  <p className="font-medium truncate text-sm mt-1">
-                    {r.pickup_city}
-                    <span className="text-brass-gold mx-2">→</span>
-                    {r.dropoff_city}
-                  </p>
-                  {inBundle && (
-                    <p className="mt-1 flex items-center gap-2 flex-wrap">
-                      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5">
-                        📦 {r.bundle_label}
-                      </span>
-                      {canExtendBundle && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addRideToBundle(r);
-                          }}
-                          className="text-[10px] uppercase tracking-widest text-brass-gold hover:text-brass-deep underline font-semibold"
-                        >
-                          + extra rit aan pakket
-                        </button>
-                      )}
-                    </p>
-                  )}
-                  <div className="mt-2 flex items-center gap-3 flex-wrap">
-                    {needsNewEscort && (
-                      <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-bold text-red-700 bg-red-100 border border-red-300 px-2 py-0.5">
-                        ✕ Begeleider geweigerd — kies nieuwe
-                      </span>
-                    )}
-                    {!needsNewEscort && (r.status === "open" || r.status === "matched" || acceptedCount > 0) && (
-                      <span
-                        className={
-                          "text-[10px] uppercase tracking-widest font-semibold tabular-nums " +
-                          (acceptedCount >= (r.num_escorts ?? ass.length)
-                            ? "text-emerald-700"
-                            : acceptedCount > 0
-                              ? "text-brass-deep/70"
-                              : "text-amber-700")
-                        }
-                      >
-                        {t("dash.nEscorts", { accepted: acceptedCount, total: r.num_escorts ?? ass.length, plural: acceptedCount === 1 ? "" : "s" })}
-                      </span>
-                    )}
-                    {!needsNewEscort && <StatusBadge status={r.status} />}
-                  </div>
-                </Link>
-              </li>
-            );
-          };
+          if (ass.length === 0) return true;
+          return !ass.every((a) => (a as any).invoiced_at);
+        });
+        const q = clientSearch.trim().toLowerCase();
+        const filtered = visible.filter((r) => {
+          if (clientStatusFilter !== "all" && r.status !== clientStatusFilter) return false;
+          if (!q) return true;
           return (
-            <div className="space-y-8">
-              {groups.map((g) => (
-                <section key={g.key}>
-                  <header className="flex items-end justify-between mb-3">
-                    <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
-                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
-                    </p>
-                  </header>
-                  <ul className="grid grid-cols-1 gap-px bg-brass-deep/10">{g.items.map(renderRide)}</ul>
-                </section>
-              ))}
-            </div>
+            (r.ride_number ?? "").toLowerCase().includes(q) ||
+            r.pickup_city.toLowerCase().includes(q) ||
+            r.dropoff_city.toLowerCase().includes(q) ||
+            r.id.toLowerCase().includes(q)
           );
-        };
-
+        });
         return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            {([
-              { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
-              { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
-              { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
-            ]).map((s) => (
-              <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
-                <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
-                  <span>{s.label}</span>
-                  <span className="text-brass-deep/80 tabular-nums">({s.list.length})</span>
-                </h2>
-                {renderList(s.list, s.key)}
-              </section>
-            ))}
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2 items-center">
+              <Select value={clientStatusFilter} onValueChange={setClientStatusFilter}>
+                <SelectTrigger className="w-[180px] h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle statussen</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="matched">Toegewezen</SelectItem>
+                  <SelectItem value="in_progress">Lopend</SelectItem>
+                  <SelectItem value="completed">Voltooid</SelectItem>
+                  <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                type="search"
+                value={clientSearch}
+                onChange={(e) => setClientSearch(e.target.value)}
+                placeholder="Zoek op ritnummer of stad…"
+                className="flex-1 min-w-[200px] h-9"
+              />
+            </div>
+            <div className="border border-border rounded-md bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Ritnummer</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Datum &amp; tijd</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Route</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold text-center">Begeleiders</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+                    <TableHead className="h-9 w-[60px]" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Geen ritten gevonden.</TableCell>
+                    </TableRow>
+                  ) : filtered.map((r) => {
+                    const ass = assignments[r.id] ?? [];
+                    const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+                    return (
+                      <TableRow
+                        key={r.id}
+                        className="hover:bg-muted/30 cursor-pointer"
+                        onClick={() => navigate(`/rit/${r.id}`)}
+                      >
+                        <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
+                        <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
+                        <TableCell className="text-xs py-2">
+                          <span className="font-medium">{r.pickup_city}</span>
+                          <span className="text-muted-foreground mx-1.5">→</span>
+                          <span className="font-medium">{r.dropoff_city}</span>
+                          {r.bundle_label && (
+                            <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-1.5 py-0.5">📦 {r.bundle_label}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs tabular-nums text-center py-2">
+                          {acceptedCount} / {r.num_escorts}
+                        </TableCell>
+                        <TableCell className="py-2"><TableStatusBadge status={r.status} /></TableCell>
+                        <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Meer opties</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                              <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
+                                Rit bekijken
+                              </DropdownMenuItem>
+                              {r.bundle_id && (r.status === "open" || r.status === "matched") && (
+                                <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
+                                  + extra rit aan pakket
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         );
       })()}
+
 
     </div>
   );
