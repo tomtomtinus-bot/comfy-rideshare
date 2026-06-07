@@ -84,8 +84,8 @@ const fmtDateTime = (d: string, lng: string = "nl") => {
 };
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="bg-card shadow-etched p-6 md:p-8">
-    <h2 className="font-display text-xl text-brass-deep italic mb-4">{title}</h2>
+  <section className="bg-card border border-input rounded-lg p-5 md:p-6">
+    <h2 className="text-base font-semibold text-foreground mb-4">{title}</h2>
     {children}
   </section>
 );
@@ -93,8 +93,8 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const Badge = ({ children, tone = "alert" }: { children: React.ReactNode; tone?: "alert" | "info" }) => (
   <span
     className={
-      "inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold uppercase tracking-wider rounded-full " +
-      (tone === "alert" ? "bg-red-600 text-white" : "bg-brass-gold text-brass-deep")
+      "inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-semibold uppercase tracking-wider rounded-full " +
+      (tone === "alert" ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground")
     }
   >
     {children}
@@ -112,31 +112,31 @@ const AccSection = ({
   badge?: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <AccordionItem value={value} className="bg-card shadow-etched border-b-0">
-    <AccordionTrigger className="px-6 md:px-8 py-5 hover:no-underline">
-      <span className="flex items-center gap-3 font-display text-xl text-brass-deep italic">
+  <AccordionItem value={value} className="bg-card border border-input rounded-lg overflow-hidden">
+    <AccordionTrigger className="px-5 md:px-6 py-4 hover:no-underline">
+      <span className="flex items-center gap-3 text-base font-semibold text-foreground">
         {title}
         {badge}
       </span>
     </AccordionTrigger>
-    <AccordionContent className="px-6 md:px-8 pt-0 pb-6 md:pb-8">{children}</AccordionContent>
+    <AccordionContent className="px-5 md:px-6 pt-0 pb-5 md:pb-6">{children}</AccordionContent>
   </AccordionItem>
 );
 
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div>
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{label}</p>
-    <p className="text-sm font-medium">{value || <span className="text-brass-deep/80">—</span>}</p>
+    <p className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-1">{label}</p>
+    <p className="text-sm font-medium text-foreground">{value || <span className="text-muted-foreground">—</span>}</p>
   </div>
 );
 
 const TelLink = ({ phone }: { phone: string | null | undefined }) =>
   phone ? (
-    <a href={`tel:${phone}`} className="text-brass-gold hover:underline font-medium">
+    <a href={`tel:${phone}`} className="text-primary hover:underline font-medium">
       {phone}
     </a>
   ) : (
-    <span className="text-brass-deep/80">—</span>
+    <span className="text-muted-foreground">—</span>
   );
 
 const Inner = () => {
