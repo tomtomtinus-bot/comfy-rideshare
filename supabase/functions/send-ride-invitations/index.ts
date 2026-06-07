@@ -185,6 +185,7 @@ Deno.serve(async (req) => {
             dropoff: ride.dropoff_city,
             plannedAt,
             rideId: ride.id,
+            rideNumber: (ride as any).ride_number ?? null,
             rideUrl,
             acceptUrl,
           },
