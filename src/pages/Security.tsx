@@ -150,7 +150,6 @@ const Security = () => {
               {forced && (
                 <Alert variant="default" className="bg-muted/50">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>{t("security.forcedTitle")}</AlertTitle>
                   <AlertDescription>{t("security.forcedNotice")}</AlertDescription>
                 </Alert>
               )}
