@@ -54,7 +54,7 @@ const WatKostViaCust = () => {
                     <Badge variant="default">50% introductiekorting</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Eerste 30 dagen gratis
+                    Eerste 30 dagen gratis · Maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
@@ -86,7 +86,7 @@ const WatKostViaCust = () => {
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Eerste 30 dagen gratis
+                    Eerste 30 dagen gratis · Maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
@@ -117,7 +117,7 @@ const WatKostViaCust = () => {
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground pt-2">
-                    + €1,50 per gekoppelde begeleider
+                    + €1,50 per gekoppelde begeleider · Maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">

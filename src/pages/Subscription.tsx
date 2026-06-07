@@ -116,7 +116,7 @@ const SubscriptionInner = () => {
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">Probeer 30 dagen gratis</p>
                 <p className="text-sm text-muted-foreground">
-                  Opzegbaar wanneer je wilt. Daarna €25 per halve maand op je platformfactuur (€50/maand).
+                  Maandelijks opzegbaar. Daarna €25 per halve maand op je platformfactuur (€50/maand).
                 </p>
               </div>
             </div>

@@ -56,7 +56,7 @@ export function SubscriptionBanner() {
       >
         <span>
           Je hebt nog geen actief abonnement.{" "}
-          <strong>30 dagen gratis proberen</strong> — opzegbaar tijdens de proefperiode.
+          <strong>30 dagen gratis proberen</strong> — maandelijks opzegbaar.
         </span>
         <Link
           to="/abonnement"
