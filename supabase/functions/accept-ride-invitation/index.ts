@@ -29,7 +29,7 @@ async function hmac(message: string): Promise<string> {
 }
 
 function htmlPage(title: string, message: string, ctaUrl?: string, ctaText?: string): string {
-  return `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} — ViaCust</title>
+  return `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} &mdash; ViaCust</title>
 <style>
 body{font-family:-apple-system,'Inter Tight',Inter,Arial,sans-serif;background:#f4f6f8;color:#161f2b;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px}
 .card{background:#fff;border-left:3px solid #f5a800;padding:32px 28px;max-width:480px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.06)}
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
   }
 
   if (assn.status === 'accepted') {
-    return new Response(htmlPage('Al gekozen ✓', 'Je bent al geselecteerd voor deze rit.', `${origin}/opdracht/${assn.ride_id}`, 'Open rit'), {
+    return new Response(htmlPage('Al gekozen &#10003;', 'Je bent al geselecteerd voor deze rit.', `${origin}/opdracht/${assn.ride_id}`, 'Open rit'), {
       headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
