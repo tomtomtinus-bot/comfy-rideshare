@@ -95,6 +95,7 @@ const AdminRides = () => {
     const q = search.toLowerCase();
     if (!q) return true;
     return (
+      r.id.toLowerCase().includes(q) ||
       r.pickup_city.toLowerCase().includes(q) ||
       r.dropoff_city.toLowerCase().includes(q) ||
       (r.client_name ?? "").toLowerCase().includes(q)
@@ -123,7 +124,7 @@ const AdminRides = () => {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Zoek op stad of opdrachtgever…"
+          placeholder="Zoek op ritnummer, stad of opdrachtgever…"
           className="flex-1 min-w-[200px] bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
         />
       </div>
@@ -138,7 +139,8 @@ const AdminRides = () => {
             <li key={r.id} className="bg-card p-4 md:p-5">
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Datum</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Ritnr · Datum</p>
+                  <p className="font-mono text-[11px] text-brass-deep/80 tabular-nums">#{r.id.slice(0, 8).toUpperCase()}</p>
                   <p className="font-medium tabular-nums text-sm">{fmt(r.scheduled_at)}</p>
                   <p className="text-[10px] text-brass-deep/80 mt-1">{r.client_name}</p>
                 </div>
