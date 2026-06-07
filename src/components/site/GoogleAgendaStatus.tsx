@@ -121,18 +121,33 @@ export const GoogleAgendaStatus = () => {
   const openBlockDialog = (k: string) => {
     setBlockDate(k);
     setBlockTitle("[ViaCust] Bezet/Verlof");
+    setBlockSlots([]);
     setBlockOpen(true);
+  };
+
+  const toggleSlot = (id: string) => {
+    setBlockSlots((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
   };
 
   const submitBlock = async () => {
     if (!blockDate) return;
+    if (blockSlots.length === 0) {
+      toast.error("Kies minimaal één tijdvak");
+      return;
+    }
     setBlocking(true);
     try {
       const { data: res, error } = await supabase.functions.invoke("google-calendar-block-day", {
-        body: { date: blockDate, title: blockTitle || "[ViaCust] Bezet/Verlof" },
+        body: {
+          date: blockDate,
+          title: blockTitle || "[ViaCust] Bezet/Verlof",
+          slots: blockSlots,
+        },
       });
       if (error || (res as any)?.error) throw new Error((res as any)?.error ?? error?.message);
-      toast.success("Dag geblokkeerd in Google Agenda");
+      toast.success("Tijdvak(ken) geblokkeerd in Google Agenda");
       setBlockOpen(false);
       await load();
     } catch (e: any) {
