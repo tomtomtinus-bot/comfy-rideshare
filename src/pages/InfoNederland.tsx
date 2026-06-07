@@ -3,7 +3,6 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
 import { SeoHead } from "@/components/SeoHead";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
