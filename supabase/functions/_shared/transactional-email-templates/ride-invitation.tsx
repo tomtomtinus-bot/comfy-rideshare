@@ -14,6 +14,7 @@ interface RideInvitationProps {
   dropoff?: string
   plannedAt?: string
   rideId?: string
+  rideNumber?: string | null
   rideUrl?: string
   acceptUrl?: string
 }
