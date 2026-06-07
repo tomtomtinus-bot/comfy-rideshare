@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
     }
 
     const plannedAt = new Date(ride.scheduled_at).toLocaleString('nl-NL', {
-      dateStyle: 'long', timeStyle: 'short',
+      dateStyle: 'long', timeStyle: 'short', timeZone: 'Europe/Amsterdam',
     })
 
     console.log('[send-ride-invitations] processing', { rideId, assignmentCount: assignments.length, escortCount: escortIds.length, emailsResolved: idToEmail.size })
