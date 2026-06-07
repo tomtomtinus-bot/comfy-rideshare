@@ -6,7 +6,7 @@ import { Nav } from "@/components/site/Nav";
 import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
 import { CheckoutDialog } from "@/components/CheckoutDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -282,7 +282,7 @@ const SubscriptionInner = () => {
 
 const Subscription = () => (
   <RequireAuth>
-    <PaymentTestModeBanner />
+    
     <SeoHead title="Tarieven & Licenties | ViaCust" description="Transparante tarieven en licenties voor slimme rittenplanning met ViaCust. Bekijk en beheer je abonnement, facturering en betalingsmethode." />
     <Nav />
     <SubscriptionInner />

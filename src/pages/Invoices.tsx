@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { CheckoutDialog } from "@/components/CheckoutDialog";
-import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+
 
 interface PlatformInvoice {
   id: string;
@@ -460,7 +460,7 @@ const InvoicesInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <PaymentTestModeBanner />
+      
       <SeoHead
         title="Facturen | ViaCust"
         description="Bekijk, download en betaal je facturen voor transportritten en platformkosten."
