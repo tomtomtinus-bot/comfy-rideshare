@@ -1,6 +1,7 @@
 // Sends webpush notifications via VAPID to subscriptions in push_subscriptions.
 // Body: { userIds?: string[], userId?: string, title: string, body: string, url?: string, tag?: string }
 // Also handles GET to return the VAPID public key (so the frontend can subscribe).
+// POST is strictly service-role only to prevent spam.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
@@ -11,6 +12,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY") ?? "";
 const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY") ?? "";
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:info@viacust.com";
@@ -25,8 +28,8 @@ if (VAPID_PUBLIC && VAPID_PRIVATE) {
 
 function admin() {
   return createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    SUPABASE_URL,
+    SUPABASE_SERVICE_KEY,
     { auth: { persistSession: false } },
   );
 }
@@ -36,6 +39,15 @@ Deno.serve(async (req) => {
 
   if (req.method === "GET") {
     return new Response(JSON.stringify({ publicKey: VAPID_PUBLIC }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Strict service-role auth: only internal server calls may trigger push notifications
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || authHeader !== `Bearer ${SUPABASE_SERVICE_KEY}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
