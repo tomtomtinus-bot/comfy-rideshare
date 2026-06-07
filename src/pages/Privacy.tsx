@@ -150,6 +150,7 @@ const PrivacyNL = () => (
       <li><strong>Beoordelingen:</strong> Zolang het bijbehorende account actief is op het platform.</li>
       <li><strong>OAuth-tokens &amp; Push-tokens:</strong> Onmiddellijke en definitieve verwijdering na het verbreken van de koppeling of het intrekken van de toestemming in uw browser.</li>
       <li><strong>Gekoppelde Chauffeursaccounts:</strong> Gegevens van chauffeurs gekoppeld aan een bedrijfsaccount blijven bewaard zolang de koppeling tussen het chauffeursprofiel en het bedrijfsaccount actief is, of totdat het hoofdaccount wordt beëindigd.</li>
+      <li><strong>Accountgegevens na opzegging:</strong> Na opzegging van het account worden persoonsgegevens 30 dagen bewaard en daarna automatisch verwijderd.</li>
     </ul>
 
     <h2>7. Uw Rechten en Contact</h2>
@@ -222,6 +223,7 @@ const PrivacyEN = () => (
       <li><strong>Reviews &amp; Ratings:</strong> As long as the associated account remains active on the platform.</li>
       <li><strong>OAuth Tokens &amp; Push Tokens:</strong> Immediate and permanent deletion upon disconnecting the integration or revoking permission in your browser settings.</li>
       <li><strong>Linked Driver Accounts:</strong> Data of drivers linked to a corporate account will be retained as long as the connection between the driver profile and the corporate account is active, or until the primary account is terminated.</li>
+      <li><strong>Account data after cancellation:</strong> After account cancellation, personal data is retained for 30 days and then automatically deleted.</li>
     </ul>
 
     <h2>7. Your Rights and Contact Information</h2>
@@ -294,6 +296,7 @@ const PrivacyDE = () => (
       <li><strong>Bewertungen &amp; Rezensionen:</strong> Solange das zugehörige Konto auf der Plattform aktiv bleibt.</li>
       <li><strong>OAuth-Token &amp; Push-Token:</strong> Sofortige und dauerhafte Löschung bei Trennung der Integration oder Widerruf der Einwilligung in Ihren Browsereinstellungen.</li>
       <li><strong>Verknüpfte Fahrerkonten:</strong> Daten von Fahrern, die mit einem Unternehmenskonto verknüpft sind, werden so lange aufbewahrt, wie die Verknüpfung zwischen dem Fahrerprofil und dem Unternehmenskonto aktiv ist, oder bis das Hauptkonto gekündigt wird.</li>
+      <li><strong>Kontodaten nach Kündigung:</strong> Nach Kündigung des Kontos werden personenbezogene Daten 30 Tage lang aufbewahrt und danach automatisch gelöscht.</li>
     </ul>
 
     <h2>7. Ihre Rechte und Kontaktinformationen</h2>
@@ -366,6 +369,7 @@ const PrivacyFR = () => (
       <li><strong>Évaluations &amp; Avis :</strong> Tant que le compte associé reste actif sur la plateforme.</li>
       <li><strong>Jetons OAuth &amp; Jetons Push :</strong> Suppression immédiate et définitive lors de la déconnexion de l'intégration ou du retrait du consentement dans les paramètres de votre navigateur.</li>
       <li><strong>Comptes de conducteurs liés :</strong> Les données des conducteurs liés à un compte d'entreprise seront conservées tant que la liaison entre le profil du conducteur et le compte de l'entreprise est active, ou jusqu'à la résiliation du compte principal.</li>
+      <li><strong>Données de compte après résiliation :</strong> Après la résiliation du compte, les données personnelles sont conservées pendant 30 jours, puis automatiquement supprimées.</li>
     </ul>
 
     <h2>7. Vos droits et coordonnées</h2>

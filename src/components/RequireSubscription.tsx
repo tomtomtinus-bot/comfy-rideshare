@@ -32,7 +32,7 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
             Je hebt een actief abonnement nodig om {action} te gebruiken.
           </p>
           <p className="text-sm text-brass-deep/80">
-            <strong>30 dagen gratis proberen</strong> — opzegbaar tijdens de proefperiode.
+            <strong>30 dagen gratis proberen</strong> — maandelijks opzegbaar.
           </p>
           <Link
             to="/abonnement"
