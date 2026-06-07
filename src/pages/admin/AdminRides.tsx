@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface RideRow {
   id: string;
+  ride_number: string | null;
   client_id: string;
   pickup_city: string;
   dropoff_city: string;
