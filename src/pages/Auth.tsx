@@ -438,7 +438,7 @@ const Auth = () => {
                 type="email"
                 label={t("auth.email")}
                 required
-                autoComplete={mode === "signup" ? "email" : "username"}
+                autoComplete="email"
               />
               <Field
                 name="password"
