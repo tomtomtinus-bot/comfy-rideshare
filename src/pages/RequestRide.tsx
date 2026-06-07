@@ -1236,7 +1236,6 @@ const RequestRideInner = () => {
               <p className="text-[11px] text-muted-foreground mt-1">{t("request.permitUploadHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
-                <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
               </div>
               {(() => {
                 const expand = (c?: string): string[] => {
