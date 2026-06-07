@@ -84,8 +84,8 @@ export const template = {
     const pickup = data.pickup ?? 'Onbekend'
     const dropoff = data.dropoff ?? 'Onbekend'
     const plannedAt = data.plannedAt ?? 'Onbekende datum'
-    const shortId = typeof data.rideId === 'string' ? data.rideId.slice(0, 8).toUpperCase() : ''
-    return `Nieuwe rit: ${pickup} naar ${dropoff} op ${plannedAt}${shortId ? ` #${shortId}` : ''} - ViaCust`
+    const rideNumber = typeof data.rideNumber === 'string' && data.rideNumber ? data.rideNumber : (typeof data.rideId === 'string' ? data.rideId.slice(0, 8).toUpperCase() : '')
+    return `Nieuwe rit: ${pickup} naar ${dropoff} op ${plannedAt}${rideNumber ? ` ${rideNumber}` : ''} - ViaCust`
   },
   displayName: 'Rit-uitnodiging (begeleider)',
   previewData: {
