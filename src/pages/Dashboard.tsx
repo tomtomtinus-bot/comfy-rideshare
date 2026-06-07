@@ -1039,373 +1039,216 @@ const EscortDashboard = () => {
       ) : (() => {
         const isExpired = (a: typeof items[number]) =>
           a.status === "invited" && new Date(a.responds_by).getTime() <= Date.now();
-        const categorize = (a: typeof items[number]) => {
-          if (a.status === "expired" || isExpired(a)) return "verlopen";
-          const dis = (a as any).hours_dispute_status === "disputed";
-          if (a.hours_submitted_at && !dis) return "afgerond";
-          if (dis) return "geaccepteerd";
-          if (a.status === "accepted") return "geaccepteerd";
-          if (a.status === "invited") return "openstaand";
-          return "afgerond"; // declined / cancelled bij historie
-        };
-        const buckets = {
-          openstaand: items.filter((a) => categorize(a) === "openstaand"),
-          geaccepteerd: items.filter((a) => categorize(a) === "geaccepteerd"),
-          afgerond: items.filter((a) => categorize(a) === "afgerond"),
-          verlopen: items.filter((a) => categorize(a) === "verlopen"),
-        };
+        const effectiveStatus = (a: typeof items[number]) => isExpired(a) ? "expired" : a.status;
 
-        const renderItem = (a: typeof items[number]) => {
-          const disputed = (a as any).hours_dispute_status === "disputed";
-          const submitted = !!a.hours_submitted_at && !disputed;
-          const isInvited = a.status === "invited";
-          const expressed = !!a.interest_expressed_at;
-          const minsLeft = isInvited ? minutesLeft(a.responds_by) : 0;
-          const expired = isInvited && minsLeft === 0 && !expressed;
-          const accepted = a.status === "accepted";
-          const needsHours = accepted && !submitted;
-          const clickable = accepted || isInvited;
-          const closesInMin = expressed && a.broadcast_closes_at
-            ? Math.max(0, Math.ceil((new Date(a.broadcast_closes_at).getTime() - Date.now()) / 60000))
-            : 0;
+        const q = escortSearch.trim().toLowerCase();
+        const filtered = items.filter((a) => {
+          const es = effectiveStatus(a);
+          if (escortStatusFilter !== "all" && es !== escortStatusFilter) return false;
+          if (!q) return true;
           return (
-            <li
-              key={a.id}
-              onClick={clickable ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
-              className={`bg-card ${isInvited && !expired ? "ring-2 ring-inset ring-brass-gold" : ""} ${clickable ? "cursor-pointer hover:bg-parchment/40 transition-colors" : ""}`}
-            >
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4">
-                <div className="w-28 shrink-0">
-                  <p className="font-medium tabular-nums text-sm">{fd2(a.ride.scheduled_at)}</p>
-                </div>
-                <div className="flex-1 min-w-[140px]">
-                  <p className="font-medium truncate">
-                    {a.ride.pickup_city}
-                    <span className="text-brass-gold mx-2">→</span>
-                    {a.ride.dropoff_city}
-                  </p>
-                </div>
-                <div className="shrink-0 hidden sm:block">
-                  <StatusBadge status={a.status} />
-                </div>
-                <div className="shrink-0 w-full sm:w-auto sm:ml-auto flex justify-end">
-                  {isInvited && expressed ? (
-                    <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap tabular-nums">
-                      ✓ Beschikbaar gemeld · selectie {closesInMin > 0 ? `binnen ${closesInMin} min` : "nu"}
-                    </span>
-                  ) : isInvited && !expired ? (
-                    <div className="flex items-center gap-2">
-                      {hasGoogleConflict(a.ride.scheduled_at) && (
-                        <span
-                          title={t("dash.googleConflictTitle")}
-                          className="text-[10px] uppercase tracking-widest text-destructive font-bold whitespace-nowrap"
-                        >
-                          {t("dash.calendarConflict")}
-                        </span>
-                      )}
-                      <span className="text-[10px] uppercase tracking-widest text-brass-gold font-bold whitespace-nowrap">
-                        {t("dash.nMin", { min: minsLeft })}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); respond(a.id, true); }}
-                        className="px-3 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                        title="Binnen 5 min wordt de beste match gekozen"
-                      >
-                        Ik ben beschikbaar
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); respond(a.id, false); }}
-                        className="px-3 py-2 border border-brass-deep/30 text-brass-deep text-xs uppercase tracking-widest font-semibold hover:bg-parchment transition-colors"
-                      >
-                        {t("dash.decline")}
-                      </button>
-                    </div>
-                  ) : expired ? (
-                    <span className="text-xs uppercase tracking-widest text-brass-deep/80 font-semibold">
-                      {t("dash.expired")}
-                    </span>
-                  ) : submitted ? (
-                    <span className="text-xs uppercase tracking-widest text-brass-gold font-semibold tabular-nums">
-                      ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
-                    </span>
-                  ) : disputed ? (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
-                      className="px-4 py-2 bg-destructive text-destructive-foreground text-xs uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity"
-                    >
-                      Uren aanpassen
-                    </button>
-                  ) : accepted ? (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setOpenId(openId === a.id ? null : a.id); }}
-                      className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors"
-                    >
-                      {t("dash.fillHours")}
-                    </button>
-                  ) : (
-                    <span className="text-xs uppercase tracking-widest text-brass-deep/80 font-semibold">—</span>
-                  )}
-                </div>
-                {disputed && (
-                  <div className="px-5 pb-3 -mt-1">
-                    <div className="bg-destructive/10 border border-destructive/30 px-3 py-2 text-xs text-destructive">
-                      <span className="font-bold uppercase tracking-widest">Uren afgewezen</span>
-                      {(a as any).hours_dispute_reason && (
-                        <span className="ml-2 italic opacity-90">"{(a as any).hours_dispute_reason}"</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {clickable && <span className="text-brass-gold text-lg shrink-0">›</span>}
-              </div>
+            (a.ride.ride_number ?? "").toLowerCase().includes(q) ||
+            a.ride.pickup_city.toLowerCase().includes(q) ||
+            a.ride.dropoff_city.toLowerCase().includes(q) ||
+            (counterpartyNames[a.id] ?? a.client_anon).toLowerCase().includes(q)
+          );
+        });
 
-              <Dialog open={openId === a.id} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
-                <DialogContent
-                  className="max-w-2xl w-[calc(100vw-1rem)] max-h-[85vh] overflow-y-auto p-4 sm:p-6"
-                  onClick={(e) => e.stopPropagation()}
-                >
+        const openItem = items.find((x) => x.id === openId) ?? null;
+
+        return (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2 items-center">
+              <Select value={escortStatusFilter} onValueChange={setEscortStatusFilter}>
+                <SelectTrigger className="w-[200px] h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle statussen</SelectItem>
+                  <SelectItem value="invited">Uitgenodigd</SelectItem>
+                  <SelectItem value="accepted">Geaccepteerd</SelectItem>
+                  <SelectItem value="declined">Geweigerd</SelectItem>
+                  <SelectItem value="expired">Verlopen</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                type="search"
+                value={escortSearch}
+                onChange={(e) => setEscortSearch(e.target.value)}
+                placeholder="Zoek op ritnummer, opdrachtgever of stad…"
+                className="flex-1 min-w-[220px] h-9"
+              />
+            </div>
+
+            <div className="border border-border rounded-md bg-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Ritnummer</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Datum &amp; tijd</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Route</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Opdrachtgever</TableHead>
+                    <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+                    <TableHead className="h-9 w-[60px]" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Geen opdrachten gevonden.</TableCell></TableRow>
+                  ) : filtered.map((a) => {
+                    const disputed = (a as any).hours_dispute_status === "disputed";
+                    const submitted = !!a.hours_submitted_at && !disputed;
+                    const isInvited = a.status === "invited";
+                    const expired = isExpired(a);
+                    const accepted = a.status === "accepted";
+                    const clickable = accepted || (isInvited && !expired);
+                    const opdr = counterpartyNames[a.id] ?? a.client_anon;
+                    return (
+                      <TableRow
+                        key={a.id}
+                        className={`hover:bg-muted/30 ${clickable ? "cursor-pointer" : ""} ${isInvited && !expired ? "bg-amber-50/50" : ""}`}
+                        onClick={clickable ? () => navigate(`/opdracht/${a.ride.id}`) : undefined}
+                      >
+                        <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(a.ride)}</TableCell>
+                        <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(a.ride.scheduled_at)}</TableCell>
+                        <TableCell className="text-xs py-2">
+                          <span className="font-medium">{a.ride.pickup_city}</span>
+                          <span className="text-muted-foreground mx-1.5">→</span>
+                          <span className="font-medium">{a.ride.dropoff_city}</span>
+                        </TableCell>
+                        <TableCell className="text-xs py-2 max-w-[180px] truncate">{opdr}</TableCell>
+                        <TableCell className="py-2"><TableStatusBadge status={expired ? "expired" : a.status} /></TableCell>
+                        <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Meer opties</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuLabel className="text-xs">{displayRideNo(a.ride)}</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              {clickable && (
+                                <DropdownMenuItem className="text-xs" onClick={() => navigate(`/opdracht/${a.ride.id}`)}>
+                                  Opdracht bekijken
+                                </DropdownMenuItem>
+                              )}
+                              {isInvited && !expired && (
+                                <>
+                                  <DropdownMenuItem className="text-xs" onClick={() => respond(a.id, true)}>
+                                    Ik ben beschikbaar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-xs" onClick={() => respond(a.id, false)}>
+                                    Weiger
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {accepted && !submitted && (
+                                <DropdownMenuItem className="text-xs" onClick={() => setOpenId(a.id)}>
+                                  Uren invullen
+                                </DropdownMenuItem>
+                              )}
+                              {disputed && (
+                                <DropdownMenuItem className="text-xs" onClick={() => setOpenId(a.id)}>
+                                  Uren aanpassen
+                                </DropdownMenuItem>
+                              )}
+                              {submitted && (
+                                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                                  ✓ {a.actual_hours}u · €{Number(a.actual_cost).toFixed(2)}
+                                </DropdownMenuLabel>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Uren invullen dialog */}
+            {openItem && (
+              <Dialog open={!!openId} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
+                <DialogContent className="max-w-2xl w-[calc(100vw-1rem)] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
                   <DialogHeader>
-                    <DialogTitle className="font-display italic text-2xl text-brass-deep">
-                      {t("dash.fillHours")}
-                    </DialogTitle>
+                    <DialogTitle className="font-display italic text-2xl text-brass-deep">{t("dash.fillHours")}</DialogTitle>
                   </DialogHeader>
-                  <form
-                    onSubmit={(e) => submitHours(a.id, e)}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
-                  >
-                  <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
-                    <div>
-                      <strong>{t("dash.plannedTime")}</strong>{" "}
-                      {new Date(a.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}
+                  <form onSubmit={(e) => submitHours(openItem.id, e)} className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div className="md:col-span-2 bg-parchment/60 border border-brass-deep/10 px-4 py-3 text-xs text-brass-deep/70 space-y-1">
+                      <div><strong>{t("dash.plannedTime")}</strong> {new Date(openItem.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}</div>
+                      <div><strong>{t("dash.travelFromBase")}</strong> {fmtHours(openItem.travel_to_pickup_min)} · <strong>{t("dash.back")}</strong> {fmtHours(openItem.travel_back_home_min)} {t("dash.roundedQuarter")}</div>
                     </div>
-                    <div>
-                      <strong>{t("dash.travelFromBase")}</strong> {fmtHours(a.travel_to_pickup_min)} ·{" "}
-                      <strong>{t("dash.back")}</strong> {fmtHours(a.travel_back_home_min)} {t("dash.roundedQuarter")}
-                    </div>
-                    {a.ride.bundle_id && (() => {
-                      const siblings = items
-                        .filter((x) => x.ride?.bundle_id === a.ride.bundle_id)
-                        .sort((x, y) => new Date(x.ride.scheduled_at).getTime() - new Date(y.ride.scheduled_at).getTime());
-                      const idx = siblings.findIndex((s) => s.id === a.id);
-                      const isFirst = idx === 0;
-                      const isLast = idx === siblings.length - 1;
-                      const pos = isFirst && isLast
-                        ? ""
-                        : isFirst
-                        ? t("dash.bundleFirstHint", { defaultValue: "Eerste rit in pakket — reistijd heen wordt meegerekend, reistijd terug pas bij de laatste rit." })
-                        : isLast
-                        ? t("dash.bundleLastHint", { defaultValue: "Laatste rit in pakket — reistijd terug wordt meegerekend, reistijd heen is al bij de eerste rit verrekend." })
-                        : t("dash.bundleMidHint", { defaultValue: "Tussenliggende rit in pakket — vul alleen de begeleidingstijd in. Reistijd heen/terug is verrekend bij de eerste en laatste rit." });
+                    {(() => {
+                      const sched = new Date(openItem.ride.scheduled_at);
+                      const pad = (n: number) => String(n).padStart(2, "0");
+                      const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
+                      const roundedMin = Math.round(sched.getMinutes() / 15) * 15;
+                      const rh = roundedMin === 60 ? sched.getHours() + 1 : sched.getHours();
+                      const rm = roundedMin === 60 ? 0 : roundedMin;
+                      const defTime = `${pad(rh % 24)}:${pad(rm)}`;
                       return (
-                        <div className="pt-2 mt-1 border-t border-brass-deep/10 text-brass-deep">
-                          <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold bg-brass-gold/20 border border-brass-gold/40 px-2 py-0.5 mr-2">
-                            📦 {t("dash.bundleBadge", { current: idx + 1, total: siblings.length, defaultValue: "Rit {{current}} van {{total}}" })}
-                          </span>
-                          {pos}
-                        </div>
+                        <>
+                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("dash.rideStartTime")}</div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
+                            <input name="ride_start_date" type="date" defaultValue={defDate} required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
+                            <input type="time" step={900} name="ride_start_time" defaultValue={defTime} required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
+                          </div>
+                          <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mt-2">{t("dash.rideEndTime")}</div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
+                            <input name="ride_end_date" type="date" defaultValue={defDate} required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
+                            <input type="time" step={900} name="ride_end_time" defaultValue="" required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
+                          </div>
+                        </>
                       );
                     })()}
-                  </div>
-                  {(() => {
-                    const sched = new Date(a.ride.scheduled_at);
-                    const pad = (n: number) => String(n).padStart(2, "0");
-                    const defDate = `${sched.getFullYear()}-${pad(sched.getMonth() + 1)}-${pad(sched.getDate())}`;
-                    const roundedMin = Math.round(sched.getMinutes() / 15) * 15;
-                    const rh = roundedMin === 60 ? sched.getHours() + 1 : sched.getHours();
-                    const rm = roundedMin === 60 ? 0 : roundedMin;
-                    const defTime = `${pad(rh % 24)}:${pad(rm)}`;
-                    return (
-                      <>
-                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
-                          {t("dash.rideStartTime")}
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
-                          <input
-                            name="ride_start_date"
-                            type="date"
-                            defaultValue={defDate}
-                            required
-                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
-                          <input
-                            type="time"
-                            step={900}
-                            name="ride_start_time"
-                            defaultValue={defTime}
-                            required
-                            placeholder="hh:mm"
-                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          />
-                        </div>
-                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mt-2">
-                          {t("dash.rideEndTime")}
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
-                          <input
-                            name="ride_end_date"
-                            type="date"
-                            defaultValue={defDate}
-                            required
-                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
-                          <input
-                            type="time"
-                            step={900}
-                            name="ride_end_time"
-                            defaultValue=""
-                            required
-                            placeholder="hh:mm"
-                            className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                          />
-                        </div>
-                      </>
-                    );
-                  })()}
-                  <div className="md:col-span-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
-                      {t("dash.notes")}
-                    </label>
-                    <textarea
-                      name="hours_notes"
-                      rows={2}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
-                        {t("dash.extraCosts")}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => addExtra(a.id)}
-                        className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold"
-                      >
-                        {t("dash.addRow")}
-                      </button>
+                    <div className="md:col-span-2">
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("dash.notes")}</label>
+                      <textarea name="hours_notes" rows={2} className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
                     </div>
-                    {getExtras(a.id).length === 0 ? (
-                      <p className="text-xs text-brass-deep/80">
-                        {t("dash.extraCostsHint")}
-                      </p>
-                    ) : (
-                      <ul className="space-y-2">
-                        {getExtras(a.id).map((ec, idx) => (
-                          <li key={idx} className="grid grid-cols-12 gap-2 items-center">
-                            <input
-                              type="text"
-                              value={ec.description}
-                              onChange={(e) => updateExtra(a.id, idx, { description: e.target.value })}
-                              placeholder={t("dash.extraCostsDescPlaceholder")}
-                              maxLength={120}
-                              className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
-                            />
-                            <div className="col-span-4 relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/80 text-sm">€</span>
-                              <input
-                                type="number"
-                                inputMode="decimal"
-                                step="0.01"
-                                min="0"
-                                value={ec.amount === 0 ? "" : ec.amount}
-                                onChange={(e) =>
-                                  updateExtra(a.id, idx, { amount: e.target.value === "" ? 0 : Number(e.target.value) })
-                                }
-                                placeholder="0,00"
-                                className="w-full bg-parchment border border-brass-deep/15 pl-7 pr-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeExtra(a.id, idx)}
-                              aria-label={t("dash.removeRow")}
-                              className="col-span-1 text-brass-deep/80 hover:text-red-700 text-lg leading-none"
-                            >
-                              ×
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {getExtras(a.id).length > 0 && (
-                      <p className="text-xs text-brass-deep/80 mt-2 tabular-nums text-right">
-                        {t("dash.extraCostsSubtotal", { amount: getExtras(a.id).reduce((s, e) => s + (Number(e.amount) || 0), 0).toFixed(2) })}
-                      </p>
-                    )}
-                  </div>
-
-                  <p className="md:col-span-2 text-xs text-brass-deep/80">
-                    {t("dash.rateInfo", {
-                      country: a.is_be_ride ? t("common.countryBE") : t("common.countryNL"),
-                      rate: a.hourly_rate,
-                      cross: a.is_be_ride ? t("dash.rateCrossBorder") : "",
-                      minHours: a.min_billable_hours > 0 ? t("dash.minBillable", { h: a.min_billable_hours }) : "",
-                    })}
-                  </p>
-                  <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
-                    {t("dash.submit")}
-                  </button>
+                    <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("dash.extraCosts")}</label>
+                        <button type="button" onClick={() => addExtra(openItem.id)} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">{t("dash.addRow")}</button>
+                      </div>
+                      {getExtras(openItem.id).length === 0 ? (
+                        <p className="text-xs text-brass-deep/80">{t("dash.extraCostsHint")}</p>
+                      ) : (
+                        <ul className="space-y-2">
+                          {getExtras(openItem.id).map((ec, idx) => (
+                            <li key={idx} className="grid grid-cols-12 gap-2 items-center">
+                              <input type="text" value={ec.description} onChange={(e) => updateExtra(openItem.id, idx, { description: e.target.value })} placeholder={t("dash.extraCostsDescPlaceholder")} maxLength={120} className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold" />
+                              <div className="col-span-4 relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/80 text-sm">€</span>
+                                <input type="number" inputMode="decimal" step="0.01" min="0" value={ec.amount === 0 ? "" : ec.amount} onChange={(e) => updateExtra(openItem.id, idx, { amount: e.target.value === "" ? 0 : Number(e.target.value) })} placeholder="0,00" className="w-full bg-parchment border border-brass-deep/15 pl-7 pr-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
+                              </div>
+                              <button type="button" onClick={() => removeExtra(openItem.id, idx)} aria-label={t("dash.removeRow")} className="col-span-1 text-brass-deep/80 hover:text-red-700 text-lg leading-none">×</button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {getExtras(openItem.id).length > 0 && (
+                        <p className="text-xs text-brass-deep/80 mt-2 tabular-nums text-right">{t("dash.extraCostsSubtotal", { amount: getExtras(openItem.id).reduce((s, e) => s + (Number(e.amount) || 0), 0).toFixed(2) })}</p>
+                      )}
+                    </div>
+                    <p className="md:col-span-2 text-xs text-brass-deep/80">{t("dash.rateInfo", { country: openItem.is_be_ride ? t("common.countryBE") : t("common.countryNL"), rate: openItem.hourly_rate, cross: openItem.is_be_ride ? t("dash.rateCrossBorder") : "", minHours: openItem.min_billable_hours > 0 ? t("dash.minBillable", { h: openItem.min_billable_hours }) : "" })}</p>
+                    <button className="md:col-span-2 px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">{t("dash.submit")}</button>
                   </form>
                 </DialogContent>
               </Dialog>
-            </li>
-          );
-        };
-
-        const renderList = (list: typeof items, bucketKey: "openstaand" | "geaccepteerd" | "afgerond" | "verlopen") => {
-          if (list.length === 0) {
-            return (
-              <div className="border border-dashed border-brass-deep/15 px-4 py-8 text-center">
-                <p className="text-xs text-brass-deep/80">{t("dash.noRidesInBucket")}</p>
-              </div>
-            );
-          }
-          const order: "asc" | "desc" = bucketKey === "afgerond" || bucketKey === "verlopen" ? "desc" : "asc";
-          const groups = groupByDateBucket(list, (a) => a.ride.scheduled_at, order, t);
-          return (
-            <div className="space-y-8">
-              {groups.map((g) => (
-                <section key={g.key}>
-                  <header className="flex items-end justify-between mb-3">
-                    <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
-                      {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
-                    </p>
-                  </header>
-                  <ul className="flex flex-col gap-2">{g.items.map(renderItem)}</ul>
-                </section>
-              ))}
-            </div>
-          );
-        };
-
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
-            {([
-              { key: "openstaand" as const, label: t("dash.tabOpen"), list: buckets.openstaand },
-              { key: "geaccepteerd" as const, label: t("dash.tabAccepted"), list: buckets.geaccepteerd },
-              { key: "afgerond" as const, label: t("dash.tabDone"), list: buckets.afgerond },
-            ]).map((s) => (
-              <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
-                <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
-                  <span>{s.label}</span>
-                  <span className="text-brass-deep/80 tabular-nums">({s.list.length})</span>
-                </h2>
-                {renderList(s.list, s.key)}
-              </section>
-            ))}
+            )}
           </div>
         );
       })()}
+
     </div>
   );
 };
