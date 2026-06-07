@@ -1,7 +1,27 @@
 import { useEffect, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AdminUser {
   id: string;
@@ -17,39 +37,37 @@ interface AdminUser {
   rejection_reason: string | null;
 }
 
-const fmtDate = (d: string) =>
-  new Date(d).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" });
-
-const RoleChip = ({ role }: { role: string }) => {
-  const map: Record<string, string> = {
-    admin: "bg-brass-gold text-parchment",
-    opdrachtgever: "bg-patina text-brass-deep",
-    begeleider: "bg-brass-deep/10 text-brass-deep",
-  };
-  return (
-    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 ${map[role] ?? "bg-muted"}`}>
-      {role}
-    </span>
-  );
+const fmtDate = (d: string) => {
+  const date = new Date(d);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
 };
 
-const StatusChip = ({ status }: { status: AdminUser["approval_status"] }) => {
-  const map: Record<string, string> = {
-    pending: "bg-brass-gold/20 text-brass-deep",
-    approved: "bg-emerald-100 text-emerald-800",
-    rejected: "bg-red-100 text-red-800",
-  };
-  const label: Record<string, string> = {
-    pending: "In afwachting",
-    approved: "Goedgekeurd",
-    rejected: "Afgewezen",
-  };
-  const k = status ?? "pending";
-  return (
-    <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 ${map[k]}`}>
-      {label[k]}
-    </span>
-  );
+const statusBadge = (status: AdminUser["approval_status"]) => {
+  const s = status ?? "pending";
+  switch (s) {
+    case "approved":
+      return { className: "bg-green-100 text-green-800 hover:bg-green-100 border-green-200", label: "Goedgekeurd" };
+    case "rejected":
+      return { className: "bg-red-100 text-red-800 hover:bg-red-100 border-red-200", label: "Afgewezen" };
+    default:
+      return { className: "bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200", label: "In afwachting" };
+  }
+};
+
+const roleBadge = (role: string) => {
+  switch (role) {
+    case "admin":
+      return { className: "bg-brass-gold text-brass-deep", label: "Admin" };
+    case "opdrachtgever":
+      return { className: "bg-patina text-brass-deep", label: "Opdrachtgever" };
+    case "begeleider":
+      return { className: "bg-brass-deep/10 text-brass-deep", label: "Begeleider" };
+    default:
+      return { className: "bg-muted text-muted-foreground", label: role };
+  }
 };
 
 const AdminUsers = () => {
@@ -161,9 +179,9 @@ const AdminUsers = () => {
   const pendingCount = users.filter((u) => (u.approval_status ?? "pending") === "pending").length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <header>
-        <h2 className="font-display text-2xl text-brass-deep">Gebruikers & rollen</h2>
+        <h2 className="font-display text-2xl text-brass-deep">Gebruikers &amp; rollen</h2>
         <p className="text-sm text-brass-deep/80 mt-1">
           {users.length} geregistreerde gebruiker{users.length === 1 ? "" : "s"}
           {pendingCount > 0 && (
@@ -177,143 +195,146 @@ const AdminUsers = () => {
           Nieuwe admin toevoegen
         </p>
         <div className="flex gap-2">
-          <input
+          <Input
             type="email"
             value={promoteEmail}
             onChange={(e) => setPromoteEmail(e.target.value)}
             placeholder="email@voorbeeld.nl"
-            className="flex-1 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
+            className="flex-1 h-9"
           />
-          <button
+          <Button
             onClick={promote}
             disabled={busy || !promoteEmail.trim()}
-            className="px-4 py-2 bg-brass-deep text-parchment text-xs uppercase tracking-widest font-semibold hover:bg-brass-gold transition-colors disabled:opacity-50"
+            size="sm"
+            className="h-9 bg-brass-deep text-parchment hover:bg-brass-gold"
           >
             Promoot
-          </button>
+          </Button>
         </div>
         <p className="text-[11px] text-brass-deep/80 mt-2">
           De gebruiker moet al een account hebben.
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3">
-        <input
+      <div className="flex flex-wrap gap-2 items-center">
+        <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+          <SelectTrigger className="w-[180px] h-9">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle</SelectItem>
+            <SelectItem value="pending">In afwachting</SelectItem>
+            <SelectItem value="approved">Goedgekeurd</SelectItem>
+            <SelectItem value="rejected">Afgewezen</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Zoek op naam, e-mail, bedrijf of anoniem ID…"
-          className="flex-1 bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+          className="flex-1 min-w-[240px] h-9"
         />
-        <div className="flex gap-1 bg-brass-deep/10 p-1">
-          {(["all", "pending", "approved", "rejected"] as const).map((k) => (
-            <button
-              key={k}
-              onClick={() => setFilter(k)}
-              className={`text-[10px] uppercase tracking-widest font-bold px-3 py-2 ${filter === k ? "bg-brass-deep text-parchment" : "text-brass-deep hover:bg-parchment"}`}
-            >
-              {k === "all" ? "Alle" : k === "pending" ? "Wacht" : k === "approved" ? "Goedgekeurd" : "Afgewezen"}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-brass-deep/80">Laden…</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-sm text-brass-deep/80">Geen gebruikers gevonden.</p>
-      ) : (
-        <ul className="space-y-px bg-brass-deep/10">
-          {filtered.map((u) => {
-            const isMe = u.id === user?.id;
-            const status = u.approval_status ?? "pending";
-            return (
-              <li key={u.id} className="bg-card p-4 md:p-5">
-                <div className="grid grid-cols-12 gap-3 items-start">
-                  <div className="col-span-12 md:col-span-4">
-                    <p className="font-medium">
-                      {u.full_name || u.email}
-                      {isMe && <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold">jij</span>}
-                    </p>
-                    <p className="text-xs text-brass-deep/80">{u.email}</p>
-                    {u.company_name && (
-                      <p className="text-xs text-brass-deep/80">{u.company_name}</p>
-                    )}
-                    {u.anonymous_id && (
-                      <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">#{u.anonymous_id}</p>
-                    )}
-                    {status === "rejected" && u.rejection_reason && (
-                      <p className="text-[11px] text-red-700 mt-1">Reden: {u.rejection_reason}</p>
-                    )}
-                  </div>
-                  <div className="col-span-6 md:col-span-2 flex flex-wrap gap-1.5 items-start">
-                    <StatusChip status={status} />
-                  </div>
-                  <div className="col-span-6 md:col-span-2 flex flex-wrap gap-1.5 items-start">
-                    {u.roles.length === 0 ? (
-                      <span className="text-xs text-brass-deep/80">geen rol</span>
-                    ) : (
-                      u.roles.map((r) => <RoleChip key={r} role={r} />)
-                    )}
-                  </div>
-                  <div className="col-span-12 md:col-span-4 flex flex-wrap gap-1.5 md:justify-end">
-                    {status !== "approved" && !isMe && (
-                      <button
-                        onClick={() => approve(u.id)}
-                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-emerald-700 text-parchment hover:bg-emerald-800"
-                      >
-                        Goedkeuren
-                      </button>
-                    )}
-                    {status !== "rejected" && !isMe && (
-                      <button
-                        onClick={() => reject(u.id)}
-                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-red-700/40 text-red-700 hover:bg-red-50"
-                      >
-                        Afwijzen
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setRole(u.id, "opdrachtgever")}
-                      className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
-                    >
-                      Opdrachtgever
-                    </button>
-                    <button
-                      onClick={() => setRole(u.id, "begeleider")}
-                      className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
-                    >
-                      Begeleider
-                    </button>
-                    {u.roles.includes("admin") && !isMe && (
-                      <button
-                        onClick={() => revokeAdmin(u.id)}
-                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-red-700/40 text-red-700 hover:bg-red-50"
-                      >
-                        Admin intrekken
-                      </button>
-                    )}
-                    {!isMe && (
-                      <button
-                        onClick={() => removeUser(u.id, u.full_name || u.email)}
-                        className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 bg-red-700 text-parchment hover:bg-red-800"
-                      >
-                        Verwijderen
-                      </button>
-                    )}
-                  </div>
-                  <p className="col-span-12 text-[10px] text-brass-deep/80 tabular-nums">
-                    Aangemaakt {fmtDate(u.created_at)}
-                    {u.approved_at && status === "approved" && (
-                      <> · goedgekeurd {fmtDate(u.approved_at)}</>
-                    )}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="border border-border rounded-md bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Bedrijf</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Anoniem ID</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Aangemaakt</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Status</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Rollen</TableHead>
+              <TableHead className="h-9 w-[60px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+              </TableRow>
+            ) : filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">Geen gebruikers gevonden.</TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((u) => {
+                const isMe = u.id === user?.id;
+                const sb = statusBadge(u.approval_status);
+                return (
+                  <TableRow key={u.id} className="hover:bg-muted/30">
+                    <TableCell className="text-xs py-2 max-w-[200px]">
+                      <p className="font-medium truncate">
+                        {u.full_name || u.email}
+                        {isMe && <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold">jij</span>}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground truncate">{u.email}</p>
+                    </TableCell>
+                    <TableCell className="text-xs py-2 max-w-[160px] truncate">{u.company_name ?? "—"}</TableCell>
+                    <TableCell className="text-xs font-mono tabular-nums py-2">{u.anonymous_id ? `#${u.anonymous_id}` : "—"}</TableCell>
+                    <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(u.created_at)}</TableCell>
+                    <TableCell className="py-2">
+                      <Badge variant="outline" className={`text-[10px] font-semibold uppercase ${sb.className}`}>
+                        {sb.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="flex flex-wrap gap-1">
+                        {u.roles.length === 0 ? (
+                          <span className="text-[10px] text-muted-foreground">geen rol</span>
+                        ) : (
+                          u.roles.map((r) => {
+                            const rb = roleBadge(r);
+                            return (
+                              <span key={r} className={`text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 ${rb.className}`}>
+                                {rb.label}
+                              </span>
+                            );
+                          })
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Meer opties</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuLabel className="text-xs">{u.full_name || u.email}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {u.approval_status !== "approved" && !isMe && (
+                            <DropdownMenuItem className="text-xs" onClick={() => approve(u.id)}>Goedkeuren</DropdownMenuItem>
+                          )}
+                          {u.approval_status !== "rejected" && !isMe && (
+                            <DropdownMenuItem className="text-xs text-destructive focus:text-destructive" onClick={() => reject(u.id)}>Afwijzen</DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-xs" onClick={() => setRole(u.id, "opdrachtgever")}>Rol: Opdrachtgever</DropdownMenuItem>
+                          <DropdownMenuItem className="text-xs" onClick={() => setRole(u.id, "begeleider")}>Rol: Begeleider</DropdownMenuItem>
+                          {u.roles.includes("admin") && !isMe && (
+                            <DropdownMenuItem className="text-xs text-destructive focus:text-destructive" onClick={() => revokeAdmin(u.id)}>Admin intrekken</DropdownMenuItem>
+                          )}
+                          {!isMe && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-xs text-destructive focus:text-destructive" onClick={() => removeUser(u.id, u.full_name || u.email)}>Verwijderen</DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
