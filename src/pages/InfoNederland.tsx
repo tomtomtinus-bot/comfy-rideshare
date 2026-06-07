@@ -3,7 +3,6 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
 import { SeoHead } from "@/components/SeoHead";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -49,38 +48,6 @@ const InfoNederland = () => {
             </div>
           </header>
 
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoNL.highwayTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoNL.highwayHint")}
-              </CardContent>
-            </Card>
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoNL.secondaryTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoNL.secondaryHint")}
-              </CardContent>
-            </Card>
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoNL.convoyTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoNL.convoyHint")}
-              </CardContent>
-            </Card>
-          </section>
 
           <section>
             <Accordion type="multiple" className="w-full">

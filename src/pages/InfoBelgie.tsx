@@ -3,7 +3,6 @@ import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
 import { SeoHead } from "@/components/SeoHead";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -61,38 +60,6 @@ const InfoBelgie = () => {
             </div>
           </header>
 
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoBE.prescriptionsTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoBE.twoRequired")}
-              </CardContent>
-            </Card>
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoBE.bansTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoBE.foot1")}
-              </CardContent>
-            </Card>
-            <Card className="border-input">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold">
-                  {t("infoBE.networksTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {t("infoCommon.officialSources")}
-              </CardContent>
-            </Card>
-          </section>
 
           <section>
             <Accordion type="multiple" className="w-full">
