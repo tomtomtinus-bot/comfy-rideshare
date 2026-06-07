@@ -24,14 +24,14 @@ ViaCust is a specialized European B2B SaaS platform and automated dispatch syste
 
 ## Essential Links
 
-- Homepage: https://viacust.com/
+- [Homepage](https://viacust.com/)
 
-- Privacy Policy (NL): https://viacust.com/privacy
+- [Privacy Policy (NL)](https://viacust.com/privacy)
 
-- Privacy Policy (EN): https://viacust.com/privacy-en
+- [Privacy Policy (EN)](https://viacust.com/privacy-en)
 
-- Datenschutzerklärung (DE): https://viacust.com/datenschutz
+- [Datenschutzerklärung (DE)](https://viacust.com/datenschutz)
 
-- Politique de Confidentialité (FR): https://viacust.com/confidentialite
+- [Politique de Confidentialité (FR)](https://viacust.com/confidentialite)
 
-- Sitemap: https://viacust.com/sitemap.xml
+- [Sitemap](https://viacust.com/sitemap.xml)
