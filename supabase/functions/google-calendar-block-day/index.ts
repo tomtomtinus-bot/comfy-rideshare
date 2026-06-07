@@ -24,8 +24,27 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const date = String(body.date ?? "");
     const title = String(body.title ?? "[ViaCust] Bezet/Verlof");
+    const slots: string[] = Array.isArray(body.slots) ? body.slots : [];
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return new Response(JSON.stringify({ error: "Invalid date (YYYY-MM-DD)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Map of slot id -> [startTime, endTime] in local Europe/Amsterdam time
+    const SLOT_MAP: Record<string, [string, string]> = {
+      night:     ["00:00", "06:00"],
+      morning:   ["06:00", "12:00"],
+      afternoon: ["12:00", "18:00"],
+      evening:   ["18:00", "23:59"],
+    };
+    const SLOT_LABELS: Record<string, string> = {
+      night:     "Nacht",
+      morning:   "Ochtend",
+      afternoon: "Middag",
+      evening:   "Avond",
+    };
+    const chosen = slots.filter((s) => s in SLOT_MAP);
+    if (chosen.length === 0) {
+      return new Response(JSON.stringify({ error: "Geen tijdvak gekozen" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const admin = createClient(
@@ -46,34 +65,40 @@ Deno.serve(async (req) => {
     const accessToken = await ensureFreshToken(admin, tokenRow);
     const calendarId = encodeURIComponent(tokenRow.calendar_id ?? "primary");
 
-    // All-day event: end date is exclusive
-    const start = date;
-    const d = new Date(`${date}T00:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + 1);
-    const end = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    const created: string[] = [];
+    const errors: string[] = [];
 
-    const eventBody = {
-      summary: title,
-      description: "Aangemaakt vanuit ViaCust planner.",
-      start: { date: start },
-      end: { date: end },
-      transparency: "opaque",
-    };
+    for (const slot of chosen) {
+      const [startT, endT] = SLOT_MAP[slot];
+      const eventBody = {
+        summary: `${title} (${SLOT_LABELS[slot]})`,
+        description: "Aangemaakt vanuit ViaCust planner.",
+        start: { dateTime: `${date}T${startT}:00`, timeZone: "Europe/Amsterdam" },
+        end:   { dateTime: `${date}T${endT}:00`,   timeZone: "Europe/Amsterdam" },
+        transparency: "opaque",
+      };
 
-    const resp = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify(eventBody),
-    });
+      const resp = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(eventBody),
+      });
 
-    if (!resp.ok) {
-      const txt = await resp.text();
-      console.error("Block day failed", resp.status, txt);
-      return new Response(JSON.stringify({ error: "Google Agenda weigerde de blokkade", detail: txt }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.error("Block slot failed", slot, resp.status, txt);
+        errors.push(`${slot}: ${txt}`);
+      } else {
+        const j = await resp.json();
+        if (j.id) created.push(j.id);
+      }
     }
 
-    const j = await resp.json();
-    return new Response(JSON.stringify({ ok: true, event_id: j.id }), {
+    if (created.length === 0) {
+      return new Response(JSON.stringify({ error: "Google Agenda weigerde de blokkade", detail: errors.join("; ") }), { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    return new Response(JSON.stringify({ ok: true, event_ids: created, failed: errors }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
@@ -81,3 +106,4 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
+

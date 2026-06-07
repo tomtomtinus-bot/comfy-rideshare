@@ -59,7 +59,15 @@ export const GoogleAgendaStatus = () => {
   const [blockOpen, setBlockOpen] = useState(false);
   const [blockDate, setBlockDate] = useState<string>("");
   const [blockTitle, setBlockTitle] = useState<string>("[ViaCust] Bezet/Verlof");
+  const [blockSlots, setBlockSlots] = useState<string[]>([]);
   const [blocking, setBlocking] = useState(false);
+
+  const SLOTS: { id: string; label: string; time: string }[] = [
+    { id: "night",     label: "Nacht",   time: "00:00 – 06:00" },
+    { id: "morning",   label: "Ochtend", time: "06:00 – 12:00" },
+    { id: "afternoon", label: "Middag",  time: "12:00 – 18:00" },
+    { id: "evening",   label: "Avond",   time: "18:00 – 23:59" },
+  ];
 
   const load = async () => {
     setSyncing(true);
@@ -113,18 +121,33 @@ export const GoogleAgendaStatus = () => {
   const openBlockDialog = (k: string) => {
     setBlockDate(k);
     setBlockTitle("[ViaCust] Bezet/Verlof");
+    setBlockSlots([]);
     setBlockOpen(true);
+  };
+
+  const toggleSlot = (id: string) => {
+    setBlockSlots((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
   };
 
   const submitBlock = async () => {
     if (!blockDate) return;
+    if (blockSlots.length === 0) {
+      toast.error("Kies minimaal één tijdvak");
+      return;
+    }
     setBlocking(true);
     try {
       const { data: res, error } = await supabase.functions.invoke("google-calendar-block-day", {
-        body: { date: blockDate, title: blockTitle || "[ViaCust] Bezet/Verlof" },
+        body: {
+          date: blockDate,
+          title: blockTitle || "[ViaCust] Bezet/Verlof",
+          slots: blockSlots,
+        },
       });
       if (error || (res as any)?.error) throw new Error((res as any)?.error ?? error?.message);
-      toast.success("Dag geblokkeerd in Google Agenda");
+      toast.success("Tijdvak(ken) geblokkeerd in Google Agenda");
       setBlockOpen(false);
       await load();
     } catch (e: any) {
@@ -311,23 +334,50 @@ export const GoogleAgendaStatus = () => {
                 )}.`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-foreground">Titel</label>
-            <Input
-              value={blockTitle}
-              onChange={(e) => setBlockTitle(e.target.value)}
-              placeholder="[ViaCust] Bezet/Verlof"
-            />
-            <p className="text-[11px] text-muted-foreground">
-              Er wordt een hele-dag-afspraak aangemaakt op je gekoppelde agenda.
-            </p>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-foreground">Tijdvakken</label>
+              <div className="grid grid-cols-2 gap-2">
+                {SLOTS.map((s) => {
+                  const active = blockSlots.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleSlot(s.id)}
+                      className={
+                        "text-left rounded-md border px-3 py-2 transition-colors " +
+                        (active
+                          ? "border-primary bg-primary/5 text-foreground"
+                          : "border-input bg-background hover:bg-muted/50 text-foreground")
+                      }
+                    >
+                      <p className="text-sm font-medium">{s.label}</p>
+                      <p className="text-[11px] text-muted-foreground tabular-nums">{s.time}</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Selecteer één of meer dagdelen die je wilt blokkeren.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-foreground">Titel</label>
+              <Input
+                value={blockTitle}
+                onChange={(e) => setBlockTitle(e.target.value)}
+                placeholder="[ViaCust] Bezet/Verlof"
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" size="sm" onClick={() => setBlockOpen(false)} disabled={blocking}>
               Annuleren
             </Button>
-            <Button size="sm" onClick={submitBlock} disabled={blocking}>
-              {blocking ? "Bezig…" : "Blokkeer dag"}
+            <Button size="sm" onClick={submitBlock} disabled={blocking || blockSlots.length === 0}>
+              {blocking ? "Bezig…" : `Blokkeer ${blockSlots.length || ""}`.trim() + (blockSlots.length > 1 ? " tijdvakken" : blockSlots.length === 1 ? " tijdvak" : "")}
             </Button>
           </DialogFooter>
         </DialogContent>
