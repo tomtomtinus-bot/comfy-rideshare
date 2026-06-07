@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     // Verify caller owns this ride (skipped for service-role)
     const { data: ride } = await admin
       .from('rides')
-      .select('id, client_id, pickup_city, dropoff_city, scheduled_at')
+      .select('id, ride_number, client_id, pickup_city, dropoff_city, scheduled_at')
       .eq('id', rideId)
       .maybeSingle()
     if (!ride || (!isServiceRole && ride.client_id !== userId)) {
