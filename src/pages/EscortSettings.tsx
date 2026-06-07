@@ -493,27 +493,27 @@ const Inner = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.fullName")}</Label>
-                    <input
+                    <BaseInput
                       value={fullName}
                       onChange={(e) => { setFullName(e.target.value); setDirty(true); }}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                   <div>
                     <Label>{t("escortSettings.phone")}</Label>
-                    <input
+                    <BaseInput
                       type="tel"
                       value={phone}
                       onChange={(e) => { setPhone(e.target.value); setDirty(true); }}
-                      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+                      className="mt-1"
                     />
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-start justify-between gap-4 border-t border-brass-deep/10 pt-4">
+                <div className="mt-4 flex items-start justify-between gap-4 border-t border-border pt-4">
                   <div>
                     <Label>Ik ben een bedrijf met meerdere chauffeurs</Label>
-                    <p className="text-[11px] text-brass-deep/70 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Schakel dit in als je onder je bedrijfsnaam meerdere chauffeurs wil laten rijden. Je krijgt dan toegang tot "Mijn team" waar je chauffeurs kunt uitnodigen en seats kunt beheren.
                     </p>
                   </div>
@@ -525,8 +525,8 @@ const Inner = () => {
               </section>
 
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
-                <p className="text-[11px] text-brass-deep/80 italic">{t("escortSettings.baseLocationHint")}</p>
+                <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
+                <p className="text-xs text-muted-foreground">{t("escortSettings.baseLocationHint")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.postcode")}</Label>
