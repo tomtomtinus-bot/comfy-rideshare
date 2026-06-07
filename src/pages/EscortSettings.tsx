@@ -757,7 +757,7 @@ const Inner = () => {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{children}</label>
+  <label className="text-sm font-medium text-foreground">{children}</label>
 );
 
 const Input = ({
@@ -775,12 +775,12 @@ const Input = ({
 }) => (
   <div>
     <Label>{label}</Label>
-    <input
+    <BaseInput
       name={name}
       type={type}
       step={step}
       defaultValue={defaultValue}
-      className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+      className="mt-1"
     />
   </div>
 );
@@ -797,9 +797,12 @@ const Toggle = ({
   <button
     type="button"
     onClick={onClick}
-    className={`px-3 py-2 text-xs uppercase tracking-widest font-semibold border ${
-      on ? "bg-brass-deep text-parchment border-brass-deep" : "bg-card text-brass-deep/70 border-brass-deep/15"
-    }`}
+    className={cn(
+      "px-3 py-2 text-xs font-medium rounded-md border transition-colors",
+      on
+        ? "bg-primary text-primary-foreground border-primary"
+        : "bg-background text-muted-foreground border-input hover:border-muted-foreground/50"
+    )}
   >
     {children}
   </button>
