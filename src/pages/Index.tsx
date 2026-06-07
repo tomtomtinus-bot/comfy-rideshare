@@ -47,6 +47,26 @@ const Index = () => {
         title="ViaCust | Digitaal dispatchplatform voor uitzonderlijk vervoer"
         description="Het alles-in-één dispatchplatform voor planners en begeleiders van uitzonderlijk vervoer. Automatiseer ritten, planningen en vergunningen in heel Europa."
         canonical="https://viacust.com/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "ViaCust",
+            url: "https://viacust.com/",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "ViaCust",
+            url: "https://viacust.com",
+            logo: "https://viacust.com/og-image-v5.jpg",
+            contactPoint: {
+              "@type": "ContactPoint",
+              email: "info@viacust.com",
+              contactType: "customer service",
+            },
+          },
+        ]}
       />
       <Nav />
 
