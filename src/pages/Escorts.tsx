@@ -39,7 +39,7 @@ const Escorts = () => {
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-brass-gold tabular-nums">
                     <Star className="size-3.5 fill-brass-gold" strokeWidth={0} />
                     {e.rating.toFixed(1)}
-                    <span className="text-brass-deep/40 font-normal">
+                    <span className="text-brass-deep/80 font-normal">
                       · {e.ridesCompleted} ritten
                     </span>
                   </div>
@@ -47,30 +47,30 @@ const Escorts = () => {
                 <h2 className="font-display text-2xl text-brass-deep leading-tight mb-2">
                   Begeleider #{e.anonymousId}
                 </h2>
-                <p className="text-sm text-brass-deep/60 flex items-center gap-1.5 mb-2">
+                <p className="text-sm text-brass-deep/80 flex items-center gap-1.5 mb-2">
                   <MapPin className="size-3.5" />
                   Standplaats {e.city}, {e.country}
                 </p>
-                <p className="text-xs text-brass-deep/55 flex items-center gap-1.5 mb-6">
+                <p className="text-xs text-brass-deep/80 flex items-center gap-1.5 mb-6">
                   <Truck className="size-3.5" />
                   {e.pilotVehicle.type}
                 </p>
 
                 <div className="space-y-3 text-sm border-t border-brass-deep/10 pt-5 mt-auto">
                   <div className="flex justify-between">
-                    <span className="text-brass-deep/55 uppercase tracking-widest text-[10px] font-bold">
+                    <span className="text-brass-deep/80 uppercase tracking-widest text-[10px] font-bold">
                       Uurtarief
                     </span>
                     <span className="font-semibold tabular-nums">€{e.hourlyRate}/uur</span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-brass-deep/55 uppercase tracking-widest text-[10px] font-bold shrink-0">
+                    <span className="text-brass-deep/80 uppercase tracking-widest text-[10px] font-bold shrink-0">
                       Categorieën
                     </span>
                     <span className="font-medium text-right">{e.categories.join(" · ")}</span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-brass-deep/55 uppercase tracking-widest text-[10px] font-bold shrink-0">
+                    <span className="text-brass-deep/80 uppercase tracking-widest text-[10px] font-bold shrink-0">
                       Landen
                     </span>
                     <span className="font-medium text-right text-xs">{e.countries.join(" · ")}</span>

@@ -860,7 +860,7 @@ const RequestRideInner = () => {
             <details open className="group border border-brass-deep/15 bg-card">
               <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("request.route")}</p>
-                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+                <span className="text-brass-deep/80 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="px-5 pb-5 pt-2">
               <p className="text-[12px] text-brass-deep/80 bg-parchment/60 border border-brass-deep/15 px-3 py-2 mb-4">
@@ -868,7 +868,7 @@ const RequestRideInner = () => {
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.pickup")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-3">{t("request.pickup")}</p>
                   <AddressAutocomplete
                     label={t("request.addrLabel")}
                     value={form.pickup_address}
@@ -877,18 +877,18 @@ const RequestRideInner = () => {
                     placeholder={t("request.pickupPlaceholder")}
                   />
                   {pickupGeo && (
-                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
+                    <p className="text-[11px] text-brass-deep/80 mt-1">📍 {pickupGeo.city}, {pickupGeo.country}</p>
                   )}
                   <button
                     type="button"
                     onClick={() => setPickerTarget({ kind: "main-pickup" })}
-                    className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                    className="mt-1 text-[11px] text-brass-deep/80 hover:text-brass-gold underline-offset-2 hover:underline"
                   >
                     Op kaart kiezen of coördinaten invoeren
                   </button>
                 </div>
                 <div className="bg-parchment/40 p-4 border border-brass-deep/10">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-3">{t("request.dropoff")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-3">{t("request.dropoff")}</p>
                   <AddressAutocomplete
                     label={t("request.addrLabel")}
                     value={form.dropoff_address}
@@ -897,12 +897,12 @@ const RequestRideInner = () => {
                     placeholder={t("request.dropoffPlaceholder")}
                   />
                   {dropoffGeo && (
-                    <p className="text-[11px] text-brass-deep/60 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
+                    <p className="text-[11px] text-brass-deep/80 mt-1">📍 {dropoffGeo.city}, {dropoffGeo.country}</p>
                   )}
                   <button
                     type="button"
                     onClick={() => setPickerTarget({ kind: "main-dropoff" })}
-                    className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                    className="mt-1 text-[11px] text-brass-deep/80 hover:text-brass-gold underline-offset-2 hover:underline"
                   >
                     Op kaart kiezen of coördinaten invoeren
                   </button>
@@ -913,15 +913,15 @@ const RequestRideInner = () => {
                 const min = travelMinutes(km);
                 return (
                   <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">
                       {t("request.estDuration")}
                     </p>
                     <p className="text-sm text-brass-deep">
                       <strong className="tabular-nums">{Math.round(km)} km</strong> ·{" "}
                       <strong className="tabular-nums">{fmtHours(min)}</strong>{" "}
-                      <span className="text-brass-deep/55">{t("request.speedHint")}</span>
+                      <span className="text-brass-deep/80">{t("request.speedHint")}</span>
                     </p>
-                    <p className="text-[11px] text-brass-deep/55 italic mt-1">
+                    <p className="text-[11px] text-brass-deep/80 italic mt-1">
                       Aan deze geschatte rijtijd kunnen geen rechten worden ontleend.
                     </p>
                   </div>
@@ -936,7 +936,7 @@ const RequestRideInner = () => {
                   onChange={(v) => setForm({ ...form, scheduled_date: v })}
                 />
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.timeQuarter")}</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("request.timeQuarter")}</label>
                   <input
                     type="time"
                     step={900}
@@ -947,7 +947,7 @@ const RequestRideInner = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.numEscorts")}</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("request.numEscorts")}</label>
                   <div className="mt-1 flex items-stretch border border-brass-deep/15 bg-parchment">
                     <button
                       type="button"
@@ -981,9 +981,9 @@ const RequestRideInner = () => {
             <details className="group border border-brass-deep/15 bg-card">
               <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                  Aansluitende ritten <span className="text-brass-deep/40 normal-case tracking-normal font-normal">(optioneel{extraLegs.length > 0 ? ` · ${extraLegs.length}` : ""})</span>
+                  Aansluitende ritten <span className="text-brass-deep/80 normal-case tracking-normal font-normal">(optioneel{extraLegs.length > 0 ? ` · ${extraLegs.length}` : ""})</span>
                 </p>
-                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+                <span className="text-brass-deep/80 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="px-5 pb-5 pt-2">
               <div className="flex items-center justify-end mb-4">
@@ -992,7 +992,7 @@ const RequestRideInner = () => {
                 </button>
               </div>
               {extraLegs.length === 0 ? (
-                <p className="text-xs text-brass-deep/55">
+                <p className="text-xs text-brass-deep/80">
                   Voeg vervolgritten toe als er direct aansluitend nog meer ritten gereden worden. Aansluitende ritten kunnen met andere chauffeurs, bedrijven of ontheffingen zijn. Begeleidingstijd loopt door van start rit 1 tot einde laatste rit.
                 </p>
               ) : (
@@ -1000,17 +1000,17 @@ const RequestRideInner = () => {
                   {extraLegs.map((leg, i) => (
                     <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Rit {i + 2}</p>
                         <button
                           type="button"
                           onClick={() => removeExtraLeg(i)}
-                          className="text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                          className="text-brass-deep/80 hover:text-red-700 text-lg leading-none"
                           aria-label="Verwijder rit"
                         >×</button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Vertrek</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">Vertrek</p>
                           <AddressAutocomplete
                             label={t("request.addrLabel")}
                             value={leg.pickup_address}
@@ -1022,18 +1022,18 @@ const RequestRideInner = () => {
                             placeholder={t("request.pickupPlaceholder")}
                           />
                           {leg.pickup && (
-                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
+                            <p className="text-[11px] text-brass-deep/80 mt-1">📍 {leg.pickup.city}, {leg.pickup.country}</p>
                           )}
                           <button
                             type="button"
                             onClick={() => setPickerTarget({ kind: "extra-pickup", index: i })}
-                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                            className="mt-1 text-[11px] text-brass-deep/80 hover:text-brass-gold underline-offset-2 hover:underline"
                           >
                             Op kaart of coördinaten
                           </button>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">Bestemming</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">Bestemming</p>
                           <AddressAutocomplete
                             label={t("request.addrLabel")}
                             value={leg.dropoff_address}
@@ -1045,12 +1045,12 @@ const RequestRideInner = () => {
                             placeholder={t("request.dropoffPlaceholder")}
                           />
                           {leg.dropoff && (
-                            <p className="text-[11px] text-brass-deep/60 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
+                            <p className="text-[11px] text-brass-deep/80 mt-1">📍 {leg.dropoff.city}, {leg.dropoff.country}</p>
                           )}
                           <button
                             type="button"
                             onClick={() => setPickerTarget({ kind: "extra-dropoff", index: i })}
-                            className="mt-1 text-[11px] text-brass-deep/55 hover:text-brass-gold underline-offset-2 hover:underline"
+                            className="mt-1 text-[11px] text-brass-deep/80 hover:text-brass-gold underline-offset-2 hover:underline"
                           >
                             Op kaart of coördinaten
                           </button>
@@ -1065,7 +1065,7 @@ const RequestRideInner = () => {
                           onChange={(v) => updateExtraLeg(i, { scheduled_date: v, end_date: leg.end_date || v })}
                         />
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Starttijd</label>
                           <input
                             type="time"
                             value={leg.scheduled_time}
@@ -1082,7 +1082,7 @@ const RequestRideInner = () => {
                           onChange={(v) => updateExtraLeg(i, { end_date: v })}
                         />
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Eindtijd</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Eindtijd</label>
                           <input
                             type="time"
                             value={leg.end_time}
@@ -1099,14 +1099,14 @@ const RequestRideInner = () => {
                         const durMin = !isNaN(sMs) && !isNaN(eMs) && eMs > sMs ? Math.round((eMs - sMs) / 60_000) : null;
                         if (km == null && durMin == null) return null;
                         return (
-                          <p className="mt-3 text-[11px] text-brass-deep/60">
+                          <p className="mt-3 text-[11px] text-brass-deep/80">
                             {km != null && (<><strong className="tabular-nums">{Math.round(km)} km</strong> · geschatte rijduur <strong className="tabular-nums">{fmtHours(travelMinutes(km))}</strong></>)}
                             {durMin != null && (<> · ingevulde duur <strong className="tabular-nums">{fmtHours(durMin)}</strong></>)}
                           </p>
                         );
                       })()}
                       <div className="mt-4">
-                        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold block mb-1">Vergunningnummer (optioneel)</label>
+                        <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold block mb-1">Vergunningnummer (optioneel)</label>
                         <input
                           type="text"
                           value={leg.permit_number}
@@ -1117,7 +1117,7 @@ const RequestRideInner = () => {
                       </div>
                       <div className="mt-4">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs (optioneel)</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Chauffeurs (optioneel)</p>
                           <button
                             type="button"
                             onClick={() => updateExtraLeg(i, { drivers: [...leg.drivers, { name: "", phone: "" }] })}
@@ -1125,7 +1125,7 @@ const RequestRideInner = () => {
                           >+ Toevoegen</button>
                         </div>
                         {leg.drivers.length === 0 ? (
-                          <p className="text-[11px] text-brass-deep/40 italic">Geen chauffeurs toegevoegd.</p>
+                          <p className="text-[11px] text-brass-deep/80 italic">Geen chauffeurs toegevoegd.</p>
                         ) : (
                           <ul className="space-y-2">
                             {leg.drivers.map((d, di) => (
@@ -1145,7 +1145,7 @@ const RequestRideInner = () => {
                                 <button
                                   type="button"
                                   onClick={() => updateExtraLeg(i, { drivers: leg.drivers.filter((_, j) => j !== di) })}
-                                  className="px-2 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                                  className="px-2 text-brass-deep/80 hover:text-red-700 text-lg leading-none"
                                   aria-label="Verwijder chauffeur"
                                 >×</button>
                               </li>
@@ -1164,12 +1164,12 @@ const RequestRideInner = () => {
                 const totalMin = Math.round((legs[legs.length - 1].endMs - legs[0].startMs) / 60_000);
                 return (
                   <div className="mt-4 bg-brass-gold/10 border border-brass-gold/30 px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">
                       Totale begeleidingstijd ({legs.length} ritten)
                     </p>
                     <p className="text-sm text-brass-deep">
                       <strong className="tabular-nums">{fmtHours(totalMin)}</strong>{" "}
-                      <span className="text-brass-deep/55">van start rit 1 tot einde rit {legs.length} (excl. aanrij- en terugreistijd begeleider)</span>
+                      <span className="text-brass-deep/80">van start rit 1 tot einde rit {legs.length} (excl. aanrij- en terugreistijd begeleider)</span>
                     </p>
                   </div>
                 );
@@ -1179,8 +1179,8 @@ const RequestRideInner = () => {
 
             <details className="group border border-brass-deep/15 bg-card">
               <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
-                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("request.cargoSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
-                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("request.cargoSection")} <span className="text-brass-deep/80 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
+                <span className="text-brass-deep/80 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="px-5 pb-5 pt-2">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1190,7 +1190,7 @@ const RequestRideInner = () => {
                 <Input label={t("request.weight")} inputMode="numeric" value={form.cargo_weight_t} onChange={(v) => setForm({ ...form, cargo_weight_t: v })} placeholder="bv. 60" />
               </div>
               <div className="mt-4">
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                   {t("request.permitLabel")}
                 </label>
                 {!uploadedPermit ? (
@@ -1230,7 +1230,7 @@ const RequestRideInner = () => {
                         {uploadedPermit.permit_number}
                         {uploadedPermit.carrier ? ` · ${uploadedPermit.carrier}` : ""}
                       </p>
-                      <p className="text-[11px] text-brass-deep/60">
+                      <p className="text-[11px] text-brass-deep/80">
                         {t("request.permitAttached")}
                       </p>
                     </div>
@@ -1245,7 +1245,7 @@ const RequestRideInner = () => {
                   </div>
                 )}
               </div>
-              <p className="text-[11px] text-brass-deep/50 mt-1">{t("request.permitUploadHint")}</p>
+              <p className="text-[11px] text-brass-deep/80 mt-1">{t("request.permitUploadHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
                 <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
@@ -1268,7 +1268,7 @@ const RequestRideInner = () => {
                 if (!beInvolved) return null;
                 return (
                   <div className="mt-4 p-4 border border-brass-gold/40 bg-brass-gold/5">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                       Type begeleider België (vereist)
                     </label>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -1294,7 +1294,7 @@ const RequestRideInner = () => {
                         );
                       })}
                     </div>
-                    <p className="text-[10px] text-brass-deep/60 mt-2">
+                    <p className="text-[10px] text-brass-deep/80 mt-2">
                       Een Type 2 begeleider mag ook Type 1-ritten uitvoeren — andersom niet.
                     </p>
                   </div>
@@ -1306,22 +1306,22 @@ const RequestRideInner = () => {
             <details className="group border border-brass-deep/15 bg-card">
               <summary className="cursor-pointer list-none flex items-center justify-between px-5 py-4 hover:bg-parchment/40">
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">
-                  {t("request.driversSection")} <span className="text-brass-deep/40 normal-case tracking-normal font-normal">({t("common.optional")})</span>
+                  {t("request.driversSection")} <span className="text-brass-deep/80 normal-case tracking-normal font-normal">({t("common.optional")})</span>
                 </p>
-                <span className="text-brass-deep/50 text-xs transition-transform group-open:rotate-180">▼</span>
+                <span className="text-brass-deep/80 text-xs transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="px-5 pb-5 pt-2">
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.drivers")}</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("request.drivers")}</label>
                     <button type="button" onClick={addDriver} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
                       {t("request.addDriver")}
                     </button>
                   </div>
                   {drivers.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">{t("request.driversHint")}</p>
+                    <p className="text-xs text-brass-deep/80">{t("request.driversHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {drivers.map((d, i) => (
@@ -1346,7 +1346,7 @@ const RequestRideInner = () => {
                             type="button"
                             onClick={() => removeDriver(i)}
                             aria-label={t("request.removeDriver")}
-                            className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                            className="col-span-1 text-brass-deep/80 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
                       ))}
@@ -1356,13 +1356,13 @@ const RequestRideInner = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.plates")}</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("request.plates")}</label>
                     <button type="button" onClick={addPlate} className="text-xs uppercase tracking-widest font-semibold text-brass-deep hover:text-brass-gold">
                       {t("request.addPlate")}
                     </button>
                   </div>
                   {licensePlates.length === 0 ? (
-                    <p className="text-xs text-brass-deep/45">{t("request.platesHint")}</p>
+                    <p className="text-xs text-brass-deep/80">{t("request.platesHint")}</p>
                   ) : (
                     <ul className="space-y-2">
                       {licensePlates.map((p, i) => (
@@ -1379,7 +1379,7 @@ const RequestRideInner = () => {
                             type="button"
                             onClick={() => removePlate(i)}
                             aria-label={t("request.removePlate")}
-                            className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                            className="col-span-1 text-brass-deep/80 hover:text-red-700 text-lg leading-none"
                           >×</button>
                         </li>
                       ))}
@@ -1392,7 +1392,7 @@ const RequestRideInner = () => {
 
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{t("request.notes")}</label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{t("request.notes")}</label>
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -1402,10 +1402,10 @@ const RequestRideInner = () => {
             </div>
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                 Bijlagen (optioneel)
               </label>
-              <p className="text-xs text-brass-deep/60 mt-1">
+              <p className="text-xs text-brass-deep/80 mt-1">
                 Voeg extra documenten of foto's toe (bijv. tekeningen, route-instructies). Max. 10 MB per bestand.
               </p>
               <input
@@ -1430,12 +1430,12 @@ const RequestRideInner = () => {
                   {attachments.map((f, i) => (
                     <li key={i} className="flex items-center justify-between gap-2 text-xs bg-parchment border border-brass-deep/10 px-3 py-2">
                       <span className="truncate">
-                        {f.name} <span className="text-brass-deep/50">({(f.size / 1024).toFixed(0)} KB)</span>
+                        {f.name} <span className="text-brass-deep/80">({(f.size / 1024).toFixed(0)} KB)</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => setAttachments((prev) => prev.filter((_, idx) => idx !== i))}
-                        className="text-brass-deep/60 hover:text-destructive font-bold"
+                        className="text-brass-deep/80 hover:text-destructive font-bold"
                       >
                         ×
                       </button>
@@ -1463,7 +1463,7 @@ const RequestRideInner = () => {
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-brass-deep">Automatisch — laat ViaCust de beste match kiezen</p>
-                    <p className="text-xs text-brass-deep/65 leading-relaxed mt-1">
+                    <p className="text-xs text-brass-deep/80 leading-relaxed mt-1">
                       Alle geschikte begeleiders krijgen tegelijk een uitnodiging. Binnen 5 minuten
                       na de eerste beschikbaarheidsmelding wordt de best passende begeleider gekozen
                       op basis van afstand, beoordeling en eerdere samenwerking.
@@ -1483,7 +1483,7 @@ const RequestRideInner = () => {
                   />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-brass-deep">Zelf begeleider kiezen</p>
-                    <p className="text-xs text-brass-deep/65 leading-relaxed mt-1">
+                    <p className="text-xs text-brass-deep/80 leading-relaxed mt-1">
                       Je krijgt een lijst met geschikte begeleiders en kiest zelf wie je wilt
                       uitnodigen.
                     </p>
@@ -1612,14 +1612,14 @@ const Matches = ({
     <section className="mt-12">
       <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">{t("request.matchesKicker")}</p>
       <h2 className="font-display text-3xl text-brass-deep italic mb-2">{t("request.matchesTitle")}</h2>
-      <p className="text-sm text-brass-deep/60 mb-6">
+      <p className="text-sm text-brass-deep/80 mb-6">
         <Trans i18nKey="request.matchesBody" values={{ n: numWanted }} components={{ strong: <strong /> }} />
       </p>
 
       {availableMatches.length === 0 ? (
         <div className="space-y-2">
-          <p className="text-sm text-brass-deep/60">{t("request.noMatches")}</p>
-          <p className="text-xs text-brass-deep/50">
+          <p className="text-sm text-brass-deep/80">{t("request.noMatches")}</p>
+          <p className="text-xs text-brass-deep/80">
             Geen geschikte begeleiders gevonden?{" "}
             <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
               support@viacust.com
@@ -1717,10 +1717,10 @@ const FuelSurchargeDialog = ({
           </DialogDescription>
         </DialogHeader>
         {tiers.length === 0 ? (
-          <p className="text-sm text-brass-deep/60">Geen drempels opgegeven.</p>
+          <p className="text-sm text-brass-deep/80">Geen drempels opgegeven.</p>
         ) : (
           <div className="border border-brass-deep/15">
-            <div className="grid grid-cols-12 text-[10px] uppercase tracking-widest font-bold text-brass-deep/55 bg-parchment px-3 py-2 border-b border-brass-deep/15">
+            <div className="grid grid-cols-12 text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 bg-parchment px-3 py-2 border-b border-brass-deep/15">
               <div className="col-span-8">Dieselprijs / liter</div>
               <div className="col-span-4 text-right">{isPercent ? "% uurtarief" : "€ / uur"}</div>
             </div>
@@ -1736,7 +1736,7 @@ const FuelSurchargeDialog = ({
             </ul>
           </div>
         )}
-        <p className="text-[11px] text-brass-deep/55 leading-relaxed">
+        <p className="text-[11px] text-brass-deep/80 leading-relaxed">
           De toeslag wordt berekend op basis van de wekelijkse dieselprijs van het land waarin
           gereden wordt en verschijnt als aparte regel op de factuur.
         </p>
@@ -1759,7 +1759,7 @@ const Input = ({
   min?: string;
 }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
+    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{label}</label>
     <input
       type={type} value={value} placeholder={placeholder} step={step} inputMode={inputMode} min={min}
       onChange={(e) => onChange(e.target.value)}

@@ -52,7 +52,7 @@ const AdminLayoutInner = () => {
                           className={`flex items-center gap-3 px-5 py-4 text-sm uppercase tracking-widest font-semibold border-l-2 transition-colors ${
                             active
                               ? "border-brass-gold text-brass-deep bg-parchment"
-                              : "border-transparent text-brass-deep/60 hover:text-brass-deep hover:bg-parchment/50"
+                              : "border-transparent text-brass-deep/80 hover:text-brass-deep hover:bg-parchment/50"
                           }`}
                         >
                           <it.icon className="size-4" />

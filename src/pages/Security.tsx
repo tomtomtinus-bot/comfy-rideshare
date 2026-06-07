@@ -126,7 +126,7 @@ const Security = () => {
               <div className="flex items-center justify-between p-4 border border-brass-deep/15">
                 <div>
                   <div className="text-sm font-semibold text-brass-deep">{t("security.active")}</div>
-                  <div className="text-xs text-brass-deep/60">
+                  <div className="text-xs text-brass-deep/80">
                     {t("security.sessionStatus")} {aal === "aal2" ? t("security.verifiedAal2") : t("security.notVerifiedSession")}
                   </div>
                 </div>
@@ -184,13 +184,13 @@ const Security = () => {
                 <div className="flex justify-center bg-white p-4 border border-brass-deep/15">
                   <img src={enroll.qr} alt={t("security.qrAlt")} className="w-48 h-48" />
                 </div>
-                <p className="mt-3 text-xs text-brass-deep/65">
+                <p className="mt-3 text-xs text-brass-deep/80">
                   {t("security.orManual")}{" "}
                   <code className="bg-parchment px-2 py-1 break-all">{enroll.secret}</code>
                 </p>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                   {t("security.enter6")}
                 </label>
                 <input

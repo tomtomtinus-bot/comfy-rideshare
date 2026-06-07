@@ -189,7 +189,7 @@ const ResetPassword = () => {
                 Tweestapsverificatie is actief op dit account. Voer de 6-cijferige code uit je authenticator-app in om je nieuwe wachtwoord op te slaan.
               </p>
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Verificatiecode</label>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Verificatiecode</label>
                 <input
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
@@ -206,11 +206,11 @@ const ResetPassword = () => {
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Nieuw wachtwoord</label>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Nieuw wachtwoord</label>
                 <input name="password" type="password" required minLength={8} className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Bevestig wachtwoord</label>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Bevestig wachtwoord</label>
                 <input name="confirm" type="password" required minLength={8} className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold" />
               </div>
               <button disabled={busy} className="w-full mt-6 px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60">

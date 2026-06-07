@@ -14,7 +14,7 @@ export const RidesBoard = () => {
             <h2 className="font-display text-4xl md:text-5xl text-brass-deep">
               Geplande transporten
             </h2>
-            <p className="text-brass-deep/60 mt-3">
+            <p className="text-brass-deep/80 mt-3">
               Actueel overzicht van convoi-aanvragen die op een begeleider wachten.
             </p>
           </div>
@@ -24,7 +24,7 @@ export const RidesBoard = () => {
           </div>
         </header>
 
-        <div className="hidden lg:grid grid-cols-12 items-center px-8 pb-3 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+        <div className="hidden lg:grid grid-cols-12 items-center px-8 pb-3 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
           <div className="col-span-2">Vertrek</div>
           <div className="col-span-3">Route</div>
           <div className="col-span-3">Lading</div>
@@ -39,17 +39,17 @@ export const RidesBoard = () => {
               className="group grid grid-cols-12 gap-y-4 items-center py-6 px-6 md:px-8 bg-card shadow-etched hover:shadow-elevated hover:bg-parchment transition-all duration-300 cursor-pointer"
             >
               <div className="col-span-6 lg:col-span-2">
-                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/50 mb-1">Vertrek</p>
+                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/80 mb-1">Vertrek</p>
                 <p className="font-medium tabular-nums">{ride.date}, {ride.time}</p>
                 <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mt-1">{ride.category}</p>
               </div>
               <div className="col-span-12 lg:col-span-3 order-3 lg:order-none">
-                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/50 mb-1">Route</p>
+                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/80 mb-1">Route</p>
                 <p className="font-medium">{ride.from} <span className="text-brass-gold mx-1">→</span> {ride.to}</p>
-                <p className="text-sm text-brass-deep/55 mt-1 line-clamp-1">{ride.note}</p>
+                <p className="text-sm text-brass-deep/80 mt-1 line-clamp-1">{ride.note}</p>
               </div>
               <div className="col-span-12 lg:col-span-3 order-4 lg:order-none">
-                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/50 mb-1">Lading</p>
+                <p className="lg:hidden text-[10px] uppercase tracking-widest text-brass-deep/80 mb-1">Lading</p>
                 <p className="font-medium tabular-nums text-sm">{ride.cargo}</p>
               </div>
               <div className="col-span-12 lg:col-span-2 flex items-center gap-3 order-5 lg:order-none">
@@ -62,7 +62,7 @@ export const RidesBoard = () => {
                 <span
                   className={cn(
                     "inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest",
-                    ride.status === "available" ? "text-brass-gold" : "text-brass-deep/40"
+                    ride.status === "available" ? "text-brass-gold" : "text-brass-deep/80"
                   )}
                 >
                   <span

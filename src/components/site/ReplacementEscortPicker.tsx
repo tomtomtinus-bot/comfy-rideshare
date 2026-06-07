@@ -141,9 +141,9 @@ export const ReplacementEscortPicker = ({
           </DialogDescription>
         </DialogHeader>
         {loading ? (
-          <p className="text-sm text-brass-deep/60 py-8 text-center">Beschikbare begeleiders laden…</p>
+          <p className="text-sm text-brass-deep/80 py-8 text-center">Beschikbare begeleiders laden…</p>
         ) : candidates.length === 0 ? (
-          <p className="text-sm text-brass-deep/60 py-8 text-center">
+          <p className="text-sm text-brass-deep/80 py-8 text-center">
             Geen beschikbare begeleiders gevonden. Probeer "Automatisch zoeken".
           </p>
         ) : (
@@ -154,7 +154,7 @@ export const ReplacementEscortPicker = ({
                   <p className="font-medium text-sm">
                     Begeleider #{c.anonymous_id ?? "—"}
                   </p>
-                  <p className="text-xs text-brass-deep/60 mt-0.5">
+                  <p className="text-xs text-brass-deep/80 mt-0.5">
                     {c.base_city ?? "—"} · {c.vehicle_type ?? "—"} · €{Number(c.hourly_rate ?? 0).toFixed(2)}/u ·{" "}
                     ★ {Number(c.rating ?? 0).toFixed(1)} ({c.rides_completed ?? 0})
                   </p>

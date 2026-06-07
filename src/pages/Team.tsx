@@ -72,7 +72,7 @@ const TeamInner = () => {
   useEffect(() => { void load(); }, [companyId]);
 
   if (companyLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-brass-deep/60">{t("common.loading", { defaultValue: "Laden…" })}</div>;
+    return <div className="min-h-screen flex items-center justify-center text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</div>;
   }
   if (role !== "begeleider" || !isPlanner) {
     return <Navigate to="/dashboard" replace />;
@@ -124,7 +124,7 @@ const TeamInner = () => {
       <Nav />
       <main className="max-w-5xl mx-auto px-6 md:px-8 py-12">
         <div className="mb-10">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-brass-deep/50 mb-2">{t("team.kicker")}</p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-brass-deep/80 mb-2">{t("team.kicker")}</p>
           <h1 className="font-display text-4xl text-brass-deep mb-2">{t("team.title")}</h1>
           <p className="text-sm text-brass-deep/70">{t("team.intro")}</p>
         </div>
@@ -132,9 +132,9 @@ const TeamInner = () => {
         <section className="bg-white border border-brass-deep/10 p-6 mb-8">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-brass-deep/50">{t("team.company")}</p>
+              <p className="text-[11px] uppercase tracking-widest text-brass-deep/80">{t("team.company")}</p>
               <p className="text-xl text-brass-deep font-semibold">{company?.name ?? "—"}</p>
-              <p className="text-xs text-brass-deep/60 mt-1">
+              <p className="text-xs text-brass-deep/80 mt-1">
                 {t("team.seatsUsedLabel")} <strong>{seatsUsed}</strong> / {seatsAvailable}
                 {seatsLeft > 0 ? ` ${t("team.seatsFree", { n: seatsLeft })}` : ` ${t("team.seatsLimitReached")}`}
               </p>
@@ -225,18 +225,18 @@ const TeamInner = () => {
         )}
 
         <section className="mb-10">
-          <h2 className="text-sm uppercase tracking-widest text-brass-deep/60 mb-3">{t("team.activeDrivers")}</h2>
+          <h2 className="text-sm uppercase tracking-widest text-brass-deep/80 mb-3">{t("team.activeDrivers")}</h2>
           {loading ? (
-            <p className="text-sm text-brass-deep/60">{t("common.loading", { defaultValue: "Laden…" })}</p>
+            <p className="text-sm text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : driverMembers.length === 0 ? (
-            <p className="text-sm text-brass-deep/60 italic">{t("team.noDrivers")}</p>
+            <p className="text-sm text-brass-deep/80 italic">{t("team.noDrivers")}</p>
           ) : (
             <div className="border border-brass-deep/10 bg-white divide-y divide-brass-deep/10">
               {driverMembers.map((m) => (
                 <div key={m.id} className="flex items-center justify-between px-4 py-3">
                   <div>
                     <p className="font-medium text-brass-deep">{m.full_name || t("team.driverFallback")}</p>
-                    <p className="text-xs text-brass-deep/55">{t("team.joinedOn", { date: new Date(m.joined_at).toLocaleDateString(locale) })}</p>
+                    <p className="text-xs text-brass-deep/80">{t("team.joinedOn", { date: new Date(m.joined_at).toLocaleDateString(locale) })}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => removeDriver(m.id, m.user_id)} className="text-red-600 hover:text-red-700">
                     <Trash2 className="size-4" />
@@ -248,18 +248,18 @@ const TeamInner = () => {
         </section>
 
         <section>
-          <h2 className="text-sm uppercase tracking-widest text-brass-deep/60 mb-3">{t("team.openInvites")}</h2>
+          <h2 className="text-sm uppercase tracking-widest text-brass-deep/80 mb-3">{t("team.openInvites")}</h2>
           {invitations.length === 0 ? (
-            <p className="text-sm text-brass-deep/60 italic">{t("team.noOpenInvites")}</p>
+            <p className="text-sm text-brass-deep/80 italic">{t("team.noOpenInvites")}</p>
           ) : (
             <div className="border border-brass-deep/10 bg-white divide-y divide-brass-deep/10">
               {invitations.map((inv) => (
                 <div key={inv.id} className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <Mail className="size-4 text-brass-deep/50" />
+                    <Mail className="size-4 text-brass-deep/80" />
                     <div>
                       <p className="text-sm font-medium text-brass-deep">{inv.email}</p>
-                      <p className="text-xs text-brass-deep/55">
+                      <p className="text-xs text-brass-deep/80">
                         {t("team.invSent", { sent: new Date(inv.created_at).toLocaleDateString(locale), exp: new Date(inv.expires_at).toLocaleDateString(locale) })}
                       </p>
                     </div>

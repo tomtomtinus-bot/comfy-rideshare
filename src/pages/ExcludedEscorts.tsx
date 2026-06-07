@@ -247,9 +247,9 @@ const PoolInner = () => {
                 Favoriete begeleiders
               </h2>
               {loading ? (
-                <p className="text-sm text-brass-deep/50">Laden…</p>
+                <p className="text-sm text-brass-deep/80">Laden…</p>
               ) : favorites.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">
+                <p className="text-sm text-brass-deep/80">
                   Nog geen favorieten. Voeg ze toe via het tabblad "Toevoegen".
                 </p>
               ) : (
@@ -264,7 +264,7 @@ const PoolInner = () => {
                             <Star className="size-3.5 fill-brass-gold text-brass-gold" />
                             {labelFor(e)}
                           </p>
-                          <p className="text-xs text-brass-deep/60">
+                          <p className="text-xs text-brass-deep/80">
                             {e?.base_city ?? "—"}
                             {e?.vehicle_type ? ` · ${e.vehicle_type}` : ""}
                           </p>
@@ -292,9 +292,9 @@ const PoolInner = () => {
                 Uitgesloten begeleiders
               </h2>
               {loading ? (
-                <p className="text-sm text-brass-deep/50">Laden…</p>
+                <p className="text-sm text-brass-deep/80">Laden…</p>
               ) : excluded.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">
+                <p className="text-sm text-brass-deep/80">
                   Geen begeleiders uitgesloten.
                 </p>
               ) : (
@@ -306,7 +306,7 @@ const PoolInner = () => {
                         <Avatar e={e} />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-brass-deep">{labelFor(e)}</p>
-                          <p className="text-xs text-brass-deep/60">
+                          <p className="text-xs text-brass-deep/80">
                             {e?.base_city ?? "—"}
                             {e?.vehicle_type ? ` · ${e.vehicle_type}` : ""}
                           </p>
@@ -316,7 +316,7 @@ const PoolInner = () => {
                           {row.reason && row.reason !== row.reason_category && (
                             <p className="text-xs text-brass-deep/80 mt-1 italic">"{row.reason}"</p>
                           )}
-                          <p className="text-[10px] text-brass-deep/40 mt-1">
+                          <p className="text-[10px] text-brass-deep/80 mt-1">
                             uitgesloten op {fmtDate(row.created_at)}
                           </p>
                         </div>
@@ -339,7 +339,7 @@ const PoolInner = () => {
               <h2 className="font-display text-xl text-brass-deep mb-2">
                 Begeleider toevoegen
               </h2>
-              <p className="text-xs text-brass-deep/60 mb-4">
+              <p className="text-xs text-brass-deep/80 mb-4">
                 Je kunt alleen begeleiders kiezen waarmee je al eerder interactie
                 hebt gehad (uitgenodigd, gereageerd of gereden).
               </p>
@@ -352,9 +352,9 @@ const PoolInner = () => {
                 className="w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold mb-4"
               />
               {loading ? (
-                <p className="text-sm text-brass-deep/50">Laden…</p>
+                <p className="text-sm text-brass-deep/80">Laden…</p>
               ) : candidates.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">
+                <p className="text-sm text-brass-deep/80">
                   {eligible.length === 0
                     ? "Er zijn nog geen begeleiders waarmee je interactie hebt gehad."
                     : "Geen begeleiders gevonden."}
@@ -370,10 +370,10 @@ const PoolInner = () => {
                         <Avatar e={e} />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-brass-deep">{labelFor(e)}</p>
-                          <p className="text-xs text-brass-deep/60">
+                          <p className="text-xs text-brass-deep/80">
                             {e.base_city ?? "—"} · {e.vehicle_type}
                           </p>
-                          <p className="text-[10px] text-brass-deep/50 mt-1 tabular-nums">
+                          <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">
                             {e.interactions} interactie{e.interactions === 1 ? "" : "s"}
                             {e.accepted_count > 0 && ` · ${e.accepted_count} geaccepteerd`}
                             {" · laatste "}

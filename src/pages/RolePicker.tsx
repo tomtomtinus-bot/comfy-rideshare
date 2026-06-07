@@ -25,7 +25,7 @@ const RolePicker = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-brass-deep/50 text-sm uppercase tracking-widest">
+      <div className="min-h-screen flex items-center justify-center text-brass-deep/80 text-sm uppercase tracking-widest">
         Laden…
       </div>
     );
@@ -89,7 +89,7 @@ const RolePicker = () => {
           <h1 className="font-display text-4xl text-brass-deep italic mb-2">
             Welkom bij ViaCust
           </h1>
-          <p className="text-sm text-brass-deep/60 mb-8">
+          <p className="text-sm text-brass-deep/80 mb-8">
             Kies hoe je ViaCust gaat gebruiken en vul je gegevens aan.
           </p>
 
@@ -101,7 +101,7 @@ const RolePicker = () => {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`py-3 text-xs uppercase tracking-widest font-semibold transition-colors ${
-                    role === r ? "bg-brass-deep text-parchment" : "bg-card text-brass-deep/60"
+                    role === r ? "bg-brass-deep text-parchment" : "bg-card text-brass-deep/80"
                   }`}
                 >
                   {r === "opdrachtgever" ? "Opdrachtgever" : "Begeleider"}
@@ -110,7 +110,7 @@ const RolePicker = () => {
             </div>
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                 Volledige naam
               </label>
               <input
@@ -122,7 +122,7 @@ const RolePicker = () => {
             </div>
 
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                 Telefoon
               </label>
               <input
@@ -134,7 +134,7 @@ const RolePicker = () => {
             </div>
 
             {role === "begeleider" && (
-              <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
+              <p className="text-xs text-brass-deep/80 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
                 Je kunt later in je profiel je standplaats, uurtarief en beschikbaarheid instellen.
               </p>
             )}

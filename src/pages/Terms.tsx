@@ -27,8 +27,8 @@ const Terms = () => {
               {L.kicker}
             </p>
             <h1 className="font-display text-4xl text-brass-deep italic">{L.title}</h1>
-            <p className="text-sm text-brass-deep/50 italic mt-2"> </p>
-            <p className="text-sm text-brass-deep/55 mt-2">{L.updated}</p>
+            <p className="text-sm text-brass-deep/80 italic mt-2"> </p>
+            <p className="text-sm text-brass-deep/80 mt-2">{L.updated}</p>
           </header>
 
           <div className="space-y-5 text-sm leading-relaxed text-brass-deep/85 [&_h2]:font-display [&_h2]:text-xl [&_h2]:text-brass-deep [&_h2]:italic [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-brass-gold [&_a]:underline">
@@ -42,7 +42,7 @@ const Terms = () => {
             <Link to="/auth" className="text-xs uppercase tracking-widest font-semibold text-brass-gold hover:text-brass-deep">
               {L.back}
             </Link>
-            <Link to="/privacy" className="text-xs uppercase tracking-widest font-semibold text-brass-deep/60 hover:text-brass-gold">
+            <Link to="/privacy" className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-gold">
               {lang === "nl" ? "Privacyverklaring" : lang === "de" ? "Datenschutzerklärung" : lang === "fr" ? "Politique de confidentialité" : "Privacy Policy"} →
             </Link>
           </div>

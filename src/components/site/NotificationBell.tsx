@@ -183,9 +183,9 @@ export const NotificationBell = () => {
 
           <div className="max-h-[60vh] overflow-y-auto">
             {loading && items.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-brass-deep/60">{t("notifBell.loading")}</p>
+              <p className="px-4 py-6 text-sm text-brass-deep/80">{t("notifBell.loading")}</p>
             ) : items.length === 0 ? (
-              <p className="px-4 py-8 text-sm text-brass-deep/60 text-center">{t("notifBell.empty")}</p>
+              <p className="px-4 py-8 text-sm text-brass-deep/80 text-center">{t("notifBell.empty")}</p>
             ) : (
               <ul className="divide-y divide-brass-deep/10">
                 {items.map((n) => {
@@ -210,7 +210,7 @@ export const NotificationBell = () => {
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-brass-deep truncate">{n.title}</p>
                               <p className="text-xs text-brass-deep/70 line-clamp-2 mt-0.5">{n.body}</p>
-                              <p className="text-[10px] uppercase tracking-widest text-brass-deep/40 mt-1">
+                              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 mt-1">
                                 {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: fnsLoc })}
                               </p>
                             </div>

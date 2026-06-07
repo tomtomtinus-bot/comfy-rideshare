@@ -92,8 +92,8 @@ const AccSection = ({
 
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div>
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
-    <p className="text-sm font-medium">{value || <span className="text-brass-deep/40">—</span>}</p>
+    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{label}</p>
+    <p className="text-sm font-medium">{value || <span className="text-brass-deep/80">—</span>}</p>
   </div>
 );
 
@@ -103,7 +103,7 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
       {phone}
     </a>
   ) : (
-    <span className="text-brass-deep/40">—</span>
+    <span className="text-brass-deep/80">—</span>
   );
 
 const statusLabel: Record<string, string> = {
@@ -254,12 +254,12 @@ const Inner = () => {
     load();
   };
 
-  if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
+  if (loading) return <p className="text-sm text-brass-deep/80">Laden…</p>;
   if (error || !data) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/60 mb-4">Geen toegang tot deze ritdetails.</p>
-        <p className="text-xs text-brass-deep/50 mb-4">
+        <p className="text-brass-deep/80 mb-4">Geen toegang tot deze ritdetails.</p>
+        <p className="text-xs text-brass-deep/80 mb-4">
           Ondersteuning nodig?{" "}
           <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
             support@viacust.com
@@ -279,7 +279,7 @@ const Inner = () => {
   return (
     <div className="space-y-8">
       <header>
-        <Link to="/dashboard" className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
+        <Link to="/dashboard" className="text-brass-deep/80 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
           ← Terug naar mijn ritten
         </Link>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">Ritdetails</p>
@@ -296,7 +296,7 @@ const Inner = () => {
             </Link>
           )}
         </div>
-        <p className="text-brass-deep/60 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
+        <p className="text-brass-deep/80 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
       </header>
 
       {userId && (
@@ -398,7 +398,7 @@ const Inner = () => {
                 <Field label="Vergunningnummer" value={ride.permit_number ?? "—"} />
                 {(ride.cargo_length_m || ride.cargo_weight_t) && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Lading</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Lading</p>
                     <p className="text-sm font-medium tabular-nums">
                       {ride.cargo_length_m ?? "—"}m × {ride.cargo_width_m ?? "—"}m × {ride.cargo_height_m ?? "—"}m ·{" "}
                       {ride.cargo_weight_t ?? "—"}t
@@ -407,7 +407,7 @@ const Inner = () => {
                 )}
                 {ride.notes && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Opmerkingen</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Opmerkingen</p>
                     <p className="text-sm">{ride.notes}</p>
                   </div>
                 )}
@@ -420,12 +420,12 @@ const Inner = () => {
 
             <AccSection value="chauffeurs" title={`Chauffeurs (${drivers.length})`}>
               {drivers.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">Geen chauffeurs opgegeven.</p>
+                <p className="text-sm text-brass-deep/80">Geen chauffeurs opgegeven.</p>
               ) : (
                 <ul className="divide-y divide-brass-deep/10">
                   {drivers.map((d, i) => (
                     <li key={i} className="py-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <p className="font-medium">{d.name || <span className="text-brass-deep/40">—</span>}</p>
+                      <p className="font-medium">{d.name || <span className="text-brass-deep/80">—</span>}</p>
                       <TelLink phone={d.phone} />
                     </li>
                   ))}
@@ -435,7 +435,7 @@ const Inner = () => {
 
             <AccSection value="kentekens" title={`Kentekens (${plates.length})`}>
               {plates.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">Geen kentekens opgegeven.</p>
+                <p className="text-sm text-brass-deep/80">Geen kentekens opgegeven.</p>
               ) : (
                 <ul className="flex flex-wrap gap-2">
                   {plates.map((p, i) => (
@@ -449,7 +449,7 @@ const Inner = () => {
 
             <AccSection value="begeleiders" title={`Begeleiders (${escorts.length})`}>
               {escorts.length === 0 ? (
-                <p className="text-sm text-brass-deep/50">Nog geen begeleiders toegewezen.</p>
+                <p className="text-sm text-brass-deep/80">Nog geen begeleiders toegewezen.</p>
               ) : (
                 <ul className="divide-y divide-brass-deep/10">
                   {escorts.map((e) => {
@@ -467,16 +467,16 @@ const Inner = () => {
                           {e.status === "accepted" ? (
                             <>
                               <p className="font-medium">{e.full_name ?? "—"}</p>
-                              <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
+                              <p className="text-xs text-brass-deep/80">{e.base_city ?? ""}</p>
                             </>
                           ) : (
-                            <p className="text-brass-deep/40 text-xs italic">Nog niet bevestigd</p>
+                            <p className="text-brass-deep/80 text-xs italic">Nog niet bevestigd</p>
                           )}
                         </div>
                         <div className="text-sm">
                           <TelLink phone={e.phone} />
                         </div>
-                        <div className="text-xs text-brass-deep/55 space-y-1">
+                        <div className="text-xs text-brass-deep/80 space-y-1">
                           <p>{e.vehicle_type ?? ""}</p>
                           {e.cert_verified_countries && e.cert_verified_countries.length > 0 && (
                             <p className="flex flex-wrap gap-1">
@@ -606,7 +606,7 @@ const Inner = () => {
                     <Field label="Geldig van" value={permit.valid_from ?? "—"} />
                     <Field label="Geldig tot" value={permit.valid_to ?? "—"} />
                     <div className="md:col-span-2">
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Maximale afmetingen</p>
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Maximale afmetingen</p>
                       <p className="text-sm font-medium tabular-nums">
                         {permit.max_length_m ?? "—"}m × {permit.max_width_m ?? "—"}m × {permit.max_height_m ?? "—"}m ·{" "}
                         {permit.max_weight_kg ? `${permit.max_weight_kg} kg` : "—"}
@@ -624,9 +624,9 @@ const Inner = () => {
                   )}
                 </div>
               ) : ride.permit_number ? (
-                <p className="text-sm text-brass-deep/60">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
+                <p className="text-sm text-brass-deep/80">Vergunning {ride.permit_number} (geen document beschikbaar)</p>
               ) : (
-                <p className="text-sm text-brass-deep/50">Geen ontheffing gekoppeld.</p>
+                <p className="text-sm text-brass-deep/80">Geen ontheffing gekoppeld.</p>
               )}
             </AccSection>
           </Accordion>

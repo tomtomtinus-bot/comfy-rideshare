@@ -59,7 +59,7 @@ export const Nav = () => {
             <span className="font-display text-2xl tracking-tight text-brass-deep italic">
               ViaCust
             </span>
-            <span className="hidden md:block text-[10px] uppercase tracking-widest text-brass-deep/40 font-medium border-l border-brass-deep/15 pl-2 ml-1 leading-none">
+            <span className="hidden md:block text-[10px] uppercase tracking-widest text-brass-deep/80 font-medium border-l border-brass-deep/15 pl-2 ml-1 leading-none">
               Digital Escort Solutions
             </span>
           </div>
@@ -145,7 +145,7 @@ export const Nav = () => {
               </div>
             )}
             <div className="mt-2 pt-3 border-t border-brass-deep/10 px-3 pb-2 md:hidden">
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                 {t("landing.navLanguage")}
               </p>
               <LanguageSwitcher />
@@ -154,7 +154,7 @@ export const Nav = () => {
               {user ? (
                 <>
                   <div className="px-3 py-2 mb-1">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                       {t("landing.navLoggedInAs")}
                     </p>
                     <p className="text-sm font-semibold text-brass-deep truncate">
@@ -164,7 +164,7 @@ export const Nav = () => {
                     </p>
                     {((user.user_metadata as { full_name?: string; name?: string } | null)?.full_name
                       || (user.user_metadata as { full_name?: string; name?: string } | null)?.name) && (
-                      <p className="text-[11px] text-brass-deep/55 truncate">{user.email}</p>
+                      <p className="text-[11px] text-brass-deep/80 truncate">{user.email}</p>
                     )}
                   </div>
                   <button

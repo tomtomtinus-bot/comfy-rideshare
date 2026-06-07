@@ -106,7 +106,7 @@ export default function ScheduledLocationsCard() {
         <CalendarClock className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
         <div className="flex-1">
           <h3 className="font-display text-lg text-brass-deep">{t("standplaats.scheduledTitle")}</h3>
-          <p className="text-xs text-brass-deep/60 mt-1">
+          <p className="text-xs text-brass-deep/80 mt-1">
             <Trans i18nKey="standplaats.scheduledDesc" components={{ 1: <strong /> }} />
           </p>
         </div>
@@ -121,12 +121,12 @@ export default function ScheduledLocationsCard() {
                 <p className="text-xs text-brass-deep/70 mt-0.5">
                   {fmt(r.start_at)} — {fmt(r.end_at)}
                 </p>
-                {r.note && <p className="text-xs text-brass-deep/60 mt-0.5 italic">{r.note}</p>}
+                {r.note && <p className="text-xs text-brass-deep/80 mt-0.5 italic">{r.note}</p>}
               </div>
               <button
                 type="button"
                 onClick={() => remove(r.id)}
-                className="text-brass-deep/50 hover:text-brass-deep p-1"
+                className="text-brass-deep/80 hover:text-brass-deep p-1"
                 title={t("standplaats.delete")}
               >
                 <Trash2 className="w-4 h-4" />
@@ -148,7 +148,7 @@ export default function ScheduledLocationsCard() {
       ) : (
         <div className="space-y-3 border-t border-brass-deep/10 pt-4">
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold block mb-1">{t("standplaats.location")}</label>
+            <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold block mb-1">{t("standplaats.location")}</label>
             <AddressAutocomplete
               label=""
               value={addrText}
@@ -159,7 +159,7 @@ export default function ScheduledLocationsCard() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="text-xs text-brass-deep/70 block">
-              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.from")}</span>
+              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/80">{t("standplaats.from")}</span>
               <input
                 type="datetime-local"
                 value={startAt}
@@ -168,7 +168,7 @@ export default function ScheduledLocationsCard() {
               />
             </label>
             <label className="text-xs text-brass-deep/70 block">
-              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.to")}</span>
+              <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/80">{t("standplaats.to")}</span>
               <input
                 type="datetime-local"
                 value={endAt}
@@ -178,7 +178,7 @@ export default function ScheduledLocationsCard() {
             </label>
           </div>
           <label className="text-xs text-brass-deep/70 block">
-            <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/60">{t("standplaats.note")}</span>
+            <span className="block mb-1 uppercase tracking-widest text-[10px] font-bold text-brass-deep/80">{t("standplaats.note")}</span>
             <input
               type="text"
               value={note}

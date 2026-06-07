@@ -56,20 +56,20 @@ export const NotificationPreferencesCard = () => {
       <h2 className="font-display text-2xl text-brass-deep italic mb-1">
         Notificatie-instellingen
       </h2>
-      <p className="text-[12px] text-brass-deep/60 mb-5">
+      <p className="text-[12px] text-brass-deep/80 mb-5">
         Kies welke optionele e-mails je wilt ontvangen. Systeem-e-mails
         (bevestigingen, annuleringen, facturen, betalingen) ontvang je altijd.
       </p>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : (
         <div className="space-y-3">
           <label className="flex items-start gap-3 p-3 border border-brass-deep/10 bg-background/40 opacity-80 cursor-not-allowed">
             <input type="checkbox" checked disabled className="mt-1 accent-brass-gold" />
             <div>
               <div className="text-sm font-semibold text-brass-deep">Systeem-e-mails</div>
-              <div className="text-[12px] text-brass-deep/60">
+              <div className="text-[12px] text-brass-deep/80">
                 Ritbevestigingen, matches, wijzigingen, annuleringen, facturen en
                 betalingen. Verplicht — kan niet uitgezet worden.
               </div>
@@ -88,7 +88,7 @@ export const NotificationPreferencesCard = () => {
               <div className="text-sm font-semibold text-brass-deep">
                 Wekelijkse updates &amp; aanbiedingen
               </div>
-              <div className="text-[12px] text-brass-deep/60">
+              <div className="text-[12px] text-brass-deep/80">
                 Nieuws, productupdates en herinneringen over aflopende kortingen.
               </div>
             </div>
@@ -100,12 +100,12 @@ export const NotificationPreferencesCard = () => {
                 <div className="text-sm font-semibold text-brass-deep">
                   Pushmeldingen op dit apparaat
                 </div>
-                <div className="text-[12px] text-brass-deep/60">
+                <div className="text-[12px] text-brass-deep/80">
                   Ontvang directe meldingen bij nieuwe ritaanvragen, matches en wijzigingen
                   &mdash; ook als je de app niet open hebt.
                 </div>
                 {push.status === "unsupported" && (
-                  <div className="text-[12px] text-brass-deep/50 mt-2">
+                  <div className="text-[12px] text-brass-deep/80 mt-2">
                     Pushmeldingen werken niet in deze omgeving. Open de site op{" "}
                     <strong>viacust.com</strong> in je browser.
                   </div>
@@ -117,7 +117,7 @@ export const NotificationPreferencesCard = () => {
                   </div>
                 )}
                 {isIOS && !isStandalone && push.status !== "unsupported" && (
-                  <div className="text-[12px] text-brass-deep/60 mt-2">
+                  <div className="text-[12px] text-brass-deep/80 mt-2">
                     Op iPhone/iPad: open in Safari, tik op het deel-icoon en kies
                     &ldquo;Zet op beginscherm&rdquo;. Open daarna de app via het icoon
                     om meldingen aan te zetten.

@@ -57,15 +57,15 @@ const InfoNederland = () => {
                   <tbody>
                     <tr>
                       <Td><strong>{t("infoCommon.length")}</strong></Td>
-                      <Td>40 m – 50 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
-                      <Td>&gt; 50 m<br/><span className="text-brass-deep/60">20:00 – 06:00</span></Td>
+                      <Td>40 m – 50 m<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 50 m<br/><span className="text-brass-deep/80">20:00 – 06:00</span></Td>
                     </tr>
                     <tr>
                       <Td><strong>{t("infoCommon.width")}</strong></Td>
-                      <Td>4,01 m – 4,50 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>4,01 m – 4,50 m<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
                       <Td>
-                        4,51 m – 5,00 m<br/><span className="text-brass-deep/60">20:00 – 06:00</span><br/><br/>
-                        &gt; 5,00 m<br/><span className="text-brass-deep/60">22:00 – 06:00</span>
+                        4,51 m – 5,00 m<br/><span className="text-brass-deep/80">20:00 – 06:00</span><br/><br/>
+                        &gt; 5,00 m<br/><span className="text-brass-deep/80">22:00 – 06:00</span>
                       </Td>
                     </tr>
                     <tr>
@@ -76,7 +76,7 @@ const InfoNederland = () => {
                     <tr>
                       <Td><strong>{t("infoCommon.mass")}</strong></Td>
                       <Td>—</Td>
-                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
                     </tr>
                   </tbody>
                 </table>
@@ -100,17 +100,17 @@ const InfoNederland = () => {
                   <tbody>
                     <tr>
                       <Td><strong>{t("infoCommon.length")}</strong></Td>
-                      <Td>27,51 m – 32 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
-                      <Td>&gt; 32,01 m<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00 **</span></Td>
+                      <Td>27,51 m – 32 m<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 32,01 m<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00 **</span></Td>
                     </tr>
                     <tr>
                       <Td><strong>{t("infoCommon.width")}</strong></Td>
-                      <Td>3,51 m – 4 m<br/><span className="text-brass-deep/60">{t("infoNL.noBeperking")}</span></Td>
+                      <Td>3,51 m – 4 m<br/><span className="text-brass-deep/80">{t("infoNL.noBeperking")}</span></Td>
                       <Td>
                         4,01 m – 4,99 m<br/>
-                        <span className="text-brass-deep/60">10:00 – 15:00 (tot 4,51 m)</span><br/>
-                        <span className="text-brass-deep/60">20:00 – 06:00</span><br/><br/>
-                        &gt; 5,00 m<br/><span className="text-brass-deep/60">22:00 – 06:00</span>
+                        <span className="text-brass-deep/80">10:00 – 15:00 (tot 4,51 m)</span><br/>
+                        <span className="text-brass-deep/80">20:00 – 06:00</span><br/><br/>
+                        &gt; 5,00 m<br/><span className="text-brass-deep/80">22:00 – 06:00</span>
                       </Td>
                     </tr>
                     <tr>
@@ -121,7 +121,7 @@ const InfoNederland = () => {
                     <tr>
                       <Td><strong>{t("infoCommon.mass")}</strong></Td>
                       <Td>—</Td>
-                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/60">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
+                      <Td>&gt; 100.000 kg<br/><span className="text-brass-deep/80">10:00 – 15:00 &amp; 20:00 – 06:00</span></Td>
                     </tr>
                   </tbody>
                 </table>

@@ -105,7 +105,7 @@ const AdminRides = () => {
     <div className="space-y-6">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Ritten</h2>
-        <p className="text-sm text-brass-deep/60 mt-1">Alle ritten op het platform.</p>
+        <p className="text-sm text-brass-deep/80 mt-1">Alle ritten op het platform.</p>
       </header>
 
       <div className="flex flex-wrap gap-2 items-center">
@@ -129,25 +129,25 @@ const AdminRides = () => {
       </div>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-brass-deep/50">Geen ritten gevonden.</p>
+        <p className="text-sm text-brass-deep/80">Geen ritten gevonden.</p>
       ) : (
         <ul className="space-y-px bg-brass-deep/10">
           {filtered.map((r) => (
             <li key={r.id} className="bg-card p-4 md:p-5">
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Datum</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Datum</p>
                   <p className="font-medium tabular-nums text-sm">{fmt(r.scheduled_at)}</p>
-                  <p className="text-[10px] text-brass-deep/55 mt-1">{r.client_name}</p>
+                  <p className="text-[10px] text-brass-deep/80 mt-1">{r.client_name}</p>
                 </div>
                 <div className="col-span-12 md:col-span-5">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">Route</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Route</p>
                   <p className="text-sm font-medium">
                     {r.pickup_city} <span className="text-brass-gold mx-2">→</span> {r.dropoff_city}
                   </p>
-                  <p className="text-[10px] text-brass-deep/50 mt-1">
+                  <p className="text-[10px] text-brass-deep/80 mt-1">
                     {r.num_escorts} begeleider{r.num_escorts === 1 ? "" : "s"} · {r.assignment_count} toewijzing{r.assignment_count === 1 ? "" : "en"}
                   </p>
                 </div>

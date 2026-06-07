@@ -38,7 +38,7 @@ const EscortProfile = () => {
           <div className="max-w-7xl mx-auto">
             <Link
               to="/begeleiders"
-              className="inline-flex items-center gap-2 text-brass-deep/60 hover:text-brass-gold uppercase tracking-widest text-xs font-semibold mb-12 transition-colors"
+              className="inline-flex items-center gap-2 text-brass-deep/80 hover:text-brass-gold uppercase tracking-widest text-xs font-semibold mb-12 transition-colors"
             >
               <ArrowLeft className="size-4" /> {t("escortProfile.backToRegister")}
             </Link>
@@ -56,7 +56,7 @@ const EscortProfile = () => {
                     <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95]">
                       {t("escortProfile.escortHash", { id: escort.anonymousId })}
                     </h1>
-                    <p className="mt-3 text-brass-deep/60 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                    <p className="mt-3 text-brass-deep/80 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                       <span className="inline-flex items-center gap-1.5">
                         <MapPin className="size-3.5" />
                         {t("escortProfile.baseAt", { city: escort.city, country: escort.country })}
@@ -76,14 +76,14 @@ const EscortProfile = () => {
 
               <div className="col-span-12 lg:col-span-4">
                 <div className="bg-card shadow-etched p-8">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                     {t("escortProfile.hourlyRate")}
                   </p>
                   <p className="font-display text-5xl text-brass-deep tabular-nums">
                     €{escort.hourlyRate}
-                    <span className="text-xl text-brass-deep/50">{t("escortProfile.perHour")}</span>
+                    <span className="text-xl text-brass-deep/80">{t("escortProfile.perHour")}</span>
                   </p>
-                  <p className="mt-2 text-[11px] text-brass-deep/50 leading-relaxed">
+                  <p className="mt-2 text-[11px] text-brass-deep/80 leading-relaxed">
                     {t("escortProfile.fromBaseHint")}
                   </p>
                   <Link
@@ -114,7 +114,7 @@ const EscortProfile = () => {
                         <Check className="size-3.5" strokeWidth={3} /> {t("escortProfile.valid")}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brass-deep/40 uppercase tracking-widest shrink-0">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brass-deep/80 uppercase tracking-widest shrink-0">
                         <X className="size-3.5" strokeWidth={3} /> {t("escortProfile.notValid")}
                       </span>
                     )}
@@ -128,7 +128,7 @@ const EscortProfile = () => {
               <p className="text-xs uppercase tracking-widest text-brass-gold font-semibold mb-8">
                 {t("escortProfile.mayEscort")}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                 {t("escortProfile.categoriesLabel")}
               </p>
               <div className="flex flex-wrap gap-2 mb-6">
@@ -138,7 +138,7 @@ const EscortProfile = () => {
                   </span>
                 ))}
               </div>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                 {t("escortProfile.escortTypes")}
               </p>
               <ul className="space-y-2 mb-6">
@@ -149,7 +149,7 @@ const EscortProfile = () => {
                   </li>
                 ))}
               </ul>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                 {t("escortProfile.countries")}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -173,24 +173,24 @@ const EscortProfile = () => {
               <ul className="space-y-2 mb-6 text-xs">
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
                   <span>{t("escortProfile.heightPole")}</span>
-                  <span className={escort.pilotVehicle.heightPole ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
+                  <span className={escort.pilotVehicle.heightPole ? "text-brass-gold font-semibold" : "text-brass-deep/80"}>
                     {escort.pilotVehicle.heightPole ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
                   <span>{t("escortProfile.lightbar")}</span>
-                  <span className={escort.pilotVehicle.lightbar ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
+                  <span className={escort.pilotVehicle.lightbar ? "text-brass-gold font-semibold" : "text-brass-deep/80"}>
                     {escort.pilotVehicle.lightbar ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
                 <li className="flex justify-between border-b border-brass-deep/10 pb-1.5">
                   <span>{t("escortProfile.konvooiSign")}</span>
-                  <span className={escort.pilotVehicle.konvooiSign ? "text-brass-gold font-semibold" : "text-brass-deep/40"}>
+                  <span className={escort.pilotVehicle.konvooiSign ? "text-brass-gold font-semibold" : "text-brass-deep/80"}>
                     {escort.pilotVehicle.konvooiSign ? t("escortProfile.present") : t("escortProfile.absent")}
                   </span>
                 </li>
               </ul>
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-3">
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-3">
                 {t("escortProfile.surcharges")}
               </p>
               <ul className="space-y-3">

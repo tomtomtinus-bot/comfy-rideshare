@@ -441,7 +441,7 @@ const Inner = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main className="max-w-2xl mx-auto px-6 py-24">
-          <p className="text-brass-deep/60">{t("escortSettings.onlyForEscorts")}</p>
+          <p className="text-brass-deep/80">{t("escortSettings.onlyForEscorts")}</p>
         </main>
         <Footer />
       </div>
@@ -461,7 +461,7 @@ const Inner = () => {
           </h1>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">{t("common.loading", { defaultValue: "Laden…" })}</p>
+            <p className="text-sm text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : (
             <>
               <GoogleCalendarCard />
@@ -480,7 +480,7 @@ const Inner = () => {
               className="bg-card shadow-etched p-8 md:p-10 space-y-8"
             >
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
+                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.shareNameHint") }} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.fullName")}</Label>
@@ -503,8 +503,8 @@ const Inner = () => {
               </section>
 
               <section className="space-y-3">
-                <p className="text-[11px] text-brass-deep/60" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
-                <p className="text-[11px] text-brass-deep/55 italic">{t("escortSettings.baseLocationHint")}</p>
+                <p className="text-[11px] text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.addressHint") }} />
+                <p className="text-[11px] text-brass-deep/80 italic">{t("escortSettings.baseLocationHint")}</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>{t("escortSettings.postcode")}</Label>
@@ -532,7 +532,7 @@ const Inner = () => {
                       placeholder={(lookupBusy ? t("escortSettings.lookingUp") : t("escortSettings.fillFromPostcode")) as string}
                       className="mt-1 w-full bg-patina/40 border border-brass-deep/15 px-4 py-3 text-sm text-brass-deep/80 focus:outline-none"
                     />
-                    <p className="text-[10px] text-brass-deep/50 mt-1">
+                    <p className="text-[10px] text-brass-deep/80 mt-1">
                       {lookupBusy ? t("escortSettings.lookingUp") : street ? `${street} ${houseNumber}, ${city}` : t("escortSettings.addressFooter")}
                     </p>
                   </div>
@@ -563,7 +563,7 @@ const Inner = () => {
                           (profile as any)?.km_rate_de == null ? "" : String((profile as any).km_rate_de),
                         )}
                       />
-                      <p className="text-[10px] text-brass-deep/50 mt-1">
+                      <p className="text-[10px] text-brass-deep/80 mt-1">
                         {t("escortSettings.kmRateDEHint")}
                       </p>
                     </div>
@@ -590,7 +590,7 @@ const Inner = () => {
 
               <section>
                 <Label>{t("escortSettings.languagesSpoken")}</Label>
-                <p className="text-[11px] text-brass-deep/60 mt-1 mb-2">
+                <p className="text-[11px] text-brass-deep/80 mt-1 mb-2">
                   {t("escortSettings.languagesHint")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -612,7 +612,7 @@ const Inner = () => {
                 return (
               <section>
                 <Label>{t("escortSettings.fuelTitle")}</Label>
-                <p className="text-[11px] text-brass-deep/60 mt-1 mb-3">
+                <p className="text-[11px] text-brass-deep/80 mt-1 mb-3">
                   {t("escortSettings.fuelIntro")}
                   {currentFuel && (
                     <> <span dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelCurrentPrice", { p: Number(currentFuel.eur_per_liter).toFixed(3), w: currentFuel.week_start }) }} /></>
@@ -685,7 +685,7 @@ const Inner = () => {
                 {fuel.enabled && (
                   <>
                     <div className="flex gap-2 mb-2 text-sm">
-                      <span className="text-brass-deep/60">{t("escortSettings.fuelUnit")}</span>
+                      <span className="text-brass-deep/80">{t("escortSettings.fuelUnit")}</span>
                       <label className="flex items-center gap-1">
                         <input type="radio" checked={fuel.kind === "per_uur"} onChange={() => setFuel((f) => ({ ...f, kind: "per_uur" }))} /> {t("escortSettings.fuelPerHour")}
                       </label>
@@ -694,7 +694,7 @@ const Inner = () => {
                       </label>
                     </div>
                     <div className="space-y-2">
-                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold">
+                      <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                         <div className="col-span-4">{t("escortSettings.fuelFromCol")}</div>
                         <div className="col-span-4">{t("escortSettings.fuelToCol")}</div>
                         <div className="col-span-3">{fuel.kind === "percent" ? t("escortSettings.fuelValueColPct") : t("escortSettings.fuelValueColEur")}</div>
@@ -704,7 +704,7 @@ const Inner = () => {
                           <input value={t2.from} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, from: e.target.value } : x) }))} placeholder="0" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
                           <input value={t2.to} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, to: e.target.value } : x) }))} placeholder="∞" className="col-span-4 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
                           <input value={t2.value} onChange={(e) => setFuel((f) => ({ ...f, tiers: f.tiers.map((x, j) => j === i ? { ...x, value: e.target.value } : x) }))} placeholder="0" className="col-span-3 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm tabular-nums focus:outline-none focus:border-brass-gold" />
-                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/60 hover:text-brass-deep border border-brass-deep/15">×</button>
+                          <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 px-2 py-2 text-[10px] text-brass-deep/80 hover:text-brass-deep border border-brass-deep/15">×</button>
                         </div>
                       ))}
                       <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
@@ -739,7 +739,7 @@ const Inner = () => {
 };
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{children}</label>
+  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{children}</label>
 );
 
 const Input = ({

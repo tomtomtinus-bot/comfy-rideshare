@@ -133,17 +133,17 @@ export const DriverDashboard = () => {
       <header>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Chauffeur</p>
         <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn ritten</h1>
-        <p className="text-sm text-brass-deep/60 mt-3 max-w-xl">
+        <p className="text-sm text-brass-deep/80 mt-3 max-w-xl">
           Hier zie je de ritten die je planner aan jou heeft toegewezen. Na de rit vul je je tijden in;
           de planner keurt ze goed en regelt de facturatie.
         </p>
       </header>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : items.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">Nog geen ritten toegewezen door je planner.</p>
+          <p className="text-brass-deep/80">Nog geen ritten toegewezen door je planner.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,7 +153,7 @@ export const DriverDashboard = () => {
             </h2>
             <ul className="flex flex-col gap-2">
               {grouped.aankomend.length === 0 ? (
-                <p className="text-xs text-brass-deep/45 italic">Geen aankomende ritten.</p>
+                <p className="text-xs text-brass-deep/80 italic">Geen aankomende ritten.</p>
               ) : (
                 grouped.aankomend.map((a) => <Card key={a.id} a={a} />)
               )}
@@ -166,7 +166,7 @@ export const DriverDashboard = () => {
             </h2>
             <ul className="flex flex-col gap-2">
               {grouped.uren_invullen.length === 0 ? (
-                <p className="text-xs text-brass-deep/45 italic">Geen uren in te vullen.</p>
+                <p className="text-xs text-brass-deep/80 italic">Geen uren in te vullen.</p>
               ) : (
                 grouped.uren_invullen.map((a) => (
                   <Card
@@ -192,7 +192,7 @@ export const DriverDashboard = () => {
             </h2>
             <ul className="flex flex-col gap-2">
               {grouped.wacht_goedkeuring.length === 0 ? (
-                <p className="text-xs text-brass-deep/45 italic">Niets in afwachting.</p>
+                <p className="text-xs text-brass-deep/80 italic">Niets in afwachting.</p>
               ) : (
                 grouped.wacht_goedkeuring.map((a) => (
                   <Card
@@ -215,7 +215,7 @@ export const DriverDashboard = () => {
             </h2>
             <ul className="flex flex-col gap-2">
               {grouped.afgerond.length === 0 ? (
-                <p className="text-xs text-brass-deep/45 italic">Nog niets afgerond.</p>
+                <p className="text-xs text-brass-deep/80 italic">Nog niets afgerond.</p>
               ) : (
                 grouped.afgerond.map((a) => (
                   <Card
@@ -241,29 +241,29 @@ export const DriverDashboard = () => {
               <DialogTitle className="font-display italic text-2xl text-brass-deep">Vul je uren in</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => submitHours(a, e)} className="space-y-4 pt-2">
-              <p className="text-xs text-brass-deep/60">
+              <p className="text-xs text-brass-deep/80">
                 Vul de tijden in waarop je vertrok van je standplaats en terugkeerde. Je planner controleert en keurt ze goed.
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Vertrek datum</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Vertrek datum</label>
                   <input name="start_date" type="date" required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Vertrektijd</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Vertrektijd</label>
                   <input name="start_time" type="time" step={900} required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Terug datum</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Terug datum</label>
                   <input name="end_date" type="date" required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Terug tijd</label>
+                  <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Terug tijd</label>
                   <input name="end_time" type="time" step={900} required className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                 </div>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Opmerkingen</label>
+                <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Opmerkingen</label>
                 <textarea name="notes" rows={2} className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
               </div>
               <button className="w-full px-5 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors">
@@ -274,7 +274,7 @@ export const DriverDashboard = () => {
         </Dialog>
       ))}
 
-      <p className="text-xs text-brass-deep/50 text-center">
+      <p className="text-xs text-brass-deep/80 text-center">
         <Link to="/dashboard" className="hover:underline">Vragen? Neem contact op met je planner.</Link>
       </p>
     </div>

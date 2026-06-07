@@ -125,8 +125,8 @@ const AccSection = ({
 
 const Field = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div>
-    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
-    <p className="text-sm font-medium">{value || <span className="text-brass-deep/40">—</span>}</p>
+    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{label}</p>
+    <p className="text-sm font-medium">{value || <span className="text-brass-deep/80">—</span>}</p>
   </div>
 );
 
@@ -136,7 +136,7 @@ const TelLink = ({ phone }: { phone: string | null | undefined }) =>
       {phone}
     </a>
   ) : (
-    <span className="text-brass-deep/40">—</span>
+    <span className="text-brass-deep/80">—</span>
   );
 
 const Inner = () => {
@@ -294,15 +294,15 @@ const Inner = () => {
   };
 
   if (loading) {
-    return <p className="text-sm text-brass-deep/50">{t("escortRideDetail.loading")}</p>;
+    return <p className="text-sm text-brass-deep/80">{t("escortRideDetail.loading")}</p>;
   }
   if (error || !data) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/60 mb-4">
+        <p className="text-brass-deep/80 mb-4">
           {t("escortRideDetail.noAccess")}
         </p>
-        <p className="text-xs text-brass-deep/50 mb-4">
+        <p className="text-xs text-brass-deep/80 mb-4">
           {t("escortRideDetail.supportNeeded")}{" "}
           <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
             support@viacust.com
@@ -325,7 +325,7 @@ const Inner = () => {
       <header>
         <Link
           to="/dashboard"
-          className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
+          className="text-brass-deep/80 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
         >
           {t("escortRideDetail.backToTasks")}
         </Link>
@@ -336,7 +336,7 @@ const Inner = () => {
           {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
         </h1>
         <div className="flex items-center gap-3 mt-2">
-          <p className="text-brass-deep/60">{fd(ride.scheduled_at)}</p>
+          <p className="text-brass-deep/80">{fd(ride.scheduled_at)}</p>
           {isCompleted && (
             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold border border-emerald-300">
               {t("escortRideDetail.completed")}
@@ -471,7 +471,7 @@ const Inner = () => {
                 <Field label={t("escortRideDetail.actualCost")} value={myAssignment.actual_cost != null ? `€ ${(myAssignment.actual_cost - (myAssignment.extra_costs_total || 0)).toFixed(2)}` : "—"} />
                 <Field label={t("escortRideDetail.extraCosts")} value={myAssignment.extra_costs_total ? `€ ${myAssignment.extra_costs_total.toFixed(2)}` : "—"} />
                 <Field label={t("escortRideDetail.total")} value={myAssignment.actual_cost != null ? `€ ${myAssignment.actual_cost.toFixed(2)}` : "—"} />
-                <p className="md:col-span-2 text-xs text-brass-deep/60 italic mt-1">
+                <p className="md:col-span-2 text-xs text-brass-deep/80 italic mt-1">
                   {t("escortRideDetail.fuelLater")}
                 </p>
               </div>
@@ -531,7 +531,7 @@ const Inner = () => {
                 {!isCompleted && <Field label={t("escortRideDetail.clientRef")} value={ride.client_reference ?? "—"} />}
                 {!isCompleted && (ride.cargo_length_m || ride.cargo_weight_t) && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.cargo")}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("escortRideDetail.cargo")}</p>
                     <p className="text-sm font-medium tabular-nums">
                       {ride.cargo_length_m ?? "—"}m × {ride.cargo_width_m ?? "—"}m × {ride.cargo_height_m ?? "—"}m ·{" "}
                       {ride.cargo_weight_t ?? "—"}t
@@ -540,7 +540,7 @@ const Inner = () => {
                 )}
                 {ride.notes && (
                   <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.notes")}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("escortRideDetail.notes")}</p>
                     <p className="text-sm">{ride.notes}</p>
                   </div>
                 )}
@@ -608,7 +608,7 @@ const Inner = () => {
                     {!isCompleted && (
                       <>
                         <div>
-                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("escortRideDetail.phone")}</p>
+                          <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("escortRideDetail.phone")}</p>
                           <p className="text-sm"><TelLink phone={client.phone} /></p>
                         </div>
                         <Field label={t("escortRideDetail.email")} value={client.billing_email ?? "—"} />
@@ -616,7 +616,7 @@ const Inner = () => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noContact")}</p>
+                  <p className="text-sm text-brass-deep/80">{t("escortRideDetail.noContact")}</p>
                 )}
               </AccSection>
             )}
@@ -639,9 +639,9 @@ const Inner = () => {
               <AccSection value="chauffeurs" title={t("escortRideDetail.driversPlates")}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.drivers")}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">{t("escortRideDetail.drivers")}</p>
                     {drivers.length === 0 ? (
-                      <p className="text-sm text-brass-deep/40">—</p>
+                      <p className="text-sm text-brass-deep/80">—</p>
                     ) : (
                       <ul className="divide-y divide-brass-deep/10">
                         {drivers.map((d, i) => (
@@ -654,9 +654,9 @@ const Inner = () => {
                     )}
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-2">{t("escortRideDetail.plates")}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">{t("escortRideDetail.plates")}</p>
                     {plates.length === 0 ? (
-                      <p className="text-sm text-brass-deep/40">—</p>
+                      <p className="text-sm text-brass-deep/80">—</p>
                     ) : (
                       <ul className="flex flex-wrap gap-2">
                         {plates.map((p, i) => (
@@ -674,7 +674,7 @@ const Inner = () => {
             {!isInvited && !isCompleted && (
               <AccSection value="medebegeleiders" title={t("escortRideDetail.coEscorts", { n: others.length })}>
                 {others.length === 0 ? (
-                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.soleEscort")}</p>
+                  <p className="text-sm text-brass-deep/80">{t("escortRideDetail.soleEscort")}</p>
                 ) : (
                   <ul className="divide-y divide-brass-deep/10">
                     {others.map((e) => (
@@ -689,16 +689,16 @@ const Inner = () => {
                           {e.status === "accepted" ? (
                             <>
                               <p className="font-medium">{e.full_name ?? "—"}</p>
-                              <p className="text-xs text-brass-deep/55">{e.base_city ?? ""}</p>
+                              <p className="text-xs text-brass-deep/80">{e.base_city ?? ""}</p>
                             </>
                           ) : (
-                            <p className="text-brass-deep/40 text-xs italic">{t("escortRideDetail.notYetConfirmed")}</p>
+                            <p className="text-brass-deep/80 text-xs italic">{t("escortRideDetail.notYetConfirmed")}</p>
                           )}
                         </div>
                         <div className="text-sm">
                           <TelLink phone={e.phone} />
                         </div>
-                        <div className="text-xs text-brass-deep/55">{e.vehicle_type ?? ""}</div>
+                        <div className="text-xs text-brass-deep/80">{e.vehicle_type ?? ""}</div>
                       </li>
                     ))}
                   </ul>
@@ -715,7 +715,7 @@ const Inner = () => {
                       <Field label={t("escortRideDetail.validFrom")} value={permit.valid_from ?? "—"} />
                       <Field label={t("escortRideDetail.validTo")} value={permit.valid_to ?? "—"} />
                       <div className="md:col-span-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">
                           {t("escortRideDetail.maxDims")}
                         </p>
                         <p className="text-sm font-medium tabular-nums">
@@ -765,14 +765,14 @@ const Inner = () => {
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-brass-deep/50 mt-2">
+                    <p className="text-xs text-brass-deep/80 mt-2">
                       {t("escortRideDetail.rdwDisclaimer")}
                     </p>
                   </div>
                 ) : ride.permit_number ? (
-                  <p className="text-sm text-brass-deep/60">{t("escortRideDetail.permitNoDoc", { n: ride.permit_number })}</p>
+                  <p className="text-sm text-brass-deep/80">{t("escortRideDetail.permitNoDoc", { n: ride.permit_number })}</p>
                 ) : (
-                  <p className="text-sm text-brass-deep/50">{t("escortRideDetail.noPermit")}</p>
+                  <p className="text-sm text-brass-deep/80">{t("escortRideDetail.noPermit")}</p>
                 )}
               </AccSection>
             )}
@@ -795,7 +795,7 @@ const Inner = () => {
                     {myAssignment!.cancel_request_reason && (
                       <p className="italic text-brass-deep/70">"{myAssignment!.cancel_request_reason}"</p>
                     )}
-                    <p className="mt-2 text-xs text-brass-deep/60">{t("escortRideDetail.clientMustApprove")}</p>
+                    <p className="mt-2 text-xs text-brass-deep/80">{t("escortRideDetail.clientMustApprove")}</p>
                   </div>
                 ) : myAssignment!.cancel_request_status === "rejected" ? (
                   <div className="bg-red-50 border border-red-200 p-4 text-sm text-red-900 mb-3">

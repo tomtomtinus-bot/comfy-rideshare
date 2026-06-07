@@ -53,7 +53,7 @@ const SubscriptionInner = () => {
   if (authLoading) {
     return (
       <main className="container mx-auto px-4 py-12">
-        <p className="text-sm text-brass-deep/50 uppercase tracking-widest">{t("subscription.loading")}</p>
+        <p className="text-sm text-brass-deep/80 uppercase tracking-widest">{t("subscription.loading")}</p>
       </main>
     );
   }
@@ -72,16 +72,16 @@ const SubscriptionInner = () => {
       <main className="container mx-auto px-4 py-10 md:py-16 max-w-3xl">
         <header className="mb-10">
           <h1 className="font-display text-3xl md:text-4xl text-brass-deep">{t("subscription.title")}</h1>
-          <p className="text-sm text-brass-deep/60 mt-2">{t("subscription.subtitle")}</p>
+          <p className="text-sm text-brass-deep/80 mt-2">{t("subscription.subtitle")}</p>
         </header>
         <section className="bg-card shadow-etched p-6 md:p-10 space-y-5">
           <div>
             <h2 className="font-display text-2xl text-brass-deep">{PLANS.opdrachtgever.title}</h2>
-            <p className="text-sm text-brass-deep/60 mt-1">{PLANS.opdrachtgever.description}</p>
+            <p className="text-sm text-brass-deep/80 mt-1">{PLANS.opdrachtgever.description}</p>
           </div>
           <div className="flex items-baseline gap-3">
             <p className="font-display text-3xl text-brass-gold tabular-nums">€50</p>
-            <p className="text-xs uppercase tracking-widest text-brass-deep/55 font-bold">per maand</p>
+            <p className="text-xs uppercase tracking-widest text-brass-deep/80 font-bold">per maand</p>
           </div>
           <ul className="space-y-2 text-sm">
             {PLANS.opdrachtgever.features.map((f) => (
@@ -96,7 +96,7 @@ const SubscriptionInner = () => {
               <strong className="text-brass-deep">Eerste 30 dagen gratis.</strong>{" "}
               Daarna €25 per halve maand op je platformfactuur (€50/maand).
             </p>
-            <p className="text-xs text-brass-deep/60">
+            <p className="text-xs text-brass-deep/80">
               Facturatie loopt automatisch — je ontvangt 2× per maand (op de 15e en
               de laatste dag van de maand) een platformfactuur met de ritfee én
               het abonnementsdeel. Geen aparte aanmelding nodig.
@@ -111,7 +111,7 @@ const SubscriptionInner = () => {
   if (!plan) {
     return (
       <main className="container mx-auto px-4 py-12">
-        <p className="text-brass-deep/60">{t("subscription.noPlan")}</p>
+        <p className="text-brass-deep/80">{t("subscription.noPlan")}</p>
       </main>
     );
   }
@@ -140,8 +140,8 @@ const SubscriptionInner = () => {
     <main className="container mx-auto px-4 py-10 md:py-16 max-w-3xl">
       <header className="mb-10">
         <h1 className="font-display text-3xl md:text-4xl text-brass-deep">{t("subscription.title")}</h1>
-        <p className="text-sm text-brass-deep/60 mt-2">{t("subscription.subtitle")}</p>
-        <p className="text-xs text-brass-deep/50 mt-1">
+        <p className="text-sm text-brass-deep/80 mt-2">{t("subscription.subtitle")}</p>
+        <p className="text-xs text-brass-deep/80 mt-1">
           {t("subscription.questions")}{" "}
           <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
             support@viacust.com
@@ -153,11 +153,11 @@ const SubscriptionInner = () => {
         <div className="flex items-baseline justify-between flex-wrap gap-3">
           <div>
             <h2 className="font-display text-2xl text-brass-deep">{plan.title}</h2>
-            <p className="text-sm text-brass-deep/60 mt-1">{plan.description}</p>
+            <p className="text-sm text-brass-deep/80 mt-1">{plan.description}</p>
           </div>
           <div className="text-right">
             <p className="font-display text-3xl text-brass-gold tabular-nums">{plan.price}</p>
-            <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{plan.period}</p>
+            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{plan.period}</p>
           </div>
         </div>
 
@@ -172,7 +172,7 @@ const SubscriptionInner = () => {
 
         <div className="pt-4 border-t border-brass-deep/10">
           {loading ? (
-            <p className="text-sm text-brass-deep/50">{t("subscription.loading")}</p>
+            <p className="text-sm text-brass-deep/80">{t("subscription.loading")}</p>
           ) : isActive ? (
             (() => {
               const isTrial = subscription?.status === "trialing";
@@ -197,7 +197,7 @@ const SubscriptionInner = () => {
                     </span>
                   </div>
                   {isTrial && endDate && (
-                    <p className="text-xs text-brass-deep/60">
+                    <p className="text-xs text-brass-deep/80">
                       {t("subscription.firstPaymentOn", { date: endStr })}
                     </p>
                   )}

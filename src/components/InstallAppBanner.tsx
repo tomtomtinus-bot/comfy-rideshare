@@ -79,7 +79,7 @@ export const InstallAppBanner = () => {
                   {t("install.ios3a")} <strong>{t("install.ios3b")}</strong> {t("install.ios3c")}
                 </span>
               </li>
-              <li className="text-xs text-brass-deep/60 pl-5">{t("install.iosNote")}</li>
+              <li className="text-xs text-brass-deep/80 pl-5">{t("install.iosNote")}</li>
             </ol>
           )}
 
@@ -133,7 +133,7 @@ export const InstallAppBanner = () => {
           type="button"
           onClick={dismiss}
           aria-label={t("install.close") as string}
-          className="shrink-0 text-brass-deep/50 hover:text-brass-deep"
+          className="shrink-0 text-brass-deep/80 hover:text-brass-deep"
         >
           <X className="h-4 w-4" />
         </button>

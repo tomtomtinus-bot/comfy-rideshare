@@ -15,7 +15,7 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
   const { isActive, loading } = useSubscription();
 
   if (loading) {
-    return <div className="min-h-screen grid place-items-center text-sm text-brass-deep/50">Laden…</div>;
+    return <div className="min-h-screen grid place-items-center text-sm text-brass-deep/80">Laden…</div>;
   }
   if (isAdmin || isActive) return <>{children}</>;
   // Opdrachtgevers worden 2-wekelijks gefactureerd via platformfacturen
@@ -31,7 +31,7 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
           <p className="text-brass-deep/70">
             Je hebt een actief abonnement nodig om {action} te gebruiken.
           </p>
-          <p className="text-sm text-brass-deep/60">
+          <p className="text-sm text-brass-deep/80">
             <strong>30 dagen gratis proberen</strong> — opzegbaar tijdens de proefperiode.
           </p>
           <Link
@@ -40,7 +40,7 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
           >
             Start 30 dagen gratis
           </Link>
-          <p className="text-xs text-brass-deep/50">
+          <p className="text-xs text-brass-deep/80">
             Vragen?{" "}
             <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
               support@viacust.com

@@ -246,11 +246,11 @@ const Inner = () => {
     navigate(`/rit/${ride.id}`);
   };
 
-  if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
+  if (loading) return <p className="text-sm text-brass-deep/80">Laden…</p>;
   if (!ride) {
     return (
       <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/60 mb-4">Geen toegang tot deze rit.</p>
+        <p className="text-brass-deep/80 mb-4">Geen toegang tot deze rit.</p>
         <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">← Dashboard</Link>
       </div>
     );
@@ -259,7 +259,7 @@ const Inner = () => {
   return (
     <div className="space-y-6">
       <header>
-        <Link to={`/rit/${ride.id}`} className="text-brass-deep/60 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
+        <Link to={`/rit/${ride.id}`} className="text-brass-deep/80 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
           ← Terug naar ritdetails
         </Link>
         <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">Rit bewerken</p>
@@ -332,7 +332,7 @@ const Inner = () => {
             <button type="button" onClick={() => setDrivers((d) => [...d, { name: "", phone: "" }])}
               className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Toevoegen</button>
           </div>
-          {drivers.length === 0 && <p className="text-xs text-brass-deep/40 italic">Geen chauffeurs.</p>}
+          {drivers.length === 0 && <p className="text-xs text-brass-deep/80 italic">Geen chauffeurs.</p>}
           <ul className="space-y-2">
             {drivers.map((d, i) => (
               <li key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2">
@@ -341,7 +341,7 @@ const Inner = () => {
                 <input placeholder="Telefoon" value={d.phone} onChange={(e) => setDrivers((arr) => arr.map((x, j) => j === i ? { ...x, phone: e.target.value } : x))}
                   className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                 <button type="button" onClick={() => setDrivers((arr) => arr.filter((_, j) => j !== i))}
-                  className="px-2 text-brass-deep/50 hover:text-red-700"><X className="h-4 w-4" /></button>
+                  className="px-2 text-brass-deep/80 hover:text-red-700"><X className="h-4 w-4" /></button>
               </li>
             ))}
           </ul>
@@ -353,14 +353,14 @@ const Inner = () => {
             <button type="button" onClick={() => setPlates((p) => [...p, ""])}
               className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Toevoegen</button>
           </div>
-          {plates.length === 0 && <p className="text-xs text-brass-deep/40 italic">Geen kentekens.</p>}
+          {plates.length === 0 && <p className="text-xs text-brass-deep/80 italic">Geen kentekens.</p>}
           <ul className="space-y-2">
             {plates.map((p, i) => (
               <li key={i} className="grid grid-cols-[1fr_auto] gap-2">
                 <input value={p} onChange={(e) => setPlates((arr) => arr.map((x, j) => j === i ? e.target.value.toUpperCase() : x))}
                   className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm font-mono tracking-wider" />
                 <button type="button" onClick={() => setPlates((arr) => arr.filter((_, j) => j !== i))}
-                  className="px-2 text-brass-deep/50 hover:text-red-700"><X className="h-4 w-4" /></button>
+                  className="px-2 text-brass-deep/80 hover:text-red-700"><X className="h-4 w-4" /></button>
               </li>
             ))}
           </ul>
@@ -373,15 +373,15 @@ const Inner = () => {
               className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Rit toevoegen</button>
           </div>
           {extraLegs.length === 0 ? (
-            <p className="text-xs text-brass-deep/40 italic">Geen aansluitende ritten.</p>
+            <p className="text-xs text-brass-deep/80 italic">Geen aansluitende ritten.</p>
           ) : (
             <ul className="space-y-4">
               {extraLegs.map((leg, i) => (
                 <li key={i} className="bg-parchment/40 p-4 border border-brass-deep/10">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Rit {i + 2}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Rit {i + 2}</p>
                     <button type="button" onClick={() => removeLeg(i)}
-                      className="text-brass-deep/50 hover:text-red-700 text-lg leading-none" aria-label="Verwijder rit">×</button>
+                      className="text-brass-deep/80 hover:text-red-700 text-lg leading-none" aria-label="Verwijder rit">×</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <AddressAutocomplete
@@ -399,32 +399,32 @@ const Inner = () => {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Datum</label>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Datum</label>
                       <input type="date" value={leg.scheduled_date}
                         onChange={(e) => updateLeg(i, { scheduled_date: e.target.value, end_date: leg.end_date || e.target.value })}
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Starttijd</label>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Starttijd</label>
                       <input type="time" value={leg.scheduled_time}
                         onChange={(e) => updateLeg(i, { scheduled_time: e.target.value })}
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Einddatum</label>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Einddatum</label>
                       <input type="date" value={leg.end_date || leg.scheduled_date}
                         onChange={(e) => updateLeg(i, { end_date: e.target.value })}
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Eindtijd</label>
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Eindtijd</label>
                       <input type="time" value={leg.end_time}
                         onChange={(e) => updateLeg(i, { end_time: e.target.value })}
                         className="mt-1 w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                     </div>
                   </div>
                   <div className="mt-3">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold block mb-1">Vergunningnummer (optioneel)</label>
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold block mb-1">Vergunningnummer (optioneel)</label>
                     <input type="text" value={leg.permit_number}
                       onChange={(e) => updateLeg(i, { permit_number: e.target.value })}
                       placeholder="Andere ontheffing dan hoofdrit"
@@ -432,13 +432,13 @@ const Inner = () => {
                   </div>
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Chauffeurs (optioneel)</p>
+                      <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Chauffeurs (optioneel)</p>
                       <button type="button"
                         onClick={() => updateLeg(i, { drivers: [...leg.drivers, { name: "", phone: "" }] })}
                         className="text-[10px] uppercase tracking-widest text-brass-deep font-semibold hover:text-brass-gold">+ Toevoegen</button>
                     </div>
                     {leg.drivers.length === 0 ? (
-                      <p className="text-[11px] text-brass-deep/40 italic">Geen chauffeurs toegevoegd.</p>
+                      <p className="text-[11px] text-brass-deep/80 italic">Geen chauffeurs toegevoegd.</p>
                     ) : (
                       <ul className="space-y-2">
                         {leg.drivers.map((d, di) => (
@@ -451,7 +451,7 @@ const Inner = () => {
                               className="bg-parchment border border-brass-deep/15 px-3 py-2 text-sm" />
                             <button type="button"
                               onClick={() => updateLeg(i, { drivers: leg.drivers.filter((_, j) => j !== di) })}
-                              className="px-2 text-brass-deep/50 hover:text-red-700"><X className="h-4 w-4" /></button>
+                              className="px-2 text-brass-deep/80 hover:text-red-700"><X className="h-4 w-4" /></button>
                           </li>
                         ))}
                       </ul>
@@ -474,7 +474,7 @@ const Inner = () => {
           </Link>
         </div>
 
-        <p className="text-xs text-brass-deep/55">
+        <p className="text-xs text-brass-deep/80">
           Toegewezen begeleiders krijgen automatisch een melding van de wijziging.
         </p>
       </section>

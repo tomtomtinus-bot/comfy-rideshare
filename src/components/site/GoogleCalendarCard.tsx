@@ -114,7 +114,7 @@ export const GoogleCalendarCard = () => {
           </svg>
           <span className="font-semibold">Google Agenda</span>
           {status.last_sync_at && (
-            <span className="text-brass-deep/45">
+            <span className="text-brass-deep/80">
               · laatst gesynchroniseerd {new Date(status.last_sync_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
             </span>
           )}
@@ -124,7 +124,7 @@ export const GoogleCalendarCard = () => {
             type="button"
             onClick={() => sync(false)}
             disabled={busy !== null}
-            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/55 hover:text-brass-deep transition-colors disabled:opacity-50"
+            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-deep transition-colors disabled:opacity-50"
           >
             {busy === "sync" ? t("google.syncing") : t("google.syncNow")}
           </button>
@@ -133,7 +133,7 @@ export const GoogleCalendarCard = () => {
             type="button"
             onClick={disconnect}
             disabled={busy !== null}
-            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/45 hover:text-brass-deep transition-colors disabled:opacity-50"
+            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-deep transition-colors disabled:opacity-50"
           >
             {busy === "disconnect" ? t("google.disconnecting") : t("google.disconnect")}
           </button>
@@ -146,11 +146,11 @@ export const GoogleCalendarCard = () => {
     <div className="border border-brass-deep/15 bg-card/60 p-4 md:p-5 mb-6 rounded-sm">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-[9px] uppercase tracking-widest text-brass-deep/45 font-semibold">
+          <p className="text-[9px] uppercase tracking-widest text-brass-deep/80 font-semibold">
             {t("google.integration")}
           </p>
           <h3 className="font-display text-base text-brass-deep mt-0.5">Google Agenda</h3>
-          <p className="text-[11px] text-brass-deep/55 mt-1.5 max-w-xl leading-relaxed">
+          <p className="text-[11px] text-brass-deep/80 mt-1.5 max-w-xl leading-relaxed">
             {t("google.cardBody")}
           </p>
           <p className="text-[11px] text-brass-gold mt-1.5 font-semibold">

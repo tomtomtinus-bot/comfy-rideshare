@@ -262,7 +262,7 @@ export const AddressAutocomplete = ({
   return (
     <div className="relative" ref={wrapRef}>
       <div className="flex items-end justify-between gap-2">
-        <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">{label}</label>
+        <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">{label}</label>
         <button
           type="button"
           onClick={async () => {
@@ -283,7 +283,7 @@ export const AddressAutocomplete = ({
         className="mt-1 w-full bg-card border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
         autoComplete="off"
       />
-      <p className="text-[10px] text-brass-deep/50 mt-1 min-h-[14px]">
+      <p className="text-[10px] text-brass-deep/80 mt-1 min-h-[14px]">
         {busy ? "Adres zoeken…" : bordersBusy ? "Grensovergangen laden…" : "Selecteer een adres of grensovergang uit de lijst"}
       </p>
 
@@ -300,10 +300,10 @@ export const AddressAutocomplete = ({
           </div>
           <ul className="overflow-auto">
             {bordersBusy && !allBorders.length && (
-              <li className="px-4 py-3 text-sm text-brass-deep/60">Grensovergangen laden uit OpenStreetMap…</li>
+              <li className="px-4 py-3 text-sm text-brass-deep/80">Grensovergangen laden uit OpenStreetMap…</li>
             )}
             {!bordersBusy && filteredBorders.length === 0 && allBorders.length > 0 && (
-              <li className="px-4 py-3 text-sm text-brass-deep/60">Geen resultaten voor "{borderFilter}"</li>
+              <li className="px-4 py-3 text-sm text-brass-deep/80">Geen resultaten voor "{borderFilter}"</li>
             )}
             {filteredBorders.slice(0, 200).map((b, i) => (
               <li
@@ -315,7 +315,7 @@ export const AddressAutocomplete = ({
               </li>
             ))}
             {filteredBorders.length > 200 && (
-              <li className="px-4 py-2 text-[10px] text-brass-deep/50 italic">+{filteredBorders.length - 200} meer — verfijn de zoekterm</li>
+              <li className="px-4 py-2 text-[10px] text-brass-deep/80 italic">+{filteredBorders.length - 200} meer — verfijn de zoekterm</li>
             )}
           </ul>
         </div>
@@ -341,7 +341,7 @@ export const AddressAutocomplete = ({
           )}
           {results.length > 0 && (
             <>
-              <li className="px-4 py-1.5 text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold bg-parchment/60">
+              <li className="px-4 py-1.5 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold bg-parchment/60">
                 Adressen (Google)
               </li>
               {results.map((r) => (
@@ -351,7 +351,7 @@ export const AddressAutocomplete = ({
                   className="px-4 py-2 text-sm cursor-pointer hover:bg-parchment border-b border-brass-deep/10 last:border-0"
                 >
                   <div className="font-medium">{r.main}</div>
-                  {r.secondary && <div className="text-xs text-brass-deep/60">{r.secondary}</div>}
+                  {r.secondary && <div className="text-xs text-brass-deep/80">{r.secondary}</div>}
                 </li>
               ))}
             </>

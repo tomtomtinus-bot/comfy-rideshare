@@ -164,7 +164,7 @@ const AdminUsers = () => {
     <div className="space-y-8">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Gebruikers & rollen</h2>
-        <p className="text-sm text-brass-deep/60 mt-1">
+        <p className="text-sm text-brass-deep/80 mt-1">
           {users.length} geregistreerde gebruiker{users.length === 1 ? "" : "s"}
           {pendingCount > 0 && (
             <> · <span className="text-brass-gold font-semibold">{pendingCount} wacht{pendingCount === 1 ? "" : "en"} op goedkeuring</span></>
@@ -173,7 +173,7 @@ const AdminUsers = () => {
       </header>
 
       <div className="bg-parchment/60 border border-brass-deep/10 p-4">
-        <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
           Nieuwe admin toevoegen
         </p>
         <div className="flex gap-2">
@@ -192,7 +192,7 @@ const AdminUsers = () => {
             Promoot
           </button>
         </div>
-        <p className="text-[11px] text-brass-deep/50 mt-2">
+        <p className="text-[11px] text-brass-deep/80 mt-2">
           De gebruiker moet al een account hebben.
         </p>
       </div>
@@ -219,9 +219,9 @@ const AdminUsers = () => {
       </div>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-brass-deep/50">Geen gebruikers gevonden.</p>
+        <p className="text-sm text-brass-deep/80">Geen gebruikers gevonden.</p>
       ) : (
         <ul className="space-y-px bg-brass-deep/10">
           {filtered.map((u) => {
@@ -235,12 +235,12 @@ const AdminUsers = () => {
                       {u.full_name || u.email}
                       {isMe && <span className="ml-2 text-[10px] uppercase tracking-widest text-brass-gold">jij</span>}
                     </p>
-                    <p className="text-xs text-brass-deep/55">{u.email}</p>
+                    <p className="text-xs text-brass-deep/80">{u.email}</p>
                     {u.company_name && (
-                      <p className="text-xs text-brass-deep/55">{u.company_name}</p>
+                      <p className="text-xs text-brass-deep/80">{u.company_name}</p>
                     )}
                     {u.anonymous_id && (
-                      <p className="text-[10px] text-brass-deep/40 mt-1 tabular-nums">#{u.anonymous_id}</p>
+                      <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">#{u.anonymous_id}</p>
                     )}
                     {status === "rejected" && u.rejection_reason && (
                       <p className="text-[11px] text-red-700 mt-1">Reden: {u.rejection_reason}</p>
@@ -251,7 +251,7 @@ const AdminUsers = () => {
                   </div>
                   <div className="col-span-6 md:col-span-2 flex flex-wrap gap-1.5 items-start">
                     {u.roles.length === 0 ? (
-                      <span className="text-xs text-brass-deep/40">geen rol</span>
+                      <span className="text-xs text-brass-deep/80">geen rol</span>
                     ) : (
                       u.roles.map((r) => <RoleChip key={r} role={r} />)
                     )}
@@ -302,7 +302,7 @@ const AdminUsers = () => {
                       </button>
                     )}
                   </div>
-                  <p className="col-span-12 text-[10px] text-brass-deep/40 tabular-nums">
+                  <p className="col-span-12 text-[10px] text-brass-deep/80 tabular-nums">
                     Aangemaakt {fmtDate(u.created_at)}
                     {u.approved_at && status === "approved" && (
                       <> · goedgekeurd {fmtDate(u.approved_at)}</>
