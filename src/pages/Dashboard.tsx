@@ -552,8 +552,109 @@ const ClientDashboard = () => {
                 className="flex-1 min-w-[200px] h-9"
               />
             </div>
-            <div className="border border-border rounded-md bg-card overflow-hidden">
-              <Table>
+            {(() => {
+              const now = new Date();
+              const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+              const mondayOf = (d: Date) => {
+                const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+                const day = (x.getDay() + 6) % 7;
+                x.setDate(x.getDate() - day);
+                return x;
+              };
+
+              const currentRides = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= currentMonthStart);
+              const pastRides = filtered.filter((r) => new Date(r.scheduled_at).getTime() < currentMonthStart);
+
+              // Group current rides by week
+              type WeekGroup = { key: string; label: string; sortKey: number; rides: typeof filtered };
+              const weeks = new Map<string, WeekGroup>();
+              for (const r of currentRides) {
+                const d = new Date(r.scheduled_at);
+                const wMon = mondayOf(d);
+                const wKey = `w-${wMon.toISOString().slice(0, 10)}`;
+                if (!weeks.has(wKey)) {
+                  const wEnd = new Date(wMon); wEnd.setDate(wEnd.getDate() + 6);
+                  const sameMonth = wMon.getMonth() === wEnd.getMonth();
+                  const label = sameMonth
+                    ? `Week ${wMon.getDate()}–${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`
+                    : `Week ${wMon.getDate()} ${wMon.toLocaleDateString("nl-NL", { month: "short" })} – ${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`;
+                  weeks.set(wKey, { key: wKey, label, sortKey: wMon.getTime(), rides: [] });
+                }
+                weeks.get(wKey)!.rides.push(r);
+              }
+              const sortedWeeks = Array.from(weeks.values()).sort((a, b) => a.sortKey - b.sortKey);
+
+              // Group past rides by month (descending)
+              type MonthGroup = { key: string; label: string; sortKey: number; rides: typeof filtered };
+              const pastMonths = new Map<string, MonthGroup>();
+              for (const r of pastRides) {
+                const d = new Date(r.scheduled_at);
+                const mKey = `${d.getFullYear()}-${d.getMonth()}`;
+                if (!pastMonths.has(mKey)) {
+                  pastMonths.set(mKey, {
+                    key: mKey,
+                    label: d.toLocaleDateString("nl-NL", { month: "long", year: "numeric" }),
+                    sortKey: d.getFullYear() * 12 + d.getMonth(),
+                    rides: [],
+                  });
+                }
+                pastMonths.get(mKey)!.rides.push(r);
+              }
+              const sortedPastMonths = Array.from(pastMonths.values()).sort((a, b) => b.sortKey - a.sortKey);
+
+              const renderRideRow = (r: typeof filtered[number]) => {
+                const ass = assignments[r.id] ?? [];
+                const acceptedCount = ass.filter((a) => a.status === "accepted").length;
+                return (
+                  <TableRow
+                    key={r.id}
+                    className="hover:bg-muted/30 cursor-pointer"
+                    onClick={() => navigate(`/rit/${r.id}/bewerk`)}
+                  >
+                    <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
+                    <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
+                    <TableCell className="text-xs py-2">
+                      <span className="font-medium">{r.pickup_city}</span>
+                      <span className="text-muted-foreground mx-1.5">→</span>
+                      <span className="font-medium">{r.dropoff_city}</span>
+                      {r.bundle_label && (
+                        <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-1.5 py-0.5">📦 {r.bundle_label}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs tabular-nums text-center py-2">
+                      {acceptedCount} / {r.num_escorts}
+                    </TableCell>
+                    <TableCell className="py-2"><TableStatusBadge status={r.status} /></TableCell>
+                    <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Meer opties</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}/bewerk`)}>
+                            Aanpassen
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
+                            Details bekijken
+                          </DropdownMenuItem>
+                          {r.bundle_id && (r.status === "open" || r.status === "matched") && (
+                            <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
+                              + extra rit aan pakket
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              };
+
+              const tableHeader = (
                 <TableHeader>
                   <TableRow className="bg-muted/40 hover:bg-muted/40">
                     <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Ritnummer</TableHead>
@@ -564,164 +665,69 @@ const ClientDashboard = () => {
                     <TableHead className="h-9 w-[60px]" />
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {filtered.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Geen ritten gevonden.</TableCell>
-                    </TableRow>
-                  ) : (() => {
-                    const now = new Date();
-                    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
-                    // Monday of given date
-                    const mondayOf = (d: Date) => {
-                      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                      const day = (x.getDay() + 6) % 7; // 0 = Monday
-                      x.setDate(x.getDate() - day);
-                      return x;
-                    };
-                    const currentWeekKey = `w-${mondayOf(now).toISOString().slice(0, 10)}`;
+              );
 
-                    type WeekGroup = { key: string; label: string; isPast: boolean; sortKey: number; rides: typeof filtered };
-                    type MonthGroup = { key: string; label: string; isPast: boolean; isCurrent: boolean; sortKey: number; weeks: Map<string, WeekGroup> };
-                    const months = new Map<string, MonthGroup>();
-
-                    for (const r of filtered) {
-                      const d = new Date(r.scheduled_at);
-                      const mKey = `${d.getFullYear()}-${d.getMonth()}`;
-                      if (!months.has(mKey)) {
-                        const isPastM = d.getFullYear() < now.getFullYear() || (d.getFullYear() === now.getFullYear() && d.getMonth() < now.getMonth());
-                        months.set(mKey, {
-                          key: mKey,
-                          label: d.toLocaleDateString("nl-NL", { month: "long", year: "numeric" }),
-                          isPast: isPastM,
-                          isCurrent: mKey === currentMonthKey,
-                          sortKey: d.getFullYear() * 12 + d.getMonth(),
-                          weeks: new Map(),
-                        });
-                      }
-                      const m = months.get(mKey)!;
-                      const wMon = mondayOf(d);
-                      const wKey = `w-${wMon.toISOString().slice(0, 10)}`;
-                      if (!m.weeks.has(wKey)) {
-                        const wEnd = new Date(wMon); wEnd.setDate(wEnd.getDate() + 6);
-                        const sameMonth = wMon.getMonth() === wEnd.getMonth();
-                        const label = sameMonth
-                          ? `Week ${wMon.getDate()}–${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`
-                          : `Week ${wMon.getDate()} ${wMon.toLocaleDateString("nl-NL", { month: "short" })} – ${wEnd.getDate()} ${wEnd.toLocaleDateString("nl-NL", { month: "short" })}`;
-                        const isPastW = wEnd.getTime() < new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-                        m.weeks.set(wKey, { key: wKey, label, isPast: isPastW, sortKey: wMon.getTime(), rides: [] });
-                      }
-                      m.weeks.get(wKey)!.rides.push(r);
-                    }
-
-                    const sortedMonths = Array.from(months.values()).sort((a, b) => {
-                      const aF = !a.isPast, bF = !b.isPast;
-                      if (aF && !bF) return -1;
-                      if (!aF && bF) return 1;
-                      return aF ? a.sortKey - b.sortKey : b.sortKey - a.sortKey;
-                    });
-
-                    const isOpen = (key: string, defaultOpen: boolean) =>
-                      collapsedSections.has(key) ? !defaultOpen : defaultOpen;
-
-                    const rows: JSX.Element[] = [];
-                    for (const m of sortedMonths) {
-                      const monthOpen = isOpen(m.key, m.isCurrent);
-                      const monthCount = Array.from(m.weeks.values()).reduce((n, w) => n + w.rides.length, 0);
-                      rows.push(
-                        <TableRow key={`mhdr-${m.key}`} className="hover:bg-muted/60 border-y border-border bg-muted/50">
-                          <TableCell
-                            colSpan={6}
-                            className="py-3 px-4 cursor-pointer select-none"
-                            onClick={() => toggleSection(m.key)}
-                          >
-                            <span className="inline-flex items-center gap-2">
-                              {monthOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                              <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
-                              <span className="text-xs font-normal text-muted-foreground tabular-nums">({monthCount})</span>
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      );
-                      if (!monthOpen) continue;
-
-                      const sortedWeeks = Array.from(m.weeks.values()).sort((a, b) =>
-                        m.isPast ? b.sortKey - a.sortKey : a.sortKey - b.sortKey
-                      );
-                      for (const w of sortedWeeks) {
-                        rows.push(
-                          <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b border-border/50 bg-muted/30">
-                            <TableCell
-                              colSpan={6}
-                              className="text-xs font-semibold tracking-wider uppercase text-muted-foreground py-2 px-4"
-                            >
-                              {w.label} <span className="ml-1 normal-case tracking-normal font-normal tabular-nums">({w.rides.length} {w.rides.length === 1 ? "rit" : "ritten"})</span>
+              return (
+                <>
+                  <div className="border border-border rounded-md bg-card overflow-hidden">
+                    <Table>
+                      {tableHeader}
+                      <TableBody>
+                        {currentRides.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
+                              Geen ritten in {now.toLocaleDateString("nl-NL", { month: "long", year: "numeric" })}.
                             </TableCell>
                           </TableRow>
-                        );
-                        const sortedRides = [...w.rides].sort((a, b) => {
-                          const da = new Date(a.scheduled_at).getTime();
-                          const db = new Date(b.scheduled_at).getTime();
-                          return m.isPast ? db - da : da - db;
-                        });
-                        for (const r of sortedRides) {
-                          const ass = assignments[r.id] ?? [];
-                          const acceptedCount = ass.filter((a) => a.status === "accepted").length;
-                          rows.push(
-                            <TableRow
-                              key={r.id}
-                              className="hover:bg-muted/30 cursor-pointer"
-                              onClick={() => navigate(`/rit/${r.id}/bewerk`)}
-                            >
-                              <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
-                              <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
-                              <TableCell className="text-xs py-2">
-                                <span className="font-medium">{r.pickup_city}</span>
-                                <span className="text-muted-foreground mx-1.5">→</span>
-                                <span className="font-medium">{r.dropoff_city}</span>
-                                {r.bundle_label && (
-                                  <span className="ml-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-semibold text-brass-deep bg-brass-gold/20 border border-brass-gold/40 px-1.5 py-0.5">📦 {r.bundle_label}</span>
-                                )}
+                        ) : (
+                          sortedWeeks.flatMap((w) => [
+                            <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b border-border/50 bg-muted/30">
+                              <TableCell
+                                colSpan={6}
+                                className="text-xs font-semibold tracking-wider uppercase text-muted-foreground py-2 px-4"
+                              >
+                                {w.label} <span className="ml-1 normal-case tracking-normal font-normal tabular-nums">({w.rides.length} {w.rides.length === 1 ? "rit" : "ritten"})</span>
                               </TableCell>
-                              <TableCell className="text-xs tabular-nums text-center py-2">
-                                {acceptedCount} / {r.num_escorts}
-                              </TableCell>
-                              <TableCell className="py-2"><TableStatusBadge status={r.status} /></TableCell>
-                              <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                      <span className="sr-only">Meer opties</span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-44">
-                                    <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}/bewerk`)}>
-                                      Aanpassen
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
-                                      Details bekijken
-                                    </DropdownMenuItem>
-                                    {r.bundle_id && (r.status === "open" || r.status === "matched") && (
-                                      <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
-                                        + extra rit aan pakket
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        }
-                      }
-                    }
-                    return rows;
-                  })()}
-                </TableBody>
-              </Table>
-            </div>
+                            </TableRow>,
+                            ...[...w.rides]
+                              .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+                              .map((r) => renderRideRow(r)),
+                          ])
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {sortedPastMonths.length > 0 && (
+                    <div className="mt-12">
+                      <h2 className="text-lg font-semibold text-muted-foreground mb-4">Eerdere ritten</h2>
+                      <Accordion type="multiple" className="border border-border rounded-md bg-card overflow-hidden divide-y">
+                        {sortedPastMonths.map((m) => (
+                          <AccordionItem key={m.key} value={m.key} className="border-b-0">
+                            <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline">
+                              <span className="inline-flex items-center gap-2">
+                                <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
+                                <span className="text-xs font-normal text-muted-foreground tabular-nums">({m.rides.length})</span>
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-0">
+                              <Table>
+                                {tableHeader}
+                                <TableBody>
+                                  {[...m.rides]
+                                    .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())
+                                    .map((r) => renderRideRow(r))}
+                                </TableBody>
+                              </Table>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         );
       })()}
