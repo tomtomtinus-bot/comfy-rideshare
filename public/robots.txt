@@ -1,16 +1,20 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
-Allow: /
+
+Allow: /$
+Allow: /faq
+Allow: /hoe-werkt-viacust
+Allow: /privacy
+Allow: /privacy-en
+Allow: /datenschutz
+Allow: /confidentialite
+Allow: /sitemap.xml
+Allow: /llms.txt
+
+# Beveiligde en functionele app-routes uitsluiten van indexering
+Disallow: /dashboard
+Disallow: /profiel
+Disallow: /reset-password
+Disallow: /kies-rol
+Disallow: /aanvragen
 
 Sitemap: https://viacust.com/sitemap.xml
