@@ -269,10 +269,8 @@ const Auth = () => {
 
     // Notify admins (best-effort, niet blokkerend)
     if (data.user?.id) {
-      supabase.functions.invoke("notify-admins-new-signup", {
+      supabase.functions.invoke("request-admin-signup-notify", {
         body: {
-          userId: data.user.id,
-          email: d.email,
           fullName: d.fullName,
           phone: d.phone,
           role: d.role,
