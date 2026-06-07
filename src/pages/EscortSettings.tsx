@@ -728,9 +728,9 @@ const Inner = () => {
                           <Button type="button" variant="ghost" size="icon" onClick={() => setFuel((f) => ({ ...f, tiers: f.tiers.filter((_, j) => j !== i) }))} className="col-span-1 h-9 w-9">×</Button>
                         </div>
                       ))}
-                      <button type="button" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))} className="px-4 py-2 text-[10px] uppercase tracking-widest font-semibold border border-brass-deep/30 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors">
+                      <Button type="button" variant="outline" size="sm" onClick={() => setFuel((f) => ({ ...f, tiers: [...f.tiers, { from: "", to: "", value: "" }] }))}>
                         {t("escortSettings.fuelAddTier")}
-                      </button>
+                      </Button>
                     </div>
                   </>
                 )}
@@ -738,17 +738,14 @@ const Inner = () => {
                 );
               })()}
 
-              <section className="bg-brass-gold/5 border border-brass-gold/30 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold mb-1">{t("escortSettings.availability")}</p>
-                <p className="text-sm text-brass-deep/80" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
+              <section className="bg-accent/5 border border-accent/20 rounded-md p-4">
+                <p className="text-xs font-medium text-accent mb-1">{t("escortSettings.availability")}</p>
+                <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("escortSettings.availabilityHint") }} />
               </section>
 
-              <button
-                disabled={busy}
-                className="w-full px-6 py-4 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors disabled:opacity-60"
-              >
+              <Button type="submit" disabled={busy} className="w-full">
                 {busy ? t("escortSettings.busy") : t("escortSettings.saveProfile")}
-              </button>
+              </Button>
             </form>
             </>
           )}
