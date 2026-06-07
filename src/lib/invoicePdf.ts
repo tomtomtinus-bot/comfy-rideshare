@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoUrl from "@/assets/viacust-logo.png";
+import headerBannerUrl from "@/assets/viacust-invoice-header.jpg";
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
 
