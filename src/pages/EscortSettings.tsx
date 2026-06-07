@@ -612,7 +612,7 @@ const Inner = () => {
 
               <section>
                 <Label>{t("escortSettings.languagesSpoken")}</Label>
-                <p className="text-[11px] text-brass-deep/80 mt-1 mb-2">
+                <p className="text-xs text-muted-foreground mt-1 mb-2">
                   {t("escortSettings.languagesHint")}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -634,23 +634,22 @@ const Inner = () => {
                 return (
               <section>
                 <Label>{t("escortSettings.fuelTitle")}</Label>
-                <p className="text-[11px] text-brass-deep/80 mt-1 mb-3">
+                <p className="text-xs text-muted-foreground mt-1 mb-3">
                   {t("escortSettings.fuelIntro")}
                   {currentFuel && (
                     <> <span dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelCurrentPrice", { p: Number(currentFuel.eur_per_liter).toFixed(3), w: currentFuel.week_start }) }} /></>
                   )}
                 </p>
-                <label className="flex items-center gap-2 mb-3 text-sm">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center gap-2 mb-3">
+                  <Switch
                     checked={fuel.enabled}
-                    onChange={(e) => setFuel((f) => ({ ...f, enabled: e.target.checked }))}
+                    onCheckedChange={(v) => setFuel((f) => ({ ...f, enabled: !!v }))}
                   />
-                  {t("escortSettings.fuelEnable")}
-                </label>
+                  <span className="text-sm">{t("escortSettings.fuelEnable")}</span>
+                </div>
                 {fuel.enabled && (
-                  <div className="mb-3 p-3 bg-parchment border border-brass-deep/15">
-                    <p className="text-[11px] text-brass-deep/70 mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
+                  <div className="mb-3 p-3 bg-muted/40 border border-border rounded-md">
+                    <p className="text-xs text-muted-foreground mb-2" dangerouslySetInnerHTML={{ __html: t("escortSettings.fuelUploadHint") }} />
                     <input
                       type="file"
                       accept="application/pdf,.pdf"
