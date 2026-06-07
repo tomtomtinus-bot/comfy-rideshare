@@ -426,7 +426,6 @@ const Auth = () => {
             <form
               onSubmit={mode === "login" ? handleLogin : handleSignup}
               className="space-y-4"
-              autoComplete="on"
             >
               {mode === "signup" && (
                 <>
