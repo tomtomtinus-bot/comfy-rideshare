@@ -16,7 +16,6 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 
 async function sendPush(userIds: string[], title: string, body: string, url: string, tag?: string) {
   const ids = userIds.filter(Boolean)
@@ -26,8 +25,8 @@ async function sendPush(userIds: string[], title: string, body: string, url: str
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ANON_KEY}`,
-        'apikey': ANON_KEY,
+        'Authorization': `Bearer ${SERVICE_KEY}`,
+        'apikey': SERVICE_KEY,
       },
       body: JSON.stringify({ userIds: ids, title, body, url, tag }),
     }).then(r => r.text())
