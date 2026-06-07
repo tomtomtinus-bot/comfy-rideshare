@@ -52,7 +52,7 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="max-w-5xl mx-auto px-5 md:px-8 pt-12 md:pt-20 pb-10 md:pb-14 text-center">
+        <section className="max-w-5xl mx-auto px-5 md:px-8 pt-8 md:pt-12 pb-6 md:pb-8 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
             Het digitale platform voor uitzonderlijk vervoer
           </h1>
@@ -61,16 +61,16 @@ const Index = () => {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/auth">Aanmelden</Link>
+              <Link to="/auth">Start als Opdrachtgever</Link>
             </Button>
-            <Button asChild size="lg" variant="ghost">
-              <Link to="/hoe-werkt-viacust">Hoe werkt het</Link>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/auth">Aanmelden als Begeleider</Link>
             </Button>
           </div>
         </section>
 
         {/* Product preview */}
-        <section className="max-w-5xl mx-auto px-5 md:px-8 pb-12 md:pb-20">
+        <section className="max-w-5xl mx-auto px-5 md:px-8 pb-8 md:pb-10">
           <Card className="overflow-hidden shadow-sm">
             <CardHeader className="border-b bg-muted/30 py-3 px-4 md:px-6 flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
@@ -157,20 +157,44 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Direct op de hoogte van de regelgeving?{" "}
+            <Link to="/info/nederland" className="underline underline-offset-4 hover:text-foreground transition-colors">
+              Bekijk de transportrichtlijnen voor Nederland
+            </Link>{" "}en{" "}
+            <Link to="/info/belgie" className="underline underline-offset-4 hover:text-foreground transition-colors">
+              België
+            </Link>.
+          </p>
         </section>
       </main>
 
       {/* Slim footer */}
       <footer className="border-t">
-        <div className="max-w-5xl mx-auto px-5 md:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} ViaCust. Alle rechten voorbehouden.</p>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            <Link to="/hoe-werkt-viacust" className="hover:text-foreground transition-colors">Hoe werkt het</Link>
-            <Link to="/wat-kost-viacust" className="hover:text-foreground transition-colors">Prijzen</Link>
-            <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+        <div className="max-w-5xl mx-auto px-5 md:px-8 py-8 text-xs text-muted-foreground">
+          <div className="grid grid-cols-2 gap-6 md:gap-12 mb-6">
+            <div>
+              <p className="font-semibold text-foreground mb-2">Informatie</p>
+              <ul className="space-y-1.5">
+                <li><Link to="/hoe-werkt-viacust" className="hover:text-foreground transition-colors">Hoe werkt het</Link></li>
+                <li><Link to="/wat-kost-viacust" className="hover:text-foreground transition-colors">Tarieven</Link></li>
+                <li><Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
+                <li><Link to="/info/nederland" className="hover:text-foreground transition-colors">NL Richtlijnen</Link></li>
+                <li><Link to="/info/belgie" className="hover:text-foreground transition-colors">BE Richtlijnen</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground mb-2">Juridisch</p>
+              <ul className="space-y-1.5">
+                <li><Link to="/voorwaarden" className="hover:text-foreground transition-colors">Algemene voorwaarden</Link></li>
+                <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacyverklaring</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-4 border-t flex flex-col md:flex-row items-center justify-between gap-2">
+            <p>© {new Date().getFullYear()} ViaCust. Alle rechten voorbehouden.</p>
             <a href="mailto:info@viacust.com" className="hover:text-foreground transition-colors">info@viacust.com</a>
-          </nav>
+          </div>
         </div>
       </footer>
     </div>
