@@ -57,7 +57,7 @@ const en: Dict = {
     join: "Join us.",
     client: "Client",
     escort: "Escort",
-    fullName: "Full name",
+    fullName: "COMPANY NAME",
     phone: "Phone",
     email: "Email",
     password: "Password",
