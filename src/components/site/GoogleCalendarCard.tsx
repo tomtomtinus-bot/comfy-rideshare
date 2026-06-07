@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface TokenStatus {
   connected: boolean;
@@ -107,65 +109,63 @@ export const GoogleCalendarCard = () => {
 
   if (status.connected) {
     return (
-      <div className="flex items-center justify-between gap-3 flex-wrap border border-brass-deep/15 bg-card/60 px-4 py-2.5 mb-6 rounded-sm">
-        <div className="flex items-center gap-2 text-[11px] text-brass-deep/70">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-brass-gold shrink-0">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          <span className="font-semibold">Google Agenda</span>
-          {status.last_sync_at && (
-            <span className="text-brass-deep/80">
-              · laatst gesynchroniseerd {new Date(status.last_sync_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => sync(false)}
-            disabled={busy !== null}
-            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-deep transition-colors disabled:opacity-50"
-          >
-            {busy === "sync" ? t("google.syncing") : t("google.syncNow")}
-          </button>
-          <span className="text-brass-deep/20">·</span>
-          <button
-            type="button"
-            onClick={disconnect}
-            disabled={busy !== null}
-            className="text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-deep transition-colors disabled:opacity-50"
-          >
-            {busy === "disconnect" ? t("google.disconnecting") : t("google.disconnect")}
-          </button>
-        </div>
-      </div>
+      <Card className="mb-6">
+        <CardContent className="flex items-center justify-between gap-3 flex-wrap py-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-500 shrink-0">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span className="font-medium text-foreground">Google Agenda</span>
+            {status.last_sync_at && (
+              <span>
+                · laatst gesynchroniseerd {new Date(status.last_sync_at).toLocaleString(locale, { dateStyle: "short", timeStyle: "short" })}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => sync(false)}
+              disabled={busy !== null}
+            >
+              {busy === "sync" ? "Synchroniseren…" : "Nu Synchroniseren"}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={disconnect}
+              disabled={busy !== null}
+            >
+              {busy === "disconnect" ? "Loskoppelen…" : "Loskoppelen"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="border border-brass-deep/15 bg-card/60 p-4 md:p-5 mb-6 rounded-sm">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <Card className="mb-6">
+      <CardContent className="flex items-start justify-between gap-4 flex-wrap py-5">
         <div>
-          <p className="text-[9px] uppercase tracking-widest text-brass-deep/80 font-semibold">
-            {t("google.integration")}
-          </p>
-          <h3 className="font-display text-base text-brass-deep mt-0.5">Google Agenda</h3>
-          <p className="text-[11px] text-brass-deep/80 mt-1.5 max-w-xl leading-relaxed">
+          <p className="text-xs font-medium text-muted-foreground mb-0.5">Google Agenda</p>
+          <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
             {t("google.cardBody")}
           </p>
-          <p className="text-[11px] text-brass-gold mt-1.5 font-semibold">
-            ⚠ Let op: zorg dat je browser pop-ups van deze site toestaat.
+          <p className="text-xs text-amber-600 mt-1.5 font-medium">
+            Let op: zorg dat je browser pop-ups van deze site toestaat.
           </p>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           onClick={connect}
           disabled={busy !== null}
-          className="px-3 py-1.5 border border-brass-deep/25 text-brass-deep uppercase tracking-widest text-[10px] font-semibold hover:bg-parchment transition-colors disabled:opacity-50 shrink-0"
         >
           {busy === "connect" ? t("google.connecting") : t("google.connectGoogle")}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
