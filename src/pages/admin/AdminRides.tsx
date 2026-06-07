@@ -97,6 +97,7 @@ const AdminRides = () => {
     if (!q) return true;
     return (
       r.id.toLowerCase().includes(q) ||
+      (r.ride_number ?? "").toLowerCase().includes(q) ||
       r.pickup_city.toLowerCase().includes(q) ||
       r.dropoff_city.toLowerCase().includes(q) ||
       (r.client_name ?? "").toLowerCase().includes(q)
