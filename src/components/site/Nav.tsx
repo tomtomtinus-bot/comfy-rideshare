@@ -50,7 +50,7 @@ export const Nav = () => {
         <Link to="/" className="flex items-center gap-3" onClick={close}>
           <img
             src={logo}
-            alt="ViaCust"
+            alt="ViaCust - Transportbegeleiding Logo"
             width={32}
             height={32}
             className="size-8 object-contain"
