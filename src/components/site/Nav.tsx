@@ -46,12 +46,12 @@ export const Nav = () => {
 
   return (
     <nav className="sticky top-0 z-50 bg-parchment/85 backdrop-blur-md border-b border-brass-deep/10 pt-[env(safe-area-inset-top)]">
-      <div className="max-w-7xl mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 h-28 flex items-center justify-between">
         <Link to="/" className="flex items-center" onClick={close}>
           <img
             src={logo}
             alt="ViaCust - Digital Escort Solutions"
-            className="h-12 md:h-14 w-auto object-contain"
+            className="h-20 md:h-24 w-auto object-contain"
           />
         </Link>
         <div className="hidden md:flex items-center gap-10 text-sm font-medium uppercase tracking-widest text-brass-deep/70">
