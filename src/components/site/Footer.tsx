@@ -11,7 +11,7 @@ export const Footer = () => {
           <div className="flex items-center gap-3 mb-2">
             <img
               src={logo}
-              alt="ViaCust - Transportbegeleiding Logo"
+              alt="ViaCust - Digital Escort Solutions"
               width={24}
               height={24}
               loading="lazy"
