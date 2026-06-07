@@ -21,7 +21,7 @@ export const Footer = () => {
               ViaCust
             </span>
           </div>
-          <p className="text-[10px] uppercase tracking-widest text-parchment/40 mb-4">
+          <p className="text-[10px] uppercase tracking-widest text-parchment/80 mb-4">
             {" "}
           </p>
           <p className="text-sm leading-relaxed">{t("home.footer.tagline")}</p>
