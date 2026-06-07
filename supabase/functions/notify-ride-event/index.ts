@@ -25,7 +25,7 @@ function getAdmin() {
 
 const fmtDateTime = (iso?: string | null) =>
   iso
-    ? new Date(iso).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+    ? new Date(iso).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Amsterdam" })
     : "";
 
 const fmtMoney = (n: number | null | undefined) =>
