@@ -56,7 +56,9 @@ const Privacy = ({ forceLang }: PrivacyProps = {}) => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title={seo.title} description={seo.description} canonical={seo.canonical} />
+      <Nav />
       <main className="px-6 md:px-8 py-16 md:py-24">
+
         <article className="max-w-3xl mx-auto bg-card shadow-etched p-8 md:p-12 space-y-6">
           <header>
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
