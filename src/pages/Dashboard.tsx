@@ -684,7 +684,7 @@ const ClientDashboard = () => {
                             <TableRow
                               key={r.id}
                               className="hover:bg-muted/30 cursor-pointer"
-                              onClick={() => navigate(`/rit/${r.id}`)}
+                              onClick={() => navigate(`/rit/${r.id}/bewerk`)}
                             >
                               <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
                               <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
@@ -711,8 +711,11 @@ const ClientDashboard = () => {
                                   <DropdownMenuContent align="end" className="w-44">
                                     <DropdownMenuLabel className="text-xs">{displayRideNo(r)}</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}/bewerk`)}>
+                                      Aanpassen
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem className="text-xs" onClick={() => navigate(`/rit/${r.id}`)}>
-                                      Rit bekijken
+                                      Details bekijken
                                     </DropdownMenuItem>
                                     {r.bundle_id && (r.status === "open" || r.status === "matched") && (
                                       <DropdownMenuItem className="text-xs" onClick={() => addRideToBundle(r)}>
