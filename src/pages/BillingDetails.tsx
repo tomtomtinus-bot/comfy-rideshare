@@ -5,6 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { EmailChangeCard } from "@/components/site/EmailChangeCard";
 import { AccountDeletionCard } from "@/components/AccountDeletionCard";
@@ -345,6 +346,7 @@ const BillingDetailsInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Facturatiegegevens | ViaCust" description="Beheer je bedrijfsgegevens, BTW-nummer en factuuradres voor ViaCust." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto space-y-10">

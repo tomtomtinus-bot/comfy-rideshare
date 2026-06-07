@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 
@@ -195,6 +196,7 @@ const HistoryInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Geschiedenis | ViaCust" description="Bekijk je voltooide transportritten, uren en historische facturen in ViaCust." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto space-y-12">

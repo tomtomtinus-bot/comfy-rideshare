@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 
 type Factor = { id: string; status: string; friendly_name?: string | null };
@@ -105,6 +106,7 @@ const Security = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Beveiliging | ViaCust" description="Beheer tweestapsverificatie en accountbeveiligingsinstellingen in ViaCust." />
       <Nav />
       <main className="px-6 md:px-8 py-12 md:py-16">
         <div className="max-w-2xl mx-auto bg-card shadow-etched p-8 md:p-10">
