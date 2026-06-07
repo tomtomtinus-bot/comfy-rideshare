@@ -104,6 +104,7 @@ const WatKostViaCust = () => {
               </CardContent>
             </Card>
           </div>
+          </div>
         </section>
 
         <section className="py-10 md:py-14 px-5 md:px-8 text-center">
