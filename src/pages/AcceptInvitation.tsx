@@ -43,7 +43,7 @@ const AcceptInvitation = () => {
       <Nav />
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="max-w-md w-full bg-white border border-brass-deep/10 p-8">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-brass-deep/50 mb-2">Bedrijfsuitnodiging</p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-brass-deep/80 mb-2">Bedrijfsuitnodiging</p>
           <h1 className="font-display text-3xl text-brass-deep mb-4">
             {done ? "Aangesloten!" : "Word chauffeur"}
           </h1>
@@ -77,7 +77,7 @@ const AcceptInvitation = () => {
                 bedrijf op ViaCust. Je gaat toegewezen ritten zien en kunt je uren indienen. De
                 bedrijfsplanner blijft eindverantwoordelijk voor acceptatie en facturatie.
               </p>
-              <p className="text-xs text-brass-deep/55 mb-6">
+              <p className="text-xs text-brass-deep/80 mb-6">
                 Ingelogd als: <strong>{user.email}</strong>
               </p>
               <Button onClick={accept} disabled={submitting} className="w-full">

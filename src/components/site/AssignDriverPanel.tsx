@@ -118,14 +118,14 @@ export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
       </div>
 
       {drivers.length === 0 ? (
-        <p className="text-sm text-brass-deep/60">
+        <p className="text-sm text-brass-deep/80">
           Je hebt nog geen chauffeurs in je team.{" "}
           <a href="/team" className="text-brass-gold underline">Nodig chauffeurs uit</a>.
         </p>
       ) : (
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-1">
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">
               Voer uit met
             </label>
             <select
@@ -152,7 +152,7 @@ export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
       )}
 
       {assignment.assigned_driver_id && (
-        <p className="text-xs text-brass-deep/55 mt-3">
+        <p className="text-xs text-brass-deep/80 mt-3">
           De chauffeur ziet deze rit in zijn eigen dashboard zonder financiële details. Jij blijft
           verantwoordelijk voor goedkeuring van de uren en de facturatie.
         </p>

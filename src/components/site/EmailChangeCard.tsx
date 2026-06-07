@@ -47,7 +47,7 @@ export const EmailChangeCard = () => {
   return (
     <div className="bg-parchment/60 border border-brass-deep/10 p-5 space-y-3">
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">Huidig e-mailadres</p>
+        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Huidig e-mailadres</p>
         <p className="text-sm font-semibold text-brass-deep break-all">{user.email}</p>
       </div>
 
@@ -58,7 +58,7 @@ export const EmailChangeCard = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          <label className="block text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+          <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
             Aanvragen e-mailadres veranderen
           </label>
           <div className="flex gap-2">
@@ -77,7 +77,7 @@ export const EmailChangeCard = () => {
               Aanvraag indienen
             </button>
           </div>
-          <p className="text-[11px] text-brass-deep/50">
+          <p className="text-[11px] text-brass-deep/80">
             Een admin keurt je aanvraag goed. Daarna ontvang je op het nieuwe adres een bevestigingsmail.
           </p>
         </div>

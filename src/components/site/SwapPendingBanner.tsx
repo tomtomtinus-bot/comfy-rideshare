@@ -79,14 +79,14 @@ export const SwapPendingBanner = ({
               Nieuwe datum: <strong>{fmt(otherWhen)}</strong>
             </p>
             {isSwap && (
-              <p className="text-xs text-brass-deep/60 mt-1">
+              <p className="text-xs text-brass-deep/80 mt-1">
                 Ruil met begeleider #{otherAnon ?? "????"} — beide moeten akkoord gaan.
               </p>
             )}
             {s.reason && (
               <p className="text-sm text-brass-deep/80 italic mt-2">"{s.reason}"</p>
             )}
-            <p className="text-[10px] text-brass-deep/50 mt-2">
+            <p className="text-[10px] text-brass-deep/80 mt-2">
               Vervalt op {fmt(s.expires_at)}
             </p>
 

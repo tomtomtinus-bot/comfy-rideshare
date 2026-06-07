@@ -24,7 +24,7 @@ export const RequireAdmin = ({ children }: { children: ReactNode }) => {
 
   if (loading || (isAdmin && !aalChecked)) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-brass-deep/50 text-sm uppercase tracking-widest">
+      <div className="min-h-screen flex items-center justify-center text-brass-deep/80 text-sm uppercase tracking-widest">
         Laden…
       </div>
     );

@@ -89,15 +89,15 @@ const AdminEscorts = () => {
     <div className="space-y-6">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Begeleiders</h2>
-        <p className="text-sm text-brass-deep/60 mt-1">
+        <p className="text-sm text-brass-deep/80 mt-1">
           {list.length} profiel{list.length === 1 ? "" : "en"} · modereer beschikbaarheid en certificering per land.
         </p>
       </header>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : list.length === 0 ? (
-        <p className="text-sm text-brass-deep/50">Geen begeleiders.</p>
+        <p className="text-sm text-brass-deep/80">Geen begeleiders.</p>
       ) : (
         <ul className="space-y-px bg-brass-deep/10">
           {list.map((e) => (
@@ -105,40 +105,40 @@ const AdminEscorts = () => {
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-3">
                   <p className="font-medium">{e.full_name || e.company_name || "—"}</p>
-                  <p className="text-[10px] text-brass-deep/55 mt-1 tabular-nums">
+                  <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">
                     #{e.anonymous_id} · {e.base_city}
                   </p>
                   {e.company_name && e.full_name && (
-                    <p className="text-[10px] text-brass-deep/45 mt-1">{e.company_name}</p>
+                    <p className="text-[10px] text-brass-deep/80 mt-1">{e.company_name}</p>
                   )}
                   {e.languages && e.languages.length > 0 && (
-                    <p className="text-[10px] text-brass-deep/55 mt-2">
+                    <p className="text-[10px] text-brass-deep/80 mt-2">
                       <span className="uppercase tracking-widest font-bold">Talen:</span>{" "}
                       {e.languages.join(", ")}
                     </p>
                   )}
                 </div>
                 <div className="col-span-6 md:col-span-2 text-xs">
-                  <p className="text-brass-deep/55">Tarief</p>
+                  <p className="text-brass-deep/80">Tarief</p>
                   <p className="tabular-nums">€{Number(e.hourly_rate).toFixed(2)}/u</p>
-                  <p className="mt-2 text-brass-deep/55">Ritten</p>
+                  <p className="mt-2 text-brass-deep/80">Ritten</p>
                   <p className="tabular-nums">{e.rides_completed} · ★ {Number(e.rating).toFixed(1)}</p>
                 </div>
                 <div className="col-span-6 md:col-span-2 text-xs">
-                  <p className="text-brass-deep/55">Certificaat</p>
+                  <p className="text-brass-deep/80">Certificaat</p>
                   <p className="tabular-nums">
                     {e.cert_number || "—"}
                     {e.cert_expires_on && (
-                      <span className={`block text-[10px] ${expired(e.cert_expires_on) ? "text-red-700 font-bold" : "text-brass-deep/55"}`}>
+                      <span className={`block text-[10px] ${expired(e.cert_expires_on) ? "text-red-700 font-bold" : "text-brass-deep/80"}`}>
                         Verloopt {fmt(e.cert_expires_on)}
                         {expired(e.cert_expires_on) ? " (verlopen!)" : ""}
                       </span>
                     )}
                   </p>
-                  {e.vca_number && <p className="mt-1 text-[10px] text-brass-deep/55">VCA {e.vca_number}</p>}
+                  {e.vca_number && <p className="mt-1 text-[10px] text-brass-deep/80">VCA {e.vca_number}</p>}
                 </div>
                 <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mb-2">
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-2">
                     Geverifieerd per land
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -156,7 +156,7 @@ const AdminEscorts = () => {
                               ? "bg-brass-gold text-brass-deep border-brass-gold"
                               : offers
                                 ? "bg-card text-brass-deep/70 border-brass-deep/20 hover:bg-parchment"
-                                : "bg-card text-brass-deep/40 border-brass-deep/10 hover:bg-parchment"
+                                : "bg-card text-brass-deep/80 border-brass-deep/10 hover:bg-parchment"
                           }`}
                         >
                           {verified && <Check className="size-3" strokeWidth={3} />}
@@ -167,7 +167,7 @@ const AdminEscorts = () => {
                   </div>
                 </div>
                 <div className="col-span-12 md:col-span-2 md:text-right space-y-2">
-                  <p className={`text-[10px] uppercase tracking-widest font-bold ${e.available ? "text-brass-gold" : "text-brass-deep/40"}`}>
+                  <p className={`text-[10px] uppercase tracking-widest font-bold ${e.available ? "text-brass-gold" : "text-brass-deep/80"}`}>
                     {e.available ? "Beschikbaar" : "Inactief"}
                   </p>
                   <button

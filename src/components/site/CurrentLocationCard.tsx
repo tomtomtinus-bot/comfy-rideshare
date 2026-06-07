@@ -115,7 +115,7 @@ export default function CurrentLocationCard() {
         <MapPin className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
         <div>
           <h3 className="font-display text-lg text-brass-deep">{t("standplaats.currentTitle")}</h3>
-          <p className="text-xs text-brass-deep/60 mt-1">
+          <p className="text-xs text-brass-deep/80 mt-1">
             <Trans
               i18nKey="standplaats.currentDesc"
               components={{ 1: <strong />, 2: <em /> }}

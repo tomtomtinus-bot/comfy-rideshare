@@ -75,7 +75,7 @@ const AdminEmailChanges = () => {
     <div className="space-y-8">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">E-mailwijzigingen</h2>
-        <p className="text-sm text-brass-deep/60 mt-1">
+        <p className="text-sm text-brass-deep/80 mt-1">
           {rows.length} aanvragen
           {pendingCount > 0 && <> · <span className="text-brass-gold font-semibold">{pendingCount} wacht{pendingCount === 1 ? "" : "en"} op goedkeuring</span></>}
         </p>
@@ -91,18 +91,18 @@ const AdminEmailChanges = () => {
       </div>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-brass-deep/50">Geen aanvragen.</p>
+        <p className="text-sm text-brass-deep/80">Geen aanvragen.</p>
       ) : (
         <ul className="space-y-px bg-brass-deep/10">
           {filtered.map((r) => (
             <li key={r.id} className="bg-card p-4 md:p-5">
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-7">
-                  <p className="text-xs text-brass-deep/55">Van</p>
+                  <p className="text-xs text-brass-deep/80">Van</p>
                   <p className="font-medium break-all">{r.current_email}</p>
-                  <p className="text-xs text-brass-deep/55 mt-2">Naar</p>
+                  <p className="text-xs text-brass-deep/80 mt-2">Naar</p>
                   <p className="font-medium break-all text-brass-gold">{r.new_email}</p>
                   {r.rejection_reason && <p className="text-[11px] text-red-700 mt-2">Reden: {r.rejection_reason}</p>}
                 </div>
@@ -121,7 +121,7 @@ const AdminEmailChanges = () => {
                     </>
                   )}
                 </div>
-                <p className="col-span-12 text-[10px] text-brass-deep/40 tabular-nums">
+                <p className="col-span-12 text-[10px] text-brass-deep/80 tabular-nums">
                   Aangevraagd {fmt(r.created_at)}
                   {r.decided_at && <> · beslist {fmt(r.decided_at)}</>}
                 </p>

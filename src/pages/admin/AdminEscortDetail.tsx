@@ -9,7 +9,7 @@ const fmt = (d: string | null | undefined) =>
 
 const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="grid grid-cols-12 gap-3 py-2 border-b border-brass-deep/10 text-sm">
-    <div className="col-span-5 md:col-span-4 text-brass-deep/55 uppercase tracking-widest text-[10px] font-bold pt-1">
+    <div className="col-span-5 md:col-span-4 text-brass-deep/80 uppercase tracking-widest text-[10px] font-bold pt-1">
       {label}
     </div>
     <div className="col-span-7 md:col-span-8 break-words">{value ?? "—"}</div>
@@ -45,8 +45,8 @@ const AdminEscortDetail = () => {
     })();
   }, [id]);
 
-  if (loading) return <p className="text-sm text-brass-deep/50">Laden…</p>;
-  if (!escort) return <p className="text-sm text-brass-deep/50">Begeleider niet gevonden.</p>;
+  if (loading) return <p className="text-sm text-brass-deep/80">Laden…</p>;
+  if (!escort) return <p className="text-sm text-brass-deep/80">Begeleider niet gevonden.</p>;
 
   const surcharges = Array.isArray(escort.surcharges) ? escort.surcharges : [];
   const fuel = escort.fuel_surcharge || {};
@@ -61,7 +61,7 @@ const AdminEscortDetail = () => {
         >
           <ArrowLeft className="size-4" /> Terug
         </Link>
-        <span className={`text-[10px] uppercase tracking-widest font-bold ${escort.available ? "text-brass-gold" : "text-brass-deep/40"}`}>
+        <span className={`text-[10px] uppercase tracking-widest font-bold ${escort.available ? "text-brass-gold" : "text-brass-deep/80"}`}>
           {escort.available ? "Beschikbaar" : "Inactief"}
         </span>
       </div>
@@ -70,7 +70,7 @@ const AdminEscortDetail = () => {
         <h2 className="font-display text-2xl text-brass-deep">
           {profile?.full_name || escort.company_name || "Begeleider"}
         </h2>
-        <p className="text-xs text-brass-deep/55 mt-1 tabular-nums">
+        <p className="text-xs text-brass-deep/80 mt-1 tabular-nums">
           #{escort.anonymous_id} · {escort.base_city} · ★ {Number(escort.rating).toFixed(1)} · {escort.rides_completed} ritten
         </p>
       </header>

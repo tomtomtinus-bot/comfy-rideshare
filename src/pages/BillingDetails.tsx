@@ -92,7 +92,7 @@ const FieldImpl = ({
   error?: string;
 }) => (
   <label className="block">
-    <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60 mb-1 block">
+    <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
       {label}
     </span>
     <input
@@ -158,7 +158,7 @@ const VatField = ({
 
   return (
     <label className="block">
-      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60 mb-1 block">
+      <span className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1 block">
         {label}
       </span>
       <div className="flex gap-2">
@@ -354,14 +354,14 @@ const BillingDetailsInner = () => {
             <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">
               {t("billing.title")}
             </h1>
-            <p className="text-sm text-brass-deep/60 mt-3">
+            <p className="text-sm text-brass-deep/80 mt-3">
               {t("billing.intro")}
               {isEscort ? t("billing.introEscort") : "."}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
+            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
           ) : (
             <form onSubmit={save} className="bg-card shadow-etched p-6 md:p-8 space-y-8">
               <section className="space-y-4">
@@ -427,7 +427,7 @@ const BillingDetailsInner = () => {
                   <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
                     {t("billing.weroSection")}
                   </h2>
-                  <p className="text-xs text-brass-deep/60 -mt-2">
+                  <p className="text-xs text-brass-deep/80 -mt-2">
                     {t("billing.weroIntro")}
                   </p>
                   <label className="flex items-center gap-3 cursor-pointer">

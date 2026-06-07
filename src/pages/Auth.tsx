@@ -349,7 +349,7 @@ const Auth = () => {
           <h1 className="font-display text-4xl text-brass-deep italic mb-2">
             {mode === "login" ? t("auth.welcomeBack") : mode === "signup" ? t("auth.join") : "Herstel je toegang"}
           </h1>
-          <p className="text-sm text-brass-deep/50 italic mb-8">
+          <p className="text-sm text-brass-deep/80 italic mb-8">
             {" "}
           </p>
 
@@ -361,7 +361,7 @@ const Auth = () => {
                   type="button"
                   onClick={() => setRole(r)}
                   className={`py-3 text-xs uppercase tracking-widest font-semibold transition-colors ${
-                    role === r ? "bg-brass-deep text-parchment" : "bg-card text-brass-deep/60"
+                    role === r ? "bg-brass-deep text-parchment" : "bg-card text-brass-deep/80"
                   }`}
                 >
                   {r === "opdrachtgever" ? t("auth.client") : t("auth.escort")}
@@ -402,13 +402,13 @@ const Auth = () => {
                   {mode === "signup" ? "Aanmelden met Google" : "Inloggen met Google"}
                 </button>
                 {mode === "signup" && (
-                  <p className="text-[11px] text-brass-deep/60 mb-3 text-center">
+                  <p className="text-[11px] text-brass-deep/80 mb-3 text-center">
                     Na aanmelden kies je of je opdrachtgever of begeleider bent.
                   </p>
                 )}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 h-px bg-brass-deep/15" />
-                  <span className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-semibold">of</span>
+                  <span className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">of</span>
                   <div className="flex-1 h-px bg-brass-deep/15" />
                 </div>
                 {mode === "login" && bioReady && (
@@ -470,7 +470,7 @@ const Auth = () => {
               )}
 
               {mode === "signup" && role === "begeleider" && (
-                <p className="text-xs text-brass-deep/65 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
+                <p className="text-xs text-brass-deep/80 leading-relaxed bg-parchment/60 p-3 border-l-2 border-brass-gold">
                   {t("auth.escortHint")}
                 </p>
               )}
@@ -524,11 +524,11 @@ const Auth = () => {
             <>
               <button
                 onClick={() => setMode(mode === "forgot" ? "login" : mode === "login" ? "signup" : "login")}
-                className="mt-6 text-xs text-brass-deep/60 hover:text-brass-gold w-full text-center"
+                className="mt-6 text-xs text-brass-deep/80 hover:text-brass-gold w-full text-center"
               >
                 {mode === "login" ? t("auth.noAccount") : mode === "signup" ? t("auth.hasAccount") : "Terug naar inloggen"}
               </button>
-              <p className="mt-4 text-center text-[10px] text-brass-deep/40">
+              <p className="mt-4 text-center text-[10px] text-brass-deep/80">
                 Problemen?{" "}
                 <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
                   support@viacust.com
@@ -565,7 +565,7 @@ const Field = ({
   <div>
     <label
       htmlFor={id ?? name}
-      className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold"
+      className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold"
     >
       {label}
     </label>

@@ -164,7 +164,7 @@ const InfoBelgie = () => {
                       className="block p-4 border border-brass-deep/15 hover:border-brass-gold hover:bg-brass-gold/5 transition-colors"
                     >
                       <span className="text-sm text-brass-deep font-semibold">{l.label}</span>
-                      <span className="block text-xs text-brass-deep/60 mt-1 truncate">{l.href}</span>
+                      <span className="block text-xs text-brass-deep/80 mt-1 truncate">{l.href}</span>
                     </a>
                   </li>
                 ))}

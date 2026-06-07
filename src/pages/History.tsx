@@ -203,16 +203,16 @@ const HistoryInner = () => {
               {t("history.kicker")}
             </p>
             <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("history.title")}</h1>
-            <p className="text-brass-deep/60 mt-3">
+            <p className="text-brass-deep/80 mt-3">
               {t("history.intro")}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
+            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
           ) : grouped.length === 0 ? (
             <div className="bg-card shadow-etched p-12 text-center">
-              <p className="text-brass-deep/60">{t("history.none")}</p>
+              <p className="text-brass-deep/80">{t("history.none")}</p>
             </div>
           ) : (
             <div className="space-y-10">
@@ -220,7 +220,7 @@ const HistoryInner = () => {
                 <section key={g.key}>
                   <header className="flex items-end justify-between flex-wrap gap-2 mb-4">
                     <h2 className="font-display text-2xl text-brass-deep">{g.label}</h2>
-                    <p className="text-xs uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
+                    <p className="text-xs uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : (i18n.language === "nl" ? "ten" : "s") })} · €{g.total.toFixed(2)}
                     </p>
                   </header>
@@ -229,24 +229,24 @@ const HistoryInner = () => {
                       <li key={r.id} className="bg-card p-6 md:p-8">
                         <div className="grid grid-cols-12 gap-4 items-start">
                           <div className="col-span-12 md:col-span-3">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.date")}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.date")}</p>
                             <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at, i18n.language)}</p>
-                            <p className="text-xs text-brass-deep/55 mt-1">
+                            <p className="text-xs text-brass-deep/80 mt-1">
                               {role === "begeleider" ? t("common.client") : t("common.escort")} {r.counterpart}
                               {r.counterpart_name ? ` · ${r.counterpart_name}` : ""}
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-6">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.route")}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.route")}</p>
                             <p className="font-medium">
                               {r.pickup_city} <span className="text-brass-gold mx-2">→</span> {r.dropoff_city}
                             </p>
                             {r.invoice_number && (
-                              <p className="text-xs text-brass-deep/55 mt-2">{t("history.invoice", { nr: r.invoice_number })}</p>
+                              <p className="text-xs text-brass-deep/80 mt-2">{t("history.invoice", { nr: r.invoice_number })}</p>
                             )}
                           </div>
                           <div className="col-span-12 md:col-span-3 md:text-right">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("history.amount")}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.amount")}</p>
                             <p className="font-semibold tabular-nums text-brass-gold">
                               €{r.amount.toFixed(2)}
                             </p>

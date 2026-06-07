@@ -68,9 +68,9 @@ const FuelPrices = () => {
         </a>
 
         {loading ? (
-          <p className="text-sm text-brass-deep/50">Laden…</p>
+          <p className="text-sm text-brass-deep/80">Laden…</p>
         ) : available.length === 0 ? (
-          <p className="text-sm text-brass-deep/50">Nog geen prijzen beschikbaar.</p>
+          <p className="text-sm text-brass-deep/80">Nog geen prijzen beschikbaar.</p>
         ) : (
           <Tabs defaultValue={initial}>
             <TabsList>
@@ -118,7 +118,7 @@ const FuelPrices = () => {
                             <td className="py-2 pr-4">{r.week_start}</td>
                             <td className="py-2 pr-4">€ {Number(r.eur_per_liter).toFixed(3)}</td>
                             <td className="py-2 pr-4">{r.source}</td>
-                            <td className="py-2 pr-4 text-brass-deep/60">
+                            <td className="py-2 pr-4 text-brass-deep/80">
                               {new Date(r.fetched_at).toLocaleDateString("nl-NL")}
                             </td>
                           </tr>

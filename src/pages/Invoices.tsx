@@ -388,7 +388,7 @@ const InvoicesInner = () => {
                 {isEscort ? t("common.escort") : t("common.client")}
               </p>
               <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("invoices.title")}</h1>
-              <p className="text-sm text-brass-deep/60 mt-3">
+              <p className="text-sm text-brass-deep/80 mt-3">
                 {t("invoices.intro")}
               </p>
             </div>
@@ -396,7 +396,7 @@ const InvoicesInner = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 bg-card shadow-etched">
             <div>
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1">
                 {t("invoices.searchLabel")}
               </label>
               <input
@@ -408,7 +408,7 @@ const InvoicesInner = () => {
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1">
                 {t("invoices.dateFrom")}
               </label>
               <input
@@ -419,7 +419,7 @@ const InvoicesInner = () => {
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/50 mb-1">
+              <label className="block text-[10px] uppercase tracking-widest font-bold text-brass-deep/80 mb-1">
                 {t("invoices.dateTo")}
               </label>
               <input
@@ -455,7 +455,7 @@ const InvoicesInner = () => {
               <TabsContent value="platform" className="space-y-6">
                 <div className="bg-card shadow-etched p-6 flex items-center justify-between flex-wrap gap-4">
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.frequency")}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.frequency")}</p>
                     <p className="text-sm text-brass-deep/70">{t("invoices.feeIntro")}</p>
                   </div>
                   <div className="flex gap-2">
@@ -512,7 +512,7 @@ const InvoicesInner = () => {
     if (items.length === 0)
       return (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{emptyText}</p>
+          <p className="text-brass-deep/80">{emptyText}</p>
         </div>
       );
     const tree = groupByYMW(items);
@@ -527,7 +527,7 @@ const InvoicesInner = () => {
             <details key={y} open={expandAll || yi === 0} className="group bg-card shadow-etched">
               <summary className="flex items-center justify-between cursor-pointer select-none px-5 py-3 hover:bg-parchment/50">
                 <span className="font-display text-lg text-brass-deep">{y}</span>
-                <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                   {t("invoices.invoiceCount", { count: yearCount })}
                   <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
                 </span>
@@ -540,7 +540,7 @@ const InvoicesInner = () => {
                     <details key={m} open={expandAll} className="group/m border border-brass-deep/10 bg-parchment/30">
                       <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
                         <span className="text-sm font-semibold text-brass-deep">{monthName(parseInt(m, 10), i18n.language)}</span>
-                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                           {monthCount}
                           <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">▼</span>
                         </span>
@@ -550,7 +550,7 @@ const InvoicesInner = () => {
                           <details key={w} open={expandAll} className="group/w border border-brass-deep/10 bg-card">
                             <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/40">
                               <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">{t("invoices.week", { n: parseInt(w, 10) })}</span>
-                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                                 {tree[y][m][w].length}
                                 <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">▼</span>
                               </span>
@@ -573,7 +573,7 @@ const InvoicesInner = () => {
   }
 
   function renderPlatformInvoices() {
-    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
+    if (loading) return <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>;
     const filtered = platformInvoices.filter(matchesFilter);
     const renderInv = (inv: PlatformInvoice) => {
       const isOpen = openPlat === inv.id;
@@ -582,20 +582,20 @@ const InvoicesInner = () => {
             <li key={inv.id} className="bg-card p-6 md:p-8">
               <div className="grid grid-cols-12 gap-4 items-start">
                 <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.invoice")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.invoice")}</p>
                   <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
-                  <p className="text-xs text-brass-deep/55 mt-1">{fd(inv.created_at)}</p>
+                  <p className="text-xs text-brass-deep/80 mt-1">{fd(inv.created_at)}</p>
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.period")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.period")}</p>
                   <p className="text-sm">{fd(inv.period_start)} → {fd(inv.period_end)}</p>
                 </div>
                 <div className="col-span-6 md:col-span-2">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.escortsCount")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.escortsCount")}</p>
                   <p className="font-semibold tabular-nums">{inv.total_escorts}</p>
                 </div>
                 <div className="col-span-6 md:col-span-2">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.total")}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.total")}</p>
                   <p className="font-semibold tabular-nums text-brass-gold">{fmtMoney(inv.total_amount)}</p>
                 </div>
                 <div className="col-span-12 md:col-span-1 text-right">
@@ -635,7 +635,7 @@ const InvoicesInner = () => {
                 <div className="mt-6 pt-6 border-t border-brass-deep/10">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
+                      <tr className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                         <th className="text-left py-2">{t("invoices.date")}</th>
                         <th className="text-left py-2">{t("invoices.route")}</th>
                         <th className="text-right py-2">{t("invoices.escortsCount")}</th>
@@ -668,7 +668,7 @@ const InvoicesInner = () => {
   }
 
   function renderEscortInvoices() {
-    if (loading) return <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>;
+    if (loading) return <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>;
     const filtered = invoices.filter(matchesFilter);
     const renderInv = (inv: Invoice) => {
       const isOpen = open === inv.id;
@@ -677,20 +677,20 @@ const InvoicesInner = () => {
                   <li key={inv.id} className="bg-card p-6 md:p-8">
                     <div className="grid grid-cols-12 gap-4 items-start">
                       <div className="col-span-12 md:col-span-3">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.invoice")}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.invoice")}</p>
                         <p className="font-display text-xl text-brass-deep tabular-nums">{inv.invoice_number}</p>
-                        <p className="text-xs text-brass-deep/55 mt-1">{fd(inv.created_at)}</p>
+                        <p className="text-xs text-brass-deep/80 mt-1">{fd(inv.created_at)}</p>
                       </div>
                       <div className="col-span-12 md:col-span-4">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.period")}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.period")}</p>
                         <p className="text-sm">{fd(inv.period_start)} → {fd(inv.period_end)}</p>
                       </div>
                       <div className="col-span-6 md:col-span-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.hours")}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.hours")}</p>
                         <p className="font-semibold tabular-nums">{Number(inv.total_hours).toFixed(2)}u</p>
                       </div>
                       <div className="col-span-6 md:col-span-2">
-                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("invoices.total")}</p>
+                        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("invoices.total")}</p>
                         <p className="font-semibold tabular-nums text-brass-gold">{fmtMoney(inv.total_amount)}</p>
                       </div>
                       <div className="col-span-12 md:col-span-1 text-right">
@@ -748,7 +748,7 @@ const InvoicesInner = () => {
                         <div className="mt-6 pt-6 border-t border-brass-deep/10">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="text-[10px] uppercase tracking-widest text-brass-deep/50">
+                              <tr className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                                 <th className="text-left py-2">{t("invoices.date")}</th>
                                 <th className="text-left py-2">{t("invoices.description")}</th>
                                 <th className="text-right py-2">{t("invoices.hours")}</th>
@@ -805,7 +805,7 @@ const InvoicesInner = () => {
                               </tr>
                               {reverseCharge && (
                                 <tr>
-                                  <td colSpan={5} className="py-2 text-right text-[10px] italic text-brass-deep/55">
+                                  <td colSpan={5} className="py-2 text-right text-[10px] italic text-brass-deep/80">
                                     {t("invoices.vatNote")}
                                   </td>
                                 </tr>

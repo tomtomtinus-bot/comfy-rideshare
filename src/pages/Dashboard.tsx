@@ -388,7 +388,7 @@ const ClientDashboard = () => {
       {exportOpen && (
         <div className="bg-card shadow-etched p-6 flex flex-wrap items-end gap-4">
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.from")}</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("dash.from")}</label>
             <input
               type="date"
               value={exportFrom}
@@ -397,7 +397,7 @@ const ClientDashboard = () => {
             />
           </div>
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{t("dash.to")}</label>
+            <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("dash.to")}</label>
             <input
               type="date"
               value={exportTo}
@@ -407,7 +407,7 @@ const ClientDashboard = () => {
           </div>
           <button
             onClick={() => { setExportFrom(""); setExportTo(""); }}
-            className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep"
+            className="px-4 py-2 text-xs uppercase tracking-widest text-brass-deep/80 hover:text-brass-deep"
           >
             {t("common.clear")}
           </button>
@@ -417,15 +417,15 @@ const ClientDashboard = () => {
           >
             {t("dash.export")}
           </button>
-          <p className="text-xs text-brass-deep/50 ml-auto">{t("dash.exportEmptyHint")}</p>
+          <p className="text-xs text-brass-deep/80 ml-auto">{t("dash.exportEmptyHint")}</p>
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
+        <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
       ) : rides.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60 mb-6">{t("dash.noRidesYet")}</p>
+          <p className="text-brass-deep/80 mb-6">{t("dash.noRidesYet")}</p>
           <Link to="/aanvragen" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
             {t("dash.requestFirst")}
           </Link>
@@ -449,7 +449,7 @@ const ClientDashboard = () => {
 
         const renderList = (list: RideRow[], bucketKey: "openstaand" | "geaccepteerd" | "afgerond") => {
           if (list.length === 0) {
-            return <p className="text-sm text-brass-deep/50 p-6">{t("dash.noRidesInBucket")}</p>;
+            return <p className="text-sm text-brass-deep/80 p-6">{t("dash.noRidesInBucket")}</p>;
           }
           const order: "asc" | "desc" = bucketKey === "afgerond" ? "desc" : "asc";
           const groups = groupByDateBucket(list, (r) => r.scheduled_at, order, t);
@@ -538,7 +538,7 @@ const ClientDashboard = () => {
                 <section key={g.key}>
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
@@ -559,7 +559,7 @@ const ClientDashboard = () => {
               <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
                 <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
                   <span>{s.label}</span>
-                  <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+                  <span className="text-brass-deep/80 tabular-nums">({s.list.length})</span>
                 </h2>
                 {renderList(s.list, s.key)}
               </section>
@@ -925,7 +925,7 @@ const EscortDashboard = () => {
                   <p className="text-sm font-medium truncate">
                     {a.ride.pickup_city} <span className="text-brass-gold">→</span> {a.ride.dropoff_city}
                   </p>
-                  <p className="text-xs text-brass-deep/60 tabular-nums">
+                  <p className="text-xs text-brass-deep/80 tabular-nums">
                     {new Date(a.ride.scheduled_at).toLocaleString(localeFromI18n(i18n.language), { dateStyle: "short", timeStyle: "short" })}
                   </p>
                 </div>
@@ -943,7 +943,7 @@ const EscortDashboard = () => {
             <button
               type="button"
               onClick={() => setOverdueDismissed(true)}
-              className="text-xs uppercase tracking-widest text-brass-deep/60 hover:text-brass-deep font-semibold"
+              className="text-xs uppercase tracking-widest text-brass-deep/80 hover:text-brass-deep font-semibold"
             >
               Later
             </button>
@@ -971,10 +971,10 @@ const EscortDashboard = () => {
       {user && <ScheduledLocationsCard />}
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
+        <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
       ) : items.length === 0 ? (
         <div className="bg-card shadow-etched p-12 text-center">
-          <p className="text-brass-deep/60">{t("dash.noAssignmentsYet")}</p>
+          <p className="text-brass-deep/80">{t("dash.noAssignmentsYet")}</p>
         </div>
       ) : (() => {
         const isExpired = (a: typeof items[number]) =>
@@ -1061,7 +1061,7 @@ const EscortDashboard = () => {
                       </button>
                     </div>
                   ) : expired ? (
-                    <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">
+                    <span className="text-xs uppercase tracking-widest text-brass-deep/80 font-semibold">
                       {t("dash.expired")}
                     </span>
                   ) : submitted ? (
@@ -1083,7 +1083,7 @@ const EscortDashboard = () => {
                       {t("dash.fillHours")}
                     </button>
                   ) : (
-                    <span className="text-xs uppercase tracking-widest text-brass-deep/40 font-semibold">—</span>
+                    <span className="text-xs uppercase tracking-widest text-brass-deep/80 font-semibold">—</span>
                   )}
                 </div>
                 {disputed && (
@@ -1156,11 +1156,11 @@ const EscortDashboard = () => {
                     const defTime = `${pad(rh % 24)}:${pad(rm)}`;
                     return (
                       <>
-                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                           {t("dash.rideStartTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_start_date"
                             type="date"
@@ -1170,7 +1170,7 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
                           <input
                             type="time"
                             step={900}
@@ -1181,11 +1181,11 @@ const EscortDashboard = () => {
                             className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                           />
                         </div>
-                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold mt-2">
+                        <div className="md:col-span-2 text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mt-2">
                           {t("dash.rideEndTime")}
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.date")}</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.date")}</label>
                           <input
                             name="ride_end_date"
                             type="date"
@@ -1195,7 +1195,7 @@ const EscortDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/45 font-semibold">{t("dash.time")}</label>
+                          <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-semibold">{t("dash.time")}</label>
                           <input
                             type="time"
                             step={900}
@@ -1210,7 +1210,7 @@ const EscortDashboard = () => {
                     );
                   })()}
                   <div className="md:col-span-2">
-                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                    <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                       {t("dash.notes")}
                     </label>
                     <textarea
@@ -1222,7 +1222,7 @@ const EscortDashboard = () => {
 
                   <div className="md:col-span-2 pt-2 border-t border-brass-deep/10">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold">
+                      <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">
                         {t("dash.extraCosts")}
                       </label>
                       <button
@@ -1234,7 +1234,7 @@ const EscortDashboard = () => {
                       </button>
                     </div>
                     {getExtras(a.id).length === 0 ? (
-                      <p className="text-xs text-brass-deep/45">
+                      <p className="text-xs text-brass-deep/80">
                         {t("dash.extraCostsHint")}
                       </p>
                     ) : (
@@ -1250,7 +1250,7 @@ const EscortDashboard = () => {
                               className="col-span-7 bg-parchment border border-brass-deep/15 px-3 py-2 text-sm focus:outline-none focus:border-brass-gold"
                             />
                             <div className="col-span-4 relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/50 text-sm">€</span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/80 text-sm">€</span>
                               <input
                                 type="number"
                                 inputMode="decimal"
@@ -1268,7 +1268,7 @@ const EscortDashboard = () => {
                               type="button"
                               onClick={() => removeExtra(a.id, idx)}
                               aria-label={t("dash.removeRow")}
-                              className="col-span-1 text-brass-deep/50 hover:text-red-700 text-lg leading-none"
+                              className="col-span-1 text-brass-deep/80 hover:text-red-700 text-lg leading-none"
                             >
                               ×
                             </button>
@@ -1277,13 +1277,13 @@ const EscortDashboard = () => {
                       </ul>
                     )}
                     {getExtras(a.id).length > 0 && (
-                      <p className="text-xs text-brass-deep/60 mt-2 tabular-nums text-right">
+                      <p className="text-xs text-brass-deep/80 mt-2 tabular-nums text-right">
                         {t("dash.extraCostsSubtotal", { amount: getExtras(a.id).reduce((s, e) => s + (Number(e.amount) || 0), 0).toFixed(2) })}
                       </p>
                     )}
                   </div>
 
-                  <p className="md:col-span-2 text-xs text-brass-deep/55">
+                  <p className="md:col-span-2 text-xs text-brass-deep/80">
                     {t("dash.rateInfo", {
                       country: a.is_be_ride ? t("common.countryBE") : t("common.countryNL"),
                       rate: a.hourly_rate,
@@ -1305,7 +1305,7 @@ const EscortDashboard = () => {
           if (list.length === 0) {
             return (
               <div className="border border-dashed border-brass-deep/15 px-4 py-8 text-center">
-                <p className="text-xs text-brass-deep/45">{t("dash.noRidesInBucket")}</p>
+                <p className="text-xs text-brass-deep/80">{t("dash.noRidesInBucket")}</p>
               </div>
             );
           }
@@ -1317,7 +1317,7 @@ const EscortDashboard = () => {
                 <section key={g.key}>
                   <header className="flex items-end justify-between mb-3">
                     <h3 className="font-display text-lg text-brass-deep">{g.label}</h3>
-                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/55 font-bold tabular-nums">
+                    <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : "ten" })}
                     </p>
                   </header>
@@ -1338,7 +1338,7 @@ const EscortDashboard = () => {
               <section key={s.key} className="bg-card/60 border border-brass-deep/10 p-3 md:p-4">
                 <h2 className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-3 flex items-center justify-between">
                   <span>{s.label}</span>
-                  <span className="text-brass-deep/40 tabular-nums">({s.list.length})</span>
+                  <span className="text-brass-deep/80 tabular-nums">({s.list.length})</span>
                 </h2>
                 {renderList(s.list, s.key)}
               </section>
@@ -1362,7 +1362,7 @@ const DashboardInner = () => {
           {!isDriver && <InstallAppBanner />}
           {!isDriver && <OnboardingChecklist />}
           {loading || companyLoading ? (
-            <p className="text-sm text-brass-deep/50">{t("common.loading")}</p>
+            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
             isDriver ? <DriverDashboard /> : <EscortDashboard />
           ) : (

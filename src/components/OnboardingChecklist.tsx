@@ -136,7 +136,7 @@ export const OnboardingChecklist = () => {
             localStorage.setItem("viacust_onboarding_hidden", "true");
             setHidden(true);
           }}
-          className="text-xs text-brass-deep/50 hover:text-brass-deep underline"
+          className="text-xs text-brass-deep/80 hover:text-brass-deep underline"
         >
           Verbergen
         </button>
@@ -157,14 +157,14 @@ export const OnboardingChecklist = () => {
                     ? "border-emerald-600 bg-emerald-600 text-white"
                     : s.blocked
                       ? "border-brass-gold/50 text-brass-gold"
-                      : "border-brass-deep/30 text-brass-deep/40"
+                      : "border-brass-deep/30 text-brass-deep/80"
                 }`}
               >
                 <Icon className="size-3.5" />
               </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className={`text-sm font-semibold ${s.done ? "text-brass-deep/60 line-through" : "text-brass-deep"}`}>
+                  <p className={`text-sm font-semibold ${s.done ? "text-brass-deep/80 line-through" : "text-brass-deep"}`}>
                     {s.label}
                   </p>
                   {s.blocked && !s.done && (
@@ -173,7 +173,7 @@ export const OnboardingChecklist = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-brass-deep/60 mt-0.5">{s.description}</p>
+                <p className="text-xs text-brass-deep/80 mt-0.5">{s.description}</p>
               </div>
             </div>
           );

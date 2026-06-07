@@ -87,9 +87,9 @@ export const SwapRequestDialog = ({
         </DialogHeader>
 
         {loading ? (
-          <p className="text-sm text-brass-deep/50">Laden…</p>
+          <p className="text-sm text-brass-deep/80">Laden…</p>
         ) : options.length === 0 ? (
-          <p className="text-sm text-brass-deep/60">
+          <p className="text-sm text-brass-deep/80">
             Geen geschikte ritten gevonden. Vereist: een toekomstige eigen rit waar deze begeleider
             nog niet op staat.
           </p>
@@ -116,7 +116,7 @@ export const SwapRequestDialog = ({
                           <p className="font-medium text-sm">
                             {r.pickup_city} <span className="text-brass-gold">→</span> {r.dropoff_city}
                           </p>
-                          <p className="text-xs text-brass-deep/55 tabular-nums">{fmt(r.scheduled_at)}</p>
+                          <p className="text-xs text-brass-deep/80 tabular-nums">{fmt(r.scheduled_at)}</p>
                         </div>
                       </label>
                     </li>
@@ -146,8 +146,8 @@ export const SwapRequestDialog = ({
                           <p className="font-medium text-sm">
                             {r.pickup_city} <span className="text-brass-gold">→</span> {r.dropoff_city}
                           </p>
-                          <p className="text-xs text-brass-deep/55 tabular-nums">{fmt(r.scheduled_at)}</p>
-                          <p className="text-[10px] text-brass-deep/55 mt-1">
+                          <p className="text-xs text-brass-deep/80 tabular-nums">{fmt(r.scheduled_at)}</p>
+                          <p className="text-[10px] text-brass-deep/80 mt-1">
                             Huidige begeleider: #{r.target_escort_anon ?? "????"}
                           </p>
                         </div>
@@ -159,7 +159,7 @@ export const SwapRequestDialog = ({
             )}
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-1">
+              <label className="block text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">
                 Reden (optioneel)
               </label>
               <textarea

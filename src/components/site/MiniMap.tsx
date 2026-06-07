@@ -66,7 +66,7 @@ export function MiniMap({ address, label, className, lat, lng }: Props) {
   return (
     <div className={className}>
       {label && (
-        <p className="text-[10px] uppercase tracking-widest text-brass-deep/50 font-bold mb-1">{label}</p>
+        <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{label}</p>
       )}
       <div ref={ref} className="h-[220px] w-full overflow-hidden rounded-lg border border-brass-deep/20" />
       <div className="mt-2 flex items-center justify-between text-xs">

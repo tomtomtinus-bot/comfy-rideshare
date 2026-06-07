@@ -231,12 +231,12 @@ const Inner = () => {
             <h2 className="font-display text-xl text-brass-deep mb-2">
               {listTitle}
             </h2>
-            <p className="text-sm text-brass-deep/60 mb-5">{listHelp}</p>
+            <p className="text-sm text-brass-deep/80 mb-5">{listHelp}</p>
 
             {loading ? (
-              <p className="text-sm text-brass-deep/50">Laden…</p>
+              <p className="text-sm text-brass-deep/80">Laden…</p>
             ) : preferred.length === 0 ? (
-              <p className="text-sm text-brass-deep/50">
+              <p className="text-sm text-brass-deep/80">
                 Nog geen opdrachtgevers in je lijst.
                 {mode === "all"
                   ? " Voeg ze hieronder toe."
@@ -256,7 +256,7 @@ const Inner = () => {
                       <p className="font-medium text-brass-deep">
                         {labelFor(row)}
                       </p>
-                      <p className="text-xs text-brass-deep/60">
+                      <p className="text-xs text-brass-deep/80">
                         {row.billing_city ?? "—"}
                       </p>
                     </div>
@@ -278,12 +278,12 @@ const Inner = () => {
             <h2 className="font-display text-xl text-brass-deep mb-4 flex items-center gap-2">
               <Plus className="size-5" /> Opdrachtgevers toevoegen
             </h2>
-            <p className="text-sm text-brass-deep/60 mb-4">
+            <p className="text-sm text-brass-deep/80 mb-4">
               Hier zie je opdrachtgevers waarmee je eerder ritten hebt gehad.
             </p>
 
             <div className="relative mb-4">
-              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/40" />
+              <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-brass-deep/80" />
               <input
                 type="text"
                 value={search}
@@ -294,9 +294,9 @@ const Inner = () => {
             </div>
 
             {loading ? (
-              <p className="text-sm text-brass-deep/50">Laden…</p>
+              <p className="text-sm text-brass-deep/80">Laden…</p>
             ) : candidates.length === 0 ? (
-              <p className="text-sm text-brass-deep/50">
+              <p className="text-sm text-brass-deep/80">
                 {eligible.length === 0
                   ? "Nog geen eerdere opdrachtgevers."
                   : "Geen opdrachtgevers gevonden."}
@@ -315,7 +315,7 @@ const Inner = () => {
                       <p className="font-medium text-brass-deep">
                         {labelFor(c)}
                       </p>
-                      <p className="text-xs text-brass-deep/60">
+                      <p className="text-xs text-brass-deep/80">
                         {c.billing_city ?? "—"} · {c.interactions} contact
                         {c.interactions === 1 ? "" : "en"} ·{" "}
                         {c.accepted_count} geaccepteerd

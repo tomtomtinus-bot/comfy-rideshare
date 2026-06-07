@@ -208,7 +208,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
     toast.success("Agenda opgeslagen");
   };
 
-  if (loading) return <p className="text-sm text-brass-deep/50">Agenda laden…</p>;
+  if (loading) return <p className="text-sm text-brass-deep/80">Agenda laden…</p>;
 
   return (
     <div className="bg-card shadow-etched p-6">
@@ -216,7 +216,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         <div>
           <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">Agenda</p>
           <h2 className="font-display text-2xl text-brass-deep italic">7 dagen · 24u · per half uur</h2>
-          <p className="text-[11px] text-brass-deep/60 mt-1">
+          <p className="text-[11px] text-brass-deep/80 mt-1">
             Klik het <strong>eerste half uur</strong> en daarna het <strong>laatste half uur</strong> — alles ertussen wordt automatisch doorgetrokken. Druk op <kbd className="px-1 bg-parchment border border-brass-deep/20">Esc</kbd> om te annuleren.
           </p>
           {anchor && (
@@ -238,7 +238,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         <div className="min-w-[1200px]">
           {/* Hour header */}
           <div
-            className="grid text-[9px] text-brass-deep/50 mb-1 tabular-nums"
+            className="grid text-[9px] text-brass-deep/80 mb-1 tabular-nums"
             style={{ gridTemplateColumns: `64px repeat(${SLOTS_PER_DAY}, 1fr)` }}
           >
             <div />
@@ -311,7 +311,7 @@ export const AgendaPlanner = ({ escortId, rides }: Props) => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 mt-4 text-[10px] text-brass-deep/60">
+      <div className="flex flex-wrap gap-4 mt-4 text-[10px] text-brass-deep/80">
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 bg-parchment border border-brass-deep/15" /> Beschikbaar
         </span>

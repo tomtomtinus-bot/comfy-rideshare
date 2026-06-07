@@ -33,7 +33,7 @@ export const GoogleAgendaStatus = () => {
 
   useEffect(() => { load(); }, []);
 
-  if (loading) return <p className="text-sm text-brass-deep/50">{t("google.checking")}</p>;
+  if (loading) return <p className="text-sm text-brass-deep/80">{t("google.checking")}</p>;
 
   if (!data?.connected) {
     return (
@@ -84,7 +84,7 @@ export const GoogleAgendaStatus = () => {
           <div>
             <p className="text-[10px] uppercase tracking-widest text-brass-gold font-bold">{t("google.connected")}</p>
             <h3 className="font-display text-xl text-brass-deep italic">{t("google.avail7days")}</h3>
-            <p className="text-[11px] text-brass-deep/60 mt-1">{t("google.availHint")}</p>
+            <p className="text-[11px] text-brass-deep/80 mt-1">{t("google.availHint")}</p>
           </div>
         </div>
         <button
@@ -120,7 +120,7 @@ export const GoogleAgendaStatus = () => {
         })}
       </div>
 
-      <div className="flex items-center gap-2 mt-3 text-[10px] text-brass-deep/60">
+      <div className="flex items-center gap-2 mt-3 text-[10px] text-brass-deep/80">
         <Calendar className="size-3" />
         {t("google.tip")}
       </div>

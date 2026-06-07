@@ -157,10 +157,10 @@ export function LocationPickerDialog({ open, onOpenChange, title, initial, onCon
         </DialogHeader>
         <div className="space-y-3">
           <div ref={mapRef} className="w-full h-[360px] border border-brass-deep/15 bg-parchment/30" />
-          <p className="text-[11px] text-brass-deep/60">Tik op de kaart of versleep de marker om een locatie te kiezen.</p>
+          <p className="text-[11px] text-brass-deep/80">Tik op de kaart of versleep de marker om een locatie te kiezen.</p>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Latitude</label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Latitude</label>
               <input
                 value={latStr}
                 onChange={(e) => setLatStr(e.target.value)}
@@ -169,7 +169,7 @@ export function LocationPickerDialog({ open, onOpenChange, title, initial, onCon
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold">Longitude</label>
+              <label className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold">Longitude</label>
               <input
                 value={lngStr}
                 onChange={(e) => setLngStr(e.target.value)}
@@ -187,14 +187,14 @@ export function LocationPickerDialog({ open, onOpenChange, title, initial, onCon
           </button>
           {resolved && (
             <div className="bg-parchment/50 border border-brass-deep/15 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-widest text-brass-deep/60 font-bold mb-0.5">Gekozen locatie</p>
+              <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-0.5">Gekozen locatie</p>
               <p className="text-sm">{resolved.display}</p>
               {(resolved.city || resolved.country) && (
-                <p className="text-[11px] text-brass-deep/55">{[resolved.city, resolved.country].filter(Boolean).join(", ")}</p>
+                <p className="text-[11px] text-brass-deep/80">{[resolved.city, resolved.country].filter(Boolean).join(", ")}</p>
               )}
             </div>
           )}
-          {loading && <p className="text-[11px] text-brass-deep/50">Adres opzoeken…</p>}
+          {loading && <p className="text-[11px] text-brass-deep/80">Adres opzoeken…</p>}
         </div>
         <DialogFooter>
           <button

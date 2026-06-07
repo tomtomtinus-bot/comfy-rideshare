@@ -141,7 +141,7 @@ const AdminExcluded = () => {
         <h2 className="font-display text-2xl text-brass-deep flex items-center gap-2">
           <ShieldOff className="size-6" /> Uitgesloten begeleiders
         </h2>
-        <p className="text-sm text-brass-deep/60 mt-1">
+        <p className="text-sm text-brass-deep/80 mt-1">
           {rows.length} uitsluiting{rows.length === 1 ? "" : "en"} verdeeld over{" "}
           {Object.keys(clients).length} opdrachtgever
           {Object.keys(clients).length === 1 ? "" : "s"}
@@ -170,9 +170,9 @@ const AdminExcluded = () => {
       </div>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : grouped.length === 0 ? (
-        <p className="text-sm text-brass-deep/50">Geen uitsluitingen gevonden.</p>
+        <p className="text-sm text-brass-deep/80">Geen uitsluitingen gevonden.</p>
       ) : (
         <ul className="space-y-px bg-brass-deep/10">
           {grouped.map(([cid, list]) => {
@@ -188,7 +188,7 @@ const AdminExcluded = () => {
                     <p className="font-medium text-brass-deep">
                       {c?.company_name || c?.full_name || "Onbekende opdrachtgever"}
                     </p>
-                    <p className="text-xs text-brass-deep/55">
+                    <p className="text-xs text-brass-deep/80">
                       {c?.full_name && c?.company_name ? c.full_name + " · " : ""}
                       {c?.anonymous_id ? `#${c.anonymous_id}` : cid.slice(0, 8)}
                     </p>
@@ -218,7 +218,7 @@ const AdminExcluded = () => {
                             <p className="text-sm font-medium text-brass-deep">
                               Begeleider #{e?.anonymous_id ?? "onbekend"}
                             </p>
-                            <p className="text-xs text-brass-deep/55">
+                            <p className="text-xs text-brass-deep/80">
                               {e?.base_city ?? "—"} · uitgesloten op {fmt(r.created_at)}
                             </p>
                             {r.reason && (

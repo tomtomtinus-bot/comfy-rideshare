@@ -167,18 +167,18 @@ const AdminInvoices = () => {
     <li key={i.id} className="bg-card p-4 md:p-5 grid grid-cols-12 gap-3 items-start">
       <div className="col-span-12 md:col-span-3">
         <p className="font-mono text-sm">{i.invoice_number}</p>
-        <p className="text-[10px] text-brass-deep/55 mt-1">
+        <p className="text-[10px] text-brass-deep/80 mt-1">
           {fmt(i.period_start)} – {fmt(i.period_end)}
         </p>
       </div>
       <div className="col-span-12 md:col-span-5">
         <p className="text-sm">
-          <span className="text-brass-deep/55">Van:</span> {i.escort_name}
+          <span className="text-brass-deep/80">Van:</span> {i.escort_name}
         </p>
         <p className="text-sm">
-          <span className="text-brass-deep/55">Aan:</span> {i.client_name}
+          <span className="text-brass-deep/80">Aan:</span> {i.client_name}
         </p>
-        <p className="text-[10px] text-brass-deep/55 mt-1 tabular-nums">
+        <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">
           {Number(i.total_hours).toFixed(2)} uur
         </p>
       </div>
@@ -186,7 +186,7 @@ const AdminInvoices = () => {
         <p className="font-semibold tabular-nums text-brass-gold">
           €{Number(i.total_amount).toFixed(2)}
         </p>
-        <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60">{i.status}</p>
+        <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80">{i.status}</p>
         <button
           onClick={() => togglePaid("invoices", i.id, !i.paid_at)}
           className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
@@ -201,15 +201,15 @@ const AdminInvoices = () => {
     <li key={p.id} className="bg-card p-4 md:p-5 grid grid-cols-12 gap-3 items-start">
       <div className="col-span-12 md:col-span-3">
         <p className="font-mono text-sm">{p.invoice_number}</p>
-        <p className="text-[10px] text-brass-deep/55 mt-1">
+        <p className="text-[10px] text-brass-deep/80 mt-1">
           {fmt(p.period_start)} – {fmt(p.period_end)}
         </p>
       </div>
       <div className="col-span-12 md:col-span-5">
         <p className="text-sm">
-          <span className="text-brass-deep/55">Aan:</span> {p.client_name}
+          <span className="text-brass-deep/80">Aan:</span> {p.client_name}
         </p>
-        <p className="text-[10px] text-brass-deep/55 mt-1">
+        <p className="text-[10px] text-brass-deep/80 mt-1">
           {p.total_escorts} begeleider{p.total_escorts === 1 ? "" : "s"}
         </p>
       </div>
@@ -217,7 +217,7 @@ const AdminInvoices = () => {
         <p className="font-semibold tabular-nums text-brass-gold">
           €{Number(p.total_amount).toFixed(2)}
         </p>
-        <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/60">{p.status}</p>
+        <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/80">{p.status}</p>
         <button
           onClick={() => togglePaid("platform_invoices", p.id, !p.paid_at)}
           className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-brass-deep/20 text-brass-deep hover:bg-parchment"
@@ -234,7 +234,7 @@ const AdminInvoices = () => {
     emptyText: string,
   ) => {
     const years = Object.keys(grouped).sort(sortDesc);
-    if (years.length === 0) return <p className="text-sm text-brass-deep/50">{emptyText}</p>;
+    if (years.length === 0) return <p className="text-sm text-brass-deep/80">{emptyText}</p>;
     const anyFilter = search || dateFrom || dateTo;
     return (
       <div className="space-y-2">
@@ -252,7 +252,7 @@ const AdminInvoices = () => {
             >
               <summary className="flex items-center justify-between cursor-pointer select-none px-4 py-3 hover:bg-parchment/40">
                 <span className="font-display text-lg text-brass-deep">{y}</span>
-                <span className="text-[10px] uppercase tracking-widest text-brass-deep/60">
+                <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                   {yearCount} factu{yearCount === 1 ? "ur" : "ren"}{" "}
                   <span className="ml-2 inline-block transition-transform group-open:rotate-180">▼</span>
                 </span>
@@ -269,7 +269,7 @@ const AdminInvoices = () => {
                     >
                       <summary className="flex items-center justify-between cursor-pointer select-none px-3 py-2 hover:bg-parchment/60">
                         <span className="text-sm font-semibold text-brass-deep">{m}</span>
-                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                        <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                           {monthCount}{" "}
                           <span className="ml-2 inline-block transition-transform group-open/m:rotate-180">
                             ▼
@@ -287,7 +287,7 @@ const AdminInvoices = () => {
                               <span className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80">
                                 {w}
                               </span>
-                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/55">
+                              <span className="text-[10px] uppercase tracking-widest text-brass-deep/80">
                                 {grouped[y][m][w].length}{" "}
                                 <span className="ml-2 inline-block transition-transform group-open/w:rotate-180">
                                   ▼
@@ -315,7 +315,7 @@ const AdminInvoices = () => {
     <div className="space-y-6">
       <header>
         <h2 className="font-display text-2xl text-brass-deep">Facturen</h2>
-        <p className="text-sm text-brass-deep/60 mt-1">Begeleiderfacturen en platformfacturen.</p>
+        <p className="text-sm text-brass-deep/80 mt-1">Begeleiderfacturen en platformfacturen.</p>
       </header>
 
       <div className="flex gap-2 flex-wrap">
@@ -350,7 +350,7 @@ const AdminInvoices = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 border border-brass-deep/15 bg-parchment/30">
         <div>
-          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 mb-1">
             Zoek op naam of factuurnr.
           </label>
           <input
@@ -362,7 +362,7 @@ const AdminInvoices = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 mb-1">
             Datum van
           </label>
           <input
@@ -373,7 +373,7 @@ const AdminInvoices = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/60 mb-1">
+          <label className="block text-[10px] uppercase tracking-widest font-semibold text-brass-deep/80 mb-1">
             Datum tot
           </label>
           <input
@@ -400,7 +400,7 @@ const AdminInvoices = () => {
       </div>
 
       {loading ? (
-        <p className="text-sm text-brass-deep/50">Laden…</p>
+        <p className="text-sm text-brass-deep/80">Laden…</p>
       ) : tab === "escort" ? (
         renderGrouped(groupedEscort, renderEscortRow, "Geen facturen.")
       ) : (

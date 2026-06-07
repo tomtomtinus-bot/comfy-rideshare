@@ -10,7 +10,7 @@ export const Protocol = () => {
           <h2 className="font-display text-3xl md:text-5xl text-brass-deep italic leading-tight">
             {t("protocol.heading")}
           </h2>
-          <p className="mt-4 md:mt-6 text-brass-deep/60 max-w-sm text-sm md:text-base">
+          <p className="mt-4 md:mt-6 text-brass-deep/80 max-w-sm text-sm md:text-base">
             {t("protocol.sub")}
           </p>
         </div>
