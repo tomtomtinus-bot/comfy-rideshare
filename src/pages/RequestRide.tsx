@@ -846,6 +846,14 @@ const RequestRideInner = () => {
               <p className="text-xs text-muted-foreground mb-3">
                 Let op: Voorlopig alleen beschikbaar in Nederland en België
               </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <Input
+                  label={t("request.ownRef")}
+                  value={form.client_reference}
+                  onChange={(v) => setForm({ ...form, client_reference: v })}
+                  placeholder={t("request.ownRefPlaceholder")}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">{t("request.pickup")}</p>
@@ -1228,7 +1236,6 @@ const RequestRideInner = () => {
               <p className="text-[11px] text-muted-foreground mt-1">{t("request.permitUploadHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input label={t("request.permitNumber")} value={form.permit_number} onChange={(v) => setForm({ ...form, permit_number: v })} placeholder={t("request.permitNumberPlaceholder")} />
-                <Input label={t("request.ownRef")} value={form.client_reference} onChange={(v) => setForm({ ...form, client_reference: v })} placeholder={t("request.ownRefPlaceholder")} />
               </div>
               {(() => {
                 const expand = (c?: string): string[] => {
