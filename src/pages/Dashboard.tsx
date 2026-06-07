@@ -195,7 +195,9 @@ const ClientDashboard = () => {
     (async () => {
       if (!user) return;
 
-      // Auto-annuleer eigen openstaande ritten waarvan de geplande datum > 3 dagen verstreken is.
+      // Auto-annuleer eigen openstaande ritten waarvan de geplande datum > 3 dagen
+      // verstreken is EN waarvoor geen enkele begeleider geaccepteerd heeft of uren
+      // heeft ingediend. Zo blijven ritten met geaccepteerde/afgehandelde begeleiders staan.
       const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
       const { data: stale } = await supabase
         .from("rides")
@@ -203,14 +205,26 @@ const ClientDashboard = () => {
         .eq("client_id", user.id)
         .eq("status", "open")
         .lt("scheduled_at", threeDaysAgo);
-      const staleIds = (stale ?? []).map((r: any) => r.id);
-      if (staleIds.length) {
-        await supabase.from("rides").update({ status: "cancelled" as any }).in("id", staleIds);
-        await supabase
+      const candidateIds = (stale ?? []).map((r: any) => r.id);
+      if (candidateIds.length) {
+        const { data: liveAss } = await supabase
           .from("ride_assignments")
-          .update({ status: "cancelled" as any })
-          .in("ride_id", staleIds)
-          .in("status", ["invited", "accepted"]);
+          .select("ride_id, status, hours_submitted_at")
+          .in("ride_id", candidateIds);
+        const keepIds = new Set(
+          (liveAss ?? [])
+            .filter((a: any) => a.status === "accepted" || a.hours_submitted_at)
+            .map((a: any) => a.ride_id)
+        );
+        const toCancel = candidateIds.filter((id) => !keepIds.has(id));
+        if (toCancel.length) {
+          await supabase.from("rides").update({ status: "cancelled" as any }).in("id", toCancel);
+          await supabase
+            .from("ride_assignments")
+            .update({ status: "cancelled" as any })
+            .in("ride_id", toCancel)
+            .in("status", ["invited"]);
+        }
       }
 
       const { data: rs } = await supabase
