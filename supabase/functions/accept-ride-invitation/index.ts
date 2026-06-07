@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     })
   }
   if (assn.interest_expressed_at) {
-    return new Response(htmlPage('Beschikbaarheid genoteerd ✓', 'Je hebt je al beschikbaar gemeld. Binnen enkele minuten wordt de beste match gekozen — je krijgt direct bericht.', `${origin}/dashboard`, 'Open dashboard'), {
+    return new Response(htmlPage('Beschikbaarheid genoteerd &#10003;', 'Je hebt je al beschikbaar gemeld. Binnen enkele minuten wordt de beste match gekozen &mdash; je krijgt direct bericht.', `${origin}/dashboard`, 'Open dashboard'), {
       headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' },
     })
   }
@@ -217,8 +217,8 @@ Deno.serve(async (req) => {
   }
 
   return new Response(htmlPage(
-    'Beschikbaarheid genoteerd ✓',
-    'Bedankt — je staat genoteerd. Binnen 5 minuten wordt de beste match gekozen op basis van reistijd (aan- en afvoer via de weg), rating, eerdere samenwerkingen en of je een favoriete begeleider van de klant bent. Je krijgt direct bericht of je gekozen bent.',
+    'Beschikbaarheid genoteerd &#10003;',
+    'Bedankt &mdash; je staat genoteerd. Binnen 5 minuten wordt de beste match gekozen op basis van reistijd (aan- en afvoer via de weg), rating, eerdere samenwerkingen en of je een favoriete begeleider van de klant bent. Je krijgt direct bericht of je gekozen bent.',
     `${origin}/dashboard`,
     'Open dashboard',
   ), {
