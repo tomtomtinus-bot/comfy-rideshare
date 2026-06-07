@@ -88,7 +88,7 @@ export const Nav = () => {
             width={1658}
             height={624}
             fetchPriority="high"
-            className="h-[52px] w-auto object-contain"
+            className="h-[64px] w-auto object-contain"
           />
         </Link>
 
