@@ -66,6 +66,7 @@ interface RideRow {
   scheduled_at: string;
   num_escorts: number;
   status: string;
+  ride_number?: string | null;
   notes: string | null;
   app_fee: number;
   cargo_length_m?: number | null;
