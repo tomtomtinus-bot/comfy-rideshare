@@ -139,9 +139,47 @@ Deno.serve(async (req) => {
       console.error("FreeBusy failed", await fbResp.text());
     }
 
-    await admin.from("google_calendar_tokens").update({ last_sync_at: new Date().toISOString() }).eq("escort_id", user.id);
+    const nowIso = new Date().toISOString();
+    await admin.from("google_calendar_tokens").update({ last_sync_at: nowIso }).eq("escort_id", user.id);
 
-    return new Response(JSON.stringify({ connected: true, pushed, removed, busy }), {
+    // Fetch connected Google account email
+    let accountEmail: string | null = null;
+    try {
+      const uiResp = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (uiResp.ok) {
+        const ui = await uiResp.json();
+        accountEmail = ui.email ?? null;
+      }
+    } catch (_) { /* ignore */ }
+
+    // Return upcoming accepted assignments (7d) so UI can link busy days to rides
+    const next7 = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
+    const { data: upcoming } = await admin
+      .from("ride_assignments")
+      .select("id, status, estimated_hours, actual_hours, ride:rides!inner(id, scheduled_at, pickup_city, dropoff_city, status)")
+      .eq("escort_id", user.id)
+      .eq("status", "accepted")
+      .gte("ride.scheduled_at", new Date().toISOString())
+      .lte("ride.scheduled_at", next7);
+
+    const assignments = (upcoming ?? []).map((a: any) => ({
+      id: a.id,
+      ride_id: a.ride?.id,
+      scheduled_at: a.ride?.scheduled_at,
+      hours: Number(a.actual_hours ?? a.estimated_hours ?? 3),
+      pickup_city: a.ride?.pickup_city,
+      dropoff_city: a.ride?.dropoff_city,
+    }));
+
+    return new Response(JSON.stringify({
+      connected: true,
+      pushed,
+      removed,
+      busy,
+      assignments,
+      account_email: accountEmail,
+      last_sync_at: nowIso,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
