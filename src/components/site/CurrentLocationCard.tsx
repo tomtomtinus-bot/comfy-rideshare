@@ -112,12 +112,12 @@ export default function CurrentLocationCard() {
   if (loading) return null;
 
   return (
-    <div className="bg-card shadow-etched p-6 border border-brass-deep/10">
+    <Card className="p-5 border-input">
       <div className="flex items-start gap-3 mb-4">
-        <MapPin className="w-5 h-5 text-brass-gold mt-0.5 flex-shrink-0" />
+        <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
         <div>
-          <h3 className="font-display text-lg text-brass-deep">{t("standplaats.currentTitle")}</h3>
-          <p className="text-xs text-brass-deep/80 mt-1">
+          <h3 className="text-sm font-semibold text-foreground">{t("standplaats.currentTitle")}</h3>
+          <p className="text-xs text-muted-foreground mt-1">
             <Trans
               i18nKey="standplaats.currentDesc"
               components={{ 1: <strong />, 2: <em /> }}
@@ -128,9 +128,9 @@ export default function CurrentLocationCard() {
 
       {isActive ? (
         <div className="space-y-3">
-          <div className="bg-brass-gold/10 border border-brass-gold/30 px-3 py-2 text-sm">
-            <p className="text-brass-deep font-semibold">📍 {loc?.current_address ?? t("standplaats.currentLocation")}</p>
-            <p className="text-xs text-brass-deep/70 mt-1">
+          <div className="rounded-md border border-input bg-muted/30 px-3 py-2 text-sm">
+            <p className="text-foreground font-medium">📍 {loc?.current_address ?? t("standplaats.currentLocation")}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {t("standplaats.activeUntil", {
                 when: new Date(loc!.current_until!).toLocaleString(locale, {
                   weekday: "short", hour: "2-digit", minute: "2-digit",
@@ -139,49 +139,34 @@ export default function CurrentLocationCard() {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={setHere}
-              disabled={busy}
-              className="px-4 py-2 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
-            >
+            <Button type="button" size="sm" variant="outline" onClick={setHere} disabled={busy}>
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : t("standplaats.refresh")}
-            </button>
-            <button
-              type="button"
-              onClick={clearHere}
-              disabled={busy}
-              className="px-4 py-2 text-brass-deep/70 uppercase tracking-widest text-xs font-semibold hover:text-brass-deep disabled:opacity-50"
-            >
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={clearHere} disabled={busy}>
               {t("standplaats.clear")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
         <div className="flex flex-wrap gap-3 items-center">
-          <label className="text-sm text-brass-deep/70 flex items-center gap-2">
+          <label className="text-sm text-muted-foreground flex items-center gap-2">
             {t("standplaats.validFor")}
             <select
               value={hours}
               onChange={(e) => setHours(Number(e.target.value))}
-              className="border border-brass-deep/20 bg-parchment px-2 py-1.5 text-sm"
+              className="border border-input bg-background rounded-md px-2 py-1.5 text-sm"
             >
               {DURATIONS.map((h) => (
                 <option key={h} value={h}>{t("standplaats.hours", { n: h })}</option>
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            onClick={setHere}
-            disabled={busy}
-            className="px-5 py-2.5 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
-          >
+          <Button type="button" size="sm" onClick={setHere} disabled={busy} className="gap-2">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
             {t("standplaats.iAmHere")}
-          </button>
+          </Button>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
