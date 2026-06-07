@@ -803,23 +803,20 @@ const RequestRideInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title="Rit aanvragen | ViaCust" description="Plan een nieuwe transportrit met begeleiding en vraag offertes op bij gecertificeerde begeleiders." />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
+      <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-4">
-            {t("request.kicker")}
-          </p>
-          <div className="flex items-start justify-between gap-4 mb-12">
-            <h1 className="font-display text-4xl md:text-6xl text-brass-deep italic leading-[0.95]">
-              {t("request.title")}
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Nieuwe ViaCust-aanvraag
             </h1>
             {isApproved && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setConfirmReset(true)}
-                className="shrink-0 text-xs uppercase tracking-[0.2em] font-semibold text-brass-deep/70 hover:text-brass-deep underline underline-offset-4 mt-2"
               >
                 {t("request.startOver", { defaultValue: "Begin opnieuw" })}
-              </button>
+              </Button>
             )}
           </div>
 
