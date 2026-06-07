@@ -400,6 +400,7 @@ const Inner = () => {
         countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
+        is_business: isBusiness,
         categories,
         languages: languages.length ? languages : ["Nederlands"],
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
