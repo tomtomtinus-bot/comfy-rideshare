@@ -171,6 +171,7 @@ const Inner = () => {
   // Persoonlijk
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [isBusiness, setIsBusiness] = useState(false);
 
   // Adres autodetect
   const [postcode, setPostcode] = useState("");
