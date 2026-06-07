@@ -84,7 +84,7 @@ export const Nav = () => {
         <Link to={user ? "/dashboard" : "/"} className="flex items-center shrink-0 mr-6">
           <img
             src={logo}
-            alt="ViaCust"
+            alt="ViaCust - Digital Escort Solutions logo"
             width={1658}
             height={624}
             fetchPriority="high"

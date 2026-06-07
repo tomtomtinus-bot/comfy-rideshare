@@ -34,7 +34,11 @@ const WatKostViaCust = () => {
         </section>
 
         <section className="py-8 md:py-12 px-5 md:px-8">
-          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
+              Kies je abonnement
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
             {/* Card 1: Voor Opdrachtgevers */}
             <Card className="border-input flex flex-col">
               <CardHeader className="pb-4">
@@ -99,6 +103,7 @@ const WatKostViaCust = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
           </div>
         </section>
 
