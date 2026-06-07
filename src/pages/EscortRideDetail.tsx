@@ -294,21 +294,21 @@ const Inner = () => {
   };
 
   if (loading) {
-    return <p className="text-sm text-brass-deep/80">{t("escortRideDetail.loading")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("escortRideDetail.loading")}</p>;
   }
   if (error || !data) {
     return (
-      <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/80 mb-4">
+      <div className="bg-card border border-input rounded-lg p-10 text-center">
+        <p className="text-sm text-muted-foreground mb-4">
           {t("escortRideDetail.noAccess")}
         </p>
-        <p className="text-xs text-brass-deep/80 mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           {t("escortRideDetail.supportNeeded")}{" "}
-          <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+          <a href="mailto:support@viacust.com" className="text-primary hover:underline">
             support@viacust.com
           </a>
         </p>
-        <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
+        <Link to="/dashboard" className="text-sm text-primary hover:underline font-medium">
           {t("escortRideDetail.backToDashboard")}
         </Link>
       </div>
@@ -321,29 +321,28 @@ const Inner = () => {
   const others = escorts.filter((e) => !e.is_self);
 
   return (
-    <div className="space-y-8">
-      <header>
+    <div className="space-y-6">
+      <div>
         <Link
           to="/dashboard"
-          className="text-brass-deep/80 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold"
+          className="text-xs text-muted-foreground hover:text-foreground font-medium"
         >
-          {t("escortRideDetail.backToTasks")}
+          ← {t("escortRideDetail.backToTasks")}
         </Link>
-        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">
-          {t("escortRideDetail.detailsKicker")}
-        </p>
-        <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
-          {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
-        </h1>
-        <div className="flex items-center gap-3 mt-2">
-          <p className="text-brass-deep/80">{fd(ride.scheduled_at)}</p>
+        <header className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {ride.pickup_city} <span className="text-muted-foreground font-normal">→</span> {ride.dropoff_city}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">{fd(ride.scheduled_at)}</p>
+          </div>
           {isCompleted && (
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase tracking-widest font-bold border border-emerald-300">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[11px] font-medium border border-emerald-500/20">
               {t("escortRideDetail.completed")}
             </span>
           )}
-        </div>
-      </header>
+        </header>
+      </div>
 
       {userId && (
         <SwapPendingBanner rideId={ride.id} currentUserId={userId} onChanged={load} />
