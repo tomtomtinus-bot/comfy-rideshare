@@ -108,6 +108,44 @@ interface AssignmentRow {
 const fmtDate = (d: string, lang = "nl") =>
   new Date(d).toLocaleString(localeFromI18n(lang), { dateStyle: "medium", timeStyle: "short" });
 
+const fmtCompact = (d: string) => {
+  const x = new Date(d);
+  const dd = String(x.getDate()).padStart(2, "0");
+  const mm = String(x.getMonth() + 1).padStart(2, "0");
+  const yyyy = x.getFullYear();
+  const hh = String(x.getHours()).padStart(2, "0");
+  const mi = String(x.getMinutes()).padStart(2, "0");
+  return `${dd}-${mm}-${yyyy} ${hh}:${mi}`;
+};
+
+const displayRideNo = (r: { ride_number?: string | null; id: string }) =>
+  r.ride_number ?? `#${r.id.slice(0, 8).toUpperCase()}`;
+
+type StatusKind = "open" | "matched" | "in_progress" | "completed" | "cancelled" | "invited" | "accepted" | "declined" | "expired";
+const statusBadgeClasses = (s: string): string => {
+  switch (s) {
+    case "open": return "bg-blue-100 text-blue-800 hover:bg-blue-100 border-blue-200";
+    case "matched": return "bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200";
+    case "in_progress": return "bg-indigo-100 text-indigo-800 hover:bg-indigo-100 border-indigo-200";
+    case "completed": return "bg-green-100 text-green-800 hover:bg-green-100 border-green-200";
+    case "cancelled": return "bg-red-100 text-red-800 hover:bg-red-100 border-red-200";
+    case "invited": return "bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200";
+    case "accepted": return "bg-green-100 text-green-800 hover:bg-green-100 border-green-200";
+    case "declined": return "bg-red-100 text-red-800 hover:bg-red-100 border-red-200";
+    case "expired": return "bg-muted text-muted-foreground hover:bg-muted border-border";
+    default: return "bg-muted text-muted-foreground hover:bg-muted border-border";
+  }
+};
+const TableStatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
+  const known = ["open","matched","in_progress","completed","cancelled","invited","accepted","declined","expired"];
+  return (
+    <Badge variant="outline" className={`text-[10px] font-semibold uppercase ${statusBadgeClasses(status)}`}>
+      {known.includes(status) ? t(`status.${status}`) : status}
+    </Badge>
+  );
+};
+
 type DateBucketKey = "vandaag" | "morgen" | "deze_week" | "later" | "eerder";
 const DATE_BUCKET_TKEYS: Record<DateBucketKey, string> = {
   vandaag: "bucket.today",
