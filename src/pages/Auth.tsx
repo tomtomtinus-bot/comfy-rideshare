@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { lovable } from "@/integrations/lovable";
 import {
@@ -307,6 +308,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Inloggen of aanmelden | ViaCust" description="Log in op je ViaCust account of meld je aan als transportplanner of begeleider." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">

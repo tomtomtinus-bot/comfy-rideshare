@@ -7,6 +7,7 @@ import ExcelJS from "exceljs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
@@ -1389,6 +1390,7 @@ const DashboardInner = () => {
   const { isDriver, loading: companyLoading } = useCompany();
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Dashboard | ViaCust" description="Bekijk en beheer je transportritten, planningen en opdrachten in ViaCust." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-6xl mx-auto">

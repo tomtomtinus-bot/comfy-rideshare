@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,7 @@ const TeamInner = () => {
 
   return (
     <div className="min-h-screen bg-parchment">
+      <SeoHead title="Team | ViaCust" description="Beheer teamleden, uitnodigingen en zitplaatsen voor je organisatie in ViaCust." />
       <Nav />
       <main className="max-w-5xl mx-auto px-6 md:px-8 py-12">
         <div className="mb-10">

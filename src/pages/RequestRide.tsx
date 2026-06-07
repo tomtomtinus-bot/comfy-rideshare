@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { distanceKm, travelMinutes, emptyTravelMinutes } from "@/lib/geo";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { RequireSubscription } from "@/components/RequireSubscription";
@@ -819,6 +820,7 @@ const RequestRideInner = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Rit aanvragen | ViaCust" description="Plan een nieuwe transportrit met begeleiding en vraag offertes op bij gecertificeerde begeleiders." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">

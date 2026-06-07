@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 
 const ResetPassword = () => {
@@ -166,6 +167,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead title="Wachtwoord herstellen | ViaCust" description="Stel een nieuw wachtwoord in voor je ViaCust account via de herstellink." />
       <Nav />
       <main className="px-6 md:px-8 py-16 md:py-24">
         <div className="max-w-md mx-auto bg-card shadow-etched p-8 md:p-10">

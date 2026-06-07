@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Nav } from "@/components/site/Nav";
+import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
@@ -256,6 +257,7 @@ const SubscriptionInner = () => {
 const Subscription = () => (
   <RequireAuth>
     <PaymentTestModeBanner />
+    <SeoHead title="Abonnement | ViaCust" description="Bekijk en beheer je ViaCust abonnement, facturering en betalingsmethode." />
     <Nav />
     <SubscriptionInner />
     <Footer />
