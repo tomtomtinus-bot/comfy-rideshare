@@ -7,17 +7,26 @@ interface SeoHeadProps {
   title?: string;
   description?: string;
   canonical?: string;
+  image?: string;
   jsonLd?: Record<string, unknown>[];
 }
+
+const DEFAULT_OG_IMAGE = "/og-image.jpg";
+
+const toAbsolute = (path: string) => {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+};
 
 /**
  * Per-page SEO head. Renders title, description and a self-referencing canonical link.
  * If `canonical` is omitted, it is derived from the current pathname so any future
  * route automatically gets the correct self-referencing URL.
  */
-export const SeoHead = ({ title, description, canonical, jsonLd }: SeoHeadProps) => {
+export const SeoHead = ({ title, description, canonical, image, jsonLd }: SeoHeadProps) => {
   const location = useLocation();
   const url = canonical ?? `${BASE_URL}${location.pathname}`;
+  const imageUrl = toAbsolute(image ?? DEFAULT_OG_IMAGE);
 
   return (
     <Helmet>
@@ -29,6 +38,8 @@ export const SeoHead = ({ title, description, canonical, jsonLd }: SeoHeadProps)
       {title && <meta name="twitter:title" content={title} />}
       {description && <meta property="og:description" content={description} />}
       {description && <meta name="twitter:description" content={description} />}
+      <meta property="og:image" content={imageUrl} />
+      <meta name="twitter:image" content={imageUrl} />
       {jsonLd?.map((schema, index) => (
         <script key={index} type="application/ld+json">
           {JSON.stringify(schema)}
