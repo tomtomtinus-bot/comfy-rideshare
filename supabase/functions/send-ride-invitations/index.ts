@@ -184,6 +184,7 @@ Deno.serve(async (req) => {
             pickup: ride.pickup_city,
             dropoff: ride.dropoff_city,
             plannedAt,
+            rideId: ride.id,
             rideUrl,
             acceptUrl,
           },
