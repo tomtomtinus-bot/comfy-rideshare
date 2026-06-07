@@ -1,7 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ShieldOff } from "lucide-react";
+import { MoreHorizontal, ShieldOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Row {
   id: string;
@@ -10,20 +21,27 @@ interface Row {
   reason: string | null;
   created_at: string;
 }
+
 interface Profile {
   id: string;
   full_name: string | null;
   company_name: string | null;
   anonymous_id: string | null;
 }
+
 interface Escort {
   id: string;
   anonymous_id: string;
   base_city: string | null;
 }
 
-const fmt = (d: string) =>
-  new Date(d).toLocaleDateString("nl-NL", { day: "2-digit", month: "short", year: "numeric" });
+const fmtDate = (d: string) => {
+  const date = new Date(d);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
 
 const AdminExcluded = () => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -31,8 +49,6 @@ const AdminExcluded = () => {
   const [escorts, setEscorts] = useState<Record<string, Escort>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<"name" | "count" | "recent">("count");
 
   const load = async () => {
     setLoading(true);
@@ -92,51 +108,22 @@ const AdminExcluded = () => {
     }
   };
 
-  const grouped = useMemo(() => {
-    const g: Record<string, Row[]> = {};
-    for (const r of rows) {
-      (g[r.client_id] ??= []).push(r);
-    }
-    let entries = Object.entries(g);
+  const filtered = rows.filter((r) => {
     const q = search.toLowerCase().trim();
-    if (q) {
-      entries = entries.filter(([cid, list]) => {
-        const c = clients[cid];
-        if (
-          c?.full_name?.toLowerCase().includes(q) ||
-          c?.company_name?.toLowerCase().includes(q) ||
-          c?.anonymous_id?.toLowerCase().includes(q)
-        )
-          return true;
-        return list.some((r) =>
-          escorts[r.escort_id]?.anonymous_id?.toLowerCase().includes(q),
-        );
-      });
-    }
-    entries.sort(([a, la], [b, lb]) => {
-      if (sortBy === "count") return lb.length - la.length;
-      if (sortBy === "recent") {
-        const ta = Math.max(...la.map((r) => +new Date(r.created_at)));
-        const tb = Math.max(...lb.map((r) => +new Date(r.created_at)));
-        return tb - ta;
-      }
-      const na = (clients[a]?.company_name || clients[a]?.full_name || "").toLowerCase();
-      const nb = (clients[b]?.company_name || clients[b]?.full_name || "").toLowerCase();
-      return na.localeCompare(nb);
-    });
-    return entries;
-  }, [rows, clients, escorts, search, sortBy]);
-
-  const toggle = (cid: string) => {
-    setOpen((s) => {
-      const n = new Set(s);
-      n.has(cid) ? n.delete(cid) : n.add(cid);
-      return n;
-    });
-  };
+    if (!q) return true;
+    const c = clients[r.client_id];
+    const e = escorts[r.escort_id];
+    return (
+      c?.full_name?.toLowerCase().includes(q) ||
+      c?.company_name?.toLowerCase().includes(q) ||
+      c?.anonymous_id?.toLowerCase().includes(q) ||
+      e?.anonymous_id?.toLowerCase().includes(q) ||
+      (r.reason ?? "").toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <header>
         <h2 className="font-display text-2xl text-brass-deep flex items-center gap-2">
           <ShieldOff className="size-6" /> Uitgesloten begeleiders
@@ -148,101 +135,86 @@ const AdminExcluded = () => {
         </p>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-3">
-        <input
+      <div className="flex flex-wrap gap-2 items-center">
+        <Input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Zoek op opdrachtgever, bedrijf of begeleider-ID…"
-          className="flex-1 bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
+          placeholder="Zoek op opdrachtgever, bedrijf, begeleider-ID of reden…"
+          className="flex-1 min-w-[240px] h-9"
         />
-        <div className="flex gap-1 bg-brass-deep/10 p-1">
-          {(["count", "recent", "name"] as const).map((k) => (
-            <button
-              key={k}
-              onClick={() => setSortBy(k)}
-              className={`text-[10px] uppercase tracking-widest font-bold px-3 py-2 ${sortBy === k ? "bg-brass-deep text-parchment" : "text-brass-deep hover:bg-parchment"}`}
-            >
-              {k === "count" ? "Aantal" : k === "recent" ? "Recent" : "Naam"}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-brass-deep/80">Laden…</p>
-      ) : grouped.length === 0 ? (
-        <p className="text-sm text-brass-deep/80">Geen uitsluitingen gevonden.</p>
-      ) : (
-        <ul className="space-y-px bg-brass-deep/10">
-          {grouped.map(([cid, list]) => {
-            const c = clients[cid];
-            const isOpen = open.has(cid);
-            return (
-              <li key={cid} className="bg-card">
-                <button
-                  onClick={() => toggle(cid)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-parchment/40 transition-colors text-left"
-                >
-                  <div>
-                    <p className="font-medium text-brass-deep">
-                      {c?.company_name || c?.full_name || "Onbekende opdrachtgever"}
-                    </p>
-                    <p className="text-xs text-brass-deep/80">
-                      {c?.full_name && c?.company_name ? c.full_name + " · " : ""}
-                      {c?.anonymous_id ? `#${c.anonymous_id}` : cid.slice(0, 8)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-1 bg-brass-deep text-parchment">
-                      {list.length} uitgesloten
-                    </span>
-                    <ChevronDown
-                      className={`size-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                </button>
-                {isOpen && (
-                  <ul className="border-t border-brass-deep/10">
-                    {list.map((r) => {
-                      const e = escorts[r.escort_id];
-                      return (
-                        <li
-                          key={r.id}
-                          className="p-4 pl-6 border-b border-brass-deep/5 last:border-0 flex flex-wrap items-start gap-3 bg-parchment/30"
-                        >
-                          <div className="size-9 bg-patina shadow-etched flex items-center justify-center text-xs font-bold text-brass-deep tabular-nums">
-                            #{e?.anonymous_id ?? "?"}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-brass-deep">
-                              Begeleider #{e?.anonymous_id ?? "onbekend"}
-                            </p>
-                            <p className="text-xs text-brass-deep/80">
-                              {e?.base_city ?? "—"} · uitgesloten op {fmt(r.created_at)}
-                            </p>
-                            {r.reason && (
-                              <p className="text-xs text-brass-deep/80 mt-1 italic">
-                                "{r.reason}"
-                              </p>
-                            )}
-                          </div>
-                          <button
+      <div className="border border-border rounded-md bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Opdrachtgever</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Begeleider ID</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Standplaats</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Reden</TableHead>
+              <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Datum</TableHead>
+              <TableHead className="h-9 w-[60px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+              </TableRow>
+            ) : filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Geen uitsluitingen gevonden.</TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((r) => {
+                const c = clients[r.client_id];
+                const e = escorts[r.escort_id];
+                return (
+                  <TableRow key={r.id} className="hover:bg-muted/30">
+                    <TableCell className="text-xs py-2 max-w-[200px]">
+                      <p className="font-medium truncate">{c?.company_name || c?.full_name || "Onbekend"}</p>
+                      {c?.anonymous_id && (
+                        <p className="text-[10px] text-muted-foreground tabular-nums">#{c.anonymous_id}</p>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">
+                      #{e?.anonymous_id ?? "?"}
+                    </TableCell>
+                    <TableCell className="text-xs py-2 whitespace-nowrap">{e?.base_city ?? "—"}</TableCell>
+                    <TableCell className="text-xs py-2 max-w-[260px] truncate">
+                      {r.reason ? <span className="italic">&ldquo;{r.reason}&rdquo;</span> : "—"}
+                    </TableCell>
+                    <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(r.created_at)}</TableCell>
+                    <TableCell className="py-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Meer opties</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel className="text-xs">
+                            #{e?.anonymous_id ?? "?"} bij {c?.company_name || c?.full_name || "Onbekend"}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-xs text-destructive focus:text-destructive"
                             onClick={() => remove(r.id)}
-                            className="text-[10px] uppercase tracking-widest font-semibold px-2 py-1.5 border border-red-700/40 text-red-700 hover:bg-red-50"
                           >
-                            Verwijder
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                            Uitsluiting verwijderen
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
