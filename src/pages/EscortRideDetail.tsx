@@ -280,7 +280,7 @@ const Inner = () => {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success(t("escortRideDetail.cancelRequestSent"));
-    supabase.functions.invoke("notify-ride-event", {
+    supabase.functions.invoke("request-ride-notification", {
       body: {
         event: "escort_cancelled",
         rideId: id,
