@@ -66,7 +66,7 @@ const HoeWerktViaCust = () => {
                           {t("howItWorks.step")} {s.n}
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
+                      <h2 className="text-lg font-semibold mb-2">{s.title}</h2>
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {s.body}
                       </p>
@@ -89,7 +89,7 @@ const HoeWerktViaCust = () => {
                           {t("howItWorks.step")} {s.n}
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
+                      <h2 className="text-lg font-semibold mb-2">{s.title}</h2>
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {s.body}
                       </p>
