@@ -102,7 +102,7 @@ const HoeWerktViaCust = () => {
         </section>
 
         <section className="pb-10 md:pb-14">
-          <h2 className="text-2xl font-semibold tracking-tight mb-6">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
             {t("howItWorks.whyTitle")}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
