@@ -33,7 +33,7 @@ const AdminRides = () => {
     setLoading(true);
     const { data: rs, error } = await supabase
       .from("rides")
-      .select("id, client_id, pickup_city, dropoff_city, pickup_address, dropoff_address, scheduled_at, num_escorts, status, app_fee")
+      .select("id, ride_number, client_id, pickup_city, dropoff_city, pickup_address, dropoff_address, scheduled_at, num_escorts, status, app_fee")
       .order("scheduled_at", { ascending: false })
       .limit(500);
     if (error) {
