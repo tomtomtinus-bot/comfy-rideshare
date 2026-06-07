@@ -1,12 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, ShieldOff, Plus, Star, Heart, Users } from "lucide-react";
+import {
+  Trash2,
+  ShieldOff,
+  Plus,
+  Star,
+  Heart,
+  Users,
+  MoreHorizontal,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const REASON_CATEGORIES = [
   "Eerdere negatieve ervaring",
@@ -200,10 +226,10 @@ const PoolInner = () => {
     }
   };
 
-  // ----- Render helpers -----
-  const Avatar = ({ e }: { e: EligibleEscort | undefined }) => (
-    <div className="size-10 bg-patina shadow-etched flex items-center justify-center text-xs font-bold text-brass-deep tabular-nums shrink-0">
-      #{e?.anonymous_id ?? "?"}
+  // ----- Shared table cell renderer -----
+  const escortLabel = (e: EligibleEscort | undefined) => (
+    <div className="max-w-[200px]">
+      <p className="font-medium truncate text-xs">{labelFor(e)}</p>
     </div>
   );
 
@@ -211,7 +237,7 @@ const PoolInner = () => {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Nav />
       <main className="flex-1 bg-gradient-hero">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-10 md:py-14">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 py-10 md:py-14">
           <header className="mb-8">
             <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
               Voorkeuren beheren · Privé
@@ -242,114 +268,163 @@ const PoolInner = () => {
             </TabsList>
 
             {/* FAVORIETEN */}
-            <TabsContent value="favorites" className="bg-card shadow-etched p-6 md:p-8">
-              <h2 className="font-display text-xl text-brass-deep mb-4">
-                Favoriete begeleiders
-              </h2>
-              {loading ? (
-                <p className="text-sm text-brass-deep/80">Laden…</p>
-              ) : favorites.length === 0 ? (
-                <p className="text-sm text-brass-deep/80">
-                  Nog geen favorieten. Voeg ze toe via het tabblad "Toevoegen".
-                </p>
-              ) : (
-                <ul className="space-y-px bg-brass-deep/10">
-                  {favorites.map((row) => {
-                    const e = escortMap.get(row.escort_id);
-                    return (
-                      <li key={row.id} className="bg-card p-4 flex flex-wrap items-start gap-3">
-                        <Avatar e={e} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-brass-deep flex items-center gap-1.5">
-                            <Star className="size-3.5 fill-brass-gold text-brass-gold" />
-                            {labelFor(e)}
-                          </p>
-                          <p className="text-xs text-brass-deep/80">
-                            {e?.base_city ?? "—"}
-                            {e?.vehicle_type ? ` · ${e.vehicle_type}` : ""}
-                          </p>
-                          {row.note && (
-                            <p className="text-xs text-brass-deep/80 mt-1 italic">"{row.note}"</p>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => removeFavorite(row.id)}
-                          disabled={busy === row.id}
-                          className="text-[10px] uppercase tracking-widest font-semibold px-3 py-2 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          <Trash2 className="size-3" /> Verwijder
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+            <TabsContent value="favorites" className="space-y-4">
+              <div className="border border-border rounded-md bg-card overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40 hover:bg-muted/40">
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Anoniem ID</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam / Bedrijf</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Standplaats</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Voertuig</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Notitie</TableHead>
+                      <TableHead className="h-9 w-[60px]" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+                      </TableRow>
+                    ) : favorites.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">Nog geen favorieten. Voeg ze toe via het tabblad "Toevoegen".</TableCell>
+                      </TableRow>
+                    ) : (
+                      favorites.map((row) => {
+                        const e = escortMap.get(row.escort_id);
+                        return (
+                          <TableRow key={row.id} className="hover:bg-muted/30">
+                            <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">
+                              #{e?.anonymous_id ?? "?"}
+                            </TableCell>
+                            <TableCell className="py-2">{escortLabel(e)}</TableCell>
+                            <TableCell className="text-xs py-2 whitespace-nowrap">{e?.base_city ?? "—"}</TableCell>
+                            <TableCell className="text-xs py-2 whitespace-nowrap">{e?.vehicle_type ?? "—"}</TableCell>
+                            <TableCell className="text-xs py-2 max-w-[200px] truncate italic text-muted-foreground">
+                              {row.note || "—"}
+                            </TableCell>
+                            <TableCell className="py-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Meer opties</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuLabel className="text-xs">
+                                    {labelFor(e)}
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-xs text-destructive focus:text-destructive"
+                                    onClick={() => removeFavorite(row.id)}
+                                  >
+                                    <Trash2 className="size-3 mr-1.5" />
+                                    Verwijderen
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
 
             {/* UITGESLOTEN */}
-            <TabsContent value="excluded" className="bg-card shadow-etched p-6 md:p-8">
-              <h2 className="font-display text-xl text-brass-deep mb-4">
-                Uitgesloten begeleiders
-              </h2>
-              {loading ? (
-                <p className="text-sm text-brass-deep/80">Laden…</p>
-              ) : excluded.length === 0 ? (
-                <p className="text-sm text-brass-deep/80">
-                  Geen begeleiders uitgesloten.
-                </p>
-              ) : (
-                <ul className="space-y-px bg-brass-deep/10">
-                  {excluded.map((row) => {
-                    const e = escortMap.get(row.escort_id);
-                    return (
-                      <li key={row.id} className="bg-card p-4 flex flex-wrap items-start gap-3">
-                        <Avatar e={e} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-brass-deep">{labelFor(e)}</p>
-                          <p className="text-xs text-brass-deep/80">
-                            {e?.base_city ?? "—"}
-                            {e?.vehicle_type ? ` · ${e.vehicle_type}` : ""}
-                          </p>
-                          <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mt-1">
-                            {row.reason_category}
-                          </p>
-                          {row.reason && row.reason !== row.reason_category && (
-                            <p className="text-xs text-brass-deep/80 mt-1 italic">"{row.reason}"</p>
-                          )}
-                          <p className="text-[10px] text-brass-deep/80 mt-1">
-                            uitgesloten op {fmtDate(row.created_at)}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => removeExcluded(row.id)}
-                          disabled={busy === row.id}
-                          className="text-[10px] uppercase tracking-widest font-semibold px-3 py-2 border border-brass-deep/20 text-brass-deep hover:bg-brass-deep hover:text-parchment transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          <Trash2 className="size-3" /> Verwijder
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+            <TabsContent value="excluded" className="space-y-4">
+              <div className="border border-border rounded-md bg-card overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40 hover:bg-muted/40">
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Anoniem ID</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam / Bedrijf</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Standplaats</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Voertuig</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Reden</TableHead>
+                      <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Uitgesloten op</TableHead>
+                      <TableHead className="h-9 w-[60px]" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">Laden…</TableCell>
+                      </TableRow>
+                    ) : excluded.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">Geen begeleiders uitgesloten.</TableCell>
+                      </TableRow>
+                    ) : (
+                      excluded.map((row) => {
+                        const e = escortMap.get(row.escort_id);
+                        return (
+                          <TableRow key={row.id} className="hover:bg-muted/30">
+                            <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">
+                              #{e?.anonymous_id ?? "?"}
+                            </TableCell>
+                            <TableCell className="py-2">{escortLabel(e)}</TableCell>
+                            <TableCell className="text-xs py-2 whitespace-nowrap">{e?.base_city ?? "—"}</TableCell>
+                            <TableCell className="text-xs py-2 whitespace-nowrap">{e?.vehicle_type ?? "—"}</TableCell>
+                            <TableCell className="text-xs py-2 max-w-[240px]">
+                              <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground block">{row.reason_category}</span>
+                              {row.reason && row.reason !== row.reason_category && (
+                                <span className="italic text-muted-foreground">&ldquo;{row.reason}&rdquo;</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">{fmtDate(row.created_at)}</TableCell>
+                            <TableCell className="py-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Meer opties</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuLabel className="text-xs">
+                                    {labelFor(e)}
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-xs text-destructive focus:text-destructive"
+                                    onClick={() => removeExcluded(row.id)}
+                                  >
+                                    <Trash2 className="size-3 mr-1.5" />
+                                    Uitsluiting opheffen
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
 
             {/* TOEVOEGEN */}
-            <TabsContent value="add" className="bg-card shadow-etched p-6 md:p-8">
-              <h2 className="font-display text-xl text-brass-deep mb-2">
+            <TabsContent value="add" className="bg-card shadow-etched p-6 md:p-8 space-y-4">
+              <h2 className="font-display text-xl text-brass-deep">
                 Begeleider toevoegen
               </h2>
-              <p className="text-xs text-brass-deep/80 mb-4">
+              <p className="text-xs text-brass-deep/80">
                 Je kunt alleen begeleiders kiezen waarmee je al eerder interactie
                 hebt gehad (uitgenodigd, gereageerd of gereden).
               </p>
-              <input
+              <Input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Zoek op naam, bedrijfsnaam of konvooi-ID…"
-                maxLength={120}
-                className="w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold mb-4"
+                className="h-9"
               />
               {loading ? (
                 <p className="text-sm text-brass-deep/80">Laden…</p>
@@ -360,106 +435,108 @@ const PoolInner = () => {
                     : "Geen begeleiders gevonden."}
                 </p>
               ) : (
-                <ul className="space-y-3">
-                  {candidates.slice(0, 50).map((e) => (
-                    <li
-                      key={e.id}
-                      className="bg-parchment/40 border border-brass-deep/10 p-4 flex flex-col gap-3"
-                    >
-                      <div className="flex flex-wrap items-start gap-3">
-                        <Avatar e={e} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-brass-deep">{labelFor(e)}</p>
-                          <p className="text-xs text-brass-deep/80">
-                            {e.base_city ?? "—"} · {e.vehicle_type}
-                          </p>
-                          <p className="text-[10px] text-brass-deep/80 mt-1 tabular-nums">
+                <div className="border border-border rounded-md bg-card overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40 hover:bg-muted/40">
+                        <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Anoniem ID</TableHead>
+                        <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Naam / Bedrijf</TableHead>
+                        <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Standplaats</TableHead>
+                        <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Voertuig</TableHead>
+                        <TableHead className="h-9 text-[11px] uppercase tracking-wider font-semibold">Interacties</TableHead>
+                        <TableHead className="h-9 w-[180px]" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {candidates.slice(0, 50).map((e) => (
+                        <TableRow key={e.id} className="hover:bg-muted/30">
+                          <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">
+                            #{e.anonymous_id}
+                          </TableCell>
+                          <TableCell className="py-2">
+                            <p className="font-medium truncate text-xs">{labelFor(e)}</p>
+                          </TableCell>
+                          <TableCell className="text-xs py-2 whitespace-nowrap">{e.base_city ?? "—"}</TableCell>
+                          <TableCell className="text-xs py-2 whitespace-nowrap">{e.vehicle_type}</TableCell>
+                          <TableCell className="text-xs tabular-nums py-2 whitespace-nowrap">
                             {e.interactions} interactie{e.interactions === 1 ? "" : "s"}
                             {e.accepted_count > 0 && ` · ${e.accepted_count} geaccepteerd`}
-                            {" · laatste "}
-                            {fmtDate(e.last_interaction_at)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-3">
-                        {/* Favoriet */}
-                        <div className="bg-card p-3 border border-brass-deep/10">
-                          <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-2 flex items-center gap-1.5">
-                            <Heart className="size-3" /> Favoriet maken
-                          </p>
-                          <input
-                            type="text"
-                            maxLength={500}
-                            value={favNote[e.id] ?? ""}
-                            onChange={(ev) =>
-                              setFavNote((d) => ({ ...d, [e.id]: ev.target.value }))
-                            }
-                            placeholder="Notitie (optioneel)"
-                            className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-xs focus:outline-none focus:border-brass-gold mb-2"
-                          />
-                          <button
-                            onClick={() => addFavorite(e.id)}
-                            disabled={busy === e.id}
-                            className="w-full text-[10px] uppercase tracking-widest font-semibold px-3 py-2 bg-brass-gold text-parchment hover:bg-brass-deep transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
-                          >
-                            <Star className="size-3" /> Toevoegen aan favorieten
-                          </button>
-                        </div>
-
-                        {/* Uitsluiten */}
-                        <div className="bg-card p-3 border border-brass-deep/10">
-                          <p className="text-[10px] uppercase tracking-widest font-bold text-brass-deep/70 mb-2 flex items-center gap-1.5">
-                            <ShieldOff className="size-3" /> Uitsluiten
-                          </p>
-                          <select
-                            value={reasonCat[e.id] ?? ""}
-                            onChange={(ev) =>
-                              setReasonCat((d) => ({
-                                ...d,
-                                [e.id]: ev.target.value as ReasonCategory,
-                              }))
-                            }
-                            className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-xs focus:outline-none focus:border-brass-gold mb-2"
-                          >
-                            <option value="">— Kies een reden —</option>
-                            {REASON_CATEGORIES.map((r) => (
-                              <option key={r} value={r}>
-                                {r}
-                              </option>
-                            ))}
-                          </select>
-                          <input
-                            type="text"
-                            maxLength={500}
-                            value={reasonDetail[e.id] ?? ""}
-                            onChange={(ev) =>
-                              setReasonDetail((d) => ({ ...d, [e.id]: ev.target.value }))
-                            }
-                            placeholder={
-                              reasonCat[e.id] === "Overig"
-                                ? "Korte toelichting (verplicht)"
-                                : "Toelichting (optioneel)"
-                            }
-                            className="w-full bg-parchment border border-brass-deep/15 px-3 py-2 text-xs focus:outline-none focus:border-brass-gold mb-2"
-                          />
-                          <button
-                            onClick={() => addExcluded(e.id)}
-                            disabled={
-                              busy === e.id ||
-                              !reasonCat[e.id] ||
-                              (reasonCat[e.id] === "Overig" &&
-                                (reasonDetail[e.id] ?? "").trim().length < 3)
-                            }
-                            className="w-full text-[10px] uppercase tracking-widest font-semibold px-3 py-2 bg-brass-deep text-parchment hover:bg-brass-gold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            <Plus className="size-3" /> Uitsluiten
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                          </TableCell>
+                          <TableCell className="py-2">
+                            <div className="flex flex-col gap-2">
+                              {/* Favoriet */}
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  maxLength={500}
+                                  value={favNote[e.id] ?? ""}
+                                  onChange={(ev) =>
+                                    setFavNote((d) => ({ ...d, [e.id]: ev.target.value }))
+                                  }
+                                  placeholder="Notitie (optioneel)"
+                                  className="flex-1 bg-parchment border border-brass-deep/15 px-2 py-1.5 text-[11px] focus:outline-none focus:border-brass-gold"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => addFavorite(e.id)}
+                                  disabled={busy === e.id}
+                                  className="h-7 text-[10px] bg-brass-gold text-parchment hover:bg-brass-deep whitespace-nowrap"
+                                >
+                                  <Star className="size-3 mr-1" /> Favoriet
+                                </Button>
+                              </div>
+                              {/* Uitsluiten */}
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={reasonCat[e.id] ?? ""}
+                                  onChange={(ev) =>
+                                    setReasonCat((d) => ({
+                                      ...d,
+                                      [e.id]: ev.target.value as ReasonCategory,
+                                    }))
+                                  }
+                                  className="flex-1 bg-parchment border border-brass-deep/15 px-2 py-1.5 text-[11px] focus:outline-none focus:border-brass-gold"
+                                >
+                                  <option value="">— Kies een reden —</option>
+                                  {REASON_CATEGORIES.map((r) => (
+                                    <option key={r} value={r}>
+                                      {r}
+                                    </option>
+                                  ))}
+                                </select>
+                                <Button
+                                  size="sm"
+                                  onClick={() => addExcluded(e.id)}
+                                  disabled={
+                                    busy === e.id ||
+                                    !reasonCat[e.id] ||
+                                    (reasonCat[e.id] === "Overig" &&
+                                      (reasonDetail[e.id] ?? "").trim().length < 3)
+                                  }
+                                  className="h-7 text-[10px] bg-brass-deep text-parchment hover:bg-brass-gold whitespace-nowrap"
+                                >
+                                  <ShieldOff className="size-3 mr-1" /> Uitsluiten
+                                </Button>
+                              </div>
+                              {reasonCat[e.id] === "Overig" && (
+                                <input
+                                  type="text"
+                                  maxLength={500}
+                                  value={reasonDetail[e.id] ?? ""}
+                                  onChange={(ev) =>
+                                    setReasonDetail((d) => ({ ...d, [e.id]: ev.target.value }))
+                                  }
+                                  placeholder="Korte toelichting (verplicht)"
+                                  className="w-full bg-parchment border border-brass-deep/15 px-2 py-1.5 text-[11px] focus:outline-none focus:border-brass-gold"
+                                />
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </TabsContent>
           </Tabs>
