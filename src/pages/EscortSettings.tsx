@@ -449,7 +449,7 @@ const Inner = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main className="max-w-2xl mx-auto px-6 py-24">
-          <p className="text-brass-deep/80">{t("escortSettings.onlyForEscorts")}</p>
+          <p className="text-muted-foreground">{t("escortSettings.onlyForEscorts")}</p>
         </main>
         <Footer />
       </div>
