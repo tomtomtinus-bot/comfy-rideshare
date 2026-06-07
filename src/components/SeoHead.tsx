@@ -11,7 +11,7 @@ interface SeoHeadProps {
   jsonLd?: Record<string, unknown>[];
 }
 
-const DEFAULT_OG_IMAGE = "/og-image-v4.jpg";
+const DEFAULT_OG_IMAGE = "/og-image-v5.jpg";
 
 const toAbsolute = (path: string) => {
   if (/^https?:\/\//i.test(path)) return path;
