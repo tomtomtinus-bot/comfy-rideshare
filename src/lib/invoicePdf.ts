@@ -349,8 +349,8 @@ export interface PlatformInvoicePdfData extends BasePdfOpts {
 
 export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) => {
   const doc = new jsPDF();
-  const logo = await loadLogoDataUrl();
-  drawShell(doc, data, logo);
+  const [logo, banner] = await Promise.all([loadLogoDataUrl(), loadBannerDataUrl()]);
+  drawShell(doc, data, logo, banner);
 
   const subtotal = data.total_amount;
   const vatRate = vatRateFor(data.from, data.to);
