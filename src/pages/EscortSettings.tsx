@@ -13,6 +13,7 @@ import { NotificationPreferencesCard } from "@/components/site/NotificationPrefe
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
+import { Switch } from "@/components/ui/switch";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland", country: "Nederland" },
@@ -170,6 +171,7 @@ const Inner = () => {
   // Persoonlijk
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [isBusiness, setIsBusiness] = useState(false);
 
   // Adres autodetect
   const [postcode, setPostcode] = useState("");
@@ -232,6 +234,7 @@ const Inner = () => {
 
       if (p) {
         setProfile(p);
+        setIsBusiness(((d.isBusiness as boolean | undefined) ?? !!(p as any).is_business));
         setCategories((d.categories as string[]) ?? (((p as any).categories ?? []) as string[]));
         setFiles(((p as any).certificate_files ?? []) as string[]);
         setLanguages((d.languages as string[]) ?? (((p as any).languages ?? ["Nederlands"]) as string[]));
@@ -285,10 +288,10 @@ const Inner = () => {
     if (loading) return;
     writeDraft({
       fullName, phone, postcode, houseNumber, street, city,
-      categories, languages, surcharges, fuel,
+      categories, languages, surcharges, fuel, isBusiness,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, loading]);
+  }, [fullName, phone, postcode, houseNumber, street, city, categories, languages, surcharges, fuel, isBusiness, loading]);
 
 
   const toggle = (arr: string[], v: string) =>
@@ -397,6 +400,7 @@ const Inner = () => {
         countries: derivedCountries,
         min_billable_hours: parsed.data.minBillableHours,
         vehicle_type: parsed.data.vehicleType,
+        is_business: isBusiness,
         categories,
         languages: languages.length ? languages : ["Nederlands"],
         surcharges: surcharges.filter((s) => s.label.trim() && !/brandstof|fuel/i.test(s.label)).map((s) => ({ label: s.label.trim(), amount: s.amount.trim(), unit: s.unit })) as any,
@@ -501,6 +505,19 @@ const Inner = () => {
                       className="mt-1 w-full bg-parchment border border-brass-deep/15 px-4 py-3 text-sm focus:outline-none focus:border-brass-gold"
                     />
                   </div>
+                </div>
+
+                <div className="mt-4 flex items-start justify-between gap-4 border-t border-brass-deep/10 pt-4">
+                  <div>
+                    <Label>Ik ben een bedrijf met meerdere chauffeurs</Label>
+                    <p className="text-[11px] text-brass-deep/70 mt-1">
+                      Schakel dit in als je onder je bedrijfsnaam meerdere chauffeurs wil laten rijden. Je krijgt dan toegang tot "Mijn team" waar je chauffeurs kunt uitnodigen en seats kunt beheren.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isBusiness}
+                    onCheckedChange={(v) => { setIsBusiness(!!v); setDirty(true); }}
+                  />
                 </div>
               </section>
 

@@ -37,7 +37,7 @@ const TeamInner = () => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language?.startsWith("fr") ? "fr-BE" : i18n.language?.startsWith("de") ? "de-DE" : i18n.language?.startsWith("en") ? "en-GB" : "nl-NL";
   const { user, role } = useAuth();
-  const { companyId, isPlanner, loading: companyLoading } = useCompany();
+  const { companyId, isPlanner, isBusinessEscort, loading: companyLoading } = useCompany();
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [invitations, setInvitations] = useState<InvitationRow[]>([]);
   const [company, setCompany] = useState<{ name: string; seat_limit: number } | null>(null);
@@ -75,7 +75,7 @@ const TeamInner = () => {
   if (companyLoading) {
     return <div className="min-h-screen flex items-center justify-center text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</div>;
   }
-  if (role !== "begeleider" || !isPlanner) {
+  if (role !== "begeleider" || (!isPlanner && !isBusinessEscort)) {
     return <Navigate to="/dashboard" replace />;
   }
 
