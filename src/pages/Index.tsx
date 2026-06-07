@@ -23,7 +23,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead
-        title="ViaCust | Platform voor Transportbegeleiding & Uitzonderlijk Vervoer"
+        title="ViaCust | Digital Escort Solutions"
         description="Het alles-in-één platform voor transportbegeleiders en planners. Automatiseer ritten, planningen en vergunningen in heel Europa."
         canonical="https://viacust.com/"
         jsonLd={[
