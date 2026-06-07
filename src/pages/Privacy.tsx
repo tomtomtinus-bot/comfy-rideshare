@@ -4,14 +4,15 @@ import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { SeoHead } from "@/components/SeoHead";
+import { Button } from "@/components/ui/button";
 
 type Lang = "nl" | "en" | "de" | "fr";
 
-const labels: Record<Lang, { kicker: string; title: string; updated: string; back: string; toTerms: string }> = {
-  nl: { kicker: "Privacy", title: "Privacyverklaring ViaCust", updated: "Versie 1.7 — Laatst bijgewerkt op: 5 juni 2026", back: "← Terug", toTerms: "Algemene voorwaarden" },
-  en: { kicker: "Privacy", title: "Privacy Policy ViaCust", updated: "Version 1.7 — Last updated: June 5, 2026", back: "← Back", toTerms: "Terms and Conditions" },
-  de: { kicker: "Datenschutz", title: "Datenschutzerklärung ViaCust", updated: "Version 1.7 — Zuletzt aktualisiert am: 5. Juni 2026", back: "← Zurück", toTerms: "AGB" },
-  fr: { kicker: "Confidentialité", title: "Politique de Confidentialité ViaCust", updated: "Version 1.7 — Dernière mise à jour : 5 juin 2026", back: "← Retour", toTerms: "Conditions générales" },
+const labels: Record<Lang, { title: string; updated: string; back: string; toTerms: string }> = {
+  nl: { title: "Privacyverklaring", updated: "Laatst bijgewerkt: juni 2026", back: "Terug", toTerms: "Algemene voorwaarden" },
+  en: { title: "Privacy Policy", updated: "Last updated: June 2026", back: "Back", toTerms: "Terms and Conditions" },
+  de: { title: "Datenschutzerklärung", updated: "Zuletzt aktualisiert: Juni 2026", back: "Zurück", toTerms: "AGB" },
+  fr: { title: "Politique de Confidentialité", updated: "Dernière mise à jour : juin 2026", back: "Retour", toTerms: "Conditions générales" },
 };
 
 const seoByLang: Record<Lang, { title: string; description: string; canonical: string }> = {
@@ -57,32 +58,27 @@ const Privacy = ({ forceLang }: PrivacyProps = {}) => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title={seo.title} description={seo.description} canonical={seo.canonical} />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-24">
-
-        <article className="max-w-3xl mx-auto bg-card shadow-etched p-8 md:p-12 space-y-6">
-          <header>
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {L.kicker}
-            </p>
-            <h1 className="font-display text-4xl text-brass-deep italic">{L.title}</h1>
-            <p className="text-sm text-brass-deep/80 italic mt-2"> </p>
-            <p className="text-sm text-brass-deep/80 mt-2">{L.updated}</p>
+      <main className="px-6 md:px-8 py-8 md:py-12">
+        <article className="max-w-3xl mx-auto space-y-8">
+          <header className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">{L.title}</h1>
+            <p className="text-sm text-muted-foreground">{L.updated}</p>
           </header>
 
-          <div className="space-y-5 text-sm leading-relaxed text-brass-deep/85 [&_h2]:font-display [&_h2]:text-xl [&_h2]:text-brass-deep [&_h2]:italic [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-brass-gold [&_a]:underline">
+          <div className="space-y-5 text-sm leading-relaxed text-foreground/85 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h2]:mt-8 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_a]:text-primary [&_a]:underline [&_a:hover]:text-primary/80">
             {lang === "nl" && <PrivacyNL />}
             {lang === "en" && <PrivacyEN />}
             {lang === "de" && <PrivacyDE />}
             {lang === "fr" && <PrivacyFR />}
           </div>
 
-          <div className="pt-6 border-t border-brass-deep/10 flex justify-between items-center">
-            <Link to="/auth" className="text-xs uppercase tracking-widest font-semibold text-brass-gold hover:text-brass-deep">
-              {L.back}
-            </Link>
-            <Link to="/voorwaarden" className="text-xs uppercase tracking-widest font-semibold text-brass-deep/80 hover:text-brass-gold">
-              {L.toTerms} →
-            </Link>
+          <div className="pt-6 border-t border-border flex justify-between items-center">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/auth">{L.back}</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/voorwaarden">{L.toTerms}</Link>
+            </Button>
           </div>
         </article>
       </main>
@@ -378,6 +374,5 @@ const PrivacyFR = () => (
     <p><strong>ViaCust</strong><br />Ruwenbergstraat 52<br />5271AG Sint-Michielsgestel<br />Pays-Bas</p>
   </>
 );
-
 
 export default Privacy;
