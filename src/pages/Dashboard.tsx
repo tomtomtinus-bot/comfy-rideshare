@@ -443,27 +443,20 @@ const ClientDashboard = () => {
 
   return (
     <div className="space-y-12">
-      <header className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            {t("dash.clientKicker")}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("dash.myRides")}</h1>
-        </div>
-        <div className="flex gap-3 flex-wrap">
-          <button
+      <header className="flex items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("dash.myRides")}</h1>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setExportOpen((v) => !v)}
             disabled={rides.length === 0}
-            className="px-6 py-3 border border-brass-deep/30 text-brass-deep uppercase tracking-widest text-xs font-semibold hover:bg-brass-deep hover:text-parchment transition-colors disabled:opacity-50"
           >
             {t("dash.downloadExcel")}
-          </button>
-          <Link
-            to="/aanvragen"
-            className="px-6 py-3 bg-brass-deep text-parchment uppercase tracking-widest text-xs font-semibold hover:bg-brass-gold transition-colors"
-          >
-            {t("dash.newRequest")}
-          </Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link to="/aanvragen">{t("dash.newRequest")}</Link>
+          </Button>
         </div>
       </header>
 
