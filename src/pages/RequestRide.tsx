@@ -14,7 +14,7 @@ import { RequireSubscription } from "@/components/RequireSubscription";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 import { LocationPickerDialog } from "@/components/site/LocationPickerDialog";
 import { uploadPermitPdf } from "@/lib/uploadPermit";
-import { Loader2, Upload, X, FileText } from "lucide-react";
+import { Loader2, Upload, X, FileText, ChevronDown } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -842,7 +842,7 @@ const RequestRideInner = () => {
             <details open className="group border-b border-border bg-transparent">
               <summary className="cursor-pointer list-none flex items-center justify-between py-3 hover:text-foreground transition-colors">
                 <p className="text-[11px] uppercase tracking-wider text-foreground font-semibold">{t("request.route")}</p>
-                <span className="text-muted-foreground text-xs transition-transform group-open:rotate-180">▼</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
               <div className="pt-2 pb-5">
               <p className="text-xs text-muted-foreground mb-3">
@@ -965,7 +965,7 @@ const RequestRideInner = () => {
                 <p className="text-[11px] uppercase tracking-wider text-foreground font-semibold">
                   Aansluitende ritten <span className="text-brass-deep/80 normal-case tracking-normal font-normal">(optioneel{extraLegs.length > 0 ? ` · ${extraLegs.length}` : ""})</span>
                 </p>
-                <span className="text-muted-foreground text-xs transition-transform group-open:rotate-180">▼</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
               <div className="pt-2 pb-5">
               <div className="flex items-center justify-end mb-4">
@@ -1162,7 +1162,7 @@ const RequestRideInner = () => {
             <details className="group border-b border-border bg-transparent">
               <summary className="cursor-pointer list-none flex items-center justify-between py-3 hover:text-foreground transition-colors">
                 <p className="text-[11px] uppercase tracking-wider text-foreground font-semibold">{t("request.cargoSection")} <span className="text-brass-deep/80 normal-case tracking-normal font-normal">({t("common.optional")})</span></p>
-                <span className="text-muted-foreground text-xs transition-transform group-open:rotate-180">▼</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
               <div className="pt-2 pb-5">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1290,7 +1290,7 @@ const RequestRideInner = () => {
                 <p className="text-[11px] uppercase tracking-wider text-foreground font-semibold">
                   {t("request.driversSection")} <span className="text-brass-deep/80 normal-case tracking-normal font-normal">({t("common.optional")})</span>
                 </p>
-                <span className="text-muted-foreground text-xs transition-transform group-open:rotate-180">▼</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
               <div className="pt-2 pb-5">
 
