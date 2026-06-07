@@ -5,11 +5,11 @@ import headerBannerUrl from "@/assets/viacust-invoice-header.jpg";
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("nl-NL", { dateStyle: "short" });
 
-let logoDataUrlCache: string | null = null;
-const loadLogoDataUrl = async (): Promise<string | null> => {
-  if (logoDataUrlCache) return logoDataUrlCache;
+const dataUrlCache: Record<string, string> = {};
+const loadDataUrl = async (url: string): Promise<string | null> => {
+  if (dataUrlCache[url]) return dataUrlCache[url];
   try {
-    const res = await fetch(logoUrl);
+    const res = await fetch(url);
     const blob = await res.blob();
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -17,12 +17,14 @@ const loadLogoDataUrl = async (): Promise<string | null> => {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-    logoDataUrlCache = dataUrl;
+    dataUrlCache[url] = dataUrl;
     return dataUrl;
   } catch {
     return null;
   }
 };
+const loadLogoDataUrl = () => loadDataUrl(logoUrl);
+const loadBannerDataUrl = () => loadDataUrl(headerBannerUrl);
 const fmtMoney = (n: number) =>
   `€ ${Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
