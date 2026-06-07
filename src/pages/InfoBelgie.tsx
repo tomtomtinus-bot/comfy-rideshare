@@ -32,7 +32,7 @@ const InfoBelgie = () => {
       <SeoHead
         title="Wetgeving Uitzonderlijk Vervoer België | ViaCust"
         description="Inzicht in de Belgische regelgeving, gewestelijke vergunningen en begeleidingsregels. ViaCust helpt transporteurs en begeleiders in België naadloos te matchen."
-        canonical="https://viacust.com/belgie"
+        canonical="https://viacust.com/info/belgie"
       />
       <Nav />
       <main>
