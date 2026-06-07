@@ -562,13 +562,23 @@ const ClientDashboard = () => {
                 return x;
               };
 
-              const currentRides = filtered.filter((r) => new Date(r.scheduled_at).getTime() >= currentMonthStart);
-              const pastRides = filtered.filter((r) => new Date(r.scheduled_at).getTime() < currentMonthStart);
+              const matchesFilters = (r: RideRow) => {
+                if (clientStatusFilter !== "all" && r.status !== clientStatusFilter) return false;
+                if (!q) return true;
+                return (
+                  (r.ride_number ?? "").toLowerCase().includes(q) ||
+                  r.pickup_city.toLowerCase().includes(q) ||
+                  r.dropoff_city.toLowerCase().includes(q) ||
+                  r.id.toLowerCase().includes(q)
+                );
+              };
 
-              // Group current rides by week
-              type WeekGroup = { key: string; label: string; sortKey: number; rides: typeof filtered };
+              const currentRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() >= currentMonthStart);
+              const pastRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() < currentMonthStart);
+
+              type WeekGroup = { key: string; label: string; sortKey: number; rides: RideRow[] };
               const weeks = new Map<string, WeekGroup>();
-              for (const r of currentRides) {
+              for (const r of currentRidesAll) {
                 const d = new Date(r.scheduled_at);
                 const wMon = mondayOf(d);
                 const wKey = `w-${wMon.toISOString().slice(0, 10)}`;
@@ -584,10 +594,9 @@ const ClientDashboard = () => {
               }
               const sortedWeeks = Array.from(weeks.values()).sort((a, b) => a.sortKey - b.sortKey);
 
-              // Group past rides by month (descending)
-              type MonthGroup = { key: string; label: string; sortKey: number; rides: typeof filtered };
+              type MonthGroup = { key: string; label: string; sortKey: number; rides: RideRow[] };
               const pastMonths = new Map<string, MonthGroup>();
-              for (const r of pastRides) {
+              for (const r of pastRidesAll) {
                 const d = new Date(r.scheduled_at);
                 const mKey = `${d.getFullYear()}-${d.getMonth()}`;
                 if (!pastMonths.has(mKey)) {
@@ -602,7 +611,7 @@ const ClientDashboard = () => {
               }
               const sortedPastMonths = Array.from(pastMonths.values()).sort((a, b) => b.sortKey - a.sortKey);
 
-              const renderRideRow = (r: typeof filtered[number]) => {
+              const renderRideRow = (r: RideRow) => {
                 const ass = assignments[r.id] ?? [];
                 const acceptedCount = ass.filter((a) => a.status === "accepted").length;
                 const isCompleted = r.status === "completed";
@@ -670,32 +679,43 @@ const ClientDashboard = () => {
                 </TableHeader>
               );
 
+              const emptyRow = (key: string) => (
+                <TableRow key={key}>
+                  <TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-4">
+                    Geen ritten in deze periode
+                  </TableCell>
+                </TableRow>
+              );
+
               return (
                 <>
                   <div className="border border-border rounded-md bg-card overflow-hidden">
                     <Table>
                       {tableHeader}
                       <TableBody>
-                        {currentRides.length === 0 ? (
+                        {sortedWeeks.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">
-                              Geen ritten in {now.toLocaleDateString("nl-NL", { month: "long", year: "numeric" })}.
+                            <TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-4">
+                              Geen ritten in deze periode
                             </TableCell>
                           </TableRow>
                         ) : (
-                          sortedWeeks.flatMap((w) => [
-                            <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b border-border/50 bg-muted/30">
-                              <TableCell
-                                colSpan={6}
-                                className="text-xs font-semibold tracking-wider uppercase text-muted-foreground py-2 px-4"
-                              >
-                                {w.label} <span className="ml-1 normal-case tracking-normal font-normal tabular-nums">({w.rides.length} {w.rides.length === 1 ? "rit" : "ritten"})</span>
-                              </TableCell>
-                            </TableRow>,
-                            ...[...w.rides]
-                              .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
-                              .map((r) => renderRideRow(r)),
-                          ])
+                          sortedWeeks.flatMap((w) => {
+                            const filteredRides = w.rides.filter(matchesFilters).sort((a, b) =>
+                              new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+                            );
+                            return [
+                              <TableRow key={`whdr-${w.key}`} className="hover:bg-transparent border-b border-border/50 bg-muted/30">
+                                <TableCell
+                                  colSpan={6}
+                                  className="text-xs font-semibold tracking-wider uppercase text-muted-foreground py-2 px-4"
+                                >
+                                  {w.label} <span className="ml-1 normal-case tracking-normal font-normal tabular-nums">({w.rides.length} {w.rides.length === 1 ? "rit" : "ritten"})</span>
+                                </TableCell>
+                              </TableRow>,
+                              ...(filteredRides.length === 0 ? [emptyRow(`wempty-${w.key}`)] : filteredRides.map((r) => renderRideRow(r))),
+                            ];
+                          })
                         )}
                       </TableBody>
                     </Table>
@@ -705,26 +725,37 @@ const ClientDashboard = () => {
                     <div className="mt-12">
                       <h2 className="text-lg font-semibold text-muted-foreground mb-4">Eerdere ritten</h2>
                       <Accordion type="multiple" className="border border-border rounded-md bg-card overflow-hidden divide-y">
-                        {sortedPastMonths.map((m) => (
-                          <AccordionItem key={m.key} value={m.key} className="border-b-0">
-                            <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline flex items-center">
-                              <span className="inline-flex items-center gap-2">
-                                <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
-                                <span className="text-xs font-normal text-muted-foreground tabular-nums">({m.rides.length})</span>
-                              </span>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-0">
-                              <Table>
-                                {tableHeader}
-                                <TableBody>
-                                  {[...m.rides]
-                                    .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime())
-                                    .map((r) => renderRideRow(r))}
-                                </TableBody>
-                              </Table>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
+                        {sortedPastMonths.map((m) => {
+                          const filteredRides = m.rides.filter(matchesFilters).sort((a, b) =>
+                            new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
+                          );
+                          return (
+                            <AccordionItem key={m.key} value={m.key} className="border-b-0">
+                              <AccordionTrigger className="px-4 py-3 hover:bg-muted/40 hover:no-underline flex items-center">
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-sm font-semibold text-foreground capitalize">{m.label}</span>
+                                  <span className="text-xs font-normal text-muted-foreground tabular-nums">({m.rides.length})</span>
+                                </span>
+                              </AccordionTrigger>
+                              <AccordionContent className="p-0">
+                                <Table>
+                                  {tableHeader}
+                                  <TableBody>
+                                    {filteredRides.length === 0 ? (
+                                      <TableRow>
+                                        <TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-4">
+                                          Geen ritten in deze periode
+                                        </TableCell>
+                                      </TableRow>
+                                    ) : (
+                                      filteredRides.map((r) => renderRideRow(r))
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
                       </Accordion>
                     </div>
                   )}
