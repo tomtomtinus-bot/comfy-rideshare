@@ -861,7 +861,7 @@ const EscortRideDetail = () => (
   <RequireAuth>
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
-      <main className="px-6 md:px-8 py-12 md:py-16 bg-gradient-hero min-h-[calc(100vh-5rem)]">
+      <main className="px-5 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
         <div className="max-w-5xl mx-auto">
           <Inner />
         </div>
