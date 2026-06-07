@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { SeoHead } from "@/components/SeoHead";
 
 type Lang = "nl" | "en" | "de" | "fr";
 
@@ -12,14 +14,48 @@ const labels: Record<Lang, { kicker: string; title: string; updated: string; bac
   fr: { kicker: "Confidentialité", title: "Politique de Confidentialité ViaCust", updated: "Version 1.7 — Dernière mise à jour : 5 juin 2026", back: "← Retour", toTerms: "Conditions générales" },
 };
 
-const Privacy = () => {
+const seoByLang: Record<Lang, { title: string; description: string; canonical: string }> = {
+  nl: {
+    title: "Privacyverklaring | ViaCust",
+    description: "Bekijk hoe ViaCust uw persoonsgegevens en Google Cloud-data veilig verwerkt conform de AVG.",
+    canonical: "https://viacust.com/privacy",
+  },
+  en: {
+    title: "Privacy Policy | ViaCust",
+    description: "Read how ViaCust securely handles your personal data and Google Cloud integration in accordance with the GDPR.",
+    canonical: "https://viacust.com/privacy-en",
+  },
+  de: {
+    title: "Datenschutzerklärung | ViaCust",
+    description: "Erfahren Sie, wie ViaCust Ihre personenbezogenen Daten und die Google Cloud-Integration gemäß der DSGVO schützt.",
+    canonical: "https://viacust.com/datenschutz",
+  },
+  fr: {
+    title: "Politique de Confidentialité | ViaCust",
+    description: "Découvrez comment ViaCust protège vos données personnelles et l'intégration Google Cloud conformément au RGPD.",
+    canonical: "https://viacust.com/confidentialite",
+  },
+};
+
+interface PrivacyProps {
+  forceLang?: Lang;
+}
+
+const Privacy = ({ forceLang }: PrivacyProps = {}) => {
   const { i18n } = useTranslation();
-  const lang = (["nl", "en", "de", "fr"].includes(i18n.language) ? i18n.language : "nl") as Lang;
+  const lang: Lang = forceLang ?? ((["nl", "en", "de", "fr"].includes(i18n.language) ? i18n.language : "nl") as Lang);
   const L = labels[lang];
+  const seo = seoByLang[lang];
+
+  useEffect(() => {
+    if (forceLang && i18n.language !== forceLang) {
+      i18n.changeLanguage(forceLang);
+    }
+  }, [forceLang, i18n]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Nav />
+      <SeoHead title={seo.title} description={seo.description} canonical={seo.canonical} />
       <main className="px-6 md:px-8 py-16 md:py-24">
         <article className="max-w-3xl mx-auto bg-card shadow-etched p-8 md:p-12 space-y-6">
           <header>
