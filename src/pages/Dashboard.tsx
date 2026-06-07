@@ -444,7 +444,7 @@ const ClientDashboard = () => {
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("dash.myRides")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("dash.myRides")}</h1>
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -1005,7 +1005,7 @@ const EscortDashboard = () => {
       </Dialog>
 
       <header className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">{t("dash.myAssignments")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("dash.myAssignments")}</h1>
         <Button asChild variant="outline" size="sm">
           <Link to="/profiel">{t("dash.myProfile")}</Link>
         </Button>

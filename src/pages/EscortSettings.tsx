@@ -462,7 +462,7 @@ const Inner = () => {
       <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-foreground">{t("escortSettings.title")}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("escortSettings.title")}</h1>
             {profile?.anonymous_id && (
               <p className="text-xs text-muted-foreground mt-1">#{profile.anonymous_id}</p>
             )}
