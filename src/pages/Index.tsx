@@ -53,9 +53,6 @@ const Index = () => {
       <main className="flex-1">
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-5 md:px-8 pt-12 md:pt-20 pb-10 md:pb-14 text-center">
-          <Badge variant="secondary" className="mb-5 font-normal">
-            Nieuw · Realtime dispatch voor pilot cars
-          </Badge>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
             Het digitale platform voor uitzonderlijk vervoer
           </h1>
