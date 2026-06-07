@@ -13,6 +13,7 @@ interface RideInvitationProps {
   pickup?: string
   dropoff?: string
   plannedAt?: string
+  rideId?: string
   rideUrl?: string
   acceptUrl?: string
 }
@@ -78,7 +79,13 @@ const RideInvitationEmail = ({
 
 export const template = {
   component: RideInvitationEmail,
-  subject: 'Nieuwe rit-uitnodiging — meld je beschikbaar',
+  subject: (data: Record<string, any>) => {
+    const pickup = data.pickup ?? 'Onbekend'
+    const dropoff = data.dropoff ?? 'Onbekend'
+    const plannedAt = data.plannedAt ?? 'Onbekende datum'
+    const shortId = typeof data.rideId === 'string' ? data.rideId.slice(0, 8).toUpperCase() : ''
+    return `Nieuwe rit: ${pickup} naar ${dropoff} op ${plannedAt}${shortId ? ` #${shortId}` : ''} - ViaCust`
+  },
   displayName: 'Rit-uitnodiging (begeleider)',
   previewData: {
     name: 'Sven',
