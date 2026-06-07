@@ -350,29 +350,29 @@ const BillingDetailsInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title="Facturatiegegevens | ViaCust" description="Beheer je bedrijfsgegevens, BTW-nummer en factuuradres voor ViaCust." />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
-        <div className="max-w-3xl mx-auto space-y-10">
-          <header>
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {isEscort ? t("common.escort") : t("common.client")}
-            </p>
-            <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">
+      <main className="px-6 md:px-8 py-6 md:py-8 bg-background min-h-[calc(100vh-5rem)]">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {t("billing.title")}
             </h1>
-            <p className="text-sm text-brass-deep/80 mt-3">
+            <p className="text-sm text-muted-foreground">
               {t("billing.intro")}
               {isEscort ? t("billing.introEscort") : "."}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : (
-            <form onSubmit={save} className="bg-card shadow-etched p-6 md:p-8 space-y-8">
+            <form onSubmit={save} className="bg-card border rounded-sm p-6 md:p-8 space-y-8">
               <section className="space-y-4">
-                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  {t("billing.company")}
-                </h2>
+                <div className="space-y-2">
+                  <h2 className="text-sm font-medium text-muted-foreground">
+                    {t("billing.company")}
+                  </h2>
+                  <Separator />
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   {renderField({ label: t("billing.f.companyName"), name: "company_name", autoComplete: "organization" })}
                   {renderField({
@@ -398,9 +398,12 @@ const BillingDetailsInner = () => {
               </section>
 
               <section className="space-y-4">
-                <h2 className="text-xs uppercase tracking-widest font-bold text-brass-deep">
-                  {t("billing.address")}
-                </h2>
+                <div className="space-y-2">
+                  <h2 className="text-sm font-medium text-muted-foreground">
+                    {t("billing.address")}
+                  </h2>
+                  <Separator />
+                </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     {renderField({
