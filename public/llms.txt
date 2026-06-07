@@ -1,0 +1,37 @@
+# ViaCust
+
+ViaCust is a specialized European B2B SaaS platform and automated dispatch system for the exceptional transport and oversize load escort sector (transportbegeleiding / uitzonderlijk vervoer). It connects transport planners with certified escort drivers, automating ride assignment, route management, and invoicing.
+
+## Core Features
+
+- **Automated Ride Assignment:** Real-time dispatching using matching logic based on base locations and availability.
+
+- **Google Calendar Synchronization:** Seamless injection of accepted rides directly into user calendars.
+
+- **Interactive Routing & Geocoding:** Powered by Google Maps Platform for route visualization and physical address lookups.
+
+- **Centralized Billing:** Managed via Stripe Billing, combining fixed monthly subscriptions with a 1.5% success fee per completed ride.
+
+- **Multi-Vehicle & Corporate Accounts:** Fleet dispatching tools allowing corporate planners to assign rides to specific drivers with centralized invoicing.
+
+## Architecture & Compliance
+
+- **Frontend/Backend:** Built with React/Vite and Supabase, secured via strict PostgreSQL Row Level Security (RLS) policies.
+
+- **GDPR & Privacy Compliance:** Fully compliant with European GDPR. User-data and Google Cloud OAuth credentials are locked down server-side; location tracking is temporary and strictly opt-in.
+
+- **Supported Languages:** Localized interfaces and legal documentation for the Netherlands, United Kingdom, Germany, and France.
+
+## Essential Links
+
+- Homepage: https://viacust.com/
+
+- Privacy Policy (NL): https://viacust.com/privacy
+
+- Privacy Policy (EN): https://viacust.com/privacy-en
+
+- Datenschutzerklärung (DE): https://viacust.com/datenschutz
+
+- Politique de Confidentialité (FR): https://viacust.com/confidentialite
+
+- Sitemap: https://viacust.com/sitemap.xml
