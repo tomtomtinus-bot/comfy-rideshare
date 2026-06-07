@@ -53,7 +53,7 @@ export const Nav = () => {
             alt="ViaCust - Digital Escort Solutions"
             width={1658}
             height={624}
-            fetchpriority="high"
+            fetchPriority="high"
             className="h-20 md:h-24 w-auto object-contain"
           />
         </Link>
