@@ -18,6 +18,38 @@ const Faq = () => {
       <SeoHead
         title="Veelgestelde vragen | ViaCust"
         description="Vind antwoorden op al uw vragen over rittenplanning, automatische dispatching en Stripe-facturatie binnen ViaCust."
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Wat is ViaCust?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "ViaCust is een Europees B2B SaaS-platform dat transportplanners en gecertificeerde transportbegeleiders (uitzonderlijk vervoer) efficiënt met elkaar verbindt via geautomatiseerde rittenplanning."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Hoe synchroniseert ViaCust ritten?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "ViaCust integreert naadloos met de Google Calendar API om geaccepteerde transportritten automatisch en in real-time in de persoonlijke agenda van de begeleider te plaatsen."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is ViaCust AVG-proof?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ja, ViaCust voldoet volledig aan de AVG (GDPR). Locatiegegevens zijn tijdelijk en strikt opt-in, en Google-gebruikersdata wordt via beveiligde Row Level Security (RLS) geïsoleerd."
+                }
+              }
+            ]
+          }
+        ]}
       />
       <Nav />
       <main>
