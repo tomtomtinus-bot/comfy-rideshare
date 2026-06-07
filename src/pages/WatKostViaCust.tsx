@@ -1,3 +1,4 @@
+import { SeoHead } from "@/components/SeoHead";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Link } from "react-router-dom";
@@ -38,6 +39,10 @@ const WatKostViaCust = () => {
   const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead
+        title="Tarieven & Prijzen | ViaCust"
+        description="Duidelijke en transparante tarieven voor ViaCust. Ontdek onze flexibele abonnementen voor transportplanners en begeleiders van uitzonderlijk vervoer."
+      />
       <Nav />
       <main>
         <section className="pt-12 md:pt-20 pb-10 md:pb-16 px-5 md:px-8 border-b border-brass-deep/10 bg-gradient-hero">
