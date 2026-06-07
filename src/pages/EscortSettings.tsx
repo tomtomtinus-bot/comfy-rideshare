@@ -506,6 +506,19 @@ const Inner = () => {
                     />
                   </div>
                 </div>
+
+                <div className="mt-4 flex items-start justify-between gap-4 border-t border-brass-deep/10 pt-4">
+                  <div>
+                    <Label className="text-sm font-semibold text-brass-deep">Ik ben een bedrijf met meerdere chauffeurs</Label>
+                    <p className="text-[11px] text-brass-deep/70 mt-1">
+                      Schakel dit in als je onder je bedrijfsnaam meerdere chauffeurs wil laten rijden. Je krijgt dan toegang tot "Mijn team" waar je chauffeurs kunt uitnodigen en seats kunt beheren.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isBusiness}
+                    onCheckedChange={(v) => { setIsBusiness(!!v); setDirty(true); }}
+                  />
+                </div>
               </section>
 
               <section className="space-y-3">
