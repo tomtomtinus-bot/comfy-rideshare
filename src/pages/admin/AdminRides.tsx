@@ -138,7 +138,8 @@ const AdminRides = () => {
             <li key={r.id} className="bg-card p-4 md:p-5">
               <div className="grid grid-cols-12 gap-3 items-start">
                 <div className="col-span-12 md:col-span-3">
-                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Datum</p>
+                  <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">Ritnr · Datum</p>
+                  <p className="font-mono text-[11px] text-brass-deep/80 tabular-nums">#{r.id.slice(0, 8).toUpperCase()}</p>
                   <p className="font-medium tabular-nums text-sm">{fmt(r.scheduled_at)}</p>
                   <p className="text-[10px] text-brass-deep/80 mt-1">{r.client_name}</p>
                 </div>
