@@ -56,24 +56,39 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     const errors: string[] = [];
+    const url = `${SUPABASE_URL}/functions/v1/send-transactional-email`;
     for (const recipient of adminEmails) {
-      const { error: invErr } = await admin.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "new-signup-admin",
-          recipientEmail: recipient,
-          idempotencyKey: `new-signup-${userId}-${recipient}`,
-          templateData: {
-            fullName: fullName ?? "",
-            email,
-            phone: phone ?? "",
-            role: role ?? "",
-            companyName: companyName ?? "",
-            adminUrl,
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${SERVICE}`,
+            "apikey": SERVICE,
           },
-        },
-      });
-      if (invErr) errors.push(`${recipient}: ${invErr.message}`);
-      else sent++;
+          body: JSON.stringify({
+            templateName: "new-signup-admin",
+            recipientEmail: recipient,
+            idempotencyKey: `new-signup-${userId}-${recipient}`,
+            templateData: {
+              fullName: fullName ?? "",
+              email,
+              phone: phone ?? "",
+              role: role ?? "",
+              companyName: companyName ?? "",
+              adminUrl,
+            },
+          }),
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          errors.push(`${recipient}: ${res.status} ${txt}`);
+        } else {
+          sent++;
+        }
+      } catch (e) {
+        errors.push(`${recipient}: ${String(e)}`);
+      }
     }
 
     return new Response(JSON.stringify({ ok: true, sent, errors }), {

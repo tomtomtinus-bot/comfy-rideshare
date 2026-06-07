@@ -785,28 +785,8 @@ const RequestRideInner = () => {
 
     setBusy(false);
 
-    // Send ride confirmation email to the client (best-effort; do not block on errors)
-    if (user?.email) {
-      const plannedAt = new Date(scheduledISO).toLocaleString("nl-NL", {
-        dateStyle: "long",
-        timeStyle: "short",
-      });
-      supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "ride-confirmation",
-          recipientEmail: user.email,
-          idempotencyKey: `ride-confirm-${ride.id}`,
-          templateData: {
-            name: (user.user_metadata as any)?.full_name ?? undefined,
-            pickup: form.pickup_address || undefined,
-            dropoff: form.dropoff_address || undefined,
-            plannedAt,
-            reference: form.client_reference || undefined,
-            rideUrl: `${window.location.origin}/rit/${ride.id}`,
-          },
-        },
-      }).catch((err) => console.error("ride-confirmation email failed", err));
-    }
+    // Ride confirmation emails are sent server-side via notify-ride-event
+    // to ensure the transactional email endpoint remains service-role only.
 
     // Send ride invitation emails (with one-click accept link) to all invited escorts (best-effort)
     supabase.functions.invoke("send-ride-invitations", {

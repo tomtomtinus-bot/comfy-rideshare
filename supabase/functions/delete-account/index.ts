@@ -64,15 +64,22 @@ Deno.serve(async (req) => {
 
     // Mail bevestiging
     try {
-      await supabase.functions.invoke("send-transactional-email", {
-        body: {
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${serviceKey}`,
+          "apikey": serviceKey,
+        },
+        body: JSON.stringify({
           templateName: "account-deletion-scheduled",
           recipientEmail: user.email,
           idempotencyKey: `acct-del-${user.id}-${now.toISOString().slice(0, 10)}`,
           templateData: {
             scheduledAt: scheduled.toLocaleDateString("nl-NL", { dateStyle: "long" }),
           },
-        },
+        }),
       });
     } catch (e) { console.error("delete-account mail error:", e); }
 
