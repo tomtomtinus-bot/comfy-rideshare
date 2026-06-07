@@ -13,6 +13,7 @@ import { NotificationPreferencesCard } from "@/components/site/NotificationPrefe
 import { RequireAuth } from "@/components/site/RequireAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
+import { Switch } from "@/components/ui/switch";
 
 const COUNTRY_CERTS = [
   { id: "nl", label: "Nederland", country: "Nederland" },
