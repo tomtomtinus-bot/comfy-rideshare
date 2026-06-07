@@ -234,6 +234,12 @@ const ClientDashboard = () => {
   const [escortNames, setEscortNames] = useState<Record<string, string>>({});
   const [clientSearch, setClientSearch] = useState("");
   const [clientStatusFilter, setClientStatusFilter] = useState<string>("all");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const toggleSection = (k: string) => setCollapsedSections((prev) => {
+    const n = new Set(prev);
+    n.has(k) ? n.delete(k) : n.add(k);
+    return n;
+  });
   const navigate = useNavigate();
   const addRideToBundle = (r: RideRow) => {
     if (!r.bundle_id || !r.bundle_label) return;
