@@ -210,7 +210,7 @@ Deno.serve(async (req) => {
         const driverName = idToDriverName.get(escortId)
         const deadline = a.responds_by ? new Date(a.responds_by) : null
         const deadlineTxt = deadline
-          ? deadline.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+          ? deadline.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' })
           : null
         const body = `${ride.pickup_city} → ${ride.dropoff_city} • ${plannedAt}` +
           (deadlineTxt ? ` • Reageer vóór ${deadlineTxt}` : '')
