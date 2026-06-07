@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { CalendarClock, Loader2, Trash2, Plus } from "lucide-react";
 import { AddressAutocomplete, type AddressResult } from "@/components/site/AddressAutocomplete";
 import { useTranslation, Trans } from "react-i18next";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type ScheduledLocation = {
   id: string;
