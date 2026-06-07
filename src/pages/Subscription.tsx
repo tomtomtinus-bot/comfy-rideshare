@@ -257,7 +257,7 @@ const SubscriptionInner = () => {
 const Subscription = () => (
   <RequireAuth>
     <PaymentTestModeBanner />
-    <SeoHead title="Abonnement | ViaCust" description="Bekijk en beheer je ViaCust abonnement, facturering en betalingsmethode." />
+    <SeoHead title="Tarieven & Licenties | ViaCust" description="Transparante tarieven en licenties voor slimme rittenplanning met ViaCust. Bekijk en beheer je abonnement, facturering en betalingsmethode." />
     <Nav />
     <SubscriptionInner />
     <Footer />
