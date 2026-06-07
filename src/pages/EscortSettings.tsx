@@ -459,17 +459,17 @@ const Inner = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
+      <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
         <div className="max-w-3xl mx-auto">
-          <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-            {t("escortSettings.headerKicker")} {profile?.anonymous_id ? `#${profile.anonymous_id}` : ""}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic mb-10">
-            {t("escortSettings.title")}
-          </h1>
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold text-foreground">{t("escortSettings.title")}</h1>
+            {profile?.anonymous_id && (
+              <p className="text-xs text-muted-foreground mt-1">#{profile.anonymous_id}</p>
+            )}
+          </div>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading", { defaultValue: "Laden…" })}</p>
           ) : (
             <>
               <GoogleCalendarCard />
