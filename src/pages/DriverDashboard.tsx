@@ -129,11 +129,10 @@ export const DriverDashboard = () => {
   );
 
   return (
-    <div className="space-y-10">
-      <header>
-        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">Chauffeur</p>
-        <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">Mijn ritten</h1>
-        <p className="text-sm text-brass-deep/80 mt-3 max-w-xl">
+    <div className="space-y-6">
+      <header className="mb-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Mijn ritten</h1>
+        <p className="text-sm text-muted-foreground mt-1 max-w-xl">
           Hier zie je de ritten die je planner aan jou heeft toegewezen. Na de rit vul je je tijden in;
           de planner keurt ze goed en regelt de facturatie.
         </p>
