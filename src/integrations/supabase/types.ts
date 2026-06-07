@@ -2130,6 +2130,15 @@ export type Database = {
           read_ct: number
         }[]
       }
+      scheduled_locations_at: {
+        Args: { _at: string }
+        Returns: {
+          address: string
+          escort_id: string
+          lat: number
+          lng: number
+        }[]
+      }
       unbundle_ride: { Args: { _ride_id: string }; Returns: undefined }
     }
     Enums: {
