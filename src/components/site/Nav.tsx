@@ -13,7 +13,7 @@ export const Nav = () => {
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { user, role, isAdmin, signOut } = useAuth();
-  const { isPlanner, isDriver } = useCompany();
+  const { isPlanner, isDriver, isBusinessEscort } = useCompany();
   const { t } = useTranslation();
 
   const close = () => setOpen(false);
@@ -21,6 +21,9 @@ export const Nav = () => {
   // Chauffeurs (driver) zien geen financiele/abonnement/team-links.
   const showFinance = !!user && !isDriver;
   const showPlannerOnly = !!user && role === "begeleider" && !isDriver;
+  // Mijn Team is alleen relevant voor begeleiders die zichzelf als bedrijf
+  // hebben aangemerkt (of die al planner van een bedrijf zijn).
+  const showTeam = showPlannerOnly && (isBusinessEscort || isPlanner);
 
   const links: { to: string; label: string; show: boolean }[] = [
     { to: "/dashboard", label: t("nav.dashboard"), show: !!user },
@@ -30,7 +33,7 @@ export const Nav = () => {
     { to: "/brandstofprijzen", label: t("landing.navFuel"), show: !!user && ((role === "begeleider" && !isDriver) || role === "opdrachtgever") },
     { to: "/uitgesloten-begeleiders", label: t("landing.navPool"), show: !!user && role === "opdrachtgever" },
     { to: "/voorkeursopdrachtgevers", label: t("landing.navPreferred"), show: showPlannerOnly },
-    { to: "/team", label: t("landing.navTeam"), show: showPlannerOnly },
+    { to: "/team", label: t("landing.navTeam"), show: showTeam },
     { to: "/admin", label: t("nav.admin"), show: isAdmin },
     { to: "/wat-kost-viacust", label: t("landing.navCost"), show: true },
     { to: "/hoe-werkt-viacust", label: t("landing.navHow"), show: true },
