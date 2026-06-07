@@ -256,18 +256,18 @@ const Inner = () => {
     load();
   };
 
-  if (loading) return <p className="text-sm text-brass-deep/80">Laden…</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Laden…</p>;
   if (error || !data) {
     return (
-      <div className="bg-card shadow-etched p-12 text-center">
-        <p className="text-brass-deep/80 mb-4">Geen toegang tot deze ritdetails.</p>
-        <p className="text-xs text-brass-deep/80 mb-4">
+      <div className="bg-card border border-input rounded-lg p-10 text-center">
+        <p className="text-sm text-muted-foreground mb-4">Geen toegang tot deze ritdetails.</p>
+        <p className="text-xs text-muted-foreground mb-4">
           Ondersteuning nodig?{" "}
-          <a href="mailto:support@viacust.com" className="text-brass-gold hover:text-brass-deep underline">
+          <a href="mailto:support@viacust.com" className="text-primary hover:underline">
             support@viacust.com
           </a>
         </p>
-        <Link to="/dashboard" className="text-brass-gold uppercase tracking-widest text-xs font-semibold">
+        <Link to="/dashboard" className="text-sm text-primary hover:underline font-medium">
           ← Terug naar dashboard
         </Link>
       </div>
@@ -279,27 +279,28 @@ const Inner = () => {
   const plates = ride.license_plates ?? [];
 
   return (
-    <div className="space-y-8">
-      <header>
-        <Link to="/dashboard" className="text-brass-deep/80 hover:text-brass-deep uppercase tracking-widest text-xs font-semibold">
+    <div className="space-y-6">
+      <div>
+        <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground font-medium">
           ← Terug naar mijn ritten
         </Link>
-        <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mt-6 mb-3">Ritdetails</p>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <h1 className="font-display text-3xl md:text-4xl text-brass-deep italic">
-            {ride.pickup_city} <span className="text-brass-gold">→</span> {ride.dropoff_city}
-          </h1>
+        <header className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {ride.pickup_city} <span className="text-muted-foreground font-normal">→</span> {ride.dropoff_city}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">{fmtDateTime(ride.scheduled_at)}</p>
+          </div>
           {ride.status !== "cancelled" && (
             <Link
               to={`/rit/${ride.id}/bewerk`}
-              className="px-4 py-2 border border-brass-deep/30 uppercase tracking-widest text-[10px] font-semibold hover:bg-brass-deep hover:text-parchment transition-colors"
+              className="inline-flex items-center justify-center h-9 px-3 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
             >
               Bewerken
             </Link>
           )}
-        </div>
-        <p className="text-brass-deep/80 mt-2">{fmtDateTime(ride.scheduled_at)}</p>
-      </header>
+        </header>
+      </div>
 
       {userId && (
         <SwapPendingBanner key={swapTick} rideId={ride.id} currentUserId={userId} onChanged={load} />
