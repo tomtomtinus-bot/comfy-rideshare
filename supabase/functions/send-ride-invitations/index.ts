@@ -161,7 +161,10 @@ Deno.serve(async (req) => {
       }
       const expiresAt = a.responds_by ? new Date(a.responds_by).getTime() : (Date.now() + 30 * 60 * 1000)
       const token = await buildToken(a.id, expiresAt)
-      const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}`
+      // NOTE: apikey query param is required so the Supabase edge-gateway
+      // returns the real text/html response instead of a sandboxed text/plain
+      // fallback for anonymous (no-Authorization-header) email link clicks.
+      const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}&apikey=${ANON_KEY}`
       const rideUrl = `${origin}/rit/${ride.id}`
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
