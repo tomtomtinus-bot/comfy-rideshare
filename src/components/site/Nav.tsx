@@ -81,14 +81,14 @@ export const Nav = () => {
     <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b border-border pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link to={user ? "/dashboard" : "/"} className="flex items-center shrink-0">
+        <Link to={user ? "/dashboard" : "/"} className="flex items-center shrink-0 mr-6">
           <img
             src={logo}
             alt="ViaCust"
             width={1658}
             height={624}
             fetchPriority="high"
-            className="h-8 w-auto object-contain"
+            className="h-9 w-auto object-contain"
           />
         </Link>
 
