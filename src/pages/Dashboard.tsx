@@ -1005,7 +1005,7 @@ const EscortDashboard = () => {
       </Dialog>
 
       <header className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">{t("dash.myAssignments")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("dash.myAssignments")}</h1>
         <Button asChild variant="outline" size="sm">
           <Link to="/profiel">{t("dash.myProfile")}</Link>
         </Button>
