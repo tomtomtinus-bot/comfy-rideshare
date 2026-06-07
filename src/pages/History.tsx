@@ -198,58 +198,55 @@ const HistoryInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title="Geschiedenis | ViaCust" description="Bekijk je voltooide transportritten, uren en historische facturen in ViaCust." />
       <Nav />
-      <main className="px-6 md:px-8 py-16 md:py-20 bg-gradient-hero min-h-[calc(100vh-5rem)]">
-        <div className="max-w-6xl mx-auto space-y-12">
+      <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
+        <div className="max-w-6xl mx-auto space-y-6">
           <header>
-            <p className="text-brass-gold uppercase tracking-[0.3em] font-semibold text-xs mb-3">
-              {t("history.kicker")}
-            </p>
-            <h1 className="font-display text-4xl md:text-5xl text-brass-deep italic">{t("history.title")}</h1>
-            <p className="text-brass-deep/80 mt-3">
+            <h1 className="text-2xl font-semibold text-foreground">{t("history.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
               {t("history.intro")}
             </p>
           </header>
 
           {loading ? (
-            <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : grouped.length === 0 ? (
-            <div className="bg-card shadow-etched p-12 text-center">
-              <p className="text-brass-deep/80">{t("history.none")}</p>
+            <div className="border rounded-sm p-8 text-center">
+              <p className="text-muted-foreground">{t("history.none")}</p>
             </div>
           ) : (
-            <div className="space-y-10">
+            <div className="space-y-8">
               {grouped.map((g) => (
                 <section key={g.key}>
-                  <header className="flex items-end justify-between flex-wrap gap-2 mb-4">
-                    <h2 className="font-display text-2xl text-brass-deep">{g.label}</h2>
-                    <p className="text-xs uppercase tracking-widest text-brass-deep/80 font-bold tabular-nums">
+                  <header className="flex items-end justify-between flex-wrap gap-2 mb-3">
+                    <h2 className="text-lg font-semibold text-foreground">{g.label}</h2>
+                    <p className="text-sm text-muted-foreground tabular-nums">
                       {t("dash.nRidesShort", { count: g.items.length, plural: g.items.length === 1 ? "" : (i18n.language === "nl" ? "ten" : "s") })} · €{g.total.toFixed(2)}
                     </p>
                   </header>
-                  <ul className="space-y-px bg-brass-deep/10">
+                  <ul className="space-y-px border rounded-sm overflow-hidden">
                     {g.items.map((r) => (
-                      <li key={r.id} className="bg-card p-6 md:p-8">
+                      <li key={r.id} className="bg-card p-4 md:p-5">
                         <div className="grid grid-cols-12 gap-4 items-start">
                           <div className="col-span-12 md:col-span-3">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.date")}</p>
-                            <p className="font-medium tabular-nums">{fmtDate(r.scheduled_at, i18n.language)}</p>
-                            <p className="text-xs text-brass-deep/80 mt-1">
+                            <p className="text-xs text-muted-foreground mb-1">{t("history.date")}</p>
+                            <p className="font-medium tabular-nums text-sm">{fmtDate(r.scheduled_at, i18n.language)}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
                               {role === "begeleider" ? t("common.client") : t("common.escort")} {r.counterpart}
                               {r.counterpart_name ? ` · ${r.counterpart_name}` : ""}
                             </p>
                           </div>
                           <div className="col-span-12 md:col-span-6">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.route")}</p>
-                            <p className="font-medium">
-                              {r.pickup_city} <span className="text-brass-gold mx-2">→</span> {r.dropoff_city}
+                            <p className="text-xs text-muted-foreground mb-1">{t("history.route")}</p>
+                            <p className="font-medium text-sm">
+                              {r.pickup_city} <span className="text-muted-foreground mx-1">→</span> {r.dropoff_city}
                             </p>
                             {r.invoice_number && (
-                              <p className="text-xs text-brass-deep/80 mt-2">{t("history.invoice", { nr: r.invoice_number })}</p>
+                              <p className="text-xs text-muted-foreground mt-2">{t("history.invoice", { nr: r.invoice_number })}</p>
                             )}
                           </div>
                           <div className="col-span-12 md:col-span-3 md:text-right">
-                            <p className="text-[10px] uppercase tracking-widest text-brass-deep/80 font-bold mb-1">{t("history.amount")}</p>
-                            <p className="font-semibold tabular-nums text-brass-gold">
+                            <p className="text-xs text-muted-foreground mb-1">{t("history.amount")}</p>
+                            <p className="font-semibold tabular-nums text-sm text-foreground">
                               €{r.amount.toFixed(2)}
                             </p>
                           </div>
