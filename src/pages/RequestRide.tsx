@@ -849,7 +849,7 @@ const RequestRideInner = () => {
                 Let op: Voorlopig alleen beschikbaar in Nederland en België
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="">
+                <div>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">{t("request.pickup")}</p>
                   <AddressAutocomplete
                     label={t("request.addrLabel")}
@@ -869,7 +869,7 @@ const RequestRideInner = () => {
                     Op kaart kiezen of coördinaten invoeren
                   </button>
                 </div>
-                <div className="">
+                <div>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">{t("request.dropoff")}</p>
                   <AddressAutocomplete
                     label={t("request.addrLabel")}
@@ -980,7 +980,7 @@ const RequestRideInner = () => {
               ) : (
                 <ul className="space-y-4">
                   {extraLegs.map((leg, i) => (
-                    <li key={i} className="">
+                    <li key={i}>
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Rit {i + 2}</p>
                         <button
