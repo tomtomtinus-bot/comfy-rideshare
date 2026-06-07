@@ -104,7 +104,10 @@ const App = () => (
             <Route path="/team" element={<Team />} />
             <Route path="/uitnodiging" element={<AcceptInvitation />} />
             <Route path="/beveiliging" element={<Security />} />
-            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/privacy" element={<Privacy forceLang="nl" />} />
+            <Route path="/privacy-en" element={<Privacy forceLang="en" />} />
+            <Route path="/datenschutz" element={<Privacy forceLang="de" />} />
+            <Route path="/confidentialite" element={<Privacy forceLang="fr" />} />
             <Route path="/unsubscribe" element={<Unsubscribe />} />
             <Route path="/abonnement" element={<Subscription />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
