@@ -420,6 +420,7 @@ export type Database = {
           iban: string | null
           id: string
           insurance_policy: string | null
+          is_business: boolean
           km_rate_de: number | null
           kvk_number: string | null
           languages: string[]
@@ -477,6 +478,7 @@ export type Database = {
           iban?: string | null
           id: string
           insurance_policy?: string | null
+          is_business?: boolean
           km_rate_de?: number | null
           kvk_number?: string | null
           languages?: string[]
@@ -534,6 +536,7 @@ export type Database = {
           iban?: string | null
           id?: string
           insurance_policy?: string | null
+          is_business?: boolean
           km_rate_de?: number | null
           kvk_number?: string | null
           languages?: string[]

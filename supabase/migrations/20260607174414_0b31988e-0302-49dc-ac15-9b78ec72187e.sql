@@ -1,0 +1,1 @@
+ALTER TABLE public.escort_profiles ADD COLUMN IF NOT EXISTS is_business boolean NOT NULL DEFAULT false;
