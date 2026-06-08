@@ -185,15 +185,6 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Direct op de hoogte van de regelgeving?{" "}
-            <Link to="/info/nederland" className="underline underline-offset-4 hover:text-foreground transition-colors">
-              Bekijk de transportrichtlijnen voor Nederland
-            </Link>{" "}en{" "}
-            <Link to="/info/belgie" className="underline underline-offset-4 hover:text-foreground transition-colors">
-              België
-            </Link>.
-          </p>
         </section>
       </main>
 
@@ -207,8 +198,6 @@ const Index = () => {
                 <li><Link to="/hoe-werkt-viacust" className="hover:text-foreground transition-colors">Hoe werkt het</Link></li>
                 <li><Link to="/wat-kost-viacust" className="hover:text-foreground transition-colors">Tarieven</Link></li>
                 <li><Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
-                <li><Link to="/info/nederland" className="hover:text-foreground transition-colors">NL Richtlijnen</Link></li>
-                <li><Link to="/info/belgie" className="hover:text-foreground transition-colors">BE Richtlijnen</Link></li>
               </ul>
             </div>
             <div>
