@@ -115,7 +115,7 @@ const FuelPrices = () => {
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {prev
-                            ? `Gemiddelde ma t/m zo · week van ${new Date(prev.week_start).toLocaleDateString("nl-NL", { day: "2-digit", month: "short" })}`
+                            ? `Gemiddelde ma t/m zo · week ${(() => { const d = new Date(prev.week_start); d.setHours(0,0,0,0); d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7)); const w1 = new Date(d.getFullYear(),0,4); return 1 + Math.round(((d.getTime() - w1.getTime())/86400000 - 3 + ((w1.getDay()+6)%7))/7); })()}`
                             : "Gemiddelde pompprijs per liter, excl. btw (ma t/m zo)"}
                         </div>
                       </CardContent>
