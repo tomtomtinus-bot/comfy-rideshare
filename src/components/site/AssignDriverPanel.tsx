@@ -69,7 +69,7 @@ export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, [rideId, user?.id, companyId]);
 
-  if (!companyId || !isPlanner || !assignment) return null;
+  if (!isBusinessEscort || !companyId || !isPlanner || !assignment) return null;
   if (assignment.status !== "accepted" && !assignment.assigned_driver_id) return null;
 
   const assignDriver = async () => {
