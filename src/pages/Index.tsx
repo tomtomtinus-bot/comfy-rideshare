@@ -188,32 +188,7 @@ const Index = () => {
         </section>
       </main>
 
-      {/* Slim footer */}
-      <footer className="border-t">
-        <div className="max-w-5xl mx-auto px-5 md:px-8 py-8 text-xs text-muted-foreground">
-          <div className="grid grid-cols-2 gap-6 md:gap-12 mb-6">
-            <div>
-              <p className="font-semibold text-foreground mb-2">Informatie</p>
-              <ul className="space-y-1.5">
-                <li><Link to="/hoe-werkt-viacust" className="hover:text-foreground transition-colors">Hoe werkt het</Link></li>
-                <li><Link to="/wat-kost-viacust" className="hover:text-foreground transition-colors">Tarieven</Link></li>
-                <li><Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-2">Juridisch</p>
-              <ul className="space-y-1.5">
-                <li><Link to="/voorwaarden" className="hover:text-foreground transition-colors">Algemene voorwaarden</Link></li>
-                <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacyverklaring</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="pt-4 border-t flex flex-col md:flex-row items-center justify-between gap-2">
-            <p>© {new Date().getFullYear()} ViaCust. Alle rechten voorbehouden.</p>
-            <a href="mailto:info@viacust.com" className="hover:text-foreground transition-colors">info@viacust.com</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
