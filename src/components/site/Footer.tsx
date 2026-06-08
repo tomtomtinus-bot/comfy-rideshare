@@ -2,19 +2,19 @@ import { Link } from "react-router-dom";
 
 export const Footer = () => {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer className="border-t border-zinc-800 bg-zinc-900">
       <div className="max-w-7xl mx-auto px-6 md:px-8 py-10 md:py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Informatie */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground tracking-wider uppercase">
+            <p className="text-xs font-semibold text-white tracking-wider uppercase">
               Informatie
             </p>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/hoe-werkt-viacust"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   Hoe werkt het
                 </Link>
@@ -22,7 +22,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/wat-kost-viacust"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   Tarieven
                 </Link>
@@ -30,7 +30,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   Veelgestelde vragen
                 </Link>
@@ -41,14 +41,14 @@ export const Footer = () => {
 
           {/* Juridisch */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground tracking-wider uppercase">
+            <p className="text-xs font-semibold text-white tracking-wider uppercase">
               Juridisch
             </p>
             <ul className="space-y-2">
               <li>
                 <Link
                   to="/voorwaarden"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   Algemene voorwaarden
                 </Link>
@@ -56,7 +56,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   Privacyverklaring
                 </Link>
@@ -66,14 +66,14 @@ export const Footer = () => {
 
           {/* Contact */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground tracking-wider uppercase">
+            <p className="text-xs font-semibold text-white tracking-wider uppercase">
               Contact
             </p>
             <ul className="space-y-2">
               <li>
                 <a
                   href="mailto:info@viacust.com"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-zinc-300 hover:text-white transition-colors"
                 >
                   info@viacust.com
                 </a>
@@ -82,11 +82,11 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row gap-2 justify-between items-center text-xs text-muted-foreground">
+        <div className="mt-10 pt-6 border-t border-zinc-800 flex flex-col md:flex-row gap-2 justify-between items-center text-xs text-zinc-300">
           <span>© 2026 ViaCust | Digital Escort Solutions. Alle rechten voorbehouden.</span>
           <a
             href="mailto:info@viacust.com"
-            className="hover:text-foreground transition-colors"
+            className="hover:text-white transition-colors"
           >
             info@viacust.com
           </a>
