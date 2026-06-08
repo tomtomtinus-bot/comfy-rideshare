@@ -567,11 +567,13 @@ const ClientDashboard = () => {
                 if (!q) return true;
                 return (
                   (r.ride_number ?? "").toLowerCase().includes(q) ||
+                  (r.client_reference ?? "").toLowerCase().includes(q) ||
                   r.pickup_city.toLowerCase().includes(q) ||
                   r.dropoff_city.toLowerCase().includes(q) ||
                   r.id.toLowerCase().includes(q)
                 );
               };
+
 
               const currentRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() >= currentMonthStart);
               const pastRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() < currentMonthStart);
