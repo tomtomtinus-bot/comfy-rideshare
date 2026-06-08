@@ -95,7 +95,10 @@ const Index = () => {
         </section>
 
         {/* Product preview */}
-        <section className="max-w-5xl mx-auto px-5 md:px-8 pb-8 md:pb-10">
+        <section aria-labelledby="product-preview-heading" className="max-w-5xl mx-auto px-5 md:px-8 pb-8 md:pb-10">
+          <h2 id="product-preview-heading" className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
+            Live ritten in je dashboard
+          </h2>
           <Card className="overflow-hidden shadow-sm">
             <CardHeader className="border-b bg-muted/30 py-3 px-4 md:px-6 flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
