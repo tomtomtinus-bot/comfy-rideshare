@@ -87,6 +87,11 @@ const Index = () => {
               <Link to="/auth">Aanmelden als Begeleider</Link>
             </Button>
           </div>
+          <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <Link to="/wat-kost-viacust" className="underline underline-offset-4 hover:text-foreground transition-colors">Wat kost ViaCust</Link>
+            <span className="text-border">·</span>
+            <Link to="/hoe-werkt-viacust" className="underline underline-offset-4 hover:text-foreground transition-colors">Hoe werkt het</Link>
+          </div>
         </section>
 
         {/* Product preview */}
