@@ -105,7 +105,7 @@ const WatKostViaCust = () => {
                     <FeatureItem>Flexibele planning</FeatureItem>
                   </div>
                   <div className="pt-4">
-                    <Button asChild variant="outline" className="w-full">
+                    <Button asChild variant="outline" className="w-full justify-start">
                       <Link to="/auth?role=escort">Start als begeleider</Link>
                     </Button>
                   </div>
