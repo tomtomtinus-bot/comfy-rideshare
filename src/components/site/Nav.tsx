@@ -221,7 +221,7 @@ export const Nav = () => {
         </div>
       </div>
 
-      {/* Mobile drawer: primary links only (secondary lives in profile dropdown) */}
+      {/* Mobile drawer: primary + marketing links */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-background">
           <div className="px-4 py-3 flex flex-col gap-1">
@@ -240,6 +240,23 @@ export const Nav = () => {
                 {l.label}
               </Link>
             ))}
+
+            {info.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "px-3 py-2 text-sm font-medium rounded-md",
+                  isActive(l.to)
+                    ? "text-foreground bg-muted"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                )}
+              >
+                {l.label}
+              </Link>
+            ))}
+
             <div className="pt-2 mt-2 border-t border-border">
               <LanguageSwitcher />
             </div>
