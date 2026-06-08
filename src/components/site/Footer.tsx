@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export const Footer = () => {
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-900">
+    <footer className="border-t border-[hsl(215_35%_30%)] bg-[hsl(215_45%_18%)]">
       <div className="max-w-7xl mx-auto px-6 md:px-8 py-10 md:py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Informatie */}
@@ -14,7 +14,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/hoe-werkt-viacust"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   Hoe werkt het
                 </Link>
@@ -22,7 +22,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/wat-kost-viacust"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   Tarieven
                 </Link>
@@ -30,7 +30,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/faq"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   Veelgestelde vragen
                 </Link>
@@ -48,7 +48,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/voorwaarden"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   Algemene voorwaarden
                 </Link>
@@ -56,7 +56,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/privacy"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   Privacyverklaring
                 </Link>
@@ -73,7 +73,7 @@ export const Footer = () => {
               <li>
                 <a
                   href="mailto:info@viacust.com"
-                  className="text-sm text-zinc-300 hover:text-white transition-colors"
+                  className="text-sm text-white/70 hover:text-white transition-colors"
                 >
                   info@viacust.com
                 </a>
@@ -82,7 +82,7 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-zinc-800 flex flex-col md:flex-row gap-2 justify-between items-center text-xs text-zinc-300">
+        <div className="mt-10 pt-6 border-t border-[hsl(215_35%_30%)] flex flex-col md:flex-row gap-2 justify-between items-center text-xs text-white/70">
           <span>© 2026 ViaCust | Digital Escort Solutions. Alle rechten voorbehouden.</span>
           <a
             href="mailto:info@viacust.com"
