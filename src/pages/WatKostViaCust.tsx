@@ -82,7 +82,7 @@ const WatKostViaCust = () => {
               </Card>
 
               {/* Card 2: Voor Begeleiders */}
-              <Card className="border-input flex flex-col">
+              <Card className="border border-slate-200/70 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col bg-white">
                 <CardHeader className="pb-4">
                   <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
                     Voor Begeleiders
