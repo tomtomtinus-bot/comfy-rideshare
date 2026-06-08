@@ -548,7 +548,7 @@ const ClientDashboard = () => {
                 type="search"
                 value={clientSearch}
                 onChange={(e) => setClientSearch(e.target.value)}
-                placeholder="Zoek op ritnummer of stad…"
+                placeholder="Zoek op ritnummer, opdrachtnummer of stad…"
                 className="flex-1 min-w-[200px] h-9"
               />
             </div>
