@@ -32,7 +32,7 @@ interface AssignmentInfo {
  */
 export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
   const { user } = useAuth();
-  const { companyId, isPlanner } = useCompany();
+  const { companyId, isPlanner, isBusinessEscort } = useCompany();
   const [assignment, setAssignment] = useState<AssignmentInfo | null>(null);
   const [drivers, setDrivers] = useState<Member[]>([]);
   const [busy, setBusy] = useState(false);
@@ -69,7 +69,7 @@ export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
 
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, [rideId, user?.id, companyId]);
 
-  if (!isPlanner || !assignment) return null;
+  if (!isBusinessEscort || !companyId || !isPlanner || !assignment) return null;
   if (assignment.status !== "accepted" && !assignment.assigned_driver_id) return null;
 
   const assignDriver = async () => {
