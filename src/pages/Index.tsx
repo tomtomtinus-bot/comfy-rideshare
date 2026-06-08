@@ -1,5 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
 import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/site/Footer";
 import { SeoHead } from "@/components/SeoHead";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
