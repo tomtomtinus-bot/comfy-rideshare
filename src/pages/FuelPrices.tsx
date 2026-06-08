@@ -108,16 +108,19 @@ const FuelPrices = () => {
                     <Card className="border-input">
                       <CardContent className="p-5 space-y-1">
                         <div className="text-xs text-muted-foreground uppercase tracking-wider">
-                          TLN diesel-index
+                          Weekgemiddelde (afgelopen week)
                         </div>
-                        <div className="text-3xl font-bold tabular-nums text-muted-foreground">
-                          —
+                        <div className="text-3xl font-bold tabular-nums">
+                          {prev ? `€ ${Number(prev.eur_per_liter).toFixed(3)}` : "—"}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Punten t.o.v. basisjaar (publicatie volgt)
+                          {prev
+                            ? `Gemiddelde ma t/m zo · week van ${new Date(prev.week_start).toLocaleDateString("nl-NL", { day: "2-digit", month: "short" })}`
+                            : "Gemiddelde pompprijs per liter, excl. btw (ma t/m zo)"}
                         </div>
                       </CardContent>
                     </Card>
+
 
                     <Card className="border-input">
                       <CardContent className="p-5 space-y-1">
