@@ -28,7 +28,7 @@ export const Nav = () => {
 
   const showFinance = !!user && !isDriver;
   const showPlannerOnly = !!user && role === "begeleider" && !isDriver;
-  const showTeam = showPlannerOnly && (isBusinessEscort || isPlanner);
+  const showTeam = showPlannerOnly && isBusinessEscort;
 
   // Primary nav: keep slim and Title Case
   const primary: { to: string; label: string; show: boolean }[] = [

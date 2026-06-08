@@ -105,7 +105,7 @@ const TeamInner = () => {
   if (companyLoading) {
     return <div className="min-h-screen flex items-center justify-center text-brass-deep/80">{t("common.loading", { defaultValue: "Laden…" })}</div>;
   }
-  if (role !== "begeleider" || (!isPlanner && !isBusinessEscort)) {
+  if (role !== "begeleider" || !isBusinessEscort) {
     return <Navigate to="/dashboard" replace />;
   }
 
