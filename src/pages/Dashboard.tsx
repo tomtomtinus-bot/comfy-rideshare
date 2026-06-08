@@ -548,7 +548,7 @@ const ClientDashboard = () => {
                 type="search"
                 value={clientSearch}
                 onChange={(e) => setClientSearch(e.target.value)}
-                placeholder="Zoek op ritnummer of stad…"
+                placeholder="Zoek op ritnummer, opdrachtnummer of stad…"
                 className="flex-1 min-w-[200px] h-9"
               />
             </div>
@@ -567,11 +567,13 @@ const ClientDashboard = () => {
                 if (!q) return true;
                 return (
                   (r.ride_number ?? "").toLowerCase().includes(q) ||
+                  (r.client_reference ?? "").toLowerCase().includes(q) ||
                   r.pickup_city.toLowerCase().includes(q) ||
                   r.dropoff_city.toLowerCase().includes(q) ||
                   r.id.toLowerCase().includes(q)
                 );
               };
+
 
               const currentRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() >= currentMonthStart);
               const pastRidesAll = visible.filter((r) => new Date(r.scheduled_at).getTime() < currentMonthStart);
@@ -621,7 +623,14 @@ const ClientDashboard = () => {
                     className={isCompleted ? "hover:bg-muted/30" : "hover:bg-muted/30 cursor-pointer"}
                     onClick={isCompleted ? undefined : () => navigate(`/rit/${r.id}/bewerk`)}
                   >
-                    <TableCell className="font-mono text-xs font-semibold tabular-nums py-2">{displayRideNo(r)}</TableCell>
+                    <TableCell className="font-mono text-xs font-semibold tabular-nums py-2 whitespace-nowrap">
+                      <span>{displayRideNo(r)}</span>
+                      {r.client_reference && (
+                        <span className="ml-2 font-sans font-normal text-[11px] text-muted-foreground normal-case tracking-normal">
+                          · {r.client_reference}
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs tabular-nums whitespace-nowrap py-2">{fmtCompact(r.scheduled_at)}</TableCell>
                     <TableCell className="text-xs py-2">
                       <span className="font-medium">{r.pickup_city}</span>
