@@ -32,7 +32,7 @@ interface AssignmentInfo {
  */
 export const AssignDriverPanel = ({ rideId, onChanged }: Props) => {
   const { user } = useAuth();
-  const { companyId, isPlanner } = useCompany();
+  const { companyId, isPlanner, isBusinessEscort } = useCompany();
   const [assignment, setAssignment] = useState<AssignmentInfo | null>(null);
   const [drivers, setDrivers] = useState<Member[]>([]);
   const [busy, setBusy] = useState(false);
