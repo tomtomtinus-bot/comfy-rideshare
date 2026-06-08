@@ -74,7 +74,7 @@ const WatKostViaCust = () => {
                     <FeatureItem>1,5% platform fee per rit</FeatureItem>
                   </div>
                   <div className="pt-4">
-                    <Button asChild className="w-full">
+                    <Button asChild className="w-full justify-start">
                       <Link to="/auth?role=client">Start als opdrachtgever</Link>
                     </Button>
                   </div>
@@ -105,7 +105,7 @@ const WatKostViaCust = () => {
                     <FeatureItem>Flexibele planning</FeatureItem>
                   </div>
                   <div className="pt-4">
-                    <Button asChild variant="outline" className="w-full">
+                    <Button asChild variant="outline" className="w-full justify-start">
                       <Link to="/auth?role=escort">Start als begeleider</Link>
                     </Button>
                   </div>
@@ -135,7 +135,7 @@ const WatKostViaCust = () => {
                     <FeatureItem>Volledige platformtoegang</FeatureItem>
                   </div>
                   <div className="pt-4">
-                    <Button asChild variant="outline" className="w-full">
+                    <Button asChild variant="outline" className="w-full justify-start">
                       <Link to="/auth?role=escort">Start als bedrijf</Link>
                     </Button>
                   </div>
