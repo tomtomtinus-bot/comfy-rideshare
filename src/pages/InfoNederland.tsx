@@ -49,11 +49,14 @@ const InfoNederland = () => {
           </header>
 
 
-          <section>
-            <Accordion type="multiple" className="w-full">
+          <section aria-labelledby="nl-highway-heading">
+            <h2 id="nl-highway-heading" className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
+              {t("infoNL.highwayTitle")}
+            </h2>
+            <Accordion type="single" collapsible defaultValue="highway" className="w-full">
               <AccordionItem value="highway">
-                <AccordionTrigger className="text-base font-semibold">
-                  {t("infoNL.highwayTitle")}
+                <AccordionTrigger className="text-sm font-medium text-muted-foreground">
+                  {t("infoCommon.viewTable") ?? "Bekijk tabel"}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="overflow-x-auto">
@@ -94,10 +97,17 @@ const InfoNederland = () => {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+            </Accordion>
+          </section>
 
+          <section aria-labelledby="nl-secondary-heading">
+            <h2 id="nl-secondary-heading" className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
+              {t("infoNL.secondaryTitle")}
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="secondary">
-                <AccordionTrigger className="text-base font-semibold">
-                  {t("infoNL.secondaryTitle")}
+                <AccordionTrigger className="text-sm font-medium text-muted-foreground">
+                  {t("infoCommon.viewTable") ?? "Bekijk tabel"}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="overflow-x-auto">
@@ -145,10 +155,17 @@ const InfoNederland = () => {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+            </Accordion>
+          </section>
 
+          <section aria-labelledby="nl-convoy-heading">
+            <h2 id="nl-convoy-heading" className="text-xl font-semibold tracking-tight text-foreground mt-8 mb-4">
+              {t("infoNL.convoyTitle")}
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="convoy">
-                <AccordionTrigger className="text-base font-semibold">
-                  {t("infoNL.convoyTitle")}
+                <AccordionTrigger className="text-sm font-medium text-muted-foreground">
+                  {t("infoCommon.viewTable") ?? "Bekijk tabel"}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="overflow-x-auto">
@@ -173,6 +190,7 @@ const InfoNederland = () => {
               </AccordionItem>
             </Accordion>
           </section>
+
         </div>
       </main>
       <Footer />
