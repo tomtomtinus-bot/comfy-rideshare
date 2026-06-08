@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useTranslation } from "react-i18next";
+import { HelpCircle, Sparkles, Building2 } from "lucide-react";
 
 const Faq = () => {
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ const Faq = () => {
   const businessItems = items.slice(11);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white text-foreground">
       <SeoHead
         title="Veelgestelde vragen | ViaCust"
         description="Antwoorden voor planners en begeleiders: rittenplanning, automatische dispatching, vergunningen en facturatie binnen ViaCust — zonder twijfels aan de slag."
@@ -56,55 +57,67 @@ const Faq = () => {
       />
       <Nav />
       <main className="max-w-3xl mx-auto px-5 md:px-8">
-        <section className="pt-6 md:pt-8 pb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {t("faq.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-2 mb-8">
-            {t("faq.intro")}
-          </p>
+        <section className="pt-10 md:pt-14 pb-8 -mx-5 md:-mx-8 px-5 md:px-8 bg-slate-50/60 border-b border-slate-100">
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 mb-3">
+              <Sparkles className="size-3.5 text-primary" />
+              <span className="uppercase tracking-[0.2em]">Kennisbank</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+              {t("faq.title")}
+            </h1>
+            <p className="text-slate-500 mt-3 leading-relaxed">
+              {t("faq.intro")}
+            </p>
+          </div>
         </section>
 
-        <section className="pb-10 md:pb-14">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
+        <section className="pt-10 pb-10 md:pb-14">
+          <h2 className="text-sm font-semibold text-slate-900 tracking-tight mb-4 flex items-center gap-2">
+            <HelpCircle className="size-4 text-primary" />
             {t("faq.sectionGeneral")}
           </h2>
-          <Accordion type="single" collapsible className="w-full">
-            {generalItems.map((item, i) => (
-              <AccordionItem key={i} value={`general-${i}`}>
-                <AccordionTrigger className="text-left text-base font-medium hover:no-underline py-4">
-                  {item.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
-                  {item.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </section>
-
-        {businessItems.length > 0 && (
-          <section className="pb-10 md:pb-14">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-4">
-              {t("faq.sectionBusiness")}
-            </h2>
+          <div className="rounded-xl border border-slate-200/70 shadow-sm bg-white divide-y divide-slate-100 px-5">
             <Accordion type="single" collapsible className="w-full">
-              {businessItems.map((item, i) => (
-                <AccordionItem key={i} value={`business-${i}`}>
-                  <AccordionTrigger className="text-left text-base font-medium hover:no-underline py-4">
+              {generalItems.map((item, i) => (
+                <AccordionItem key={i} value={`general-${i}`} className="border-b-0">
+                  <AccordionTrigger className="text-left text-base font-medium text-slate-900 hover:no-underline py-4">
                     {item.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
+                  <AccordionContent className="text-sm text-slate-500 leading-relaxed whitespace-pre-line pb-4">
                     {item.a}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
+          </div>
+        </section>
+
+        {businessItems.length > 0 && (
+          <section className="pb-10 md:pb-14">
+            <h2 className="text-sm font-semibold text-slate-900 tracking-tight mb-4 flex items-center gap-2">
+              <Building2 className="size-4 text-primary" />
+              {t("faq.sectionBusiness")}
+            </h2>
+            <div className="rounded-xl border border-slate-200/70 shadow-sm bg-white divide-y divide-slate-100 px-5">
+              <Accordion type="single" collapsible className="w-full">
+                {businessItems.map((item, i) => (
+                  <AccordionItem key={i} value={`business-${i}`} className="border-b-0">
+                    <AccordionTrigger className="text-left text-base font-medium text-slate-900 hover:no-underline py-4">
+                      {item.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-slate-500 leading-relaxed whitespace-pre-line pb-4">
+                      {item.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
           </section>
         )}
 
         <section className="pb-16 md:pb-20 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-500">
             Staat je vraag er niet tussen? Neem gerust contact met ons op via{" "}
             <a href="mailto:info@viacust.com" className="underline underline-offset-4 hover:text-foreground transition-colors">
               info@viacust.com
