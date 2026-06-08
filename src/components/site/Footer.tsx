@@ -38,30 +38,6 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Richtlijnen */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground tracking-wider uppercase">
-              Richtlijnen
-            </p>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  to="/info/nederland"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Nederland
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/info/belgie"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  België
-                </Link>
-              </li>
-            </ul>
-          </div>
 
           {/* Juridisch */}
           <div className="space-y-3">

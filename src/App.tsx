@@ -45,8 +45,6 @@ import PreferredClients from "./pages/PreferredClients.tsx";
 import FuelPrices from "./pages/FuelPrices.tsx";
 import HoeWerktViaCust from "./pages/HoeWerktViaCust.tsx";
 import WatKostViaCust from "./pages/WatKostViaCust.tsx";
-import InfoNederland from "./pages/InfoNederland.tsx";
-import InfoBelgie from "./pages/InfoBelgie.tsx";
 import Faq from "./pages/Faq.tsx";
 import Team from "./pages/Team.tsx";
 import ChecklistSpeciaalTransport from "./pages/ChecklistSpeciaalTransport.tsx";
@@ -73,8 +71,6 @@ const App = () => (
             <Route path="/hoe-werkt-viacust" element={<HoeWerktViaCust />} />
             <Route path="/wat-kost-viacust" element={<WatKostViaCust />} />
             <Route path="/faq" element={<Faq />} />
-            <Route path="/info/nederland" element={<InfoNederland />} />
-            <Route path="/info/belgie" element={<InfoBelgie />} />
             <Route path="/checklist-speciaal-transport" element={<ChecklistSpeciaalTransport />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
