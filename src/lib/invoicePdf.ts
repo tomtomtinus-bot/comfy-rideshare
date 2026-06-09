@@ -362,13 +362,13 @@ export const downloadPlatformInvoicePdf = async (data: PlatformInvoicePdfData) =
 
   autoTable(doc, {
     startY: 105,
-    head: [["Datum", "Omschrijving", "Referentie", "Aantal", "Tarief", "Totaal"]],
+    head: [["Datum", "Omschrijving", "Referentie", "Begeleiders", "Tarief", "Totaal"]],
     body: data.rows.map((r) => [
       fmtDate(r.ride_date),
-      `App-fee rit ${r.route ?? ""}`.trim(),
+      `Servicefee rit ${r.route ?? ""}`.trim(),
       r.reference ?? "",
       String(r.num_escorts),
-      "1,5%",
+      "€ 2,50",
       fmtMoney(r.amount),
     ]),
     theme: "plain",
