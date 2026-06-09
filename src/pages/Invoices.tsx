@@ -285,7 +285,6 @@ const InvoicesInner = () => {
             <TableHead>{isEscort ? t("common.client") : t("common.escort")}</TableHead>
             <TableHead className="w-[120px]">Type</TableHead>
             <TableHead className="text-right w-[110px]">{t("invoices.amount") || "Bedrag"}</TableHead>
-            <TableHead className="w-[110px]">Status</TableHead>
             <TableHead className="w-[60px]" />
           </TableRow>
         </TableHeader>
@@ -322,7 +321,7 @@ const InvoicesInner = () => {
                   <TableCell className="text-right tabular-nums font-medium">
                     {fmtMoney(inv.total_amount)}
                   </TableCell>
-                  <TableCell>{statusBadge(inv.status === "paid" ? "paid" : "open")}</TableCell>
+                  
                   <TableCell className="text-right">
                     {renderActions(
                       () =>
@@ -374,7 +373,7 @@ const InvoicesInner = () => {
             <TableHead>{t("common.client")}</TableHead>
             <TableHead className="w-[120px]">Type</TableHead>
             <TableHead className="text-right w-[110px]">{t("invoices.amount") || "Bedrag"}</TableHead>
-            <TableHead className="w-[110px]">Status</TableHead>
+            
             <TableHead className="w-[60px]" />
           </TableRow>
         </TableHeader>
@@ -409,7 +408,7 @@ const InvoicesInner = () => {
                 <TableCell className="text-right tabular-nums font-medium">
                   {fmtMoney(inv.total_amount)}
                 </TableCell>
-                <TableCell>{statusBadge(inv.status)}</TableCell>
+                
                 <TableCell className="text-right">
                   {renderActions(
                     () =>
