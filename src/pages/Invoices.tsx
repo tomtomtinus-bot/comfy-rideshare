@@ -285,7 +285,6 @@ const InvoicesInner = () => {
             <TableHead>{isEscort ? t("common.client") : t("common.escort")}</TableHead>
             <TableHead className="w-[120px]">Type</TableHead>
             <TableHead className="text-right w-[110px]">{t("invoices.amount") || "Bedrag"}</TableHead>
-            <TableHead className="w-[110px]">Status</TableHead>
             <TableHead className="w-[60px]" />
           </TableRow>
         </TableHeader>
