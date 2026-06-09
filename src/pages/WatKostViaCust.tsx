@@ -19,7 +19,7 @@ const WatKostViaCust = () => {
     <div className="min-h-screen bg-white text-foreground">
       <SeoHead
         title="Tarieven & Prijzen | ViaCust"
-        description="Duidelijke en transparante tarieven voor ViaCust. Ontdek onze flexibele abonnementen voor transportplanners en begeleiders van uitzonderlijk vervoer."
+        description="Duidelijke en transparante tarieven voor ViaCust. Ontdek onze flexibele abonnementen voor transportplanners, zelfstandige begeleiders en begeleidingsbedrijven."
       />
       <Nav />
       <main>
@@ -33,7 +33,7 @@ const WatKostViaCust = () => {
               Wat kost ViaCust
             </h1>
             <p className="text-slate-500 max-w-2xl leading-relaxed">
-              Transparante tarieven zonder verborgen kosten. Kies het abonnement dat past bij jouw rol.
+              Transparante tarieven zonder verborgen kosten. Kies het abonnement dat past bij jouw organisatie.
             </p>
           </div>
         </section>
@@ -44,34 +44,34 @@ const WatKostViaCust = () => {
               <Users className="size-5 text-primary" />
               Kies je abonnement
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Card 1: Voor Opdrachtgevers */}
+            <div className="grid md:grid-cols-3 gap-6 items-stretch">
+              {/* Card 1: Opdrachtgever (Planner) */}
               <Card className="border border-slate-200/70 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col bg-white">
                 <CardHeader className="pb-4">
                   <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
-                    Voor Opdrachtgevers
+                    Opdrachtgever (Planner)
                   </CardDescription>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
-                    <span className="text-muted-foreground line-through text-lg mr-2">€50,00</span>
-                    <span className="text-3xl font-bold">€25,00</span>
+                    <span className="text-3xl font-bold">€50,00</span>
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <div className="pt-2">
-                    <Badge variant="default">50% introductiekorting</Badge>
+                    <Badge variant="default">Lanceringsactie</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Eerste 30 dagen gratis · Maandelijks opzegbaar
+                    Eerste 30 dagen gratis + 12 maanden 50% korting
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
                   <div className="border-t border-border pt-4 flex-1 flex flex-col gap-3">
+                    <FeatureItem>+ €2,50 servicefee per geboekte begeleider per rit</FeatureItem>
                     <FeatureItem>Onbeperkt ritten plaatsen</FeatureItem>
                     <FeatureItem>Koppel begeleiders eenvoudig</FeatureItem>
                     <FeatureItem>Automatische ritfacturatie</FeatureItem>
                     <FeatureItem>Realtime rit-tracking</FeatureItem>
                     <FeatureItem>Centraal dashboard</FeatureItem>
                     <FeatureItem>Wekelijkse betalingen</FeatureItem>
-                    <FeatureItem>1,5% platform fee per rit</FeatureItem>
+                    <FeatureItem>Ideaal voor: Transportplanners en logistiek managers</FeatureItem>
                   </div>
                   <div className="pt-4">
                     <Button asChild className="w-full justify-start">
@@ -81,22 +81,24 @@ const WatKostViaCust = () => {
                 </CardContent>
               </Card>
 
-              {/* Card 2: Voor Begeleiders */}
+              {/* Card 2: Zelfstandige Begeleider (ZZP) */}
               <Card className="border border-slate-200/70 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col bg-white">
                 <CardHeader className="pb-4">
                   <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
-                    Voor Begeleiders
+                    Zelfstandige Begeleider (ZZP)
                   </CardDescription>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
                     <span className="text-3xl font-bold">€2,50</span>
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Eerste 30 dagen gratis · Maandelijks opzegbaar
+                    Maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
                   <div className="border-t border-border pt-4 flex-1 flex flex-col gap-3">
+                    <FeatureItem>+ €1,- servicefee per succesvol gereden rit</FeatureItem>
+                    <FeatureItem>Geverifieerd profiel op de kaart</FeatureItem>
                     <FeatureItem>Ontvang ritopdrachten</FeatureItem>
                     <FeatureItem>Gebruik je eigen voertuig</FeatureItem>
                     <FeatureItem>Agenda-integratie</FeatureItem>
@@ -112,22 +114,25 @@ const WatKostViaCust = () => {
                 </CardContent>
               </Card>
 
-              {/* Card 3: Begeleidingsbedrijf */}
+              {/* Card 3: Begeleidingsbedrijf (Vloot) */}
               <Card className="border border-slate-200/70 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col bg-white">
                 <CardHeader className="pb-4">
                   <CardDescription className="text-sm font-medium text-muted-foreground mb-1">
-                    Begeleidingsbedrijf
+                    Begeleidingsbedrijf (Vloot)
                   </CardDescription>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
                     <span className="text-3xl font-bold">€10,00</span>
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground pt-2">
-                    + €1,50 per gekoppelde begeleider · Maandelijks opzegbaar
+                    Maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
                   <div className="border-t border-border pt-4 flex-1 flex flex-col gap-3">
+                    <FeatureItem>+ €1,- servicefee per succesvol gereden rit</FeatureItem>
+                    <FeatureItem>Onbeperkt chauffeurs &amp; auto&apos;s koppelen</FeatureItem>
+                    <FeatureItem>Centraal kantoordashboard voor de planner</FeatureItem>
                     <FeatureItem>Centraal teambeheer</FeatureItem>
                     <FeatureItem>Onbeperkt begeleiders uitnodigen</FeatureItem>
                     <FeatureItem>Begeleiders accepteren namens het bedrijf</FeatureItem>
