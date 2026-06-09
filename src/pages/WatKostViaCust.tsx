@@ -150,13 +150,6 @@ const WatKostViaCust = () => {
           </div>
         </section>
 
-        <section className="py-10 md:py-14 px-5 md:px-8 text-center">
-          <div className="max-w-4xl mx-auto">
-            <Button asChild size="lg">
-              <Link to="/auth">Direct starten</Link>
-            </Button>
-          </div>
-        </section>
       </main>
       <Footer />
     </div>
