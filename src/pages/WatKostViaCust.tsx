@@ -59,7 +59,7 @@ const WatKostViaCust = () => {
                     <Badge variant="default">Lanceringsactie</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Eerste 30 dagen gratis + 12 maanden 50% korting
+                    Eerste 30 dagen gratis + 6 maanden 50% korting
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">

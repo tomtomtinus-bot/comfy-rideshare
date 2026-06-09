@@ -816,7 +816,7 @@ const en: Dict = {
     subscription: "Subscription",
     plan50: "€ 50 per month (excl. VAT)",
     introOfferLabel: "Introductory offer",
-    introOfferBody: "Now just €25 per month (excl. VAT) for the first 12 months! Enjoy a 50% launch discount and instant access to our escorts.",
+    introOfferBody: "Now just €25 per month (excl. VAT) for the first 6 months! Enjoy a 50% launch discount and instant access to our escorts.",
     commissionLabel: "Platform commission",
     commissionValue: "Just 1.5% per completed ride.",
     advantageLabel: "Your benefit",
