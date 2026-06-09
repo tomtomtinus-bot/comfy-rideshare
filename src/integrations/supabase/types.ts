@@ -69,6 +69,8 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_platform_invoice_at: string | null
+          monthly_subscription_fee: number | null
           name: string
           owner_id: string
           seat_limit: number
@@ -77,6 +79,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_platform_invoice_at?: string | null
+          monthly_subscription_fee?: number | null
           name: string
           owner_id: string
           seat_limit?: number
@@ -85,6 +89,8 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_platform_invoice_at?: string | null
+          monthly_subscription_fee?: number | null
           name?: string
           owner_id?: string
           seat_limit?: number
@@ -972,6 +978,7 @@ export type Database = {
       platform_invoices: {
         Row: {
           client_id: string
+          company_id: string | null
           created_at: string
           id: string
           invoice_number: string
@@ -981,6 +988,7 @@ export type Database = {
           pdf_path: string | null
           period_end: string
           period_start: string
+          recipient_type: string
           rides_amount: number
           status: string
           stripe_payment_intent_id: string | null
@@ -993,6 +1001,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          company_id?: string | null
           created_at?: string
           id?: string
           invoice_number: string
@@ -1002,6 +1011,7 @@ export type Database = {
           pdf_path?: string | null
           period_end: string
           period_start: string
+          recipient_type?: string
           rides_amount?: number
           status?: string
           stripe_payment_intent_id?: string | null
@@ -1014,6 +1024,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          company_id?: string | null
           created_at?: string
           id?: string
           invoice_number?: string
@@ -1023,6 +1034,7 @@ export type Database = {
           pdf_path?: string | null
           period_end?: string
           period_start?: string
+          recipient_type?: string
           rides_amount?: number
           status?: string
           stripe_payment_intent_id?: string | null
@@ -1033,7 +1045,15 @@ export type Database = {
           updated_at?: string
           xml_path?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "platform_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -1056,6 +1076,7 @@ export type Database = {
           full_name: string | null
           id: string
           kvk_number: string | null
+          last_escort_platform_invoice_at: string | null
           last_platform_invoice_at: string | null
           monthly_subscription_fee: number
           phone: string | null
@@ -1086,6 +1107,7 @@ export type Database = {
           full_name?: string | null
           id: string
           kvk_number?: string | null
+          last_escort_platform_invoice_at?: string | null
           last_platform_invoice_at?: string | null
           monthly_subscription_fee?: number
           phone?: string | null
@@ -1116,6 +1138,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           kvk_number?: string | null
+          last_escort_platform_invoice_at?: string | null
           last_platform_invoice_at?: string | null
           monthly_subscription_fee?: number
           phone?: string | null
