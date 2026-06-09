@@ -321,7 +321,7 @@ const InvoicesInner = () => {
                   <TableCell className="text-right tabular-nums font-medium">
                     {fmtMoney(inv.total_amount)}
                   </TableCell>
-                  <TableCell>{statusBadge(inv.status === "paid" ? "paid" : "open")}</TableCell>
+                  
                   <TableCell className="text-right">
                     {renderActions(
                       () =>
