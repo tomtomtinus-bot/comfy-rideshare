@@ -814,7 +814,7 @@ const nl = {
     subscription: "Abonnement",
     plan50: "€ 50,- per maand. (ex. BTW)",
     introOfferLabel: "Introductieaanbieding",
-    introOfferBody: "Nu voor slechts € 25,- per maand (ex. BTW) gedurende de eerste 12 maanden! Profiteer van 50% lanceringskorting en krijg direct toegang tot onze begeleiders.",
+    introOfferBody: "Nu voor slechts € 25,- per maand (ex. BTW) gedurende de eerste 6 maanden! Profiteer van 50% lanceringskorting en krijg direct toegang tot onze begeleiders.",
     commissionLabel: "Platformcommissie",
     commissionValue: "Slechts 1,5% per voltooide rit.",
     advantageLabel: "Uw voordeel",
