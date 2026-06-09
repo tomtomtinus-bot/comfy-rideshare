@@ -92,7 +92,7 @@ const WatKostViaCust = () => {
                     <span className="text-muted-foreground text-base font-normal"> / maand</span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground pt-2">
-                    Maandelijks opzegbaar
+                    Eerste 30 dagen gratis, maandelijks opzegbaar
                   </p>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col gap-3 pt-0">
