@@ -29,17 +29,26 @@ Deno.serve(async (req) => {
     const monday = isoMonday();
     const issues: string[] = [];
 
-    // 1. Platform-facturen vandaag
-    const startOfDay = new Date(`${monday}T00:00:00Z`).toISOString();
-    const endOfDay = new Date(`${monday}T23:59:59Z`).toISOString();
-    const { count: invoiceCount, error: invErr } = await admin
-      .from("platform_invoices")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", startOfDay)
-      .lte("created_at", endOfDay);
-    if (invErr) throw invErr;
-    if ((invoiceCount ?? 0) === 0) {
-      issues.push(`Geen platform-facturen aangemaakt op ${monday}.`);
+    // 1. Platform-facturen: alleen checken op factuurdagen (15e of laatste dag van de maand)
+    const today = new Date();
+    const dayOfMonth = today.getUTCDate();
+    const tomorrow = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+    const isLastDay = tomorrow.getUTCDate() === 1;
+    const isInvoiceDay = dayOfMonth === 15 || isLastDay;
+
+    if (isInvoiceDay) {
+      const todayStr = today.toISOString().slice(0, 10);
+      const startOfDay = new Date(`${todayStr}T00:00:00Z`).toISOString();
+      const endOfDay = new Date(`${todayStr}T23:59:59Z`).toISOString();
+      const { count: invoiceCount, error: invErr } = await admin
+        .from("platform_invoices")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", startOfDay)
+        .lte("created_at", endOfDay);
+      if (invErr) throw invErr;
+      if ((invoiceCount ?? 0) === 0) {
+        issues.push(`Geen platform-facturen aangemaakt op factuurdag ${todayStr}.`);
+      }
     }
 
     // 2. Brandstofprijzen voor de net afgesloten week (vorige maandag)
