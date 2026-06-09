@@ -373,7 +373,7 @@ const InvoicesInner = () => {
             <TableHead>{t("common.client")}</TableHead>
             <TableHead className="w-[120px]">Type</TableHead>
             <TableHead className="text-right w-[110px]">{t("invoices.amount") || "Bedrag"}</TableHead>
-            <TableHead className="w-[110px]">Status</TableHead>
+            
             <TableHead className="w-[60px]" />
           </TableRow>
         </TableHeader>
