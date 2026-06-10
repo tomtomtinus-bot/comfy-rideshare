@@ -136,7 +136,7 @@ const SubscriptionInner = () => {
             </div>
             <div className="text-right shrink-0">
               <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">
-                {isClient ? "€0,00" : plan.price}
+                {isClient ? "€50,00" : plan.price}
               </p>
               <p className="text-xs text-muted-foreground">
                 {isClient ? "per maand" : plan.period}
@@ -162,7 +162,7 @@ const SubscriptionInner = () => {
               </p>
               <p className="text-sm text-muted-foreground">
                 {isClient
-                  ? "We leggen alleen je betaalkaart vast. Het abonnement zelf is €0/maand. Ritten worden 2-wekelijks via de platformfactuur afgerekend (€2,50 per geboekte begeleider)."
+                  ? "30 dagen gratis, daarna 6 maanden 50% korting (€12,50 per halve maand). Je krijgt 2× per maand één platformfactuur: €25 abonnement (½ maand) + het verbruik (€2,50 per geboekte begeleider). We leggen tijdens activering enkel je betaalkaart vast."
                   : t("subscription.trial30Body")}
               </p>
             </div>

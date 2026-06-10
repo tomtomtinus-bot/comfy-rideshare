@@ -71,9 +71,10 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
           <p className="text-sm text-brass-deep/80">
             {isClient ? (
               <>
-                <strong>30 dagen gratis proberen</strong> — daarna €0/maand.
-                We leggen alleen je betaalkaart vast voor de 2-wekelijkse
-                platformfactuur (€2,50 per geboekte begeleider).
+                <strong>30 dagen gratis</strong> — daarna €50/maand,
+                gefactureerd als €25 per halve maand op de platformfactuur,
+                plus het verbruik (€2,50 per geboekte begeleider). De eerste
+                6 maanden 50% korting. We leggen alleen je betaalkaart vast.
               </>
             ) : (
               <><strong>30 dagen gratis proberen</strong> — maandelijks opzegbaar.</>
