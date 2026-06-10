@@ -61,12 +61,17 @@ Deno.serve(async (req) => {
 
     const customerId = await resolveOrCreateCustomer(stripe, { email: safeEmail, userId });
 
-    // Alleen begeleider-abonnementen krijgen 30 dagen proefperiode.
-    // Opdrachtgevers worden via platform-facturen achteraf afgerekend.
+    // Begeleider én opdrachtgever krijgen 30 dagen gratis proefperiode.
+    // Opdrachtgever-abo is €0/maand: dient enkel om een betaalkaart vast
+    // te leggen voor de 2-wekelijkse platformfactuur.
     const SUBSCRIPTION_TRIALS: Record<string, number> = {
       begeleider_monthly: 30,
+      opdrachtgever_monthly: 30,
     };
     const trialDays = isRecurring ? SUBSCRIPTION_TRIALS[priceId] : undefined;
+
+    // €0-abo's vereisen forceren van kaart-inname tijdens checkout.
+    const isZeroAmount = (stripePrice.unit_amount ?? 0) === 0;
 
     const subscriptionData = isRecurring
       ? {
@@ -85,6 +90,7 @@ Deno.serve(async (req) => {
       return_url: returnUrl,
       payment_method_types: ["card", "ideal"],
       customer: customerId,
+      ...(isRecurring && isZeroAmount && { payment_method_collection: "always" }),
       ...(subscriptionData && { subscription_data: subscriptionData }),
       metadata: { userId },
     });
