@@ -10,7 +10,7 @@ ViaCust is a specialized European B2B SaaS platform and automated dispatch syste
 
 - **Interactive Routing & Geocoding:** Powered by Google Maps Platform for route visualization and physical address lookups.
 
-- **Centralized Billing:** Managed via Stripe Billing, combining fixed monthly subscriptions with a 1.5% success fee per completed ride.
+- **Centralized Billing:** Managed via Stripe Billing. Clients pay €2.50 per booked escort per ride; independent escorts pay €1.00 per completed ride; fleet companies pay €1.00 per completed ride per driver. Billed twice monthly on platform invoices.
 
 - **Multi-Vehicle & Corporate Accounts:** Fleet dispatching tools allowing corporate planners to assign rides to specific drivers with centralized invoicing.
 
