@@ -135,8 +135,12 @@ const SubscriptionInner = () => {
               <CardDescription>{plan.description}</CardDescription>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">{plan.price}</p>
-              <p className="text-xs text-muted-foreground">{plan.period}</p>
+              <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">
+                {isClient ? "€0,00" : plan.price}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isClient ? "per maand" : plan.period}
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -156,7 +160,11 @@ const SubscriptionInner = () => {
               <p className="text-sm font-medium text-foreground">
                 {t("subscription.trial30Heading") || "Probeer 30 dagen gratis"}
               </p>
-              <p className="text-sm text-muted-foreground">{t("subscription.trial30Body")}</p>
+              <p className="text-sm text-muted-foreground">
+                {isClient
+                  ? "We leggen alleen je betaalkaart vast. Het abonnement zelf is €0/maand. Ritten worden 2-wekelijks via de platformfactuur afgerekend (€2,50 per geboekte begeleider)."
+                  : t("subscription.trial30Body")}
+              </p>
             </div>
           </div>
         </CardContent>
