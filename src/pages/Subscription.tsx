@@ -79,54 +79,12 @@ const SubscriptionInner = () => {
     );
   }
 
-  // Opdrachtgevers: geen Stripe-abo meer. Toon info-kaart.
-  if (role === "opdrachtgever") {
-    return (
-      <main className="container mx-auto px-4 py-6 md:py-8 max-w-xl">
-        <header className="mb-6 space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("subscription.title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("subscription.subtitle")}</p>
-        </header>
-
-        <Card className="border-input">
-          <CardHeader className="space-y-4">
-            <div className="space-y-1">
-              <CardTitle className="text-xl">{PLANS.opdrachtgever.title}</CardTitle>
-              <CardDescription>{PLANS.opdrachtgever.description}</CardDescription>
-            </div>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">€25,00</span>
-              <span className="text-base text-muted-foreground line-through">€50,00</span>
-              <Badge variant="secondary">50% introductiekorting</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <ul className="space-y-3">
-              {PLANS.opdrachtgever.features.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-sm">
-                  <span className="mt-0.5 text-primary">&#10003;</span>
-                  <span className="text-foreground">{f}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <div className="flex items-start gap-3 rounded-md border border-input bg-muted/50 p-3 w-full">
-              <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Probeer 30 dagen gratis</p>
-                <p className="text-sm text-muted-foreground">
-                  Maandelijks opzegbaar. Daarna €25 per halve maand op je platformfactuur (€50/maand).
-                </p>
-              </div>
-            </div>
-          </CardFooter>
-        </Card>
-      </main>
-    );
-  }
-
-  const plan = role === "begeleider" ? PLANS.begeleider : null;
+  const plan =
+    role === "begeleider"
+      ? PLANS.begeleider
+      : role === "opdrachtgever"
+      ? PLANS.opdrachtgever
+      : null;
   if (!plan) {
     return (
       <main className="container mx-auto px-4 py-6">
@@ -134,6 +92,7 @@ const SubscriptionInner = () => {
       </main>
     );
   }
+  const isClient = role === "opdrachtgever";
 
   const openPortal = async () => {
     setPortalLoading(true);
