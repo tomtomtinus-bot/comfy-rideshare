@@ -2052,9 +2052,10 @@ export type Database = {
         }[]
       }
       fuel_country_code: { Args: { p_country: string }; Returns: string }
-      generate_platform_invoices:
-        | { Args: never; Returns: number }
-        | { Args: { _catch_up?: boolean }; Returns: number }
+      generate_platform_invoices: {
+        Args: { _catch_up?: boolean }
+        Returns: number
+      }
       generate_ride_number: { Args: never; Returns: string }
       generate_weekly_invoices: { Args: never; Returns: number }
       get_bundle_rides_for_escort: {
