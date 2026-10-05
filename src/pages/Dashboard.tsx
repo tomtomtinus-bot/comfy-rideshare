@@ -14,6 +14,7 @@ import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { useCompany } from "@/hooks/useCompany";
 import { DriverDashboard } from "@/pages/DriverDashboard";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
+import { GoogleCalendarCard } from "@/components/site/GoogleCalendarCard";
 import { GoogleAgendaStatus } from "@/components/site/GoogleAgendaStatus";
 import CurrentLocationCard from "@/components/site/CurrentLocationCard";
 import ScheduledLocationsCard from "@/components/site/ScheduledLocationsCard";
@@ -1424,7 +1425,7 @@ const DashboardInner = () => {
           ) : (
             <div className="space-y-6">
               <RideAdministration />
-              <GoogleAgendaStatus />
+              <GoogleCalendarCard />
             </div>
           )}
         </div>
