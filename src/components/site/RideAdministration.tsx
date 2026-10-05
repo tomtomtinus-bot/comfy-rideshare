@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CalendarClock, CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck } from "lucide-react";
+import { CalendarClock, CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RelationsCard } from "@/components/site/RelationsCard";
+import { BreakdownView, type Breakdown } from "@/components/site/TicketBreakdown";
 
 type Bucket = "gepland" | "vandaag" | "afgerond";
 type TicketStatus = "none" | "submitted" | "approved" | "rejected";
@@ -45,6 +46,7 @@ interface Row {
   ticketStatus: TicketStatus;
   rejectReason: string | null;
   invoicedAt: string | null;
+  breakdown: Breakdown | null;
 }
 
 interface Option { id: string; label: string }
@@ -111,6 +113,7 @@ export const RideAdministration = () => {
         expenses: a?.ticket_expenses ?? null, expensesNote: a?.ticket_expenses_note ?? null, notes: a?.hours_notes ?? null,
         cost: a?.actual_cost ?? null, ticketStatus: (a?.ticket_status ?? "none") as TicketStatus,
         rejectReason: a?.ticket_reject_reason ?? null, invoicedAt: a?.invoiced_at ?? null,
+        breakdown: (a?.ticket_breakdown ?? null) as Breakdown | null,
       });
 
       if (isEscort) {
@@ -136,6 +139,16 @@ export const RideAdministration = () => {
   }, [user, isEscort]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Realtime: RLS-filtered stream; reload when assignments or own rides change.
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`ride-admin-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ride_assignments" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, load]);
 
   const grouped = useMemo(() => {
     const g: Record<Bucket, Row[]> = { gepland: [], vandaag: [], afgerond: [] };
@@ -402,22 +415,46 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
 };
 
 const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () => void; onSaved: () => void }) => {
-  const [v, setV] = useState({ hours: "", km: "", waiting: "", expenses: "", expensesNote: "", notes: "" });
+  const [v, setV] = useState({ hours: "", km: "", waiting: "", correction: "", correctionNote: "", notes: "" });
+  const [items, setItems] = useState<{ description: string; amount: string }[]>([]);
+  const [preview, setPreview] = useState<Breakdown | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    const s = (x: number | null) => (x != null ? String(x) : "");
-    setV({ hours: s(row?.hours ?? null), km: s(row?.km ?? null), waiting: s(row?.waiting ?? null), expenses: s(row?.expenses ?? null), expensesNote: row?.expensesNote ?? "", notes: row?.notes ?? "" });
+    const s = (x: number | null | undefined) => (x != null ? String(x) : "");
+    const b = row?.breakdown;
+    setV({ hours: s(row?.hours), km: s(row?.km), waiting: s(row?.waiting), correction: b?.correction ? String(b.correction) : "",
+      correctionNote: (b as any)?.correction_note ?? "", notes: row?.notes ?? "" });
+    setItems((b?.expenses ?? []).map((e) => ({ description: e.description ?? "", amount: String(e.amount) })));
+    setPreview(null);
   }, [row]);
   const set = (k: keyof typeof v) => (e: any) => setV({ ...v, [k]: e.target.value });
+
+  const payloadItems = items
+    .filter((i) => i.amount.trim() !== "")
+    .map((i) => ({ description: i.description.trim(), amount: num(i.amount) ?? 0 }));
+
+  useEffect(() => {
+    if (!row?.assignmentId) return;
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("calc_ride_ticket", {
+        _assignment_id: row.assignmentId!, _hours: num(v.hours) ?? 0, _km: num(v.km), _waiting: num(v.waiting),
+        _expense_items: payloadItems as any, _correction: num(v.correction),
+      } as any);
+      if (data) setPreview(data as unknown as Breakdown);
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row, v.hours, v.km, v.waiting, v.correction, JSON.stringify(items)]);
 
   const save = async () => {
     if (!row?.assignmentId) return;
     const h = num(v.hours);
     if (h == null || !Number.isFinite(h) || h <= 0) return toast.error("Vul de werkelijke uren in");
+    if (num(v.correction) && !v.correctionNote.trim()) return toast.error("Geef een toelichting bij de correctie");
     setBusy(true);
-    const { error } = await supabase.rpc("submit_ride_ticket", {
+    const { error } = await supabase.rpc("submit_ride_ticket_v2", {
       _assignment_id: row.assignmentId, _hours: h, _km: num(v.km), _waiting_hours: num(v.waiting),
-      _expenses: num(v.expenses), _expenses_note: v.expensesNote, _notes: v.notes,
+      _expense_items: payloadItems as any, _correction: num(v.correction), _correction_note: v.correctionNote, _notes: v.notes,
     } as any);
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -428,26 +465,39 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
 
   return (
     <Dialog open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="h-5 w-5" />Digitale ritbon</DialogTitle></DialogHeader>
-        {row && (
-          <p className="text-sm text-slate-500">
-            {row.rideNumber} · {row.pickup} → {row.dropoff} · {fmt(row.scheduledAt)} · {rateLabel(row.rateType, row.rateAmount)}
-          </p>
-        )}
-        {row?.ticketStatus === "rejected" && row.rejectReason && (
-          <p className="text-sm text-destructive">Afgekeurd: {row.rejectReason}</p>
-        )}
+        {row && <p className="text-sm text-slate-500">{row.rideNumber} · {row.pickup} → {row.dropoff} · {fmt(row.scheduledAt)} · {row.counterparty}</p>}
+        {row?.ticketStatus === "rejected" && row.rejectReason && <p className="text-sm text-destructive">Afgekeurd: {row.rejectReason}</p>}
         <div className="grid grid-cols-3 gap-3">
           <div><Label>Uren</Label><Input inputMode="decimal" value={v.hours} onChange={set("hours")} placeholder="6,5" /></div>
           <div><Label>Kilometers</Label><Input inputMode="decimal" value={v.km} onChange={set("km")} placeholder="240" /></div>
           <div><Label>Wachturen</Label><Input inputMode="decimal" value={v.waiting} onChange={set("waiting")} placeholder="0" /></div>
         </div>
+        <div>
+          <div className="flex items-center justify-between">
+            <Label>Losse onkosten</Label>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setItems([...items, { description: "", amount: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />Toevoegen
+            </Button>
+          </div>
+          {items.length === 0 && <p className="text-xs text-slate-500">Bijv. tol, pontgeld of vergunning.</p>}
+          <div className="space-y-2">
+            {items.map((it, idx) => (
+              <div key={idx} className="flex gap-2">
+                <Input placeholder="Omschrijving" value={it.description} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, description: e.target.value } : x)))} />
+                <Input className="w-28" inputMode="decimal" placeholder="€" value={it.amount} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, amount: e.target.value } : x)))} />
+                <Button type="button" size="icon" variant="ghost" aria-label="Verwijderen" onClick={() => setItems(items.filter((_, j) => j !== idx))}><X className="h-4 w-4" /></Button>
+              </div>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-3 gap-3">
-          <div><Label>Onkosten (€)</Label><Input inputMode="decimal" value={v.expenses} onChange={set("expenses")} placeholder="0" /></div>
-          <div className="col-span-2"><Label>Omschrijving onkosten</Label><Input value={v.expensesNote} onChange={set("expensesNote")} placeholder="bv. tol, parkeren" /></div>
+          <div><Label>Correctie (€ ±)</Label><Input inputMode="decimal" value={v.correction} onChange={set("correction")} placeholder="0" /></div>
+          <div className="col-span-2"><Label>Toelichting correctie</Label><Input value={v.correctionNote} onChange={set("correctionNote")} /></div>
         </div>
         <div><Label>Opmerkingen</Label><Textarea rows={2} value={v.notes} onChange={set("notes")} /></div>
+        {preview && <BreakdownView b={preview} />}
         <DialogFooter><Button onClick={save} disabled={busy}>{busy ? "Indienen…" : "Ritbon indienen"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
@@ -471,26 +521,19 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     onSaved();
   };
 
-  const line = (l: string, val: string) => (
-    <div className="flex justify-between py-1.5 border-b border-slate-100 text-sm"><span className="text-slate-500">{l}</span><span>{val}</span></div>
-  );
-
   return (
     <Dialog open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Ritbon controleren</DialogTitle></DialogHeader>
         {row && (
-          <div>
-            <p className="text-sm text-slate-500 mb-2">{row.rideNumber} · {row.pickup} → {row.dropoff} · {row.counterparty}</p>
-            {line("Tariefafspraak", rateLabel(row.rateType, row.rateAmount))}
-            {line("Gewerkte uren", `${Number(row.hours ?? 0)} u`)}
-            {line("Kilometers", row.km != null ? `${Number(row.km)} km` : "—")}
-            {line("Wachturen", row.waiting != null ? `${Number(row.waiting)} u` : "—")}
-            {line("Onkosten", row.expenses ? `${eur(Number(row.expenses))}${row.expensesNote ? ` (${row.expensesNote})` : ""}` : "—")}
-            {row.notes && line("Opmerkingen", row.notes)}
-            <div className="flex justify-between pt-2 font-semibold"><span>Totaal excl. btw</span><span>{eur(Number(row.cost ?? 0))}</span></div>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-500">{row.rideNumber} · {row.pickup} → {row.dropoff} · {fmt(row.scheduledAt)} · {row.counterparty}</p>
+            {row.breakdown ? <BreakdownView b={row.breakdown} /> : (
+              <p className="text-sm">Totaal: {eur(Number(row.cost ?? 0))} ({Number(row.hours ?? 0)} u, {Number(row.km ?? 0)} km)</p>
+            )}
+            {row.notes && <p className="text-sm"><span className="text-slate-500">Opmerkingen: </span>{row.notes}</p>}
             {row.ticketStatus === "submitted" && (
-              <div className="mt-4"><Label>Reden bij afkeuren</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+              <div><Label>Reden bij afkeuren</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
             )}
           </div>
         )}
