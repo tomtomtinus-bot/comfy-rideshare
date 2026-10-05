@@ -33,7 +33,7 @@ export const Nav = () => {
   // Primary nav: keep slim and Title Case
   const primary: { to: string; label: string; show: boolean }[] = [
     { to: "/dashboard", label: "Dashboard", show: !!user },
-    { to: "/aanvragen", label: "Rit aanvragen", show: !!user && role !== "begeleider" },
+    
     { to: "/facturen", label: "Facturen", show: showFinance },
   ];
 
