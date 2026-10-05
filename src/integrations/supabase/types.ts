@@ -1184,6 +1184,53 @@ export type Database = {
         }
         Relationships: []
       }
+      relation_rates: {
+        Row: {
+          holiday_pct: number
+          hourly_rate: number
+          km_rate: number
+          min_hours: number
+          night_pct: number
+          relation_id: string
+          updated_at: string
+          updated_by: string | null
+          waiting_rate: number
+          weekend_pct: number
+        }
+        Insert: {
+          holiday_pct?: number
+          hourly_rate?: number
+          km_rate?: number
+          min_hours?: number
+          night_pct?: number
+          relation_id: string
+          updated_at?: string
+          updated_by?: string | null
+          waiting_rate?: number
+          weekend_pct?: number
+        }
+        Update: {
+          holiday_pct?: number
+          hourly_rate?: number
+          km_rate?: number
+          min_hours?: number
+          night_pct?: number
+          relation_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          waiting_rate?: number
+          weekend_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relation_rates_relation_id_fkey"
+            columns: ["relation_id"]
+            isOneToOne: true
+            referencedRelation: "relations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relations: {
         Row: {
           addressee_id: string
@@ -1254,7 +1301,11 @@ export type Database = {
           returned_base_at: string | null
           ride_id: string
           status: Database["public"]["Enums"]["assignment_status"]
+          ticket_breakdown: Json | null
+          ticket_correction: number | null
+          ticket_correction_note: string | null
           ticket_created_at: string | null
+          ticket_expense_items: Json
           ticket_expenses: number | null
           ticket_expenses_note: string | null
           ticket_km: number | null
@@ -1306,7 +1357,11 @@ export type Database = {
           returned_base_at?: string | null
           ride_id: string
           status?: Database["public"]["Enums"]["assignment_status"]
+          ticket_breakdown?: Json | null
+          ticket_correction?: number | null
+          ticket_correction_note?: string | null
           ticket_created_at?: string | null
+          ticket_expense_items?: Json
           ticket_expenses?: number | null
           ticket_expenses_note?: string | null
           ticket_km?: number | null
@@ -1358,7 +1413,11 @@ export type Database = {
           returned_base_at?: string | null
           ride_id?: string
           status?: Database["public"]["Enums"]["assignment_status"]
+          ticket_breakdown?: Json | null
+          ticket_correction?: number | null
+          ticket_correction_note?: string | null
           ticket_created_at?: string | null
+          ticket_expense_items?: Json
           ticket_expenses?: number | null
           ticket_expenses_note?: string | null
           ticket_km?: number | null
@@ -1980,6 +2039,17 @@ export type Database = {
         Args: { _label: string; _ride_ids: string[] }
         Returns: string
       }
+      calc_ride_ticket: {
+        Args: {
+          _assignment_id: string
+          _correction: number
+          _expense_items: Json
+          _hours: number
+          _km: number
+          _waiting: number
+        }
+        Returns: Json
+      }
       claim_initial_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: undefined
@@ -2299,6 +2369,7 @@ export type Database = {
         Args: { _anonymous_id: string; _scope: string; _user_id: string }
         Returns: string
       }
+      nl_is_holiday: { Args: { _d: string }; Returns: boolean }
       notify_ride_confirmed: {
         Args: { _assignment_id: string }
         Returns: undefined
@@ -2315,6 +2386,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      relation_id_between: { Args: { _a: string; _b: string }; Returns: string }
       respond_relation: {
         Args: { _accept: boolean; _id: string }
         Returns: undefined
@@ -2341,6 +2413,19 @@ export type Database = {
           lng: number
         }[]
       }
+      set_relation_rates: {
+        Args: {
+          _holiday_pct: number
+          _hourly: number
+          _km: number
+          _min_hours: number
+          _night_pct: number
+          _relation_id: string
+          _waiting: number
+          _weekend_pct: number
+        }
+        Returns: undefined
+      }
       submit_ride_ticket: {
         Args: {
           _assignment_id: string
@@ -2352,6 +2437,19 @@ export type Database = {
           _waiting_hours: number
         }
         Returns: undefined
+      }
+      submit_ride_ticket_v2: {
+        Args: {
+          _assignment_id: string
+          _correction: number
+          _correction_note: string
+          _expense_items: Json
+          _hours: number
+          _km: number
+          _notes: string
+          _waiting_hours: number
+        }
+        Returns: Json
       }
       unbundle_ride: { Args: { _ride_id: string }; Returns: undefined }
     }

@@ -724,7 +724,7 @@ Deno.serve(async (req) => {
           } else if (kind === "brandstof") {
             label = "Brandstoftoeslag";
           } else {
-            label = safe(String(r.description ?? "Extra kosten").replace(/^Extra kosten:\s*/i, "Extra: "));
+            label = safe(String(r.description ?? "Extra kosten").replace(/^Extra kosten:\s*/i, ""));
           }
           body.push([
             { content: label, styles: { cellPadding: { top: 2, bottom: 2, left: 6, right: 1 } } },

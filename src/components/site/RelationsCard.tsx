@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { UserPlus, Users, X, Check } from "lucide-react";
+import { UserPlus, Users, X, Check, Euro } from "lucide-react";
+import { RatesDialog } from "@/components/site/RatesDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
   const [list, setList] = useState<Rel[]>([]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [ratesFor, setRatesFor] = useState<Rel | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await supabase.rpc("list_relations");
@@ -78,7 +80,9 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
                   </>
                 )}
                 {r.status === "pending" && !r.incoming && <Badge variant="outline">Wacht op bevestiging</Badge>}
-                {r.status === "accepted" && <Badge variant="secondary">Gekoppeld</Badge>}
+                {r.status === "accepted" && (
+                  <Button size="sm" variant="outline" onClick={() => setRatesFor(r)}><Euro className="h-4 w-4 mr-1" />Tarieven</Button>
+                )}
                 {!(r.status === "pending" && r.incoming) && (
                   <Button size="icon" variant="ghost" aria-label="Verwijderen" onClick={() => remove(r.id)}><X className="h-4 w-4" /></Button>
                 )}
@@ -87,6 +91,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
           ))}
         </ul>
       )}
+      <RatesDialog relation={ratesFor} editable={isEscort} onClose={() => setRatesFor(null)} />
     </Card>
   );
 };
