@@ -1184,6 +1184,33 @@ export type Database = {
         }
         Relationships: []
       }
+      relations: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       ride_assignments: {
         Row: {
           actual_cost: number | null
@@ -1228,7 +1255,12 @@ export type Database = {
           ride_id: string
           status: Database["public"]["Enums"]["assignment_status"]
           ticket_created_at: string | null
+          ticket_expenses: number | null
+          ticket_expenses_note: string | null
           ticket_km: number | null
+          ticket_reject_reason: string | null
+          ticket_status: string
+          ticket_waiting_hours: number | null
           travel_back_home_min: number
           travel_to_pickup_min: number
         }
@@ -1275,7 +1307,12 @@ export type Database = {
           ride_id: string
           status?: Database["public"]["Enums"]["assignment_status"]
           ticket_created_at?: string | null
+          ticket_expenses?: number | null
+          ticket_expenses_note?: string | null
           ticket_km?: number | null
+          ticket_reject_reason?: string | null
+          ticket_status?: string
+          ticket_waiting_hours?: number | null
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -1322,7 +1359,12 @@ export type Database = {
           ride_id?: string
           status?: Database["public"]["Enums"]["assignment_status"]
           ticket_created_at?: string | null
+          ticket_expenses?: number | null
+          ticket_expenses_note?: string | null
           ticket_km?: number | null
+          ticket_reject_reason?: string | null
+          ticket_status?: string
+          ticket_waiting_hours?: number | null
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -1433,6 +1475,7 @@ export type Database = {
           cargo_length_m: number | null
           cargo_weight_t: number | null
           cargo_width_m: number | null
+          client_google_event_id: string | null
           client_id: string
           client_reference: string | null
           created_at: string
@@ -1455,6 +1498,8 @@ export type Database = {
           pickup_lat: number
           pickup_lng: number
           platform_invoice_id: string | null
+          rate_amount: number | null
+          rate_type: string | null
           ride_number: string
           scheduled_at: string
           status: Database["public"]["Enums"]["ride_status"]
@@ -1476,6 +1521,7 @@ export type Database = {
           cargo_length_m?: number | null
           cargo_weight_t?: number | null
           cargo_width_m?: number | null
+          client_google_event_id?: string | null
           client_id: string
           client_reference?: string | null
           created_at?: string
@@ -1498,6 +1544,8 @@ export type Database = {
           pickup_lat: number
           pickup_lng: number
           platform_invoice_id?: string | null
+          rate_amount?: number | null
+          rate_type?: string | null
           ride_number?: string
           scheduled_at: string
           status?: Database["public"]["Enums"]["ride_status"]
@@ -1519,6 +1567,7 @@ export type Database = {
           cargo_length_m?: number | null
           cargo_weight_t?: number | null
           cargo_width_m?: number | null
+          client_google_event_id?: string | null
           client_id?: string
           client_reference?: string | null
           created_at?: string
@@ -1541,6 +1590,8 @@ export type Database = {
           pickup_lat?: number
           pickup_lng?: number
           platform_invoice_id?: string | null
+          rate_amount?: number | null
+          rate_type?: string | null
           ride_number?: string
           scheduled_at?: string
           status?: Database["public"]["Enums"]["ride_status"]
@@ -1889,6 +1940,7 @@ export type Database = {
         Args: { _assignment_id: string }
         Returns: undefined
       }
+      add_relation: { Args: { _query: string }; Returns: string }
       admin_approve_user: { Args: { _user_id: string }; Returns: undefined }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_list_users: {
@@ -2002,6 +2054,31 @@ export type Database = {
       create_priority_assignments_for_bundle_ride: {
         Args: { _ride_id: string }
         Returns: number
+      }
+      create_relation_ride: {
+        Args: {
+          _client_reference: string
+          _counterparty: string
+          _dropoff_address: string
+          _dropoff_city: string
+          _dropoff_lat: number
+          _dropoff_lng: number
+          _height_m: number
+          _length_m: number
+          _notes: string
+          _permit_number: string
+          _pickup_address: string
+          _pickup_city: string
+          _pickup_lat: number
+          _pickup_lng: number
+          _plates: string[]
+          _rate_amount: number
+          _rate_type: string
+          _scheduled_at: string
+          _weight_t: number
+          _width_m: number
+        }
+        Returns: string
       }
       decline_bundle_priority_offer: {
         Args: { _assignment_id: string; _reason?: string }
@@ -2190,11 +2267,25 @@ export type Database = {
         Returns: boolean
       }
       is_company_planner: { Args: { _uid: string }; Returns: boolean }
+      is_relation: { Args: { _a: string; _b: string }; Returns: boolean }
       is_ride_client: {
         Args: { _ride_id: string; _user_id: string }
         Returns: boolean
       }
       is_same_company: { Args: { _u1: string; _u2: string }; Returns: boolean }
+      list_relations: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          incoming: boolean
+          name: string
+          other_id: string
+          status: string
+        }[]
+      }
+      mark_ride_completed: { Args: { _ride_id: string }; Returns: undefined }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2224,6 +2315,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      respond_relation: {
+        Args: { _accept: boolean; _id: string }
+        Returns: undefined
+      }
+      review_ride_ticket: {
+        Args: { _approve: boolean; _assignment_id: string; _reason: string }
+        Returns: undefined
+      }
       save_ride_ticket: {
         Args: {
           _assignment_id: string
@@ -2241,6 +2340,18 @@ export type Database = {
           lat: number
           lng: number
         }[]
+      }
+      submit_ride_ticket: {
+        Args: {
+          _assignment_id: string
+          _expenses: number
+          _expenses_note: string
+          _hours: number
+          _km: number
+          _notes: string
+          _waiting_hours: number
+        }
+        Returns: undefined
       }
       unbundle_ride: { Args: { _ride_id: string }; Returns: undefined }
     }
