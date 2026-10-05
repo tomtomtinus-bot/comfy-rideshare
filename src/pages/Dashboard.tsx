@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, ChevronDown, ChevronRight } from "lucide-react";
 import { distanceKm } from "@/lib/geo";
+import { RideAdministration } from "@/components/site/RideAdministration";
 
 const localeFromI18n = (lang: string) => {
   switch (lang) {
@@ -222,6 +223,8 @@ const minutesLeft = (deadline: string) => {
   return Math.max(0, Math.floor(ms / 60000));
 };
 
+// Legacy marketplace dashboards — hidden, kept for possible reactivation.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ClientDashboard = () => {
   const { t, i18n } = useTranslation();
   const fd = (d: string) => fmtDate(d, i18n.language);
@@ -790,6 +793,7 @@ const hoursSchema = z.object({
 
 type ExtraCost = { description: string; amount: number };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const EscortDashboard = () => {
   const { t, i18n } = useTranslation();
   const fd2 = (d: string) => fmtDate(d, i18n.language);
@@ -1411,9 +1415,14 @@ const DashboardInner = () => {
           {loading || companyLoading ? (
             <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
-            isDriver ? <DriverDashboard /> : <EscortDashboard />
+            isDriver ? <DriverDashboard /> : (
+              <div className="space-y-6">
+                <RideAdministration />
+                <GoogleAgendaStatus />
+              </div>
+            )
           ) : (
-            <ClientDashboard />
+            <RideAdministration />
           )}
         </div>
       </main>

@@ -1227,6 +1227,8 @@ export type Database = {
           returned_base_at: string | null
           ride_id: string
           status: Database["public"]["Enums"]["assignment_status"]
+          ticket_created_at: string | null
+          ticket_km: number | null
           travel_back_home_min: number
           travel_to_pickup_min: number
         }
@@ -1272,6 +1274,8 @@ export type Database = {
           returned_base_at?: string | null
           ride_id: string
           status?: Database["public"]["Enums"]["assignment_status"]
+          ticket_created_at?: string | null
+          ticket_km?: number | null
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -1317,6 +1321,8 @@ export type Database = {
           returned_base_at?: string | null
           ride_id?: string
           status?: Database["public"]["Enums"]["assignment_status"]
+          ticket_created_at?: string | null
+          ticket_km?: number | null
           travel_back_home_min?: number
           travel_to_pickup_min?: number
         }
@@ -1975,6 +1981,24 @@ export type Database = {
         }
         Returns: number
       }
+      create_direct_ride: {
+        Args: {
+          _client_reference: string
+          _counterparty: string
+          _dropoff_address: string
+          _dropoff_city: string
+          _dropoff_lat: number
+          _dropoff_lng: number
+          _notes: string
+          _permit_number: string
+          _pickup_address: string
+          _pickup_city: string
+          _pickup_lat: number
+          _pickup_lng: number
+          _scheduled_at: string
+        }
+        Returns: string
+      }
       create_priority_assignments_for_bundle_ride: {
         Args: { _ride_id: string }
         Returns: number
@@ -2147,6 +2171,10 @@ export type Database = {
         Args: { _escort_id: string; _ride_id: string }
         Returns: string
       }
+      invoice_selected_tickets: {
+        Args: { _assignment_ids: string[] }
+        Returns: number
+      }
       is_approved: { Args: { _user_id: string }; Returns: boolean }
       is_assigned_escort: {
         Args: { _ride_id: string; _user_id: string }
@@ -2195,6 +2223,15 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      save_ride_ticket: {
+        Args: {
+          _assignment_id: string
+          _hours: number
+          _km: number
+          _notes: string
+        }
+        Returns: undefined
       }
       scheduled_locations_at: {
         Args: { _at: string }
