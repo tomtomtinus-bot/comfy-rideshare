@@ -14,6 +14,7 @@ export interface Breakdown {
   surcharge_label: string | null;
   surcharge_pct: number;
   surcharge_amount: number;
+  fuel_amount?: number;
   expenses: { description?: string; amount: number }[];
   expenses_amount: number;
   correction: number;
@@ -50,6 +51,7 @@ export const BreakdownView = ({ b }: { b: Breakdown }) => (
     {Number(b.km) > 0 && <Line label="Kilometers" calc={`${n2(b.km)} km × ${eur(b.km_rate)}`} amount={b.km_amount} />}
     {Number(b.waiting_hours) > 0 && <Line label="Wachturen" calc={`${n2(b.waiting_hours)} u × ${eur(b.waiting_rate)}`} amount={b.waiting_amount} />}
     {Number(b.surcharge_amount) > 0 && <Line label={b.surcharge_label ?? "Toeslag"} calc={`${n2(b.surcharge_pct)}%`} amount={b.surcharge_amount} />}
+    {Number(b.fuel_amount ?? 0) > 0 && <Line label="Brandstoftoeslag" calc="volgens dieselstaffel" amount={Number(b.fuel_amount)} />}
     {(b.expenses ?? []).map((e, i) => <Line key={i} label={e.description || "Onkosten"} amount={e.amount} />)}
     {Number(b.correction) !== 0 && <Line label="Correctie" calc={b.correction_note ?? undefined} amount={b.correction} />}
     <div className="flex justify-between pt-2 font-semibold text-sm">
