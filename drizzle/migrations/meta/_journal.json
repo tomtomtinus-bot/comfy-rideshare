@@ -22,6 +22,13 @@
       "when": 1791221992816,
       "tag": "0002_relation_rates_and_ticket_calc",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791222237240,
+      "tag": "0003_ticket_fuel_surcharge",
+      "breakpoints": true
     }
   ]
 }
