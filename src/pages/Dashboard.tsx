@@ -1422,7 +1422,10 @@ const DashboardInner = () => {
               </div>
             )
           ) : (
-            <RideAdministration />
+            <div className="space-y-6">
+              <RideAdministration />
+              <GoogleAgendaStatus />
+            </div>
           )}
         </div>
       </main>
