@@ -1,0 +1,1 @@
+- Dashboard = ride administration for fixed relations (RideAdministration); rides created via create_direct_ride RPC, ritbon via save_ride_ticket, invoicing via invoice_selected_tickets. Why: app pivoted from open marketplace; legacy marketplace dashboards kept hidden, not deleted.
