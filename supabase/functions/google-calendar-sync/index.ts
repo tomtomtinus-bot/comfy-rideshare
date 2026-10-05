@@ -115,6 +115,45 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ---- PUSH (planner side): rides owned by this user ----
+    const { data: ownRides } = await admin
+      .from("rides")
+      .select("id, scheduled_at, pickup_city, pickup_address, dropoff_city, status, notes, permit_number, ride_number, client_google_event_id")
+      .eq("client_id", user.id)
+      .gte("scheduled_at", fromIso)
+      .lte("scheduled_at", toIso);
+    for (const r of ownRides ?? []) {
+      const evId = (r as any).client_google_event_id as string | null;
+      if (r.status === "cancelled") {
+        if (evId) {
+          const d = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${encodeURIComponent(evId)}`, { method: "DELETE", headers: gHeaders });
+          if (d.ok || d.status === 404 || d.status === 410) { await admin.from("rides").update({ client_google_event_id: null }).eq("id", r.id); removed++; }
+        }
+        continue;
+      }
+      const start = new Date(r.scheduled_at);
+      const body = {
+        summary: `Transport ${r.pickup_city} → ${r.dropoff_city}${r.ride_number ? ` (${r.ride_number})` : ""}`,
+        location: r.pickup_address ?? r.pickup_city,
+        description: `${r.permit_number ? `Dossier/vergunning: ${r.permit_number}\n` : ""}${r.notes ?? ""}`.trim(),
+        start: { dateTime: start.toISOString(), timeZone: "Europe/Amsterdam" },
+        end: { dateTime: new Date(start.getTime() + 3 * 3600 * 1000).toISOString(), timeZone: "Europe/Amsterdam" },
+      };
+      let resp = evId
+        ? await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${encodeURIComponent(evId)}`, { method: "PATCH", headers: gHeaders, body: JSON.stringify(body) })
+        : null;
+      if (!resp || resp.status === 404) {
+        resp = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`, { method: "POST", headers: gHeaders, body: JSON.stringify(body) });
+      }
+      if (resp.ok) {
+        const j = await resp.json();
+        if (j.id && j.id !== evId) await admin.from("rides").update({ client_google_event_id: j.id }).eq("id", r.id);
+        pushed++;
+      } else {
+        console.error("Push planner event failed", r.id, resp.status, await resp.text());
+      }
+    }
+
     // ---- PULL: free/busy windows for next 7 days ----
     const fbFrom = new Date();
     fbFrom.setHours(0, 0, 0, 0);
