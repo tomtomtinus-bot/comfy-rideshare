@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-type T = {
+type T = { permit: string; clientRef: string; role: string; bd: any;
   id: string; date: string; rideNumber: string; reference: string; route: string; escort: string;
   hours: number | null; km: number | null; waiting: number | null; expenses: number | null; amount: number | null;
   status: string; invoiced: boolean;
