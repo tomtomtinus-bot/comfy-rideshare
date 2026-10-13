@@ -2272,6 +2272,15 @@ export type Database = {
           window_start: string
         }[]
       }
+      get_ride_crew: {
+        Args: { _ride_id: string }
+        Returns: {
+          escort_id: string
+          escort_role: string
+          name: string
+          phone: string
+        }[]
+      }
       get_ride_details_for_client: { Args: { _ride_id: string }; Returns: Json }
       get_ride_details_for_escort: { Args: { _ride_id: string }; Returns: Json }
       get_swap_options_for_assignment: {
