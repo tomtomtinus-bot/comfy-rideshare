@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 import { type StripeEnv, verifyWebhook } from "../_shared/stripe.ts";
 
 let _supabase: ReturnType<typeof createClient> | null = null;
@@ -149,14 +150,7 @@ async function notifyPaymentFailed(opts: {
   const email = (profile as any)?.billing_email || authUser?.user?.email;
   if (!email) return;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${serviceKey}`,
-      "apikey": serviceKey,
-    },
-    body: JSON.stringify({
+  await sendAppEmail({
       templateName: "payment-failed-client",
       recipientEmail: email,
       idempotencyKey: `pi-failed-${opts.invoiceId ?? opts.userId}-${Date.now()}`,
@@ -168,8 +162,7 @@ async function notifyPaymentFailed(opts: {
           : "",
         reason: opts.reason ?? "",
       },
-    }),
-  });
+    });
 }
 
 async function handlePaymentIntentFailed(intent: any) {

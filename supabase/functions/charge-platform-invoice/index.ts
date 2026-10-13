@@ -6,6 +6,7 @@
 // Auth: alleen toegankelijk voor admins (ingelogd) of voor cron-aanroepen
 // met de service-role key in de Authorization-header.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
 
 const corsHeaders = {
@@ -47,14 +48,7 @@ async function sendFailureEmail(invoice: any) {
     const { data: authUser } = await supabase.auth.admin.getUserById(invoice.client_id);
     const email = profile?.billing_email || authUser?.user?.email;
     if (!email) return;
-    await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${SERVICE_KEY}`,
-        "apikey": SERVICE_KEY,
-      },
-      body: JSON.stringify({
+    await sendAppEmail({
         templateName: "payment-failed-client",
         recipientEmail: email,
         idempotencyKey: `pi-failed-${invoice.id}-${invoice.last_charge_failed_at ?? Date.now()}`,
@@ -63,8 +57,7 @@ async function sendFailureEmail(invoice: any) {
           invoiceNumber: invoice.invoice_number,
           amount: Number(invoice.total_amount).toLocaleString("nl-NL", { style: "currency", currency: "EUR" }),
         },
-      }),
-    });
+      });
   } catch (e) {
     console.error("send failure email error:", e);
   }

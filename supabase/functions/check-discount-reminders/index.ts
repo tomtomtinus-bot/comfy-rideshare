@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,9 +62,9 @@ Deno.serve(async (req) => {
         year: "numeric",
       });
 
-      const { error: invokeErr } = await supabase.functions.invoke("send-transactional-email", {
-        headers: { Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!}` },
-        body: {
+      let invokeErr: unknown = null;
+      try {
+        const r = await sendAppEmail({
           templateName: "discount-ending",
           recipientEmail: email,
           idempotencyKey: `discount-ending-${sub.id}`,
@@ -73,8 +74,9 @@ Deno.serve(async (req) => {
             fullPrice: "€50,00",
             discountedPrice: "€25,00",
           },
-        },
-      });
+        });
+        if (!r.success) invokeErr = r.reason;
+      } catch (e) { invokeErr = e; }
       if (invokeErr) {
         console.error("send error for sub", sub.id, invokeErr);
         continue;

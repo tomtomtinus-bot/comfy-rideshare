@@ -4,6 +4,7 @@
 // Bij problemen: notificatie + email naar elke admin.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,18 +113,10 @@ Deno.serve(async (req) => {
     }
 
     let sent = 0;
-    const emailUrl = `${Deno.env.get("SUPABASE_URL")!}/functions/v1/send-transactional-email`;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     for (const recipient of adminEmails) {
       try {
-        const res = await fetch(emailUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${serviceKey}`,
-            "apikey": serviceKey,
-          },
-          body: JSON.stringify({
+        const res = await sendAppEmail({
             templateName: "payment-failed-admin",
             recipientEmail: recipient,
             idempotencyKey: `monday-health-${monday}-${recipient}`,
@@ -132,9 +125,8 @@ Deno.serve(async (req) => {
               errorMessage: body,
               adminUrl: "https://viacust.com/admin/invoices",
             },
-          }),
-        });
-        if (res.ok) sent++;
+          });
+        if (res.success) sent++;
       } catch (e) {
         console.error("monday-health-check email failed:", e);
       }

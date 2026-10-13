@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,17 +67,9 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     const errors: string[] = [];
-    const url = `${SUPABASE_URL}/functions/v1/send-transactional-email`;
     for (const recipient of adminEmails) {
       try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SERVICE}`,
-            "apikey": SERVICE,
-          },
-          body: JSON.stringify({
+        await sendAppEmail({
             templateName: "new-signup-admin",
             recipientEmail: recipient,
             idempotencyKey: `new-signup-${userId}-${recipient}`,
@@ -88,14 +81,8 @@ Deno.serve(async (req) => {
               companyName: companyName ?? "",
               adminUrl,
             },
-          }),
-        });
-        if (!res.ok) {
-          const txt = await res.text();
-          errors.push(`${recipient}: ${res.status} ${txt}`);
-        } else {
-          sent++;
-        }
+          });
+        sent++;
       } catch (e) {
         errors.push(`${recipient}: ${String(e)}`);
       }
