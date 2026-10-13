@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy, UserPlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { CrewEditor, ConflictBanner, useConflicts, ESCORT_ROLES, type CrewMember, RideCrewList } from "@/components/site/RideCrew";
+import { CrewEditor, ConflictBanner, useConflicts, ESCORT_ROLES, type CrewMember, RideCrewList, RideChangeLog } from "@/components/site/RideCrew";
 import { RideDocuments, uploadRideDocs, deleteRideDocs } from "@/components/site/RideDocuments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ type TicketStatus = "none" | "submitted" | "approved" | "rejected";
 interface Row {
   rideId: string;
   clientId: string;
+  scheduleChanged: boolean;
   raw: any;
   rideNumber: string;
   reference: string | null;
@@ -123,7 +124,7 @@ export const RideAdministration = () => {
       setOptions(accepted.map((r: any) => ({ id: r.other_id, label: r.name })));
 
       const toRow = (r: any, a: any, counterparty: string): Row => ({
-        rideId: r.id, clientId: r.client_id, raw: r, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
+        rideId: r.id, clientId: r.client_id, scheduleChanged: !!a?.schedule_changed_at, raw: r, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
         pickup: r.pickup_city, dropoff: r.dropoff_city, scheduledAt: r.scheduled_at, rideStatus: r.status,
         plates: r.license_plates ?? [],
         dims: [r.cargo_length_m, r.cargo_width_m, r.cargo_height_m].some((x: any) => x != null)
@@ -311,6 +312,7 @@ export const RideAdministration = () => {
                 </TableCell>
                 <TableCell className={`${c} whitespace-nowrap`}>
                   <Link to={detailHref(r)} className="font-medium hover:underline">{r.rideNumber}</Link>
+                  {isEscort && r.scheduleChanged && bucketOf(r) === "week" && <Badge className="ml-2 h-5 px-1.5 border-transparent bg-warning text-primary-foreground hover:bg-warning">Gewijzigd</Badge>}
                   {(r.permit || r.reference) && <span className="ml-2 text-xs text-muted-foreground">{[r.permit, r.reference].filter(Boolean).join(" · ")}</span>}
                 </TableCell>
                 <TableCell className={`${c} whitespace-nowrap`}>{r.pickup} → {r.dropoff}</TableCell>
@@ -461,11 +463,12 @@ export const RideAdministration = () => {
       <ReviewDialog row={reviewRow} onClose={() => setReviewRow(null)} onSaved={load} />
       <AddEscortDialog row={addRow} options={options} onClose={() => setAddRow(null)} onSaved={load} />
       <Sheet open={!!docsRow} onOpenChange={(v) => !v && setDocsRow(null)}>
-        <SheetContent className="w-full sm:max-w-md">
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
           <SheetHeader><SheetTitle>Rit {docsRow?.rideNumber}</SheetTitle></SheetHeader>
           <p className="text-sm text-muted-foreground mb-3">{docsRow?.pickup} → {docsRow?.dropoff}</p>
           {docsRow && <><h3 className="text-sm font-semibold mb-2">Begeleiders op deze rit</h3><RideCrewList rideId={docsRow.rideId} /><h3 className="text-sm font-semibold mt-5 mb-2">Documenten</h3></>}
           {docsRow && <RideDocuments clientId={docsRow.clientId} rideId={docsRow.rideId} canDelete={!isEscort} />}
+          {docsRow && <><h3 className="text-sm font-semibold mt-6 mb-2">Wijzigingshistorie</h3><RideChangeLog rideId={docsRow.rideId} /></>}
         </SheetContent>
       </Sheet>
     </div>
