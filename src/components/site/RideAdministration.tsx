@@ -2,7 +2,9 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RideDocuments, uploadRideDocs } from "@/components/site/RideDocuments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +26,8 @@ type TicketStatus = "none" | "submitted" | "approved" | "rejected";
 
 interface Row {
   rideId: string;
+  clientId: string;
+  raw: any;
   rideNumber: string;
   reference: string | null;
   permit: string | null;
@@ -104,6 +108,8 @@ export const RideAdministration = () => {
   const [dayWeek, setDayWeek] = useState(0);
   const [day, setDay] = useState<number | null>(todayIdx());
   const [allWeeks, setAllWeeks] = useState(false);
+  const [docsRow, setDocsRow] = useState<Row | null>(null);
+  const [dupFrom, setDupFrom] = useState<ReturnType<typeof rideToForm> | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -115,7 +121,7 @@ export const RideAdministration = () => {
       setOptions(accepted.map((r: any) => ({ id: r.other_id, label: r.name })));
 
       const toRow = (r: any, a: any, counterparty: string): Row => ({
-        rideId: r.id, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
+        rideId: r.id, clientId: r.client_id, raw: r, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
         pickup: r.pickup_city, dropoff: r.dropoff_city, scheduledAt: r.scheduled_at, rideStatus: r.status,
         plates: r.license_plates ?? [],
         dims: [r.cargo_length_m, r.cargo_width_m, r.cargo_height_m].some((x: any) => x != null)
@@ -335,6 +341,15 @@ export const RideAdministration = () => {
                   {done && !isEscort && (r.ticketStatus === "approved" || r.ticketStatus === "rejected") && (
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setReviewRow(r)}>Bekijken</Button>
                   )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-1" aria-label="Meer acties"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Documenten</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -436,9 +451,16 @@ export const RideAdministration = () => {
         </Tabs>
       </Card>
 
-      <NewRideDialog open={newOpen} onOpenChange={setNewOpen} isEscort={isEscort} options={options} onCreated={load} />
+      <NewRideDialog open={newOpen} onOpenChange={(v) => { setNewOpen(v); if (!v) setDupFrom(null); }} isEscort={isEscort} options={options} onCreated={load} initial={dupFrom} />
       <TicketDialog row={ticketRow} onClose={() => setTicketRow(null)} onSaved={load} />
       <ReviewDialog row={reviewRow} onClose={() => setReviewRow(null)} onSaved={load} />
+      <Sheet open={!!docsRow} onOpenChange={(v) => !v && setDocsRow(null)}>
+        <SheetContent className="w-full sm:max-w-md">
+          <SheetHeader><SheetTitle>Documenten — {docsRow?.rideNumber}</SheetTitle></SheetHeader>
+          <p className="text-sm text-muted-foreground mb-3">{docsRow?.pickup} → {docsRow?.dropoff}</p>
+          {docsRow && <RideDocuments clientId={docsRow.clientId} rideId={docsRow.rideId} canDelete={!isEscort} />}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
@@ -448,11 +470,24 @@ const emptyRide = {
   length: "", width: "", height: "", weight: "", plates: "", rateType: "hourly", rate: "", party: "none",
 };
 
-const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
-  open: boolean; onOpenChange: (v: boolean) => void; isEscort: boolean; options: Option[]; onCreated: () => void;
+export const rideToForm = (r: any): typeof emptyRide => {
+  const s = (x: any) => (x == null ? "" : String(x));
+  return {
+    ...emptyRide,
+    pickup: r.pickup_address ?? "", dropoff: r.dropoff_address ?? "",
+    permit: s(r.permit_number), reference: s(r.client_reference), notes: s(r.notes),
+    length: s(r.cargo_length_m), width: s(r.cargo_width_m), height: s(r.cargo_height_m), weight: s(r.cargo_weight_t),
+    plates: (r.license_plates ?? []).join(", "), rateType: r.rate_type ?? "hourly", rate: s(r.rate_amount),
+  };
+};
+
+const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initial }: {
+  open: boolean; onOpenChange: (v: boolean) => void; isEscort: boolean; options: Option[]; onCreated: () => void; initial?: typeof emptyRide | null;
 }) => {
   const [f, setF] = useState(emptyRide);
+  const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
+  useEffect(() => { if (open) { setF(initial ?? emptyRide); setFiles([]); } }, [open, initial]);
   const set = (k: keyof typeof f) => (e: any) => setF({ ...f, [k]: e?.target ? e.target.value : e });
 
   const submit = async () => {
@@ -465,7 +500,7 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
       const [p, d] = (geo?.results ?? []) as any[];
       if (p?.lat == null || d?.lat == null) throw new Error("Adres niet gevonden, controleer laad- en loslocatie");
       const scheduled = new Date(`${f.date}T${f.time || "00:00"}`).toISOString();
-      const { error } = await supabase.rpc("create_relation_ride", {
+      const { data: rideId, error } = await supabase.rpc("create_relation_ride", {
         _pickup_address: p.formatted ?? f.pickup, _pickup_city: cityOf(p.formatted ?? f.pickup, f.pickup), _pickup_lat: p.lat, _pickup_lng: p.lng,
         _dropoff_address: d.formatted ?? f.dropoff, _dropoff_city: cityOf(d.formatted ?? f.dropoff, f.dropoff), _dropoff_lat: d.lat, _dropoff_lng: d.lng,
         _scheduled_at: scheduled, _permit_number: f.permit, _client_reference: f.reference, _notes: f.notes,
@@ -475,9 +510,15 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
         _counterparty: f.party === "none" ? null : f.party,
       } as any);
       if (error) throw error;
+      if (files.length && rideId) {
+        const { data: { user: me } } = await supabase.auth.getUser();
+        const clientId = isEscort ? f.party : me?.id;
+        if (clientId) await uploadRideDocs(clientId, rideId as string, files);
+      }
       supabase.functions.invoke("google-calendar-sync").catch(() => {});
       toast.success("Rit toegevoegd");
       setF(emptyRide);
+      setFiles([]);
       onOpenChange(false);
       onCreated();
     } catch (e: any) {
@@ -490,7 +531,8 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><Route className="h-5 w-5" />Nieuwe rit toevoegen</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-2"><Route className="h-5 w-5" />{initial ? "Rit dupliceren" : "Nieuwe rit toevoegen"}</DialogTitle></DialogHeader>
+        {initial && <p className="text-sm text-muted-foreground -mt-2">Route, afmetingen en referenties zijn overgenomen. Kies nog datum, tijd en toewijzing.</p>}
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Dossier-/vergunningnummer</Label><Input value={f.permit} onChange={set("permit")} /></div>
@@ -538,6 +580,12 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
             {!options.length && <p className="text-xs text-slate-500 mt-1">Voeg eerst een vaste relatie toe onder "Vaste relaties".</p>}
           </div>
           <div><Label>Opmerkingen</Label><Textarea rows={2} value={f.notes} onChange={set("notes")} /></div>
+          <div>
+            <Label>Documenten (ontheffing, routebeschrijving, tekeningen)</Label>
+            <Input type="file" multiple accept=".pdf,image/*,.dwg,.dxf,.doc,.docx,.xls,.xlsx" onChange={(e) => setFiles([...(e.target.files ?? [])])} />
+            {files.length > 0 && <p className="text-xs text-muted-foreground mt-1">{files.map((x) => x.name).join(", ")}</p>}
+            <p className="text-xs text-muted-foreground mt-1">Max. 20 MB per bestand. Alleen zichtbaar voor jou en de toegewezen begeleider.</p>
+          </div>
         </div>
         <DialogFooter><Button onClick={submit} disabled={busy}>{busy ? "Opslaan…" : "Rit opslaan"}</Button></DialogFooter>
       </DialogContent>

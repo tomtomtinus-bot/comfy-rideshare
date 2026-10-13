@@ -50,6 +50,13 @@
       "when": 1791905846988,
       "tag": "0006_rates_escort_only",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791908473951,
+      "tag": "0007_ride_docs_escort_upload",
+      "breakpoints": true
     }
   ]
 }
