@@ -60,7 +60,7 @@ export const RatesDialog = ({ relation, editable, onClose }: {
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle className="flex items-center gap-2"><Euro className="h-5 w-5" />Tarieven · {relation?.name}</DialogTitle></DialogHeader>
         <p className="text-sm text-slate-500">
-          {editable ? "Standaardtarieven voor ritten met deze klant. Een tarief dat bij een rit zelf is ingevuld gaat voor." : "Tarieven zoals afgesproken met deze begeleider."}
+          {editable ? "Vaste tariefafspraken binnen deze relatie. Een tarief dat bij een rit zelf is ingevuld gaat voor." : "Tarieven zoals afgesproken met deze begeleider."}
         </p>
         <div className="grid grid-cols-2 gap-3">
           {field("Uurtarief", "hourly", "€/u")}
