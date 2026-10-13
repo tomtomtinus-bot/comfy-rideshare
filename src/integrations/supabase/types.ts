@@ -2355,6 +2355,23 @@ export type Database = {
           status: string
         }[]
       }
+      list_relations_v2: {
+        Args: never
+        Returns: {
+          contact: string
+          created_at: string
+          email: string
+          hourly_rate: number
+          id: string
+          incoming: boolean
+          km_rate: number
+          min_hours: number
+          name: string
+          other_id: string
+          phone: string
+          status: string
+        }[]
+      }
       mark_ride_completed: { Args: { _ride_id: string }; Returns: undefined }
       move_to_dlq: {
         Args: {

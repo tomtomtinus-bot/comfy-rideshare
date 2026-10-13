@@ -36,6 +36,13 @@
       "when": 1791905399539,
       "tag": "0004_auto_approve_tickets",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791905655582,
+      "tag": "0005_relations_v2",
+      "breakpoints": true
     }
   ]
 }
