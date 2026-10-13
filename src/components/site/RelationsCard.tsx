@@ -165,7 +165,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
           ))}
         </div>
       )}
-      <RatesDialog relation={ratesFor} editable onClose={() => { setRatesFor(null); load(); }} />
+      <RatesDialog relation={ratesFor} editable={isEscort} onClose={() => { setRatesFor(null); load(); }} />
       <AddRelationDialog open={addOpen} isEscort={isEscort} onClose={() => setAddOpen(false)} onDone={refresh} />
     </Card>
   );
@@ -226,14 +226,20 @@ const AddRelationDialog = ({ open, isEscort, onClose, onDone }: { open: boolean;
           <div><Label className="text-xs">Bedrijfsnaam</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} className="h-9" /></div>
           <div><Label className="text-xs">E-mailadres</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" /></div>
         </div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 pt-1">Vaste tariefafspraken (optioneel)</p>
-        <div className="grid grid-cols-2 gap-3">
-          {rf("Uurtarief", "hourly", "€/u")}
-          {rf("Kilometertarief", "km", "€/km")}
-          {rf("Minimuminzet", "min", "uur")}
-          {rf("Wachturentarief", "waiting", "€/u")}
-        </div>
-        <p className="text-xs text-slate-500">Toeslagen voor nacht, weekend en feestdag stel je later in via "Tarieven bewerken".</p>
+        {isEscort ? (
+          <>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 pt-1">Vaste tariefafspraken (optioneel)</p>
+            <div className="grid grid-cols-2 gap-3">
+              {rf("Uurtarief", "hourly", "€/u")}
+              {rf("Kilometertarief", "km", "€/km")}
+              {rf("Minimuminzet", "min", "uur")}
+              {rf("Wachturentarief", "waiting", "€/u")}
+            </div>
+            <p className="text-xs text-slate-500">Toeslagen voor nacht, weekend en feestdag stel je later in via "Tarieven bewerken".</p>
+          </>
+        ) : (
+          <p className="text-xs text-slate-500">Tarieven stelt de begeleider in; jij kunt ze daarna alleen bekijken.</p>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Annuleren</Button>
           <Button onClick={save} disabled={busy || (email.trim() || company.trim()).length < 3}>{busy ? "Opslaan…" : "Opslaan"}</Button>
