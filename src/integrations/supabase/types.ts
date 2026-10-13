@@ -1301,6 +1301,7 @@ export type Database = {
           responds_by: string
           returned_base_at: string | null
           ride_id: string
+          schedule_changed_at: string | null
           status: Database["public"]["Enums"]["assignment_status"]
           ticket_breakdown: Json | null
           ticket_correction: number | null
@@ -1358,6 +1359,7 @@ export type Database = {
           responds_by?: string
           returned_base_at?: string | null
           ride_id: string
+          schedule_changed_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           ticket_breakdown?: Json | null
           ticket_correction?: number | null
@@ -1415,6 +1417,7 @@ export type Database = {
           responds_by?: string
           returned_base_at?: string | null
           ride_id?: string
+          schedule_changed_at?: string | null
           status?: Database["public"]["Enums"]["assignment_status"]
           ticket_breakdown?: Json | null
           ticket_correction?: number | null
@@ -1440,6 +1443,44 @@ export type Database = {
           },
           {
             foreignKeyName: "ride_assignments_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ride_change_log: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          field: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          ride_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          field: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          ride_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          field?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          ride_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_change_log_ride_id_fkey"
             columns: ["ride_id"]
             isOneToOne: false
             referencedRelation: "rides"
@@ -2270,6 +2311,16 @@ export type Database = {
         Returns: {
           window_end: string
           window_start: string
+        }[]
+      }
+      get_ride_change_log: {
+        Args: { _ride_id: string }
+        Returns: {
+          created_at: string
+          field: string
+          new_value: string
+          old_value: string
+          who: string
         }[]
       }
       get_ride_crew: {

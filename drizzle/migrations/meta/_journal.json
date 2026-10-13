@@ -78,6 +78,13 @@
       "when": 1791909303108,
       "tag": "0010_conflict_3h_and_ride_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791909408820,
+      "tag": "0011_ride_change_log",
+      "breakpoints": true
     }
   ]
 }
