@@ -390,12 +390,15 @@ export const RideAdministration = () => {
                 {counterparties.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={ticketFilter} onValueChange={setTicketFilter}>
+            <Select value={ticketFilter} onValueChange={(v) => {
+              setTicketFilter(v);
+              if (v === "approved" || v === "rejected") { setAllWeeks(true); setDay(null); }
+            }}>
               <SelectTrigger className="h-8 w-[160px] text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Ritbon: alles</SelectItem>
-                <SelectItem value="rejected">Afgekeurd</SelectItem>
                 <SelectItem value="approved">Goedgekeurd</SelectItem>
+                <SelectItem value="rejected">Afgekeurd</SelectItem>
                 <SelectItem value="none">Nog geen ritbon</SelectItem>
               </SelectContent>
             </Select>
@@ -403,20 +406,28 @@ export const RideAdministration = () => {
           {loading ? <p className="text-sm text-slate-500 py-10 text-center">Laden…</p> : (
             <>
               <div className="flex flex-wrap items-center gap-1 mb-2">
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(-1)}><ChevronLeft className="h-3.5 w-3.5 mr-0.5" />Vorige week</Button>
-                <button onClick={() => setDay(null)} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", day == null ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>Hele week ({activeWeekRows.length})</button>
-                {DAY_LABELS.map((l, i) => {
-                  const d = new Date(dayWeekStart); d.setDate(d.getDate() + i);
-                  const isToday = dayWeek === 0 && i === todayIdx();
-                  return (
-                    <button key={l} onClick={() => setDay(i)}
-                      className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors tabular-nums", day === i ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted", dayCounts[i] === 0 && day !== i && "text-muted-foreground", isToday && day !== i && "border-primary/50")}>
-                      {l} {d.getDate()}-{d.getMonth() + 1} ({dayCounts[i]})
-                    </button>
-                  );
-                })}
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(1)}>Volgende week<ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
-                {dayWeek !== 0 && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={() => shiftDayWeek(-dayWeek)}>Naar deze week</Button>}
+                {!allWeeks ? (
+                  <>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(-1)}><ChevronLeft className="h-3.5 w-3.5 mr-0.5" />Vorige week</Button>
+                    <button onClick={() => setDay(null)} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", day == null ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>Hele week ({activeWeekRows.length})</button>
+                    {DAY_LABELS.map((l, i) => {
+                      const d = new Date(dayWeekStart); d.setDate(d.getDate() + i);
+                      const isToday = dayWeek === 0 && i === todayIdx();
+                      return (
+                        <button key={l} onClick={() => setDay(i)}
+                          className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors tabular-nums", day === i ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted", dayCounts[i] === 0 && day !== i && "text-muted-foreground", isToday && day !== i && "border-primary/50")}>
+                          {l} {d.getDate()}-{d.getMonth() + 1} ({dayCounts[i]})
+                        </button>
+                      );
+                    })}
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(1)}>Volgende week<ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+                    {dayWeek !== 0 && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={() => shiftDayWeek(-dayWeek)}>Naar deze week</Button>}
+                  </>
+                ) : null}
+                <button onClick={toggleAllWeeks} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", allWeeks ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>
+                  Alle weken ({tab === "afgerond" ? allCounts.afgerond : allCounts.week})
+                </button>
+                {allWeeks && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={toggleAllWeeks}>Terug naar weekweergave</Button>}
               </div>
               <TabsContent value="week">{renderTable("week")}</TabsContent>
               <TabsContent value="afgerond">{renderTable("afgerond")}</TabsContent>
