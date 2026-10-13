@@ -8,6 +8,7 @@ import { Nav } from "@/components/site/Nav";
 import { SeoHead } from "@/components/SeoHead";
 import { Footer } from "@/components/site/Footer";
 import { RequireAuth } from "@/components/site/RequireAuth";
+import { TicketsOverview } from "@/components/site/TicketsOverview";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -402,7 +403,7 @@ const InvoicesInner = () => {
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="font-normal">
-                    App-fee
+                    Abonnement
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right tabular-nums font-medium">
@@ -461,14 +462,14 @@ const InvoicesInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       
       <SeoHead
-        title="Facturen | ViaCust"
+        title="Facturatie | ViaCust"
         description="Bekijk, download en betaal je facturen voor transportritten en platformkosten."
       />
       <Nav />
-      <main className="px-6 md:px-8 py-6 md:py-8">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <main className="px-4 md:px-6 py-4 md:py-6">
+        <div className="w-full space-y-6">
           <header className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">{t("invoices.title") || "Facturen"}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Facturatie</h1>
             <p className="text-sm text-muted-foreground">{t("invoices.intro")}</p>
           </header>
 
@@ -517,15 +518,15 @@ const InvoicesInner = () => {
           {!isEscort ? (
             <Tabs defaultValue="begeleiders" className="w-full">
               <TabsList>
-                <TabsTrigger value="begeleiders">
-                  {t("invoices.tabEscorts", { n: invoices.length })}
-                </TabsTrigger>
-                <TabsTrigger value="platform">
-                  {t("invoices.tabPlatform", { n: platformInvoices.length })}
-                </TabsTrigger>
+                <TabsTrigger value="begeleiders">Ritbonnen &amp; Declaraties</TabsTrigger>
+                <TabsTrigger value="platform">Mijn Abonnement ({platformInvoices.length})</TabsTrigger>
               </TabsList>
-              <TabsContent value="begeleiders" className="mt-4">
-                {renderEscortTable()}
+              <TabsContent value="begeleiders" className="mt-4 space-y-6">
+                <TicketsOverview search={search} dateFrom={dateFrom} dateTo={dateTo} />
+                <div className="space-y-2">
+                  <h2 className="text-sm font-semibold">Ontvangen facturen van begeleiders ({invoices.length})</h2>
+                  {renderEscortTable()}
+                </div>
               </TabsContent>
               <TabsContent value="platform" className="mt-4">
                 {renderPlatformTable()}

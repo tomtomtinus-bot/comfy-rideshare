@@ -34,7 +34,7 @@ const rateSummary = (r: Rel) => {
 };
 const toNum = (s: string) => (s.trim() === "" ? 0 : Number(s.replace(",", ".")));
 
-export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
+export const RelationsCard = ({ onChange, pageTitle }: { onChange?: () => void; pageTitle?: string }) => {
   const { role } = useAuth();
   const isEscort = role === "begeleider";
   const [list, setList] = useState<Rel[]>([]);
@@ -85,8 +85,9 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
         <div>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold tracking-tight">Vaste relaties</h2>
-            <span className="text-xs text-slate-500">({list.length})</span>
+            {pageTitle
+              ? <h1 className="text-xl font-semibold tracking-tight">{pageTitle} ({list.length})</h1>
+              : <><h2 className="text-lg font-semibold tracking-tight">Vaste relaties</h2><span className="text-xs text-slate-500">({list.length})</span></>}
           </div>
           <p className="text-sm text-slate-500 mt-0.5">Je vaste {isEscort ? "transporteurs/planners" : "transportbegeleiders"} en hun tariefafspraken.</p>
         </div>
@@ -110,7 +111,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
       {filtered.length === 0 ? (
         <p className="text-sm text-slate-500 py-4">{list.length === 0 ? "Nog geen relaties." : "Geen relaties gevonden."}</p>
       ) : (
-        <div className="max-h-[520px] overflow-y-auto -mx-1 px-1">
+        <div className="max-h-[calc(100vh-16rem)] overflow-y-auto -mx-1 px-1">
           {groups.map(([l, rows]) => (
             <div key={l}>
               <div className="sticky top-0 z-10 bg-card text-[11px] font-semibold text-slate-500 border-b border-slate-100 py-0.5">{l}</div>
@@ -118,7 +119,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
                 {rows.map((r) => {
                   const rates = rateSummary(r);
                   return (
-                    <li key={r.id} className="flex items-center gap-3 py-1.5 text-sm">
+                    <li key={r.id} className="flex items-center gap-3 py-1 text-sm">
                       <div className="min-w-0 flex-1 grid sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_minmax(0,0.9fr)] gap-x-3 items-center">
                         <div className="min-w-0">
                           <div className="font-medium truncate">{r.name}</div>
@@ -142,7 +143,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
                         )}
                         {r.status === "pending" && !r.incoming && <Badge variant="outline" className="text-[11px] font-normal">Wacht op bevestiging</Badge>}
                         {r.status === "accepted" && (
-                          <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setRatesFor(r)}><Euro className="h-3.5 w-3.5 mr-1" />{isEscort ? "Tarieven bewerken" : "Tarieven bekijken"}</Button>
+                          <Button size="sm" variant="ghost" className="h-6 px-1.5 text-[11px] text-slate-600" onClick={() => setRatesFor(r)}><Euro className="h-3 w-3 mr-0.5" />{isEscort ? "Tarieven" : "Tarieven"}</Button>
                         )}
                         {!(r.status === "pending" && r.incoming) && (
                           <DropdownMenu>

@@ -13,9 +13,8 @@ const Inner = () => {
       <SeoHead title={`${title} | ViaCust`} description="Beheer je vaste relaties en tariefafspraken in ViaCust." />
       <Nav />
       <main className="px-4 md:px-6 py-4 md:py-6 min-h-[calc(100vh-5rem)]">
-        <div className="max-w-6xl mx-auto space-y-4">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <RelationsCard />
+        <div className="w-full">
+          <RelationsCard pageTitle={title} />
         </div>
       </main>
       <Footer />

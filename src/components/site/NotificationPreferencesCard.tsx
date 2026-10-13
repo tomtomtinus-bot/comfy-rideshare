@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 
 type Prefs = {
   weekly_updates: boolean;
+  ticket_submitted: boolean;
 };
 
-const DEFAULTS: Prefs = { weekly_updates: true };
+const DEFAULTS: Prefs = { weekly_updates: true, ticket_submitted: true };
 
 const isIOS = typeof navigator !== "undefined" && /iPad|iPhone|iPod/.test(navigator.userAgent);
 const isStandalone = typeof window !== "undefined" && (
@@ -18,7 +19,7 @@ const isStandalone = typeof window !== "undefined" && (
   (window.navigator as any).standalone === true
 );
 
-export const NotificationPreferencesCard = () => {
+export const NotificationPreferencesCard = ({ showTicketAlerts = false, className = "mb-6" }: { showTicketAlerts?: boolean; className?: string }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
@@ -34,7 +35,7 @@ export const NotificationPreferencesCard = () => {
         .eq("id", auth.user.id)
         .maybeSingle();
       const stored = (data as any)?.email_preferences ?? {};
-      setPrefs({ weekly_updates: stored.weekly_updates !== false });
+      setPrefs({ weekly_updates: stored.weekly_updates !== false, ticket_submitted: stored.ticket_submitted !== false });
       setLoading(false);
     })();
   }, []);
@@ -55,7 +56,7 @@ export const NotificationPreferencesCard = () => {
   };
 
   return (
-    <Card className="mb-6">
+    <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold">Notificatie-instellingen</CardTitle>
       </CardHeader>
@@ -79,6 +80,21 @@ export const NotificationPreferencesCard = () => {
                 </div>
               </div>
             </div>
+
+            {showTicketAlerts && (
+              <div className="flex items-start gap-3 p-3 rounded-md border border-border">
+                <Checkbox
+                  checked={prefs.ticket_submitted}
+                  disabled={saving}
+                  onCheckedChange={(checked) => update({ ticket_submitted: !!checked })}
+                  className="mt-0.5"
+                />
+                <div>
+                  <div className="text-sm font-medium text-foreground">E-mail bij nieuwe ritbon</div>
+                  <div className="text-xs text-muted-foreground">Ontvang een e-mail zodra een begeleider een ritbon indient.</div>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-start gap-3 p-3 rounded-md border border-border hover:border-muted-foreground/30 cursor-pointer transition-colors">
               <Checkbox
