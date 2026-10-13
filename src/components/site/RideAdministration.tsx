@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy, UserPlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { CrewEditor, ConflictBanner, useConflicts, ESCORT_ROLES, type CrewMember } from "@/components/site/RideCrew";
+import { CrewEditor, ConflictBanner, useConflicts, ESCORT_ROLES, type CrewMember, RideCrewList } from "@/components/site/RideCrew";
 import { RideDocuments, uploadRideDocs, deleteRideDocs } from "@/components/site/RideDocuments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -350,7 +350,7 @@ export const RideAdministration = () => {
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-1" aria-label="Meer acties"><MoreHorizontal className="h-4 w-4" /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Documenten</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Begeleiders & documenten</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>
                       {!isEscort && <DropdownMenuItem onClick={() => setAddRow(r)}><UserPlus className="h-4 w-4 mr-2" />Begeleider toevoegen</DropdownMenuItem>}
                     </DropdownMenuContent>
@@ -462,8 +462,9 @@ export const RideAdministration = () => {
       <AddEscortDialog row={addRow} options={options} onClose={() => setAddRow(null)} onSaved={load} />
       <Sheet open={!!docsRow} onOpenChange={(v) => !v && setDocsRow(null)}>
         <SheetContent className="w-full sm:max-w-md">
-          <SheetHeader><SheetTitle>Documenten — {docsRow?.rideNumber}</SheetTitle></SheetHeader>
+          <SheetHeader><SheetTitle>Rit {docsRow?.rideNumber}</SheetTitle></SheetHeader>
           <p className="text-sm text-muted-foreground mb-3">{docsRow?.pickup} → {docsRow?.dropoff}</p>
+          {docsRow && <><h3 className="text-sm font-semibold mb-2">Begeleiders op deze rit</h3><RideCrewList rideId={docsRow.rideId} /><h3 className="text-sm font-semibold mt-5 mb-2">Documenten</h3></>}
           {docsRow && <RideDocuments clientId={docsRow.clientId} rideId={docsRow.rideId} canDelete={!isEscort} />}
         </SheetContent>
       </Sheet>
