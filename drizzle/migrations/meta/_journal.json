@@ -43,6 +43,13 @@
       "when": 1791905655582,
       "tag": "0005_relations_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791905846988,
+      "tag": "0006_rates_escort_only",
+      "breakpoints": true
     }
   ]
 }

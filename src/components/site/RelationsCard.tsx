@@ -142,7 +142,7 @@ export const RelationsCard = ({ onChange }: { onChange?: () => void }) => {
                         )}
                         {r.status === "pending" && !r.incoming && <Badge variant="outline" className="text-[11px] font-normal">Wacht op bevestiging</Badge>}
                         {r.status === "accepted" && (
-                          <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setRatesFor(r)}><Euro className="h-3.5 w-3.5 mr-1" />Tarieven bewerken</Button>
+                          <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setRatesFor(r)}><Euro className="h-3.5 w-3.5 mr-1" />{isEscort ? "Tarieven bewerken" : "Tarieven bekijken"}</Button>
                         )}
                         {!(r.status === "pending" && r.incoming) && (
                           <DropdownMenu>
