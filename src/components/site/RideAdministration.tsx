@@ -2,8 +2,9 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy } from "lucide-react";
+import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy, UserPlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CrewEditor, ConflictBanner, useConflicts, ESCORT_ROLES, type CrewMember } from "@/components/site/RideCrew";
 import { RideDocuments, uploadRideDocs, deleteRideDocs } from "@/components/site/RideDocuments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -109,6 +110,7 @@ export const RideAdministration = () => {
   const [day, setDay] = useState<number | null>(todayIdx());
   const [allWeeks, setAllWeeks] = useState(false);
   const [docsRow, setDocsRow] = useState<Row | null>(null);
+  const [addRow, setAddRow] = useState<Row | null>(null);
   const [dupFrom, setDupFrom] = useState<ReturnType<typeof rideToForm> | null>(null);
 
   const load = useCallback(async () => {
@@ -143,7 +145,7 @@ export const RideAdministration = () => {
         setRows((as ?? []).flatMap((a) => {
           const r: any = rm.get(a.ride_id);
           if (!r || r.status === "cancelled") return [];
-          return [toRow(r, a, names.get(r.client_id) ?? "Planner")];
+          return [toRow(r, a, (names.get(r.client_id) ?? "Planner") + (a.escort_role ? ` · ${a.escort_role.split(" ")[0]}` : ""))];
         }));
       } else {
         const { data: rides } = await supabase.from("rides").select("*, ride_assignments(*)").eq("client_id", user.id).neq("status", "cancelled");
@@ -301,7 +303,7 @@ export const RideAdministration = () => {
           </TableHeader>
           <TableBody>
             {list.map((r) => (
-              <TableRow key={r.rideId} data-state={r.assignmentId && selected.has(r.assignmentId) ? "selected" : undefined}>
+              <TableRow key={r.assignmentId ?? r.rideId} data-state={r.assignmentId && selected.has(r.assignmentId) ? "selected" : undefined}>
                 <TableCell className={c}>
                   {r.assignmentId && (
                     <Checkbox checked={selected.has(r.assignmentId)} onCheckedChange={(v) => toggle([r.assignmentId!], !!v)} aria-label={`Selecteer ${r.rideNumber}`} />
@@ -350,6 +352,7 @@ export const RideAdministration = () => {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Documenten</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>
+                      {!isEscort && <DropdownMenuItem onClick={() => setAddRow(r)}><UserPlus className="h-4 w-4 mr-2" />Begeleider toevoegen</DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -456,6 +459,7 @@ export const RideAdministration = () => {
       <NewRideDialog open={newOpen} onOpenChange={(v) => { setNewOpen(v); if (!v) setDupFrom(null); }} isEscort={isEscort} options={options} onCreated={load} initial={dupFrom} />
       <TicketDialog row={ticketRow} onClose={() => setTicketRow(null)} onSaved={load} />
       <ReviewDialog row={reviewRow} onClose={() => setReviewRow(null)} onSaved={load} />
+      <AddEscortDialog row={addRow} options={options} onClose={() => setAddRow(null)} onSaved={load} />
       <Sheet open={!!docsRow} onOpenChange={(v) => !v && setDocsRow(null)}>
         <SheetContent className="w-full sm:max-w-md">
           <SheetHeader><SheetTitle>Documenten — {docsRow?.rideNumber}</SheetTitle></SheetHeader>
@@ -746,5 +750,37 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
         )}
       </SheetContent>
     </Sheet>
+  );
+};
+
+const AddEscortDialog = ({ row, options, onClose, onSaved }: { row: Row | null; options: Option[]; onClose: () => void; onSaved: () => void }) => {
+  const [crew, setCrew] = useState<CrewMember[]>([{ id: "none", role: ESCORT_ROLES[1] }]);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { if (row) setCrew([{ id: "none", role: ESCORT_ROLES[1] }]); }, [row]);
+  const real = crew.filter((m) => m.id !== "none");
+  const names = useMemo(() => new Map(options.map((o) => [o.id, o.label] as [string, string])), [options]);
+  const conflicts = useConflicts(real.map((m) => m.id), row?.scheduledAt ?? null, row?.rideId);
+  const save = async () => {
+    if (!row || !real.length) return toast.error("Kies een begeleider");
+    setBusy(true);
+    for (const m of real) {
+      const { error } = await supabase.rpc("add_ride_escort", { _ride_id: row.rideId, _escort_id: m.id, _role: m.role });
+      if (error) toast.error(error.message);
+    }
+    setBusy(false);
+    supabase.functions.invoke("google-calendar-sync").catch(() => {});
+    toast.success("Begeleider(s) toegevoegd — elk krijgt een eigen ritbon");
+    onClose(); onSaved();
+  };
+  return (
+    <Dialog open={!!row} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader><DialogTitle>Begeleider toevoegen — {row?.rideNumber}</DialogTitle></DialogHeader>
+        <p className="text-sm text-muted-foreground">{row?.pickup} → {row?.dropoff} · {row && fmt(row.scheduledAt)}</p>
+        <CrewEditor crew={crew} onChange={setCrew} options={options} />
+        <ConflictBanner conflicts={conflicts} names={names} />
+        <DialogFooter><Button onClick={save} disabled={busy}>{busy ? "Opslaan…" : "Toevoegen"}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
