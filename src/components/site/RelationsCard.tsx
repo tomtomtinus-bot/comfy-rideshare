@@ -191,8 +191,7 @@ const AddRelationDialog = ({ open, isEscort, onClose, onDone }: { open: boolean;
       const q = query.toLowerCase();
       const match = ((rels ?? []) as Rel[])
         .filter((x) => x.email?.toLowerCase() === q || x.name.toLowerCase() === q || x.name.toLowerCase() === company.trim().toLowerCase())
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
-        ?? ((rels ?? []) as Rel[]).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
       if (match) {
         const { error: e2 } = await supabase.rpc("set_relation_rates", {
           _relation_id: match.id, _hourly: toNum(r.hourly), _km: toNum(r.km), _min_hours: toNum(r.min), _waiting: toNum(r.waiting),
