@@ -538,6 +538,12 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
             {!options.length && <p className="text-xs text-slate-500 mt-1">Voeg eerst een vaste relatie toe onder "Vaste relaties".</p>}
           </div>
           <div><Label>Opmerkingen</Label><Textarea rows={2} value={f.notes} onChange={set("notes")} /></div>
+          <div>
+            <Label>Documenten (ontheffing, routebeschrijving, tekeningen)</Label>
+            <Input type="file" multiple accept=".pdf,image/*,.dwg,.dxf,.doc,.docx,.xls,.xlsx" onChange={(e) => setFiles([...(e.target.files ?? [])])} />
+            {files.length > 0 && <p className="text-xs text-muted-foreground mt-1">{files.map((x) => x.name).join(", ")}</p>}
+            <p className="text-xs text-muted-foreground mt-1">Max. 20 MB per bestand. Alleen zichtbaar voor jou en de toegewezen begeleider.</p>
+          </div>
         </div>
         <DialogFooter><Button onClick={submit} disabled={busy}>{busy ? "Opslaan…" : "Rit opslaan"}</Button></DialogFooter>
       </DialogContent>
