@@ -97,3 +97,29 @@ export const RideCrewList = ({ rideId }: { rideId: string }) => {
     </div>
   );
 };
+
+const STATUS_NL: Record<string, string> = { open: "Open", matched: "Gepland", in_progress: "Onderweg", completed: "Afgerond", cancelled: "Geannuleerd",
+  none: "Geen ritbon", submitted: "Ingediend", approved: "Goedgekeurd", rejected: "Afgekeurd" };
+const nl = (v: string | null) => (v == null ? "" : STATUS_NL[v] ?? v);
+
+export const RideChangeLog = ({ rideId }: { rideId: string }) => {
+  const [log, setLog] = useState<{ created_at: string; who: string; field: string; old_value: string | null; new_value: string | null }[]>([]);
+  useEffect(() => {
+    supabase.rpc("get_ride_change_log", { _ride_id: rideId }).then(({ data }) => setLog((data ?? []) as any));
+  }, [rideId]);
+  if (!log.length) return <p className="text-sm text-muted-foreground">Nog geen wijzigingen.</p>;
+  return (
+    <ol className="relative border-l border-border ml-1.5 space-y-3">
+      {log.map((l, i) => (
+        <li key={i} className="ml-4">
+          <span className="absolute -left-[5px] mt-1.5 h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
+          <p className="text-xs text-muted-foreground">{fmt(l.created_at)} · {l.who}</p>
+          <p className="text-sm"><span className="font-medium">{l.field}:</span>{" "}
+            {l.old_value != null && <span className="text-muted-foreground line-through mr-1">{nl(l.old_value)}</span>}
+            {nl(l.new_value)}
+          </p>
+        </li>
+      ))}
+    </ol>
+  );
+};

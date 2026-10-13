@@ -29,12 +29,13 @@ export const TicketsOverview = ({ search, dateFrom, dateTo }: { search: string; 
       const { data: rides } = await supabase.from("rides").select("*, ride_assignments(*)").eq("client_id", user.id).neq("status", "cancelled");
       const out: T[] = [];
       (rides ?? []).forEach((r: any) => (r.ride_assignments ?? []).forEach((a: any) => {
-        if (!["approved", "submitted"].includes(a.ticket_status)) return;
+        if (a.ticket_status !== "approved") return;
         out.push({
           id: a.id, date: r.scheduled_at, rideNumber: r.ride_number ?? "", reference: r.client_reference || r.permit_number || "",
           route: `${r.pickup_city ?? ""} → ${r.dropoff_city ?? ""}`, escort: names.get(a.escort_id) ?? "Begeleider",
           hours: a.actual_hours, km: a.ticket_km, waiting: a.ticket_waiting_hours, expenses: a.ticket_expenses, amount: a.actual_cost,
           status: a.ticket_status, invoiced: !!a.invoiced_at,
+          permit: r.permit_number ?? "", clientRef: r.client_reference ?? "", role: a.escort_role ?? "", bd: a.ticket_breakdown ?? null,
         });
       }));
       out.sort((x, y) => (x.escort.localeCompare(y.escort, "nl") || y.date.localeCompare(x.date)));
@@ -58,8 +59,17 @@ export const TicketsOverview = ({ search, dateFrom, dateTo }: { search: string; 
   const exportCsv = () => {
     const num = (n: number | null) => n == null ? "" : String(n).replace(".", ",");
     const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const head = ["Datum", "Ritnummer", "Referentie", "Traject", "Begeleider", "Uren", "Km", "Wachturen", "Onkosten", "Bedrag", "Gefactureerd"];
-    const lines = filtered.map((r) => [dnl(r.date), r.rideNumber, r.reference, r.route, r.escort, num(r.hours), num(r.km), num(r.waiting), num(r.expenses), num(r.amount), r.invoiced ? "Ja" : "Nee"].map((v) => esc(String(v))).join(";"));
+    const head = ["Datum", "Ritnummer", "Dossier-/vergunningnummer", "Eigen referentie", "Traject", "Begeleider", "Rol",
+      "Uren", "Factureerbare uren", "Uurtarief", "Bedrag uren", "Km", "Km-tarief", "Bedrag km", "Wachturen", "Bedrag wachturen",
+      "Toeslag", "Toeslag %", "Bedrag toeslag", "Brandstoftoeslag", "Onkosten", "Correctie", "Totaal excl. btw", "Gefactureerd"];
+    const lines = filtered.map((r) => {
+      const b: any = r.bd ?? {};
+      return [dnl(r.date), r.rideNumber, r.permit, r.clientRef, r.route, r.escort, r.role,
+        num(r.hours), num(b.billable_hours ?? null), num(b.hourly_rate ?? null), num(b.hours_amount ?? b.fixed_amount ?? null),
+        num(r.km), num(b.km_rate ?? null), num(b.km_amount ?? null), num(r.waiting), num(b.waiting_amount ?? null),
+        b.surcharge_label ?? "", num(b.surcharge_pct ?? null), num(b.surcharge_amount ?? null), num(b.fuel_amount ?? null),
+        num(b.expenses_amount ?? r.expenses), num(b.correction ?? null), num(r.amount), r.invoiced ? "Ja" : "Nee"].map((v) => esc(String(v))).join(";");
+    });
     const blob = new Blob(["\uFEFF" + [head.join(";"), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
