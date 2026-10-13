@@ -361,7 +361,7 @@ export const RideAdministration = () => {
               <SelectTrigger className="h-8 w-[160px] text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Ritbon: alles</SelectItem>
-                <SelectItem value="submitted">Ter controle</SelectItem>
+                <SelectItem value="rejected">Afgekeurd</SelectItem>
                 <SelectItem value="approved">Goedgekeurd</SelectItem>
                 <SelectItem value="none">Nog geen ritbon</SelectItem>
               </SelectContent>
@@ -537,7 +537,7 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     } as any);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Ritbon ingediend — de planner kan hem nu controleren");
+    toast.success("Ritbon ingediend en automatisch goedgekeurd");
     onClose();
     onSaved();
   };
