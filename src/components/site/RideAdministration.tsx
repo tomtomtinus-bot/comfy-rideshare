@@ -535,6 +535,7 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Ritbon ingediend en automatisch goedgekeurd");
+    supabase.functions.invoke("notify-ticket-submitted", { body: { assignmentId: row.assignmentId } }).catch(() => {});
     onClose();
     onSaved();
   };
