@@ -57,6 +57,13 @@
       "when": 1791908473951,
       "tag": "0007_ride_docs_escort_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791908794964,
+      "tag": "0008_ride_docs_escort_delete",
+      "breakpoints": true
     }
   ]
 }
