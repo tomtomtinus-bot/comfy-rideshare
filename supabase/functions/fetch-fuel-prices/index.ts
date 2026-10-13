@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 const TLN_XLSX_URL =
-  "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/Weekgemiddelde-dieselprijs.xlsx";
+  "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/weekgemiddelde_dieselprijs.xlsx";
 
 function isoMonday(d: Date): string {
   const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
     // gemiddelden per ISO-week en voegen die toe.
     try {
       const DAG_URL =
-        "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/Dagelijkse-dieselprijs.xlsx";
+        "https://cms.tln.nl/storage/media/06.Ledenvoordeel/Brandstofmonitor/dagelijkse_dieselprijs.xlsx";
       const dRes = await fetch(DAG_URL);
       if (dRes.ok) {
         const dBuf = new Uint8Array(await dRes.arrayBuffer());
