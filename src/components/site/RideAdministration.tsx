@@ -623,6 +623,7 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
 const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () => void; onSaved: () => void }) => {
   const [v, setV] = useState({ hours: "", km: "", waiting: "", correction: "", correctionNote: "", notes: "" });
   const [items, setItems] = useState<{ description: string; amount: string }[]>([]);
+  const [surs, setSurs] = useState<{ description: string; hours: string; pct: string }[]>([]);
   const [preview, setPreview] = useState<Breakdown | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -630,14 +631,17 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     const b = row?.breakdown;
     setV({ hours: s(row?.hours), km: s(row?.km), waiting: s(row?.waiting), correction: b?.correction ? String(b.correction) : "",
       correctionNote: (b as any)?.correction_note ?? "", notes: row?.notes ?? "" });
-    setItems((b?.expenses ?? []).map((e) => ({ description: e.description ?? "", amount: String(e.amount) })));
+    setItems((b?.expenses ?? []).filter((e: any) => e.kind !== "surcharge").map((e) => ({ description: e.description ?? "", amount: String(e.amount) })));
+    setSurs(((b as any)?.surcharges ?? []).map((x: any) => ({ description: x.description ?? "", hours: String(x.hours ?? ""), pct: String(x.pct ?? "") })));
     setPreview(null);
   }, [row]);
   const set = (k: keyof typeof v) => (e: any) => setV({ ...v, [k]: e.target.value });
 
   const payloadItems = items
     .filter((i) => i.amount.trim() !== "")
-    .map((i) => ({ description: i.description.trim(), amount: num(i.amount) ?? 0 }));
+    .map((i) => ({ description: i.description.trim(), amount: num(i.amount) ?? 0 }) as Record<string, unknown>)
+    .concat(surs.filter((x) => x.pct.trim() !== "" && x.hours.trim() !== "")
+      .map((x) => ({ kind: "surcharge", description: x.description.trim() || "Toeslag", hours: num(x.hours) ?? 0, pct: num(x.pct) ?? 0, amount: 0 })));
 
   useEffect(() => {
     if (!row?.assignmentId) return;
@@ -650,7 +654,7 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     }, 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row, v.hours, v.km, v.waiting, v.correction, JSON.stringify(items)]);
+  }, [row, v.hours, v.km, v.waiting, v.correction, JSON.stringify(items), JSON.stringify(surs)]);
 
   const save = async () => {
     if (!row?.assignmentId) return;
@@ -698,6 +702,34 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
                 <Button type="button" size="icon" variant="ghost" aria-label="Verwijderen" onClick={() => setItems(items.filter((_, j) => j !== idx))}><X className="h-4 w-4" /></Button>
               </div>
             ))}
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center justify-between">
+            <Label>Toeslagen</Label>
+            <div className="flex gap-1">
+              {[["Nacht", "25"], ["Weekend", "50"], ["Feestdag", "100"]].map(([l, p]) => (
+                <Button key={l} type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs"
+                  onClick={() => setSurs([...surs, { description: `${l}toeslag`, hours: v.hours, pct: p }])}>+ {l}</Button>
+              ))}
+              <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setSurs([...surs, { description: "", hours: v.hours, pct: "" }])}>
+                <Plus className="h-3.5 w-3.5 mr-1" />Anders
+              </Button>
+            </div>
+          </div>
+          {surs.length === 0 && <p className="text-xs text-slate-500">Alleen indien van toepassing: kies het soort toeslag, het aantal toeslaguren en het percentage.</p>}
+          <div className="space-y-2">
+            {surs.map((it, idx) => {
+              const upd = (k: "description" | "hours" | "pct") => (e: any) => setSurs(surs.map((x, j) => (j === idx ? { ...x, [k]: e.target.value } : x)));
+              return (
+                <div key={idx} className="flex gap-2">
+                  <Input placeholder="Omschrijving" value={it.description} onChange={upd("description")} />
+                  <Input className="w-20" inputMode="decimal" placeholder="uren" value={it.hours} onChange={upd("hours")} aria-label="Toeslaguren" />
+                  <Input className="w-20" inputMode="decimal" placeholder="%" value={it.pct} onChange={upd("pct")} aria-label="Percentage" />
+                  <Button type="button" size="icon" variant="ghost" aria-label="Verwijderen" onClick={() => setSurs(surs.filter((_, j) => j !== idx))}><X className="h-4 w-4" /></Button>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">

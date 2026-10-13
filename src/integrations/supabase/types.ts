@@ -1189,6 +1189,7 @@ export type Database = {
           holiday_pct: number
           hourly_rate: number
           km_rate: number
+          min_amount: number
           min_hours: number
           night_pct: number
           relation_id: string
@@ -1201,6 +1202,7 @@ export type Database = {
           holiday_pct?: number
           hourly_rate?: number
           km_rate?: number
+          min_amount?: number
           min_hours?: number
           night_pct?: number
           relation_id: string
@@ -1213,6 +1215,7 @@ export type Database = {
           holiday_pct?: number
           hourly_rate?: number
           km_rate?: number
+          min_amount?: number
           min_hours?: number
           night_pct?: number
           relation_id?: string
@@ -2516,6 +2519,10 @@ export type Database = {
           _waiting: number
           _weekend_pct: number
         }
+        Returns: undefined
+      }
+      set_relation_rates_v2: {
+        Args: { _hourly: number; _min_amount: number; _relation_id: string }
         Returns: undefined
       }
       submit_ride_ticket: {

@@ -85,6 +85,13 @@
       "when": 1791909408820,
       "tag": "0011_ride_change_log",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791909581157,
+      "tag": "0012_simplify_relation_rates",
+      "breakpoints": true
     }
   ]
 }

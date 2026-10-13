@@ -14,6 +14,8 @@ export interface Breakdown {
   surcharge_label: string | null;
   surcharge_pct: number;
   surcharge_amount: number;
+  surcharges?: { description: string; hours: number; pct: number; amount: number }[];
+  min_amount?: number;
   fuel_amount?: number;
   expenses: { description?: string; amount: number }[];
   expenses_amount: number;
@@ -44,13 +46,16 @@ export const BreakdownView = ({ b }: { b: Breakdown }) => (
     ) : (
       <Line
         label="Uren"
-        calc={`${n2(b.billable_hours)} u × ${eur(b.hourly_rate)}${Number(b.billable_hours) > Number(b.hours) ? ` (min. ${n2(b.min_hours)} u)` : ""}`}
+        calc={Number(b.min_amount ?? 0) > 0 && Number(b.hours_amount) <= Number(b.min_amount) && Number(b.billable_hours) * Number(b.hourly_rate) < Number(b.min_amount)
+          ? `minimumtarief (${n2(b.billable_hours)} u × ${eur(b.hourly_rate)})`
+          : `${n2(b.billable_hours)} u × ${eur(b.hourly_rate)}${Number(b.billable_hours) > Number(b.hours) ? ` (min. ${n2(b.min_hours)} u)` : ""}`}
         amount={b.hours_amount}
       />
     )}
     {Number(b.km) > 0 && <Line label="Kilometers" calc={`${n2(b.km)} km × ${eur(b.km_rate)}`} amount={b.km_amount} />}
     {Number(b.waiting_hours) > 0 && <Line label="Wachturen" calc={`${n2(b.waiting_hours)} u × ${eur(b.waiting_rate)}`} amount={b.waiting_amount} />}
-    {Number(b.surcharge_amount) > 0 && <Line label={b.surcharge_label ?? "Toeslag"} calc={`${n2(b.surcharge_pct)}%`} amount={b.surcharge_amount} />}
+    {(b.surcharges ?? []).map((x, i) => <Line key={`s${i}`} label={x.description} calc={`${n2(x.hours)} u × ${eur(b.hourly_rate)} × ${n2(x.pct)}%`} amount={x.amount} />)}
+    {!b.surcharges && Number(b.surcharge_amount) > 0 && <Line label={b.surcharge_label ?? "Toeslag"} calc={`${n2(b.surcharge_pct)}%`} amount={b.surcharge_amount} />}
     {Number(b.fuel_amount ?? 0) > 0 && <Line label="Brandstoftoeslag" calc="volgens dieselstaffel" amount={Number(b.fuel_amount)} />}
     {(b.expenses ?? []).map((e, i) => <Line key={i} label={e.description || "Onkosten"} amount={e.amount} />)}
     {Number(b.correction) !== 0 && <Line label="Correctie" calc={b.correction_note ?? undefined} amount={b.correction} />}
