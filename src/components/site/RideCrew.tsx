@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Plus, X } from "lucide-react";
+import { AlertTriangle, Phone, Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const ESCORT_ROLES = ["V1 – Voorwagen", "V2 – Achterwagen", "V3", "V4"];
+export const ESCORT_ROLES = ["V1", "V2", "V3", "V4"];
 export interface CrewMember { id: string; role: string }
 
 interface Conflict { escortId: string; label: string; at: string }
@@ -56,7 +56,7 @@ export const CrewEditor = ({ crew, onChange, options }: {
       {crew.map((m, i) => (
         <div key={i} className="flex gap-2">
           <Select value={m.role} onValueChange={(v) => upd(i, { role: v })}>
-            <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-[80px]"><SelectValue /></SelectTrigger>
             <SelectContent>{ESCORT_ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
           </Select>
           <Select value={m.id} onValueChange={(v) => upd(i, { id: v })}>
@@ -74,6 +74,26 @@ export const CrewEditor = ({ crew, onChange, options }: {
           <Plus className="h-4 w-4 mr-1" />Begeleider toevoegen
         </Button>
       )}
+    </div>
+  );
+};
+
+export const RideCrewList = ({ rideId }: { rideId: string }) => {
+  const [crew, setCrew] = useState<{ escort_id: string; name: string; phone: string | null; escort_role: string | null }[]>([]);
+  useEffect(() => {
+    supabase.rpc("get_ride_crew", { _ride_id: rideId }).then(({ data }) => setCrew((data ?? []) as any));
+  }, [rideId]);
+  if (!crew.length) return <p className="text-sm text-muted-foreground">Nog geen begeleiders toegewezen.</p>;
+  return (
+    <div className="space-y-1.5">
+      {crew.map((c) => (
+        <div key={c.escort_id} className="flex items-center gap-2 rounded-md border px-2 py-1.5 text-sm">
+          <span className="w-8 text-xs font-semibold text-muted-foreground">{c.escort_role ?? "–"}</span>
+          <span className="flex-1 truncate">{c.name}</span>
+          {c.phone ? <a href={`tel:${c.phone}`} className="inline-flex items-center gap-1 text-xs hover:underline"><Phone className="h-3.5 w-3.5" />{c.phone}</a>
+            : <span className="text-xs text-muted-foreground">geen telefoon</span>}
+        </div>
+      ))}
     </div>
   );
 };
