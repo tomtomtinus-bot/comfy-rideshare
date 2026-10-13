@@ -1273,6 +1273,7 @@ export type Database = {
           created_at: string
           departed_base_at: string | null
           escort_id: string
+          escort_role: string | null
           estimated_cost: number | null
           estimated_hours: number | null
           extra_costs: Json
@@ -1329,6 +1330,7 @@ export type Database = {
           created_at?: string
           departed_base_at?: string | null
           escort_id: string
+          escort_role?: string | null
           estimated_cost?: number | null
           estimated_hours?: number | null
           extra_costs?: Json
@@ -1385,6 +1387,7 @@ export type Database = {
           created_at?: string
           departed_base_at?: string | null
           escort_id?: string
+          escort_role?: string | null
           estimated_cost?: number | null
           estimated_hours?: number | null
           extra_costs?: Json
@@ -2000,6 +2003,10 @@ export type Database = {
         Returns: undefined
       }
       add_relation: { Args: { _query: string }; Returns: string }
+      add_ride_escort: {
+        Args: { _escort_id: string; _ride_id: string; _role: string }
+        Returns: string
+      }
       admin_approve_user: { Args: { _user_id: string }; Returns: undefined }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_list_users: {
@@ -2049,6 +2056,14 @@ export type Database = {
           _waiting: number
         }
         Returns: Json
+      }
+      check_escort_conflicts: {
+        Args: { _at: string; _escort_id: string; _exclude_ride?: string }
+        Returns: {
+          own: boolean
+          ride_label: string
+          scheduled_at: string
+        }[]
       }
       claim_initial_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
