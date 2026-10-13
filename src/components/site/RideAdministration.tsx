@@ -448,11 +448,24 @@ const emptyRide = {
   length: "", width: "", height: "", weight: "", plates: "", rateType: "hourly", rate: "", party: "none",
 };
 
-const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
-  open: boolean; onOpenChange: (v: boolean) => void; isEscort: boolean; options: Option[]; onCreated: () => void;
+export const rideToForm = (r: any): typeof emptyRide => {
+  const s = (x: any) => (x == null ? "" : String(x));
+  return {
+    ...emptyRide,
+    pickup: r.pickup_address ?? "", dropoff: r.dropoff_address ?? "",
+    permit: s(r.permit_number), reference: s(r.client_reference), notes: s(r.notes),
+    length: s(r.cargo_length_m), width: s(r.cargo_width_m), height: s(r.cargo_height_m), weight: s(r.cargo_weight_t),
+    plates: (r.license_plates ?? []).join(", "), rateType: r.rate_type ?? "hourly", rate: s(r.rate_amount),
+  };
+};
+
+const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initial }: {
+  open: boolean; onOpenChange: (v: boolean) => void; isEscort: boolean; options: Option[]; onCreated: () => void; initial?: typeof emptyRide | null;
 }) => {
   const [f, setF] = useState(emptyRide);
+  const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
+  useEffect(() => { if (open) { setF(initial ?? emptyRide); setFiles([]); } }, [open, initial]);
   const set = (k: keyof typeof f) => (e: any) => setF({ ...f, [k]: e?.target ? e.target.value : e });
 
   const submit = async () => {
@@ -465,7 +478,7 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
       const [p, d] = (geo?.results ?? []) as any[];
       if (p?.lat == null || d?.lat == null) throw new Error("Adres niet gevonden, controleer laad- en loslocatie");
       const scheduled = new Date(`${f.date}T${f.time || "00:00"}`).toISOString();
-      const { error } = await supabase.rpc("create_relation_ride", {
+      const { data: rideId, error } = await supabase.rpc("create_relation_ride", {
         _pickup_address: p.formatted ?? f.pickup, _pickup_city: cityOf(p.formatted ?? f.pickup, f.pickup), _pickup_lat: p.lat, _pickup_lng: p.lng,
         _dropoff_address: d.formatted ?? f.dropoff, _dropoff_city: cityOf(d.formatted ?? f.dropoff, f.dropoff), _dropoff_lat: d.lat, _dropoff_lng: d.lng,
         _scheduled_at: scheduled, _permit_number: f.permit, _client_reference: f.reference, _notes: f.notes,
@@ -475,9 +488,15 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
         _counterparty: f.party === "none" ? null : f.party,
       } as any);
       if (error) throw error;
+      if (files.length && rideId) {
+        const { data: { user: me } } = await supabase.auth.getUser();
+        const clientId = isEscort ? f.party : me?.id;
+        if (clientId) await uploadRideDocs(clientId, rideId as string, files);
+      }
       supabase.functions.invoke("google-calendar-sync").catch(() => {});
       toast.success("Rit toegevoegd");
       setF(emptyRide);
+      setFiles([]);
       onOpenChange(false);
       onCreated();
     } catch (e: any) {
@@ -490,7 +509,8 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated }: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><Route className="h-5 w-5" />Nieuwe rit toevoegen</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-2"><Route className="h-5 w-5" />{initial ? "Rit dupliceren" : "Nieuwe rit toevoegen"}</DialogTitle></DialogHeader>
+        {initial && <p className="text-sm text-muted-foreground -mt-2">Route, afmetingen en referenties zijn overgenomen. Kies nog datum, tijd en toewijzing.</p>}
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Dossier-/vergunningnummer</Label><Input value={f.permit} onChange={set("permit")} /></div>
