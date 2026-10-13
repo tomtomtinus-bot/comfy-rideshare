@@ -103,6 +103,7 @@ export const RideAdministration = () => {
   const [tab, setTab] = useState<Bucket>("week");
   const [dayWeek, setDayWeek] = useState(0);
   const [day, setDay] = useState<number | null>(todayIdx());
+  const [allWeeks, setAllWeeks] = useState(false);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -186,8 +187,13 @@ export const RideAdministration = () => {
       return d >= dayWeekStart && d < end;
     });
   }, [filtered, dayWeekStart]);
-  const weekRows = useMemo(() => weekAll.filter((r) => bucketOf(r) === "week").sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt)), [weekAll]);
-  const doneRows = useMemo(() => weekAll.filter((r) => bucketOf(r) === "afgerond").sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt)), [weekAll]);
+  const activeRows = allWeeks ? filtered : weekAll;
+  const weekRows = useMemo(() => activeRows.filter((r) => bucketOf(r) === "week").sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt)), [activeRows]);
+  const doneRows = useMemo(() => activeRows.filter((r) => bucketOf(r) === "afgerond").sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt)), [activeRows]);
+  const allCounts = useMemo(() => ({
+    week: filtered.filter((r) => bucketOf(r) === "week").length,
+    afgerond: filtered.filter((r) => bucketOf(r) === "afgerond").length,
+  }), [filtered]);
   const dayIdxOf = (r: Row) => (new Date(r.scheduledAt).getDay() + 6) % 7;
   const activeWeekRows = tab === "afgerond" ? doneRows : weekRows;
   const dayCounts = useMemo(() => {
@@ -198,15 +204,25 @@ export const RideAdministration = () => {
 
   const grouped = useMemo(() => {
     const g: Record<Bucket, Row[]> = { week: [], afgerond: [] };
-    g.week = day == null ? weekRows : weekRows.filter((r) => dayIdxOf(r) === day);
-    g.afgerond = day == null ? doneRows : doneRows.filter((r) => dayIdxOf(r) === day);
+    if (allWeeks) {
+      g.week = weekRows;
+      g.afgerond = doneRows;
+    } else {
+      g.week = day == null ? weekRows : weekRows.filter((r) => dayIdxOf(r) === day);
+      g.afgerond = day == null ? doneRows : doneRows.filter((r) => dayIdxOf(r) === day);
+    }
     return g;
-  }, [weekRows, doneRows, day]);
+  }, [weekRows, doneRows, day, allWeeks]);
 
   const shiftDayWeek = (n: number) => {
     const next = dayWeek + n;
     setDayWeek(next);
     setDay(next === 0 ? todayIdx() : null);
+  };
+
+  const toggleAllWeeks = () => {
+    setAllWeeks((v) => !v);
+    setDay(null);
   };
 
   const toReview = rows.filter((r) => r.ticketStatus === "submitted").length;
