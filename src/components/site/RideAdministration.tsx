@@ -171,7 +171,7 @@ export const RideAdministration = () => {
       if (cpFilter !== "all" && r.counterparty !== cpFilter) return false;
       if (ticketFilter !== "all" && r.ticketStatus !== ticketFilter) return false;
       if (needle) {
-        const hay = [r.rideNumber, r.permit, r.reference, r.pickup, r.dropoff, `${r.pickup} ${r.dropoff}`, ...r.plates].filter(Boolean).join(" ").toLowerCase();
+        const hay = [r.rideNumber, r.permit, r.reference, r.pickup, r.dropoff, `${r.pickup} ${r.dropoff}`, r.counterparty, ...r.plates].filter(Boolean).join(" ").toLowerCase();
         if (!hay.includes(needle)) return false;
       }
       return true;
@@ -365,7 +365,7 @@ export const RideAdministration = () => {
           <div className="flex flex-wrap items-center gap-2 mb-2 rounded-lg border bg-muted/40 p-2">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek dossier, referentie, traject, kenteken…" className="h-8 pl-8 text-sm" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Zoek dossier, referentie, traject, kenteken, ${isEscort ? "planner" : "begeleider"}…`} className="h-8 pl-8 text-sm" />
             </div>
             <Select value={cpFilter} onValueChange={setCpFilter}>
               <SelectTrigger className="h-8 w-[170px] text-sm"><SelectValue /></SelectTrigger>
