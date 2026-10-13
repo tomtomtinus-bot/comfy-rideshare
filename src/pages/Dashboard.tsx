@@ -1409,23 +1409,20 @@ const DashboardInner = () => {
     <div className="min-h-screen bg-background text-foreground">
       <SeoHead title="Dashboard | ViaCust" description="Bekijk en beheer je transportritten, planningen en opdrachten in ViaCust." />
       <Nav />
-      <main className="px-6 md:px-8 py-6 md:py-8 min-h-[calc(100vh-5rem)]">
-        <div className="max-w-7xl mx-auto">
+      <main className="px-4 md:px-6 py-4 md:py-6 min-h-[calc(100vh-5rem)]">
+        <div className="w-full">
           {!isDriver && <InstallAppBanner />}
-          {!isDriver && <OnboardingChecklist />}
           {loading || companyLoading ? (
             <p className="text-sm text-brass-deep/80">{t("common.loading")}</p>
           ) : role === "begeleider" ? (
             isDriver ? <DriverDashboard /> : (
               <div className="space-y-6">
                 <RideAdministration />
-                <GoogleAgendaStatus />
               </div>
             )
           ) : (
             <div className="space-y-6">
               <RideAdministration />
-              <GoogleCalendarCard />
             </div>
           )}
         </div>

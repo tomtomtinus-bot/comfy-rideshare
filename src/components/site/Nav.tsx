@@ -32,9 +32,10 @@ export const Nav = () => {
 
   // Primary nav: keep slim and Title Case
   const primary: { to: string; label: string; show: boolean }[] = [
-    { to: "/dashboard", label: "Dashboard", show: !!user },
-    
-    { to: "/facturen", label: "Facturen", show: showFinance },
+    { to: "/dashboard", label: "Ritten", show: !!user },
+    { to: "/begeleiders", label: role === "begeleider" ? "Relaties" : "Begeleiders", show: !!user && !isDriver },
+    { to: "/facturen", label: "Facturatie", show: showFinance },
+    { to: "/instellingen", label: "Instellingen", show: !!user },
   ];
 
   const myViacust: { to: string; label: string; show: boolean }[] = [

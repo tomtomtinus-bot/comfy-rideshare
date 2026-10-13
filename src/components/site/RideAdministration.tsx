@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RelationsCard } from "@/components/site/RelationsCard";
 import { BreakdownView, type Breakdown } from "@/components/site/TicketBreakdown";
 
 type Bucket = "gepland" | "vandaag" | "afgerond";
@@ -381,8 +380,6 @@ export const RideAdministration = () => {
           )}
         </Tabs>
       </Card>
-
-      <RelationsCard onChange={load} />
 
       <NewRideDialog open={newOpen} onOpenChange={setNewOpen} isEscort={isEscort} options={options} onCreated={load} />
       <TicketDialog row={ticketRow} onClose={() => setTicketRow(null)} onSaved={load} />

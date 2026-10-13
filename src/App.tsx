@@ -14,6 +14,8 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import RequestRide from "./pages/RequestRide.tsx";
+import Relations from "./pages/Relations";
+import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard.tsx";
 import EscortSettings from "./pages/EscortSettings.tsx";
 import Invoices from "./pages/Invoices.tsx";
@@ -77,6 +79,8 @@ const App = () => (
             <Route path="/kies-rol" element={<RolePicker />} />
             <Route path="/aanvragen" element={<RequestRide />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/begeleiders" element={<Relations />} />
+            <Route path="/instellingen" element={<Settings />} />
             <Route path="/profiel" element={<EscortSettings />} />
             <Route path="/facturen" element={<Invoices />} />
             <Route path="/facturatiegegevens" element={<BillingDetails />} />
