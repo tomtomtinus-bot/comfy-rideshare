@@ -147,9 +147,11 @@ export const RideAdministration = () => {
         }));
       } else {
         const { data: rides } = await supabase.from("rides").select("*, ride_assignments(*)").eq("client_id", user.id).neq("status", "cancelled");
-        setRows((rides ?? []).map((r: any) => {
-          const a = (r.ride_assignments ?? []).find((x: any) => x.status === "accepted");
-          return toRow(r, a, a ? names.get(a.escort_id) ?? "Begeleider" : "Nog niet toegewezen");
+        setRows((rides ?? []).flatMap((r: any) => {
+          const as = (r.ride_assignments ?? []).filter((x: any) => x.status === "accepted")
+            .sort((x: any, y: any) => String(x.escort_role ?? "").localeCompare(String(y.escort_role ?? "")));
+          if (!as.length) return [toRow(r, null, "Nog niet toegewezen")];
+          return as.map((a: any) => toRow(r, a, (names.get(a.escort_id) ?? "Begeleider") + (a.escort_role ? ` (${a.escort_role.split(" ")[0]})` : "")));
         }));
       }
     } finally {
@@ -487,7 +489,13 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
   const [f, setF] = useState(emptyRide);
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
-  useEffect(() => { if (open) { setF(initial ?? emptyRide); setFiles([]); } }, [open, initial]);
+  const [crew, setCrew] = useState<CrewMember[]>([{ id: "none", role: ESCORT_ROLES[0] }]);
+  const { user: me } = useAuth();
+  useEffect(() => { if (open) { setF(initial ?? emptyRide); setFiles([]); setCrew([{ id: "none", role: ESCORT_ROLES[0] }]); } }, [open, initial]);
+  const realCrew = crew.filter((m) => m.id !== "none");
+  const names = useMemo(() => new Map(options.map((o) => [o.id, o.label] as [string, string]).concat(me ? [[me.id, "Jij"]] : [])), [options, me]);
+  const checkAt = f.date ? new Date(`${f.date}T${f.time || "00:00"}`).toISOString() : null;
+  const conflicts = useConflicts(isEscort ? (me ? [me.id] : []) : realCrew.map((m) => m.id), checkAt);
   const set = (k: keyof typeof f) => (e: any) => setF({ ...f, [k]: e?.target ? e.target.value : e });
 
   const submit = async () => {
@@ -507,9 +515,15 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
         _length_m: num(f.length), _width_m: num(f.width), _height_m: num(f.height), _weight_t: num(f.weight),
         _plates: f.plates.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean),
         _rate_type: f.rateType, _rate_amount: num(f.rate),
-        _counterparty: f.party === "none" ? null : f.party,
+        _counterparty: isEscort ? (f.party === "none" ? null : f.party) : (realCrew[0]?.id ?? null),
       } as any);
       if (error) throw error;
+      if (!isEscort && rideId) {
+        for (const m of realCrew) {
+          const { error: e2 } = await supabase.rpc("add_ride_escort", { _ride_id: rideId as string, _escort_id: m.id, _role: m.role });
+          if (e2) toast.error(e2.message);
+        }
+      }
       if (files.length && rideId) {
         const { data: { user: me } } = await supabase.auth.getUser();
         const clientId = isEscort ? f.party : me?.id;
@@ -569,16 +583,21 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
             <div><Label>Bedrag (€, excl. btw)</Label><Input value={f.rate} onChange={set("rate")} inputMode="decimal" /></div>
           </div>
           <div>
-            <Label>{isEscort ? "Planner" : "Begeleider (optioneel)"}</Label>
-            <Select value={f.party} onValueChange={set("party")}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">{isEscort ? "Kies planner" : "Nog niet toewijzen"}</SelectItem>
-                {options.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label>{isEscort ? "Planner" : "Begeleider(s) (optioneel)"}</Label>
+            {isEscort ? (
+              <Select value={f.party} onValueChange={set("party")}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Kies planner</SelectItem>
+                  {options.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <CrewEditor crew={crew} onChange={setCrew} options={options} />
+            )}
             {!options.length && <p className="text-xs text-slate-500 mt-1">Voeg eerst een vaste relatie toe onder "Vaste relaties".</p>}
           </div>
+          <ConflictBanner conflicts={conflicts} names={names} />
           <div><Label>Opmerkingen</Label><Textarea rows={2} value={f.notes} onChange={set("notes")} /></div>
           <div>
             <Label>Documenten (ontheffing, routebeschrijving, tekeningen)</Label>
