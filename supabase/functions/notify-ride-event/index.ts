@@ -6,6 +6,7 @@
 // Body: { event, rideId?, assignmentId?, escortUserId?, summary?, reason?, invoiceId?, paymentEvent? }
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -82,21 +83,10 @@ async function loadProfileName(admin: ReturnType<typeof getAdmin>, userId: strin
 }
 
 async function send(_admin: ReturnType<typeof getAdmin>, templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, any>) {
-  const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-transactional-email`;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${serviceKey}`,
-        "apikey": serviceKey,
-      },
-      body: JSON.stringify({ templateName, recipientEmail, idempotencyKey, templateData }),
-    });
-    const txt = await res.text();
-    if (!res.ok) {
-      console.error(`[notify] send ${templateName} -> ${recipientEmail} FAILED ${res.status}: ${txt}`);
+    const res = await sendAppEmail({ templateName, recipientEmail, idempotencyKey, templateData });
+    if (!res.success) {
+      console.error(`[notify] send ${templateName} -> ${recipientEmail} not sent: ${res.reason}`);
       return false;
     }
     console.log(`[notify] send ${templateName} -> ${recipientEmail} OK`);

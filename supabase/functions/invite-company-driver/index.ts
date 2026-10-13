@@ -1,7 +1,8 @@
 // Invites a driver to the planner's company. Creates an invitation row and
-// enqueues an email via send-transactional-email.
+// sends an invitation email.
 
 import { createClient } from 'npm:@supabase/supabase-js@2.95.0'
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -115,20 +116,17 @@ Deno.serve(async (req) => {
       .maybeSingle()
 
     // E-mail in queue zetten.
-    await admin.functions.invoke('send-transactional-email', {
-      body: {
-        to: emailRaw,
-        template: 'company-invitation',
-        data: {
-          companyName: company.name,
-          inviterName: inviter?.full_name ?? 'Een bedrijfsplanner',
-          email: emailRaw,
-          acceptUrl,
-        },
-        idempotency_key: `company-invite-${invitation.id}`,
-        purpose: 'transactional',
+    await sendAppEmail({
+      templateName: 'company-invitation',
+      recipientEmail: emailRaw,
+      templateData: {
+        companyName: company.name,
+        inviterName: inviter?.full_name ?? 'Een bedrijfsplanner',
+        email: emailRaw,
+        acceptUrl,
       },
-    }).catch((e) => console.error('email enqueue failed', e))
+      idempotencyKey: `company-invite-${invitation.id}`,
+    }).catch((e) => console.error('email send failed', e))
 
     return new Response(JSON.stringify({ ok: true, invitationId: invitation.id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

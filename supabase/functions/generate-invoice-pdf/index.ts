@@ -2,6 +2,7 @@
 // uploads it to the private "invoices" bucket, stores the pdf_path,
 // and returns a short-lived signed download URL.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 import { jsPDF } from "npm:jspdf@2.5.2";
 import * as autoTableModule from "npm:jspdf-autotable@3.8.4";
 
@@ -919,14 +920,7 @@ Deno.serve(async (req) => {
       const fmtMoney = (n: number) =>
         `€ ${Number(n).toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       try {
-        const sendRes = await fetch(`${url}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${serviceKey}`,
-            apikey: serviceKey,
-          },
-          body: JSON.stringify({
+        const sendRes = await sendAppEmail({
             templateName: "invoice-to-client",
             recipientEmail: to.billing_email,
             fromAddress: "invoice",
@@ -941,10 +935,9 @@ Deno.serve(async (req) => {
               pdfUrl: signed.signedUrl,
               xmlUrl: signedXml.signedUrl,
             },
-          }),
-        });
-        if (!sendRes.ok) {
-          console.error("invoice email send failed", await sendRes.text());
+          });
+        if (!sendRes.success) {
+          console.error("invoice email not sent", sendRes.reason);
         }
       } catch (mailErr) {
         console.error("invoice email send error", mailErr);

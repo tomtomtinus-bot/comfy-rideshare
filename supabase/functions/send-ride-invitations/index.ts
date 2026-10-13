@@ -3,6 +3,7 @@
 // inserting ride_assignments. Uses HMAC-signed tokens.
 
 import { createClient } from 'npm:@supabase/supabase-js@2.95.0'
+import { sendAppEmail } from "../_shared/transactional-email-templates/send-app-email.ts";
 import { createClient as createClientLite } from 'npm:@supabase/supabase-js@2.95.0'
 
 const corsHeaders = {
@@ -167,14 +168,7 @@ Deno.serve(async (req) => {
       const acceptUrl = `${SUPABASE_URL}/functions/v1/accept-ride-invitation?t=${token}&origin=${encodeURIComponent(origin)}&apikey=${ANON_KEY}`
       const rideUrl = `${origin}/rit/${ride.id}`
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SERVICE_KEY}`,
-          'apikey': SERVICE_KEY,
-        },
-        body: JSON.stringify({
+      const res = await sendAppEmail({
           templateName: 'ride-invitation',
           recipientEmail: email,
           idempotencyKey: `ride-invite-${a.id}`,
@@ -189,12 +183,10 @@ Deno.serve(async (req) => {
             rideUrl,
             acceptUrl,
           },
-        }),
-      })
-      const txt = await res.text()
-      if (!res.ok) {
-        console.error('[send-ride-invitations] fetch error', { assignmentId: a.id, email, status: res.status, body: txt })
-        failures.push({ assignmentId: a.id, reason: `HTTP ${res.status}: ${txt}` })
+        })
+      if (!res.success) {
+        console.error('[send-ride-invitations] not sent', { assignmentId: a.id, reason: res.reason })
+        failures.push({ assignmentId: a.id, reason: res.reason })
       } else {
         sent += 1
       }
