@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CalendarClock, CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X } from "lucide-react";
+import { CalendarClock, CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -75,10 +76,10 @@ const num = (s: string) => (s.trim() === "" ? null : Number(s.replace(",", "."))
 
 const TicketBadge = ({ r }: { r: Row }) => {
   if (r.invoicedAt) return <Badge variant="secondary">Gefactureerd</Badge>;
-  if (r.ticketStatus === "approved") return <Badge className="bg-primary/10 text-primary hover:bg-primary/10">Goedgekeurd</Badge>;
-  if (r.ticketStatus === "submitted") return <Badge variant="outline">Ter controle</Badge>;
+  if (r.ticketStatus === "approved") return <Badge className="border-transparent bg-success-soft text-success hover:bg-success-soft font-medium">Goedgekeurd</Badge>;
+  if (r.ticketStatus === "submitted") return <Badge className="border-transparent bg-warning text-primary-foreground hover:bg-warning font-semibold">Ter controle</Badge>;
   if (r.ticketStatus === "rejected") return <Badge variant="destructive">Afgekeurd</Badge>;
-  return <span className="text-sm text-slate-500">Nog geen ritbon</span>;
+  return <span className="text-xs text-muted-foreground">Nog geen ritbon</span>;
 };
 
 export const RideAdministration = () => {
@@ -91,6 +92,10 @@ export const RideAdministration = () => {
   const [ticketRow, setTicketRow] = useState<Row | null>(null);
   const [reviewRow, setReviewRow] = useState<Row | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [q, setQ] = useState("");
+  const [cpFilter, setCpFilter] = useState("all");
+  const [ticketFilter, setTicketFilter] = useState("all");
+  const [weekOffset, setWeekOffset] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -150,19 +155,58 @@ export const RideAdministration = () => {
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
 
+  const weekRange = useMemo(() => {
+    if (weekOffset == null) return null;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) + weekOffset * 7);
+    const end = new Date(start); end.setDate(end.getDate() + 7);
+    return { start, end };
+  }, [weekOffset]);
+
+  const counterparties = useMemo(() => [...new Set(rows.map((r) => r.counterparty))].sort(), [rows]);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return rows.filter((r) => {
+      if (cpFilter !== "all" && r.counterparty !== cpFilter) return false;
+      if (ticketFilter !== "all" && r.ticketStatus !== ticketFilter) return false;
+      if (weekRange) { const d = new Date(r.scheduledAt); if (d < weekRange.start || d >= weekRange.end) return false; }
+      if (needle) {
+        const hay = [r.rideNumber, r.permit, r.reference, r.pickup, r.dropoff, `${r.pickup} ${r.dropoff}`, ...r.plates].filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [rows, q, cpFilter, ticketFilter, weekRange]);
+
   const grouped = useMemo(() => {
     const g: Record<Bucket, Row[]> = { gepland: [], vandaag: [], afgerond: [] };
-    rows.forEach((r) => g[bucketOf(r)].push(r));
+    filtered.forEach((r) => g[bucketOf(r)].push(r));
     g.gepland.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
     g.vandaag.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
     g.afgerond.sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt));
     return g;
-  }, [rows]);
+  }, [filtered]);
 
-  const toReview = grouped.afgerond.filter((r) => r.ticketStatus === "submitted").length;
+  const toReview = rows.filter((r) => r.ticketStatus === "submitted").length;
+  const byAssignment = useMemo(() => new Map(rows.filter((r) => r.assignmentId).map((r) => [r.assignmentId!, r])), [rows]);
+  const selectedRows = [...selected].map((id) => byAssignment.get(id)).filter(Boolean) as Row[];
+  const approvable = selectedRows.filter((r) => r.ticketStatus === "submitted");
+  const invoiceable = selectedRows.filter((r) => r.ticketStatus === "approved" && !r.invoicedAt);
+
+  const approveSelected = async () => {
+    let ok = 0;
+    for (const r of approvable) {
+      const { error } = await supabase.rpc("review_ride_ticket", { _assignment_id: r.assignmentId!, _approve: true, _reason: "" });
+      if (error) toast.error(`${r.rideNumber}: ${error.message}`); else ok++;
+    }
+    if (ok) toast.success(`${ok} ritbon(nen) goedgekeurd`);
+    setSelected(new Set());
+    load();
+  };
 
   const invoiceSelected = async () => {
-    const { data, error } = await supabase.rpc("invoice_selected_tickets", { _assignment_ids: [...selected] });
+    const { data, error } = await supabase.rpc("invoice_selected_tickets", { _assignment_ids: invoiceable.map((r) => r.assignmentId!) });
     if (error) return toast.error(error.message);
     toast.success(`${data} factuur/facturen aangemaakt — de PDF staat zo klaar onder Facturen`);
     setSelected(new Set());
@@ -179,92 +223,93 @@ export const RideAdministration = () => {
 
   const detailHref = (r: Row) => (isEscort ? `/opdracht/${r.rideId}` : `/rit/${r.rideId}`);
 
+  const toggle = (ids: string[], on: boolean) => {
+    const n = new Set(selected);
+    ids.forEach((id) => (on ? n.add(id) : n.delete(id)));
+    setSelected(n);
+  };
+
   const renderTable = (bucket: Bucket) => {
     const list = grouped[bucket];
-    if (!list.length) return <p className="text-sm text-slate-500 py-10 text-center">Geen ritten.</p>;
+    if (!list.length) return <p className="text-sm text-muted-foreground py-10 text-center">Geen ritten.</p>;
     const done = bucket === "afgerond";
+    const ids = list.flatMap((r) => (r.assignmentId ? [r.assignmentId] : []));
+    const all = ids.length > 0 && ids.every((id) => selected.has(id));
+    const c = "py-1.5 px-2";
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {done && isEscort && <TableHead className="w-8" />}
-            <TableHead>Rit / dossier</TableHead>
-            <TableHead>Laden → lossen</TableHead>
-            <TableHead>Datum/tijd</TableHead>
-            <TableHead>Lading</TableHead>
-            <TableHead>Tarief</TableHead>
-            <TableHead>{isEscort ? "Planner" : "Begeleider"}</TableHead>
-            {done && <TableHead>Ritbon</TableHead>}
-            <TableHead className="text-right" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {list.map((r) => {
-            const canInvoice = isEscort && r.ticketStatus === "approved" && !r.invoicedAt && r.assignmentId;
-            return (
-              <TableRow key={r.rideId}>
-                {done && isEscort && (
-                  <TableCell>
-                    {canInvoice && (
-                      <Checkbox
-                        checked={selected.has(r.assignmentId!)}
-                        onCheckedChange={(v) => {
-                          const s = new Set(selected);
-                          v ? s.add(r.assignmentId!) : s.delete(r.assignmentId!);
-                          setSelected(s);
-                        }}
-                        aria-label="Selecteer voor factuur"
-                      />
-                    )}
-                  </TableCell>
-                )}
-                <TableCell>
+      <div className="overflow-x-auto">
+        <Table className="text-[13px]">
+          <TableHeader>
+            <TableRow className="h-8">
+              <TableHead className="w-8 px-2 h-8">
+                <Checkbox checked={all} onCheckedChange={(v) => toggle(ids, !!v)} aria-label="Alles selecteren" />
+              </TableHead>
+              <TableHead className="px-2 h-8">Rit / dossier</TableHead>
+              <TableHead className="px-2 h-8">Traject</TableHead>
+              <TableHead className="px-2 h-8">Datum/tijd</TableHead>
+              <TableHead className="px-2 h-8">Lading / kenteken</TableHead>
+              <TableHead className="px-2 h-8">Tarief</TableHead>
+              <TableHead className="px-2 h-8">{isEscort ? "Planner" : "Begeleider"}</TableHead>
+              {done && <TableHead className="px-2 h-8">Ritbon</TableHead>}
+              <TableHead className="px-2 h-8 text-right" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {list.map((r) => (
+              <TableRow key={r.rideId} data-state={r.assignmentId && selected.has(r.assignmentId) ? "selected" : undefined}>
+                <TableCell className={c}>
+                  {r.assignmentId && (
+                    <Checkbox checked={selected.has(r.assignmentId)} onCheckedChange={(v) => toggle([r.assignmentId!], !!v)} aria-label={`Selecteer ${r.rideNumber}`} />
+                  )}
+                </TableCell>
+                <TableCell className={`${c} whitespace-nowrap`}>
                   <Link to={detailHref(r)} className="font-medium hover:underline">{r.rideNumber}</Link>
-                  {(r.permit || r.reference) && <div className="text-xs text-slate-500">{[r.permit, r.reference].filter(Boolean).join(" · ")}</div>}
+                  {(r.permit || r.reference) && <span className="ml-2 text-xs text-muted-foreground">{[r.permit, r.reference].filter(Boolean).join(" · ")}</span>}
                 </TableCell>
-                <TableCell>{r.pickup} → {r.dropoff}</TableCell>
-                <TableCell className="whitespace-nowrap">{fmt(r.scheduledAt)}</TableCell>
-                <TableCell className="text-sm">
-                  {r.dims ?? "—"}
-                  {r.plates.length > 0 && <div className="text-xs text-slate-500">{r.plates.join(", ")}</div>}
+                <TableCell className={`${c} whitespace-nowrap`}>{r.pickup} → {r.dropoff}</TableCell>
+                <TableCell className={`${c} whitespace-nowrap`}>{fmt(r.scheduledAt)}</TableCell>
+                <TableCell className={`${c} whitespace-nowrap text-xs`}>
+                  {r.dims ?? "—"}{r.plates.length > 0 && <span className="ml-2 text-muted-foreground">{r.plates.join(", ")}</span>}
                 </TableCell>
-                <TableCell className="whitespace-nowrap text-sm">{rateLabel(r.rateType, r.rateAmount)}</TableCell>
-                <TableCell>{r.counterparty}</TableCell>
+                <TableCell className={`${c} whitespace-nowrap text-xs`}>{rateLabel(r.rateType, r.rateAmount)}</TableCell>
+                <TableCell className={`${c} whitespace-nowrap`}>{r.counterparty}</TableCell>
                 {done && (
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <TicketBadge r={r} />
-                      {r.ticketStatus !== "none" && r.cost != null && <span className="text-xs text-slate-500">{eur(Number(r.cost))}</span>}
-                    </div>
+                  <TableCell className={`${c} whitespace-nowrap`}>
+                    <TicketBadge r={r} />
+                    {r.ticketStatus !== "none" && r.cost != null && <span className="ml-2 text-xs text-muted-foreground">{eur(Number(r.cost))}</span>}
                   </TableCell>
                 )}
-                <TableCell className="text-right whitespace-nowrap">
+                <TableCell className={`${c} text-right whitespace-nowrap`}>
                   {!done && r.assignmentId && (
-                    <Button size="sm" variant="outline" onClick={() => complete(r)}>
-                      <CheckCircle2 className="h-4 w-4 mr-1" />Afronden
+                    <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => complete(r)}>
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Afronden
                     </Button>
                   )}
                   {done && isEscort && r.assignmentId && (r.ticketStatus === "none" || r.ticketStatus === "rejected" || r.ticketStatus === "submitted") && !r.invoicedAt && (
-                    <Button size="sm" variant="outline" onClick={() => setTicketRow(r)}>
-                      <FileText className="h-4 w-4 mr-1" />{r.ticketStatus === "none" ? "Ritbon invullen" : "Ritbon wijzigen"}
+                    <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setTicketRow(r)}>
+                      <FileText className="h-3.5 w-3.5 mr-1" />{r.ticketStatus === "none" ? "Ritbon invullen" : "Wijzigen"}
                     </Button>
                   )}
                   {done && !isEscort && r.ticketStatus === "submitted" && (
-                    <Button size="sm" onClick={() => setReviewRow(r)}>
-                      <ClipboardCheck className="h-4 w-4 mr-1" />Controleren
+                    <Button size="sm" className="h-7 px-2 text-xs" onClick={() => setReviewRow(r)}>
+                      <ClipboardCheck className="h-3.5 w-3.5 mr-1" />Controleren
                     </Button>
                   )}
                   {done && !isEscort && (r.ticketStatus === "approved" || r.ticketStatus === "rejected") && (
-                    <Button size="sm" variant="ghost" onClick={() => setReviewRow(r)}>Bekijken</Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setReviewRow(r)}>Bekijken</Button>
                   )}
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     );
   };
+
+  const weekLabel = weekRange
+    ? `${weekRange.start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${new Date(+weekRange.end - 1).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`
+    : "Alle weken";
 
   return (
     <div className="space-y-6">
@@ -278,7 +323,7 @@ export const RideAdministration = () => {
         <Button onClick={() => setNewOpen(true)}><Plus className="h-4 w-4 mr-1" />Nieuwe rit toevoegen</Button>
       </div>
 
-      <Card className="p-4">
+      <Card className="p-3">
         <Tabs defaultValue="vandaag">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <TabsList>
@@ -289,9 +334,43 @@ export const RideAdministration = () => {
                 {!isEscort && toReview > 0 && <Badge className="ml-2 h-5 px-1.5">{toReview}</Badge>}
               </TabsTrigger>
             </TabsList>
-            {isEscort && selected.size > 0 && (
-              <Button size="sm" onClick={invoiceSelected}><FileText className="h-4 w-4 mr-1" />Bundel tot factuur ({selected.size})</Button>
-            )}
+            <div className="flex items-center gap-2">
+              {selected.size > 0 && <span className="text-xs text-muted-foreground">{selected.size} geselecteerd</span>}
+              {!isEscort && approvable.length > 0 && (
+                <Button size="sm" className="h-8" onClick={approveSelected}><CheckCircle2 className="h-4 w-4 mr-1" />Geselecteerde goedkeuren ({approvable.length})</Button>
+              )}
+              {isEscort && invoiceable.length > 0 && (
+                <Button size="sm" className="h-8" onClick={invoiceSelected}><FileText className="h-4 w-4 mr-1" />Bundel tot factuur ({invoiceable.length})</Button>
+              )}
+              {selected.size > 0 && <Button size="sm" variant="ghost" className="h-8" onClick={() => setSelected(new Set())}><X className="h-4 w-4" /></Button>}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mb-2 rounded-lg border bg-muted/40 p-2">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek dossier, referentie, traject, kenteken…" className="h-8 pl-8 text-sm" />
+            </div>
+            <Select value={cpFilter} onValueChange={setCpFilter}>
+              <SelectTrigger className="h-8 w-[170px] text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{isEscort ? "Alle planners" : "Alle begeleiders"}</SelectItem>
+                {counterparties.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={ticketFilter} onValueChange={setTicketFilter}>
+              <SelectTrigger className="h-8 w-[160px] text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Ritbon: alles</SelectItem>
+                <SelectItem value="submitted">Ter controle</SelectItem>
+                <SelectItem value="approved">Goedgekeurd</SelectItem>
+                <SelectItem value="none">Nog geen ritbon</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex items-center rounded-md border bg-background h-8">
+              <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Vorige week" onClick={() => setWeekOffset((w) => (w ?? 0) - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <button className="px-2 text-xs whitespace-nowrap min-w-[110px]" onClick={() => setWeekOffset((w) => (w == null ? 0 : null))} title="Wissel tussen deze week en alle weken">{weekLabel}</button>
+              <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Volgende week" onClick={() => setWeekOffset((w) => (w ?? 0) + 1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
           </div>
           {loading ? <p className="text-sm text-slate-500 py-10 text-center">Laden…</p> : (
             <>
@@ -522,9 +601,9 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
   };
 
   return (
-    <Dialog open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Ritbon controleren</DialogTitle></DialogHeader>
+    <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader className="mb-4"><SheetTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Ritbon {row?.ticketStatus === "submitted" ? "controleren" : "bekijken"}</SheetTitle></SheetHeader>
         {row && (
           <div className="space-y-3">
             <p className="text-sm text-slate-500">{row.rideNumber} · {row.pickup} → {row.dropoff} · {fmt(row.scheduledAt)} · {row.counterparty}</p>
@@ -538,12 +617,12 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
           </div>
         )}
         {row?.ticketStatus === "submitted" && (
-          <DialogFooter className="gap-2">
+          <SheetFooter className="gap-2 mt-6">
             <Button variant="outline" disabled={busy} onClick={() => decide(false)}>Afkeuren</Button>
             <Button disabled={busy} onClick={() => decide(true)}>Goedkeuren</Button>
-          </DialogFooter>
+          </SheetFooter>
         )}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };
