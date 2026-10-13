@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BreakdownView, type Breakdown } from "@/components/site/TicketBreakdown";
 
-type Bucket = "gepland" | "vandaag" | "afgerond";
+type Bucket = "gepland" | "week" | "afgerond";
 type TicketStatus = "none" | "submitted" | "approved" | "rejected";
 
 interface Row {
@@ -57,11 +58,19 @@ const fmt = (d: string) =>
 const rateLabel = (t: string | null, a: number | null) =>
   a == null ? "—" : t === "km" ? `${eur(a)}/km` : t === "fixed" ? `${eur(a)} vast` : `${eur(a)}/uur`;
 
+const mondayOf = (offset: number) => {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + offset * 7);
+  return d;
+};
+const DAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+const todayIdx = () => (new Date().getDay() + 6) % 7;
+
 const bucketOf = (r: Row): Bucket => {
   if (r.rideStatus === "completed" || r.ticketStatus !== "none") return "afgerond";
   const d = new Date(r.scheduledAt);
-  const endOfToday = new Date(); endOfToday.setHours(23, 59, 59, 999);
-  if (r.rideStatus === "in_progress" || d <= endOfToday) return "vandaag";
+  const endOfWeek = mondayOf(0); endOfWeek.setDate(endOfWeek.getDate() + 7);
+  if (r.rideStatus === "in_progress" || d < endOfWeek) return "week";
   return "gepland";
 };
 
@@ -95,6 +104,9 @@ export const RideAdministration = () => {
   const [cpFilter, setCpFilter] = useState("all");
   const [ticketFilter, setTicketFilter] = useState("all");
   const [weekOffset, setWeekOffset] = useState<number | null>(null);
+  const [tab, setTab] = useState<Bucket>("week");
+  const [dayWeek, setDayWeek] = useState(0);
+  const [day, setDay] = useState<number | null>(todayIdx());
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -169,23 +181,49 @@ export const RideAdministration = () => {
     return rows.filter((r) => {
       if (cpFilter !== "all" && r.counterparty !== cpFilter) return false;
       if (ticketFilter !== "all" && r.ticketStatus !== ticketFilter) return false;
-      if (weekRange) { const d = new Date(r.scheduledAt); if (d < weekRange.start || d >= weekRange.end) return false; }
       if (needle) {
         const hay = [r.rideNumber, r.permit, r.reference, r.pickup, r.dropoff, `${r.pickup} ${r.dropoff}`, ...r.plates].filter(Boolean).join(" ").toLowerCase();
         if (!hay.includes(needle)) return false;
       }
       return true;
     });
-  }, [rows, q, cpFilter, ticketFilter, weekRange]);
+  }, [rows, q, cpFilter, ticketFilter]);
+
+  const dayWeekStart = useMemo(() => mondayOf(dayWeek), [dayWeek]);
+  const weekRows = useMemo(() => {
+    const end = new Date(dayWeekStart); end.setDate(end.getDate() + 7);
+    return filtered.filter((r) => {
+      if (bucketOf(r) === "afgerond") return false;
+      const d = new Date(r.scheduledAt);
+      return d >= dayWeekStart && d < end;
+    }).sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
+  }, [filtered, dayWeekStart]);
+  const dayIdxOf = (r: Row) => (new Date(r.scheduledAt).getDay() + 6) % 7;
+  const dayCounts = useMemo(() => {
+    const c = [0, 0, 0, 0, 0, 0, 0];
+    weekRows.forEach((r) => c[dayIdxOf(r)]++);
+    return c;
+  }, [weekRows]);
 
   const grouped = useMemo(() => {
-    const g: Record<Bucket, Row[]> = { gepland: [], vandaag: [], afgerond: [] };
-    filtered.forEach((r) => g[bucketOf(r)].push(r));
+    const g: Record<Bucket, Row[]> = { gepland: [], week: [], afgerond: [] };
+    filtered.forEach((r) => {
+      const b = bucketOf(r);
+      if (b === "week") return;
+      if (weekRange) { const d = new Date(r.scheduledAt); if (d < weekRange.start || d >= weekRange.end) return; }
+      g[b].push(r);
+    });
+    g.week = day == null ? weekRows : weekRows.filter((r) => dayIdxOf(r) === day);
     g.gepland.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
-    g.vandaag.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
     g.afgerond.sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt));
     return g;
-  }, [filtered]);
+  }, [filtered, weekRange, weekRows, day]);
+
+  const shiftDayWeek = (n: number) => {
+    const next = dayWeek + n;
+    setDayWeek(next);
+    setDay(next === 0 ? todayIdx() : null);
+  };
 
   const toReview = rows.filter((r) => r.ticketStatus === "submitted").length;
   const byAssignment = useMemo(() => new Map(rows.filter((r) => r.assignmentId).map((r) => [r.assignmentId!, r])), [rows]);
@@ -323,11 +361,11 @@ export const RideAdministration = () => {
       </div>
 
       <Card className="p-3">
-        <Tabs defaultValue="vandaag">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as Bucket)}>
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <TabsList>
               <TabsTrigger value="gepland"><CalendarClock className="h-4 w-4 mr-1" />Gepland ({grouped.gepland.length})</TabsTrigger>
-              <TabsTrigger value="vandaag"><Sun className="h-4 w-4 mr-1" />Vandaag / Actief ({grouped.vandaag.length})</TabsTrigger>
+              <TabsTrigger value="week"><Sun className="h-4 w-4 mr-1" />Deze week ({weekRows.length})</TabsTrigger>
               <TabsTrigger value="afgerond">
                 <CheckCircle2 className="h-4 w-4 mr-1" />Afgerond ({grouped.afgerond.length})
                 {!isEscort && toReview > 0 && <Badge className="ml-2 h-5 px-1.5">{toReview}</Badge>}
@@ -365,16 +403,34 @@ export const RideAdministration = () => {
                 <SelectItem value="none">Nog geen ritbon</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex items-center rounded-md border bg-background h-8">
+            {tab !== "week" && <div className="flex items-center rounded-md border bg-background h-8">
               <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Vorige week" onClick={() => setWeekOffset((w) => (w ?? 0) - 1)}><ChevronLeft className="h-4 w-4" /></Button>
               <button className="px-2 text-xs whitespace-nowrap min-w-[110px]" onClick={() => setWeekOffset((w) => (w == null ? 0 : null))} title="Wissel tussen deze week en alle weken">{weekLabel}</button>
               <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Volgende week" onClick={() => setWeekOffset((w) => (w ?? 0) + 1)}><ChevronRight className="h-4 w-4" /></Button>
-            </div>
+            </div>}
           </div>
           {loading ? <p className="text-sm text-slate-500 py-10 text-center">Laden…</p> : (
             <>
               <TabsContent value="gepland">{renderTable("gepland")}</TabsContent>
-              <TabsContent value="vandaag">{renderTable("vandaag")}</TabsContent>
+              <TabsContent value="week">
+                <div className="flex flex-wrap items-center gap-1 mb-2">
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(-1)}><ChevronLeft className="h-3.5 w-3.5 mr-0.5" />Vorige week</Button>
+                  <button onClick={() => setDay(null)} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", day == null ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>Hele week ({weekRows.length})</button>
+                  {DAY_LABELS.map((l, i) => {
+                    const d = new Date(dayWeekStart); d.setDate(d.getDate() + i);
+                    const isToday = dayWeek === 0 && i === todayIdx();
+                    return (
+                      <button key={l} onClick={() => setDay(i)}
+                        className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors tabular-nums", day === i ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted", dayCounts[i] === 0 && day !== i && "text-muted-foreground", isToday && day !== i && "border-primary/50")}>
+                        {l} {d.getDate()}-{d.getMonth() + 1} ({dayCounts[i]})
+                      </button>
+                    );
+                  })}
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(1)}>Volgende week<ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+                  {dayWeek !== 0 && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={() => shiftDayWeek(-dayWeek)}>Naar deze week</Button>}
+                </div>
+                {renderTable("week")}
+              </TabsContent>
               <TabsContent value="afgerond">{renderTable("afgerond")}</TabsContent>
             </>
           )}
