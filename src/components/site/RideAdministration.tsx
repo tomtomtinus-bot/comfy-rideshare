@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CalendarClock, CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BreakdownView, type Breakdown } from "@/components/site/TicketBreakdown";
 
-type Bucket = "gepland" | "week" | "afgerond";
+type Bucket = "week" | "afgerond";
 type TicketStatus = "none" | "submitted" | "approved" | "rejected";
 
 interface Row {
@@ -68,10 +68,7 @@ const todayIdx = () => (new Date().getDay() + 6) % 7;
 
 const bucketOf = (r: Row): Bucket => {
   if (r.rideStatus === "completed" || r.ticketStatus !== "none") return "afgerond";
-  const d = new Date(r.scheduledAt);
-  const endOfWeek = mondayOf(0); endOfWeek.setDate(endOfWeek.getDate() + 7);
-  if (r.rideStatus === "in_progress" || d < endOfWeek) return "week";
-  return "gepland";
+  return "week";
 };
 
 const cityOf = (formatted: string, fallback: string) => {
@@ -103,7 +100,6 @@ export const RideAdministration = () => {
   const [q, setQ] = useState("");
   const [cpFilter, setCpFilter] = useState("all");
   const [ticketFilter, setTicketFilter] = useState("all");
-  const [weekOffset, setWeekOffset] = useState<number | null>(null);
   const [tab, setTab] = useState<Bucket>("week");
   const [dayWeek, setDayWeek] = useState(0);
   const [day, setDay] = useState<number | null>(todayIdx());
@@ -166,13 +162,6 @@ export const RideAdministration = () => {
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
 
-  const weekRange = useMemo(() => {
-    if (weekOffset == null) return null;
-    const start = new Date(); start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) + weekOffset * 7);
-    const end = new Date(start); end.setDate(end.getDate() + 7);
-    return { start, end };
-  }, [weekOffset]);
 
   const counterparties = useMemo(() => [...new Set(rows.map((r) => r.counterparty))].sort(), [rows]);
 
@@ -190,34 +179,29 @@ export const RideAdministration = () => {
   }, [rows, q, cpFilter, ticketFilter]);
 
   const dayWeekStart = useMemo(() => mondayOf(dayWeek), [dayWeek]);
-  const weekRows = useMemo(() => {
+  const weekAll = useMemo(() => {
     const end = new Date(dayWeekStart); end.setDate(end.getDate() + 7);
     return filtered.filter((r) => {
-      if (bucketOf(r) === "afgerond") return false;
       const d = new Date(r.scheduledAt);
       return d >= dayWeekStart && d < end;
-    }).sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
+    });
   }, [filtered, dayWeekStart]);
+  const weekRows = useMemo(() => weekAll.filter((r) => bucketOf(r) === "week").sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt)), [weekAll]);
+  const doneRows = useMemo(() => weekAll.filter((r) => bucketOf(r) === "afgerond").sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt)), [weekAll]);
   const dayIdxOf = (r: Row) => (new Date(r.scheduledAt).getDay() + 6) % 7;
+  const activeWeekRows = tab === "afgerond" ? doneRows : weekRows;
   const dayCounts = useMemo(() => {
     const c = [0, 0, 0, 0, 0, 0, 0];
-    weekRows.forEach((r) => c[dayIdxOf(r)]++);
+    activeWeekRows.forEach((r) => c[dayIdxOf(r)]++);
     return c;
-  }, [weekRows]);
+  }, [activeWeekRows]);
 
   const grouped = useMemo(() => {
-    const g: Record<Bucket, Row[]> = { gepland: [], week: [], afgerond: [] };
-    filtered.forEach((r) => {
-      const b = bucketOf(r);
-      if (b === "week") return;
-      if (weekRange) { const d = new Date(r.scheduledAt); if (d < weekRange.start || d >= weekRange.end) return; }
-      g[b].push(r);
-    });
+    const g: Record<Bucket, Row[]> = { week: [], afgerond: [] };
     g.week = day == null ? weekRows : weekRows.filter((r) => dayIdxOf(r) === day);
-    g.gepland.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
-    g.afgerond.sort((a, b) => +new Date(b.scheduledAt) - +new Date(a.scheduledAt));
+    g.afgerond = day == null ? doneRows : doneRows.filter((r) => dayIdxOf(r) === day);
     return g;
-  }, [filtered, weekRange, weekRows, day]);
+  }, [weekRows, doneRows, day]);
 
   const shiftDayWeek = (n: number) => {
     const next = dayWeek + n;
@@ -344,9 +328,6 @@ export const RideAdministration = () => {
     );
   };
 
-  const weekLabel = weekRange
-    ? `${weekRange.start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${new Date(+weekRange.end - 1).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`
-    : "Alle weken";
 
   return (
     <div className="space-y-6">
@@ -361,10 +342,9 @@ export const RideAdministration = () => {
       </div>
 
       <Card className="p-3">
-        <Tabs value={tab} onValueChange={(v) => setTab(v as Bucket)}>
+        <Tabs value={tab} onValueChange={(v) => { const b = v as Bucket; setTab(b); setDay(b === "week" && dayWeek === 0 ? todayIdx() : null); }}>
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <TabsList>
-              <TabsTrigger value="gepland"><CalendarClock className="h-4 w-4 mr-1" />Gepland ({grouped.gepland.length})</TabsTrigger>
               <TabsTrigger value="week"><Sun className="h-4 w-4 mr-1" />Deze week ({weekRows.length})</TabsTrigger>
               <TabsTrigger value="afgerond">
                 <CheckCircle2 className="h-4 w-4 mr-1" />Afgerond ({grouped.afgerond.length})
@@ -403,34 +383,26 @@ export const RideAdministration = () => {
                 <SelectItem value="none">Nog geen ritbon</SelectItem>
               </SelectContent>
             </Select>
-            {tab !== "week" && <div className="flex items-center rounded-md border bg-background h-8">
-              <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Vorige week" onClick={() => setWeekOffset((w) => (w ?? 0) - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-              <button className="px-2 text-xs whitespace-nowrap min-w-[110px]" onClick={() => setWeekOffset((w) => (w == null ? 0 : null))} title="Wissel tussen deze week en alle weken">{weekLabel}</button>
-              <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="Volgende week" onClick={() => setWeekOffset((w) => (w ?? 0) + 1)}><ChevronRight className="h-4 w-4" /></Button>
-            </div>}
           </div>
           {loading ? <p className="text-sm text-slate-500 py-10 text-center">Laden…</p> : (
             <>
-              <TabsContent value="gepland">{renderTable("gepland")}</TabsContent>
-              <TabsContent value="week">
-                <div className="flex flex-wrap items-center gap-1 mb-2">
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(-1)}><ChevronLeft className="h-3.5 w-3.5 mr-0.5" />Vorige week</Button>
-                  <button onClick={() => setDay(null)} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", day == null ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>Hele week ({weekRows.length})</button>
-                  {DAY_LABELS.map((l, i) => {
-                    const d = new Date(dayWeekStart); d.setDate(d.getDate() + i);
-                    const isToday = dayWeek === 0 && i === todayIdx();
-                    return (
-                      <button key={l} onClick={() => setDay(i)}
-                        className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors tabular-nums", day === i ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted", dayCounts[i] === 0 && day !== i && "text-muted-foreground", isToday && day !== i && "border-primary/50")}>
-                        {l} {d.getDate()}-{d.getMonth() + 1} ({dayCounts[i]})
-                      </button>
-                    );
-                  })}
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(1)}>Volgende week<ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
-                  {dayWeek !== 0 && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={() => shiftDayWeek(-dayWeek)}>Naar deze week</Button>}
-                </div>
-                {renderTable("week")}
-              </TabsContent>
+              <div className="flex flex-wrap items-center gap-1 mb-2">
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(-1)}><ChevronLeft className="h-3.5 w-3.5 mr-0.5" />Vorige week</Button>
+                <button onClick={() => setDay(null)} className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors", day == null ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted")}>Hele week ({activeWeekRows.length})</button>
+                {DAY_LABELS.map((l, i) => {
+                  const d = new Date(dayWeekStart); d.setDate(d.getDate() + i);
+                  const isToday = dayWeek === 0 && i === todayIdx();
+                  return (
+                    <button key={l} onClick={() => setDay(i)}
+                      className={cn("h-7 px-3 rounded-full text-xs font-medium border transition-colors tabular-nums", day === i ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted", dayCounts[i] === 0 && day !== i && "text-muted-foreground", isToday && day !== i && "border-primary/50")}>
+                      {l} {d.getDate()}-{d.getMonth() + 1} ({dayCounts[i]})
+                    </button>
+                  );
+                })}
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => shiftDayWeek(1)}>Volgende week<ChevronRight className="h-3.5 w-3.5 ml-0.5" /></Button>
+                {dayWeek !== 0 && <Button size="sm" variant="link" className="h-7 px-1 text-xs" onClick={() => shiftDayWeek(-dayWeek)}>Naar deze week</Button>}
+              </div>
+              <TabsContent value="week">{renderTable("week")}</TabsContent>
               <TabsContent value="afgerond">{renderTable("afgerond")}</TabsContent>
             </>
           )}
