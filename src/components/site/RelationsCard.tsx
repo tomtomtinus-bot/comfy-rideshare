@@ -28,7 +28,6 @@ const eur = (n: number) => `€ ${n.toLocaleString("nl-NL", { minimumFractionDig
 const rateSummary = (r: Rel) => {
   const parts: string[] = [];
   if (r.hourly_rate) parts.push(`${eur(Number(r.hourly_rate))}/u`);
-  if (r.km_rate) parts.push(`${eur(Number(r.km_rate))}/km`);
   if (r.min_hours) parts.push(`min. ${Number(r.min_hours)} u`);
   return parts.join(" • ");
 };
@@ -175,9 +174,9 @@ export const RelationsCard = ({ onChange, pageTitle }: { onChange?: () => void; 
 const AddRelationDialog = ({ open, isEscort, onClose, onDone }: { open: boolean; isEscort: boolean; onClose: () => void; onDone: () => void }) => {
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
-  const [r, setR] = useState({ hourly: "", km: "", min: "", waiting: "" });
+  const [r, setR] = useState({ hourly: "", min: "" });
   const [busy, setBusy] = useState(false);
-  useEffect(() => { if (open) { setCompany(""); setEmail(""); setR({ hourly: "", km: "", min: "", waiting: "" }); } }, [open]);
+  useEffect(() => { if (open) { setCompany(""); setEmail(""); setR({ hourly: "", min: "" }); } }, [open]);
 
   const save = async () => {
     const vals = Object.values(r).map(toNum);
@@ -195,10 +194,9 @@ const AddRelationDialog = ({ open, isEscort, onClose, onDone }: { open: boolean;
         ? all.find((x) => !x.incoming && x.status === "pending")
         : all.find((x) => x.email?.toLowerCase() === q || x.name.toLowerCase() === q || x.name.toLowerCase() === company.trim().toLowerCase());
       if (match) {
-        const { error: e2 } = await supabase.rpc("set_relation_rates", {
-          _relation_id: match.id, _hourly: toNum(r.hourly), _km: toNum(r.km), _min_hours: toNum(r.min), _waiting: toNum(r.waiting),
-          _night_pct: 0, _weekend_pct: 0, _holiday_pct: 0,
-        });
+        const { error: e2 } = await supabase.rpc("set_relation_rates_v2" as any, {
+          _relation_id: match.id, _hourly: toNum(r.hourly), _min_amount: toNum(r.min),
+        } as any);
         if (e2) toast.error(`Relatie toegevoegd, tarieven niet opgeslagen: ${e2.message}`);
       }
     }
@@ -232,11 +230,9 @@ const AddRelationDialog = ({ open, isEscort, onClose, onDone }: { open: boolean;
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500 pt-1">Vaste tariefafspraken (optioneel)</p>
             <div className="grid grid-cols-2 gap-3">
               {rf("Uurtarief", "hourly", "€/u")}
-              {rf("Kilometertarief", "km", "€/km")}
-              {rf("Minimuminzet", "min", "uur")}
-              {rf("Wachturentarief", "waiting", "€/u")}
+              {rf("Minimumtarief", "min", "€")}
             </div>
-            <p className="text-xs text-slate-500">Toeslagen voor nacht, weekend en feestdag stel je later in via "Tarieven bewerken".</p>
+            <p className="text-xs text-slate-500">Leeg gelaten? Dan geldt je standaardtarief uit Instellingen. Toeslagen voeg je toe op de ritbon.</p>
           </>
         ) : (
           <p className="text-xs text-slate-500">Tarieven stelt de begeleider in; jij kunt ze daarna alleen bekijken.</p>
