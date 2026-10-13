@@ -285,7 +285,7 @@ export const RideAdministration = () => {
                       <CheckCircle2 className="h-3.5 w-3.5 mr-1" />Afronden
                     </Button>
                   )}
-                  {done && isEscort && r.assignmentId && (r.ticketStatus === "none" || r.ticketStatus === "rejected" || r.ticketStatus === "submitted") && !r.invoicedAt && (
+                  {done && isEscort && r.assignmentId && !r.invoicedAt && (
                     <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => setTicketRow(r)}>
                       <FileText className="h-3.5 w-3.5 mr-1" />{r.ticketStatus === "none" ? "Ritbon invullen" : "Wijzigen"}
                     </Button>
@@ -361,7 +361,7 @@ export const RideAdministration = () => {
               <SelectTrigger className="h-8 w-[160px] text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Ritbon: alles</SelectItem>
-                <SelectItem value="submitted">Ter controle</SelectItem>
+                <SelectItem value="rejected">Afgekeurd</SelectItem>
                 <SelectItem value="approved">Goedgekeurd</SelectItem>
                 <SelectItem value="none">Nog geen ritbon</SelectItem>
               </SelectContent>
@@ -537,7 +537,7 @@ const TicketDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
     } as any);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Ritbon ingediend — de planner kan hem nu controleren");
+    toast.success("Ritbon ingediend en automatisch goedgekeurd");
     onClose();
     onSaved();
   };
@@ -588,6 +588,7 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
   const [busy, setBusy] = useState(false);
   useEffect(() => setReason(""), [row]);
 
+  const canReject = !!row && !row.invoicedAt && (row.ticketStatus === "submitted" || row.ticketStatus === "approved");
   const decide = async (approve: boolean) => {
     if (!row?.assignmentId) return;
     if (!approve && !reason.trim()) return toast.error("Geef een reden voor afkeuren");
@@ -603,7 +604,7 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
   return (
     <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader className="mb-4"><SheetTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Ritbon {row?.ticketStatus === "submitted" ? "controleren" : "bekijken"}</SheetTitle></SheetHeader>
+        <SheetHeader className="mb-4"><SheetTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" />Ritbon bekijken</SheetTitle></SheetHeader>
         {row && (
           <div className="space-y-3">
             <p className="text-sm text-slate-500">{row.rideNumber} · {row.pickup} → {row.dropoff} · {fmt(row.scheduledAt)} · {row.counterparty}</p>
@@ -611,15 +612,15 @@ const ReviewDialog = ({ row, onClose, onSaved }: { row: Row | null; onClose: () 
               <p className="text-sm">Totaal: {eur(Number(row.cost ?? 0))} ({Number(row.hours ?? 0)} u, {Number(row.km ?? 0)} km)</p>
             )}
             {row.notes && <p className="text-sm"><span className="text-slate-500">Opmerkingen: </span>{row.notes}</p>}
-            {row.ticketStatus === "submitted" && (
+            {canReject && (
               <div><Label>Reden bij afkeuren</Label><Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
             )}
           </div>
         )}
-        {row?.ticketStatus === "submitted" && (
+        {canReject && (
           <SheetFooter className="gap-2 mt-6">
             <Button variant="outline" disabled={busy} onClick={() => decide(false)}>Afkeuren</Button>
-            <Button disabled={busy} onClick={() => decide(true)}>Goedkeuren</Button>
+            {row?.ticketStatus === "submitted" && <Button disabled={busy} onClick={() => decide(true)}>Goedkeuren</Button>}
           </SheetFooter>
         )}
       </SheetContent>
