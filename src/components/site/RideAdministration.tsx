@@ -2,7 +2,9 @@ import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, FileText, Plus, Route, Sun, ClipboardCheck, X, Search, ChevronLeft, ChevronRight, MoreHorizontal, Paperclip, Copy } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RideDocuments, uploadRideDocs } from "@/components/site/RideDocuments";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +26,8 @@ type TicketStatus = "none" | "submitted" | "approved" | "rejected";
 
 interface Row {
   rideId: string;
+  clientId: string;
+  raw: any;
   rideNumber: string;
   reference: string | null;
   permit: string | null;
@@ -104,6 +108,8 @@ export const RideAdministration = () => {
   const [dayWeek, setDayWeek] = useState(0);
   const [day, setDay] = useState<number | null>(todayIdx());
   const [allWeeks, setAllWeeks] = useState(false);
+  const [docsRow, setDocsRow] = useState<Row | null>(null);
+  const [dupFrom, setDupFrom] = useState<ReturnType<typeof rideToForm> | null>(null);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -115,7 +121,7 @@ export const RideAdministration = () => {
       setOptions(accepted.map((r: any) => ({ id: r.other_id, label: r.name })));
 
       const toRow = (r: any, a: any, counterparty: string): Row => ({
-        rideId: r.id, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
+        rideId: r.id, clientId: r.client_id, raw: r, rideNumber: r.ride_number, reference: r.client_reference, permit: r.permit_number,
         pickup: r.pickup_city, dropoff: r.dropoff_city, scheduledAt: r.scheduled_at, rideStatus: r.status,
         plates: r.license_plates ?? [],
         dims: [r.cargo_length_m, r.cargo_width_m, r.cargo_height_m].some((x: any) => x != null)
@@ -335,6 +341,15 @@ export const RideAdministration = () => {
                   {done && !isEscort && (r.ticketStatus === "approved" || r.ticketStatus === "rejected") && (
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setReviewRow(r)}>Bekijken</Button>
                   )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-1" aria-label="Meer acties"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Documenten</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -436,9 +451,16 @@ export const RideAdministration = () => {
         </Tabs>
       </Card>
 
-      <NewRideDialog open={newOpen} onOpenChange={setNewOpen} isEscort={isEscort} options={options} onCreated={load} />
+      <NewRideDialog open={newOpen} onOpenChange={(v) => { setNewOpen(v); if (!v) setDupFrom(null); }} isEscort={isEscort} options={options} onCreated={load} initial={dupFrom} />
       <TicketDialog row={ticketRow} onClose={() => setTicketRow(null)} onSaved={load} />
       <ReviewDialog row={reviewRow} onClose={() => setReviewRow(null)} onSaved={load} />
+      <Sheet open={!!docsRow} onOpenChange={(v) => !v && setDocsRow(null)}>
+        <SheetContent className="w-full sm:max-w-md">
+          <SheetHeader><SheetTitle>Documenten — {docsRow?.rideNumber}</SheetTitle></SheetHeader>
+          <p className="text-sm text-muted-foreground mb-3">{docsRow?.pickup} → {docsRow?.dropoff}</p>
+          {docsRow && <RideDocuments clientId={docsRow.clientId} rideId={docsRow.rideId} canDelete={!isEscort} />}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
