@@ -21,6 +21,14 @@ export async function uploadRideDocs(clientId: string, rideId: string, files: Fi
   return files.length - failed;
 }
 
+/** Remove every document of a ride (used once the escort completes the ritbon). */
+export async function deleteRideDocs(clientId: string, rideId: string) {
+  const folder = `${clientId}/${rideId}`;
+  const { data } = await supabase.storage.from(BUCKET).list(folder);
+  const paths = (data ?? []).filter((d) => d.name).map((d) => `${folder}/${d.name}`);
+  if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
+}
+
 interface Doc { name: string; size: number }
 
 export const RideDocuments = ({ clientId, rideId, canDelete }: { clientId: string; rideId: string; canDelete: boolean }) => {
