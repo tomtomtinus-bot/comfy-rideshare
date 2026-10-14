@@ -23,17 +23,17 @@ const mockRides = [
 ];
 
 const clientFeatures = [
-  "Ritplaatsing binnen 30 seconden",
-  "Geautomatiseerde facturatie & btw",
-  "Centraal pool- en teambeheer",
-  "Realtime status en tracking",
+  "Plan en wijs direct toe aan je eigen vaste begeleiders.",
+  "Realtime ritstatussen (nooit meer bellen: \u201cwaar ben je?\u201d).",
+  "Digitale ritbonnen centraal controleren en accorderen.",
+  "1-klik export voor je boekhoudpakket.",
 ];
 
 const escortFeatures = [
-  "Direct ritten claimen",
-  "Digitale urenregistratie",
-  "Google Agenda synchronisatie",
-  "100% gratis voor begeleiders",
+  "Ontvang ritten direct in je eigen Google Agenda.",
+  "Tarieven, uren en kilometers automatisch berekend.",
+  "Dien digitale ritbonnen direct in na aankomst.",
+  "100% gratis in opdracht van je vaste planner.",
 ];
 
 const Index = () => {
@@ -45,8 +45,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SeoHead
-        title="ViaCust | Digital Escort Solutions"
-        description="Het alles-in-één dispatchplatform voor planners en begeleiders van uitzonderlijk vervoer. Automatiseer ritten, planningen en vergunningen in heel Europa."
+        title="ViaCust | Plannings- en administratietool voor uitzonderlijk vervoer"
+        description="Plan ritten met je vaste netwerk van transportbegeleiders, volg statussen realtime en automatiseer ritbonnen en facturatie in één centraal dashboard."
         canonical="https://viacust.com/"
         jsonLd={[
           {
@@ -75,17 +75,17 @@ const Index = () => {
         {/* Hero */}
         <section className="max-w-5xl mx-auto px-5 md:px-8 pt-8 md:pt-12 pb-6 md:pb-8 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground">
-            Het digitale platform voor uitzonderlijk vervoer
+            Dé plannings- en administratietool voor uitzonderlijk vervoer
           </h1>
           <p className="mt-5 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            ViaCust verbindt opdrachtgevers en transportbegeleiders naadloos met elkaar. Efficiënt, transparant en zero-trust beveiligd.
+            Weg met WhatsApp-chaos en handgeschreven ritbonnen. Plan ritten met je vaste netwerk, volg statussen realtime en automatiseer de facturatie in één centraal dashboard.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/auth">Start als Opdrachtgever</Link>
+              <Link to="/auth">Start als Planner / Transporteur</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/auth">Aanmelden als Begeleider</Link>
+              <Link to="/auth">Gratis aanmelden als Begeleider</Link>
             </Button>
           </div>
           <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
@@ -113,21 +113,21 @@ const Index = () => {
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Ritnummer</TableHead>
-                    <TableHead>Route</TableHead>
-                    <TableHead className="hidden sm:table-cell">Datum</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
+                  <TableRow className="h-8">
+                    <TableHead className="py-1.5 text-xs">Ritnummer</TableHead>
+                    <TableHead className="py-1.5 text-xs">Route</TableHead>
+                    <TableHead className="hidden sm:table-cell py-1.5 text-xs">Datum</TableHead>
+                    <TableHead className="text-right py-1.5 text-xs">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {mockRides.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-mono text-xs md:text-sm">{r.id}</TableCell>
-                      <TableCell className="text-sm">{r.route}</TableCell>
-                      <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{r.date}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${r.tone}`}>
+                    <TableRow key={r.id} className="h-9">
+                      <TableCell className="py-1.5 font-mono text-xs">{r.id}</TableCell>
+                      <TableCell className="py-1.5 text-xs md:text-sm">{r.route}</TableCell>
+                      <TableCell className="hidden sm:table-cell py-1.5 text-xs text-muted-foreground">{r.date}</TableCell>
+                      <TableCell className="text-right py-1.5">
+                        <span className={`inline-flex items-center rounded-full border px-2 py-px text-[11px] leading-4 ${r.tone}`}>
                           {r.status}
                         </span>
                       </TableCell>
@@ -143,13 +143,13 @@ const Index = () => {
         <section className="max-w-5xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
           <div className="text-center mb-10 md:mb-12">
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Eén platform, twee perspectieven</h2>
-            <p className="mt-2 text-muted-foreground">Gebouwd voor planners én begeleiders.</p>
+            <p className="mt-2 text-muted-foreground">Gebouwd voor vaste samenwerking tussen planners en begeleiders.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">Voor opdrachtgevers</CardTitle>
-                <CardDescription>Plan, dispatch en factureer in één flow.</CardDescription>
+                <CardTitle className="text-xl">Voor planners &amp; transporteurs</CardTitle>
+                <CardDescription>Behoud het overzicht, van opdracht tot factuur.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -161,15 +161,15 @@ const Index = () => {
                   ))}
                 </ul>
                 <Button asChild className="mt-6 w-full">
-                  <Link to="/auth">Start als opdrachtgever</Link>
+                  <Link to="/auth">Start als planner / transporteur</Link>
                 </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">Voor begeleiders</CardTitle>
-                <CardDescription>Vind ritten, registreer uren, gratis te gebruiken.</CardDescription>
+                <CardTitle className="text-xl">Voor transportbegeleiders</CardTitle>
+                <CardDescription>Nooit meer &apos;s nachts handmatig uren en bonnetjes overtikken.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
@@ -181,7 +181,7 @@ const Index = () => {
                   ))}
                 </ul>
                 <Button asChild variant="outline" className="mt-6 w-full">
-                  <Link to="/auth">Start als begeleider</Link>
+                  <Link to="/auth">Gratis aanmelden als begeleider</Link>
                 </Button>
               </CardContent>
             </Card>
