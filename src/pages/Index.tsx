@@ -33,7 +33,7 @@ const escortFeatures = [
   "Ontvang ritten direct in je eigen Google Agenda.",
   "Tarieven, uren en kilometers automatisch berekend.",
   "Dien digitale ritbonnen direct in na aankomst.",
-  "100% gratis in opdracht van je vaste planner.",
+  "Automatische facturatie naar je opdrachtgevers\n",
 ];
 
 const Index = () => {
@@ -181,7 +181,7 @@ const Index = () => {
                   ))}
                 </ul>
                 <Button asChild variant="outline" className="mt-6 w-full">
-                  <Link to="/auth">Gratis aanmelden als begeleider</Link>
+                  <Link to="/auth">Aanmelden als begeleider</Link>
                 </Button>
               </CardContent>
             </Card>
