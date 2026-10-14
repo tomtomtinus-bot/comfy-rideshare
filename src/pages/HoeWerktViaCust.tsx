@@ -28,6 +28,10 @@ const HoeWerktViaCust = () => {
     [t("howItWorks.w3t"), t("howItWorks.w3b")],
     [t("howItWorks.w4t"), t("howItWorks.w4b")],
   ] as const;
+  const escortWhy = [1, 2, 3, 4].map(
+    (i) => [t(`howItWorks.ew${i}t`), t(`howItWorks.ew${i}b`)] as const,
+  );
+  const whyList = activeTab === "escort" ? escortWhy : why;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -106,7 +110,7 @@ const HoeWerktViaCust = () => {
             {t("howItWorks.whyTitle")}
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {why.map(([title, body]) => (
+            {whyList.map(([title, body]) => (
               <Card key={title} className="border-input">
                 <CardContent className="p-6">
                   <h3 className="text-base font-semibold mb-1">{title}</h3>
@@ -121,7 +125,7 @@ const HoeWerktViaCust = () => {
 
         <section className="pb-16 md:pb-20 text-center">
           <Button asChild size="lg">
-            <Link to="/auth">{t("howItWorks.ctaClient")}</Link>
+            <Link to="/auth">{activeTab === "escort" ? t("howItWorks.ctaEscort") : t("howItWorks.ctaClient")}</Link>
           </Button>
         </section>
       </main>
