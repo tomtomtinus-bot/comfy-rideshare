@@ -85,7 +85,7 @@ const Index = () => {
               <Link to="/auth">Start als Planner / Transporteur</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/auth">Gratis aanmelden als Begeleider</Link>
+              <Link to="/auth">Aanmelden als Begeleider</Link>
             </Button>
           </div>
           <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
