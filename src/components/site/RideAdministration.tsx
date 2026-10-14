@@ -353,7 +353,7 @@ export const RideAdministration = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => setDocsRow(r)}><Paperclip className="h-4 w-4 mr-2" />Begeleiders & documenten</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>
+                      {!isEscort && <DropdownMenuItem onClick={() => { setDupFrom(rideToForm(r.raw)); setNewOpen(true); }}><Copy className="h-4 w-4 mr-2" />Dupliceer rit</DropdownMenuItem>}
                       {!isEscort && <DropdownMenuItem onClick={() => setAddRow(r)}><UserPlus className="h-4 w-4 mr-2" />Begeleider toevoegen</DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -376,7 +376,7 @@ export const RideAdministration = () => {
             {isEscort ? "Je ritten met vaste planners, ritbonnen en facturatie." : "Plan ritten met je vaste begeleiders en keur ritbonnen goed."}
           </p>
         </div>
-        <Button onClick={() => setNewOpen(true)}><Plus className="h-4 w-4 mr-1" />Nieuwe rit toevoegen</Button>
+        {!isEscort && <Button onClick={() => setNewOpen(true)}><Plus className="h-4 w-4 mr-1" />Nieuwe rit toevoegen</Button>}
       </div>
 
       <Card className="p-3">
@@ -458,7 +458,7 @@ export const RideAdministration = () => {
         </Tabs>
       </Card>
 
-      <NewRideDialog open={newOpen} onOpenChange={(v) => { setNewOpen(v); if (!v) setDupFrom(null); }} isEscort={isEscort} options={options} onCreated={load} initial={dupFrom} />
+      <NewRideDialog open={newOpen} onOpenChange={(v) => { setNewOpen(v); if (!v) setDupFrom(null); }} options={options} onCreated={load} initial={dupFrom} />
       <TicketDialog row={ticketRow} onClose={() => setTicketRow(null)} onSaved={load} />
       <ReviewDialog row={reviewRow} onClose={() => setReviewRow(null)} onSaved={load} />
       <AddEscortDialog row={addRow} options={options} onClose={() => setAddRow(null)} onSaved={load} />
@@ -477,7 +477,7 @@ export const RideAdministration = () => {
 
 const emptyRide = {
   pickup: "", dropoff: "", date: "", time: "08:00", permit: "", reference: "", notes: "",
-  length: "", width: "", height: "", weight: "", plates: "", rateType: "hourly", rate: "", party: "none",
+  length: "", width: "", height: "", weight: "", plates: "", rateType: "hourly", rate: "",
 };
 
 export const rideToForm = (r: any): typeof emptyRide => {
@@ -491,8 +491,8 @@ export const rideToForm = (r: any): typeof emptyRide => {
   };
 };
 
-const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initial }: {
-  open: boolean; onOpenChange: (v: boolean) => void; isEscort: boolean; options: Option[]; onCreated: () => void; initial?: typeof emptyRide | null;
+const NewRideDialog = ({ open, onOpenChange, options, onCreated, initial }: {
+  open: boolean; onOpenChange: (v: boolean) => void; options: Option[]; onCreated: () => void; initial?: typeof emptyRide | null;
 }) => {
   const [f, setF] = useState(emptyRide);
   const [files, setFiles] = useState<File[]>([]);
@@ -503,12 +503,11 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
   const realCrew = crew.filter((m) => m.id !== "none");
   const names = useMemo(() => new Map(options.map((o) => [o.id, o.label] as [string, string]).concat(me ? [[me.id, "Jij"]] : [])), [options, me]);
   const checkAt = f.date ? new Date(`${f.date}T${f.time || "00:00"}`).toISOString() : null;
-  const conflicts = useConflicts(isEscort ? (me ? [me.id] : []) : realCrew.map((m) => m.id), checkAt);
+  const conflicts = useConflicts(realCrew.map((m) => m.id), checkAt);
   const set = (k: keyof typeof f) => (e: any) => setF({ ...f, [k]: e?.target ? e.target.value : e });
 
   const submit = async () => {
     if (!f.pickup.trim() || !f.dropoff.trim() || !f.date) return toast.error("Vul laadlocatie, loslocatie en datum in");
-    if (isEscort && f.party === "none") return toast.error("Kies een planner");
     setBusy(true);
     try {
       const { data: geo, error: gErr } = await supabase.functions.invoke("google-geocode", { body: { queries: [f.pickup, f.dropoff] } });
@@ -523,10 +522,10 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
         _length_m: num(f.length), _width_m: num(f.width), _height_m: num(f.height), _weight_t: num(f.weight),
         _plates: f.plates.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean),
         _rate_type: f.rateType, _rate_amount: num(f.rate),
-        _counterparty: isEscort ? (f.party === "none" ? null : f.party) : (realCrew[0]?.id ?? null),
+        _counterparty: realCrew[0]?.id ?? null,
       } as any);
       if (error) throw error;
-      if (!isEscort && rideId) {
+      if (rideId) {
         for (const m of realCrew) {
           const { error: e2 } = await supabase.rpc("add_ride_escort", { _ride_id: rideId as string, _escort_id: m.id, _role: m.role });
           if (e2) toast.error(e2.message);
@@ -534,7 +533,7 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
       }
       if (files.length && rideId) {
         const { data: { user: me } } = await supabase.auth.getUser();
-        const clientId = isEscort ? f.party : me?.id;
+        const clientId = me?.id;
         if (clientId) await uploadRideDocs(clientId, rideId as string, files);
       }
       supabase.functions.invoke("google-calendar-sync").catch(() => {});
@@ -591,18 +590,8 @@ const NewRideDialog = ({ open, onOpenChange, isEscort, options, onCreated, initi
             <div><Label>Bedrag (€, excl. btw)</Label><Input value={f.rate} onChange={set("rate")} inputMode="decimal" /></div>
           </div>
           <div>
-            <Label>{isEscort ? "Planner" : "Begeleider(s) (optioneel)"}</Label>
-            {isEscort ? (
-              <Select value={f.party} onValueChange={set("party")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kies planner</SelectItem>
-                  {options.map((o) => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            ) : (
-              <CrewEditor crew={crew} onChange={setCrew} options={options} />
-            )}
+            <Label>Begeleider(s) (optioneel)</Label>
+            <CrewEditor crew={crew} onChange={setCrew} options={options} />
             {!options.length && <p className="text-xs text-slate-500 mt-1">Voeg eerst een vaste relatie toe onder "Vaste relaties".</p>}
           </div>
           <ConflictBanner conflicts={conflicts} names={names} />
