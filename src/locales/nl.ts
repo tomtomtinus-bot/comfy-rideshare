@@ -491,6 +491,7 @@ const nl = {
     intro: "Nodig chauffeurs uit om onder jouw bedrijf ritten uit te voeren. Jij blijft verantwoordelijk voor ritacceptatie, urengoedkeuring en facturatie.",
     company: "Bedrijf",
     seatsUsedLabel: "Chauffeurplaatsen gebruikt:",
+    unlimitedDrivers: "Onbeperkt chauffeurs inbegrepen",
     seatsFree: "({{n}} vrij)",
     seatsLimitReached: "— limiet bereikt",
     manageSeats: "Beheer seats",
