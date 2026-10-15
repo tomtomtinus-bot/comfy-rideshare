@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     // Caller must own a company.
     const { data: company } = await admin
       .from('companies')
-      .select('id, name, seat_limit')
+      .select('id, name')
       .eq('owner_id', user.id)
       .maybeSingle()
     if (!company) {
@@ -58,21 +58,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Seat check (members + pending invites < seat_limit).
-    const { count: activeCount } = await admin
-      .from('company_members')
-      .select('id', { count: 'exact', head: true })
-      .eq('company_id', company.id).eq('status', 'active')
-    const { count: pendingCount } = await admin
-      .from('company_invitations')
-      .select('id', { count: 'exact', head: true })
-      .eq('company_id', company.id).eq('status', 'pending')
-    const used = (activeCount ?? 0) + (pendingCount ?? 0)
-    if (used >= company.seat_limit) {
-      return new Response(JSON.stringify({
-        error: `Geen vrije plek beschikbaar (${used}/${company.seat_limit}). Verhoog je abonnement om meer chauffeurs uit te nodigen.`,
-      }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
+    // Chauffeurs zijn onbeperkt inbegrepen bij het abonnement; er wordt geen
+    // seat-limiet meer afgedwongen.
 
     // Voorkom dubbele open invitation voor zelfde e-mail.
     const { data: existing } = await admin
