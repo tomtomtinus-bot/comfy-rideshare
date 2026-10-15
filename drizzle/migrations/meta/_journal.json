@@ -92,6 +92,13 @@
       "when": 1791909581157,
       "tag": "0012_simplify_relation_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792070396164,
+      "tag": "0013_platform_invoices_fixed_subscription_prices",
+      "breakpoints": true
     }
   ]
 }
