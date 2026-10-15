@@ -18,9 +18,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { getStripeEnvironment } from "@/lib/stripe";
 
 const PLAN_NAMES: Record<string, string> = {
-  opdrachtgever_monthly: "Opdrachtgever — € 50 per maand",
-  begeleider_monthly: "Begeleider (ZZP) — € 2,50 per maand",
-  vloot_monthly: "Vloot — € 10 per maand",
+  opdrachtgever_monthly: "Transporteur / Planner — € 49 per maand",
+  begeleider_monthly: "Zelfstandige Begeleider (ZZP) — € 19 per maand",
+  vloot_monthly: "Begeleidingsbedrijf (Vloot) — € 99 per maand",
 };
 
 const Section = ({ icon: Icon, title, action, children }: { icon: any; title: string; action?: React.ReactNode; children: React.ReactNode }) => (

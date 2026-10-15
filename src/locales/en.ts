@@ -167,7 +167,7 @@ const en: Dict = {
     sent: "Sent",
     draft: "Draft",
   },
-  xlsx: { rideId: "Ride ID", reference: "Reference", permit: "Permit", pickup: "Pickup", dropoff: "Dropoff", numEscorts: "Number of escorts", escorts: "Escorts", escort: "Escort", hours: "Hours", baseCost: "Escort cost (€)", fuelSurcharge: "Fuel surcharge (€)", extraCosts: "Extra costs (€)", totalCost: "Total cost (€)", status: "Status", estCost: "Estimated cost (€)", actualCost: "Actual cost (€)", serviceFee: "Service fee (€)", totalIncl: "Total incl. fee (€)", notes: "Notes" },
+  xlsx: { rideId: "Ride ID", reference: "Reference", permit: "Permit", pickup: "Pickup", dropoff: "Dropoff", numEscorts: "Number of escorts", escorts: "Escorts", escort: "Escort", hours: "Hours", baseCost: "Escort cost (€)", fuelSurcharge: "Fuel surcharge (€)", extraCosts: "Extra costs (€)", totalCost: "Total cost (€)", status: "Status", estCost: "Estimated cost (€)", actualCost: "Actual cost (€)", notes: "Notes" },
 
   dash: {
     clientKicker: "Client",
@@ -493,6 +493,7 @@ const en: Dict = {
     intro: "Invite drivers to operate rides under your company. You remain responsible for ride acceptance, hour approval and invoicing.",
     company: "Company",
     seatsUsedLabel: "Driver seats used:",
+    unlimitedDrivers: "Unlimited drivers included",
     seatsFree: "({{n}} free)",
     seatsLimitReached: "— limit reached",
     manageSeats: "Manage seats",
@@ -1006,6 +1007,15 @@ const en: Dict = {
       escortF3: "Google Calendar integration",
       escortF4: "Automatic weekly invoicing",
       escortF5: "Full platform access",
+      vlootTitle: "Fleet Company",
+      vlootPrice: "€99,00",
+      vlootPeriod: "per month · excl. VAT",
+      vlootDescription: "Complete overview of your own fleet and external charters in one central dashboard.",
+      vlootF1: "Try 30 days free — cancellable during the trial",
+      vlootF2: "All features of Planner & ZZP",
+      vlootF3: "Multiple planner accounts",
+      vlootF4: "Centralised invoicing flows",
+      vlootF5: "Extended company reports",
     },
   },
   security: {

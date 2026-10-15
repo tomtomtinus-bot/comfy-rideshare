@@ -133,7 +133,7 @@ const fr: Dict = {
     invited: "Invité", accepted: "Accepté", declined: "Refusé", expired: "Expiré",
     paid: "Payé", sent: "Envoyé", draft: "Brouillon",
   },
-  xlsx: { rideId: "ID transport", reference: "Référence", permit: "Permis", pickup: "Départ", dropoff: "Destination", numEscorts: "Nombre d'escortes", escorts: "Escortes", escort: "Escorte", hours: "Heures", baseCost: "Coût escorte (€)", fuelSurcharge: "Surtaxe carburant (€)", extraCosts: "Frais supplémentaires (€)", totalCost: "Coût total (€)", status: "Statut", estCost: "Coût estimé (€)", actualCost: "Coût réel (€)", serviceFee: "Frais de service (€)", totalIncl: "Total avec frais (€)", notes: "Notes" },
+  xlsx: { rideId: "ID transport", reference: "Référence", permit: "Permis", pickup: "Départ", dropoff: "Destination", numEscorts: "Nombre d'escortes", escorts: "Escortes", escort: "Escorte", hours: "Heures", baseCost: "Coût escorte (€)", fuelSurcharge: "Surtaxe carburant (€)", extraCosts: "Frais supplémentaires (€)", totalCost: "Coût total (€)", status: "Statut", estCost: "Coût estimé (€)", actualCost: "Coût réel (€)", notes: "Notes" },
 
   dash: {
     clientKicker: "Donneur d'ordre", escortKicker: "Accompagnateur",
@@ -366,6 +366,7 @@ const fr: Dict = {
     intro: "Invitez des chauffeurs à réaliser des courses sous votre entreprise. Vous restez responsable de l'acceptation, de la validation des heures et de la facturation.",
     company: "Entreprise",
     seatsUsedLabel: "Places chauffeur utilisées :",
+    unlimitedDrivers: "Chauffeurs illimités inclus",
     seatsFree: "({{n}} libres)",
     seatsLimitReached: "— limite atteinte",
     manageSeats: "Gérer les places",
@@ -879,6 +880,15 @@ const fr: Dict = {
       escortF3: "Intégration Google Agenda",
       escortF4: "Facturation hebdomadaire automatique",
       escortF5: "Accès complet à la plateforme",
+      vlootTitle: "Entreprise d'accompagnement (Flotte)",
+      vlootPrice: "€99,00",
+      vlootPeriod: "par mois · HT",
+      vlootDescription: "Vue complète de votre propre flotte et des charters externes dans un tableau de bord central.",
+      vlootF1: "30 jours d'essai gratuits — résiliable pendant l'essai",
+      vlootF2: "Toutes les fonctions de Planner & ZZP",
+      vlootF3: "Plusieurs comptes planificateurs",
+      vlootF4: "Flux de facturation centralisés",
+      vlootF5: "Rapports d'entreprise étendus",
     },
   },
   security: {

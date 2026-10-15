@@ -8,15 +8,17 @@
 
 ## Nieuwe prijzen (€19 / €49 / €99) overal doorvoeren
 - [x] Tarievenpagina: 3 kaarten, geen fees/lancering, gelijke hoogte, donkerblauwe knoppen
-- [x] Stripe: begeleider_monthly €19, opdrachtgever_monthly €49
-- [ ] Stripe: vloot_monthly naar €99 (product-ID nog onbekend)
-- [ ] Database: generate_platform_invoices zonder rit-/begeleidersfees, vaste bedragen 19/49/99, geen 6-maanden-korting
-- [ ] Database: bestaande monthly_subscription_fee waarden op 19 / 49 / 99 zetten + kolomdefault
-- [ ] Teksten: Subscription.tsx, RequireSubscription.tsx, Settings.tsx planlabels, nl.ts (abonnementen, FAQ, profiel-, aanvraagtekst), Excel-export fee-kolom
-- [ ] Checkouts: opdrachtgever-abo €49 moet kaart vastleggen tijdens proefperiode
+- [x] Stripe: begeleider_monthly €19, opdrachtgever_monthly €49, vloot_monthly €99
+- [x] Database: generate_platform_invoices zonder rit-/begeleidersfees, vaste bedragen 19/49/99, geen 6-maanden-korting
+- [x] Database: monthly_subscription_fee is gedeprecieerd — de generator gebruikt vaste bedragen per soort account
+- [x] Facturen van 1–15 okt. opnieuw gemaakt met €9,50 / €24,50 (oude onbetaalde run verwijderd)
+- [x] Platformfactuur-pdf: abonnementsregel i.p.v. app-fee tabel
+- [x] Teksten: Subscription.tsx, RequireSubscription.tsx, Settings.tsx planlabels, nl.ts (abonnementen, FAQ, profiel-, aanvraag-, teamteksten), Excel-export fee-kolom
+- [x] Checkouts: proefperiode legt verplicht een betaalmethode vast (ook bij €19/€49/€99)
+- [x] Vloot: €99-checkout in Subscription.tsx voor begeleidersbedrijven met meerdere leden; chauffeurslimiet opgeheven
+- [ ] Controleren dat een vlootbedrijf met €99-abo ook daadwerkelijk een platformfactuur krijgt (pas mogelijk zodra een bedrijf 2+ leden heeft)
 
 ## Upload: backend-model voor 3 abonnementen (user-uploads://Implementeer_de_backend-logica_Supabase_pasted.md)
 - [ ] Pakketkeuze vanaf Tarieven/Homepage meenemen in de aanmeldflow en opslaan bij het profiel
-- [ ] Vloot-abonnement (€99) echt afneembaar maken: checkout-pad + factuurontvanger
 - [ ] Controleren of de drie dashboardroutes en de ritstatusstroom overeenkomen met wat er al staat
-- [ ] RLS-control per pakket (planner eigen ritten, begeleider toegewezen ritten)
+- [ ] RLS-check per pakket (planner eigen ritten, begeleider toegewezen ritten)
