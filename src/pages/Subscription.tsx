@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -29,6 +29,30 @@ const SubscriptionInner = () => {
   const { subscription, isActive, loading } = useSubscription();
   const [openCheckout, setOpenCheckout] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [isFleet, setIsFleet] = useState(false);
+
+  // Een begeleider met een eigen bedrijf met meerdere actieve leden valt onder
+  // het abonnement voor begeleidingsbedrijven (Vloot).
+  useEffect(() => {
+    let cancelled = false;
+    if (role !== "begeleider" || !user) {
+      setIsFleet(false);
+      return;
+    }
+    (async () => {
+      const { data: companyId } = await supabase.rpc("get_user_company_id");
+      if (!companyId || cancelled) return;
+      const { count } = await supabase
+        .from("company_members")
+        .select("id", { count: "exact", head: true })
+        .eq("company_id", companyId)
+        .eq("status", "active");
+      if (!cancelled) setIsFleet((count ?? 0) >= 2);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, role]);
 
   const PLANS = {
     opdrachtgever: {
@@ -60,6 +84,20 @@ const SubscriptionInner = () => {
         t("subscription.plans.escortF5"),
       ],
     },
+    vloot: {
+      priceId: "vloot_monthly",
+      title: t("subscription.plans.vlootTitle"),
+      price: t("subscription.plans.vlootPrice"),
+      period: t("subscription.plans.vlootPeriod"),
+      description: t("subscription.plans.vlootDescription"),
+      features: [
+        t("subscription.plans.vlootF1"),
+        t("subscription.plans.vlootF2"),
+        t("subscription.plans.vlootF3"),
+        t("subscription.plans.vlootF4"),
+        t("subscription.plans.vlootF5"),
+      ],
+    },
   } as const;
 
   if (authLoading) {
@@ -81,7 +119,9 @@ const SubscriptionInner = () => {
 
   const plan =
     role === "begeleider"
-      ? PLANS.begeleider
+      ? isFleet
+        ? PLANS.vloot
+        : PLANS.begeleider
       : role === "opdrachtgever"
       ? PLANS.opdrachtgever
       : null;
@@ -136,10 +176,10 @@ const SubscriptionInner = () => {
             </div>
             <div className="text-right shrink-0">
               <p className="text-3xl font-semibold tracking-tight tabular-nums text-foreground">
-                {isClient ? "€50,00" : plan.price}
+                {plan.price}
               </p>
               <p className="text-xs text-muted-foreground">
-                {isClient ? "per maand" : plan.period}
+                {plan.period}
               </p>
             </div>
           </div>
@@ -162,7 +202,7 @@ const SubscriptionInner = () => {
               </p>
               <p className="text-sm text-muted-foreground">
                 {isClient
-                  ? "30 dagen gratis, daarna 6 maanden 50% korting (€12,50 per halve maand). Je krijgt 2× per maand één platformfactuur: €25 abonnement (½ maand) + het verbruik (€2,50 per geboekte begeleider). We leggen tijdens activering enkel je betaalkaart vast."
+                  ? "30 dagen gratis, daarna €49 per maand. Je krijgt tweemaal per maand één platformfactuur met de helft van het maandbedrag (€24,50). We leggen tijdens activering enkel je betaalkaart vast."
                   : t("subscription.trial30Body")}
               </p>
             </div>
