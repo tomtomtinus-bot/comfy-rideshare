@@ -393,7 +393,6 @@ const ClientDashboard = () => {
           [t("xlsx.baseCost")]: null,
           [t("xlsx.fuelSurcharge")]: null,
           [t("xlsx.extraCosts")]: null,
-          [t("xlsx.serviceFee")]: Number(r.app_fee ?? 0),
           [t("xlsx.totalCost")]: null,
           [t("xlsx.status")]: r.status,
           [t("xlsx.notes")]: r.notes ?? "",
@@ -410,9 +409,8 @@ const ClientDashboard = () => {
             ? +(Number(a.actual_cost ?? 0) - extras).toFixed(2)
             : 0;
         const fuel = invBuckets ? +invBuckets.fuel.toFixed(2) : 0;
-        const fee = idx === 0 ? Number(r.app_fee ?? 0) : 0;
         const total = submitted || invBuckets
-          ? +(base + fuel + extras + fee).toFixed(2)
+          ? +(base + fuel + extras).toFixed(2)
           : null;
         rows.push({
           [t("common.date")]: fd(r.scheduled_at),
@@ -426,7 +424,6 @@ const ClientDashboard = () => {
           [t("xlsx.baseCost")]: submitted || invBuckets ? base : null,
           [t("xlsx.fuelSurcharge")]: invBuckets ? fuel : null,
           [t("xlsx.extraCosts")]: submitted ? extras : null,
-          [t("xlsx.serviceFee")]: fee,
           [t("xlsx.totalCost")]: total,
           [t("xlsx.status")]: idx === 0 ? r.status : "",
           [t("xlsx.notes")]: idx === 0 ? (r.notes ?? "") : "",
