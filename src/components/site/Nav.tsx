@@ -253,8 +253,11 @@ export const Nav = () => {
                 {l.label}
               </Link>
             ))}
+            </div>
+          </div>
         </div>
       )}
+
     </nav>
   );
 };
