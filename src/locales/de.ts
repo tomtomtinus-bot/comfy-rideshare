@@ -132,7 +132,7 @@ const de: Dict = {
     invited: "Eingeladen", accepted: "Angenommen", declined: "Abgelehnt", expired: "Abgelaufen",
     paid: "Bezahlt", sent: "Versendet", draft: "Entwurf",
   },
-  xlsx: { rideId: "Fahrt-ID", reference: "Referenz", permit: "Genehmigung", pickup: "Abfahrt", dropoff: "Ziel", numEscorts: "Anzahl Begleiter", escorts: "Begleiter", escort: "Begleiter", hours: "Stunden", baseCost: "Begleiterkosten (€)", fuelSurcharge: "Kraftstoffzuschlag (€)", extraCosts: "Zusatzkosten (€)", totalCost: "Gesamtkosten (€)", status: "Status", estCost: "Geschätzte Kosten (€)", actualCost: "Tatsächliche Kosten (€)", serviceFee: "Servicegebühr (€)", totalIncl: "Gesamt inkl. Gebühr (€)", notes: "Anmerkungen" },
+  xlsx: { rideId: "Fahrt-ID", reference: "Referenz", permit: "Genehmigung", pickup: "Abfahrt", dropoff: "Ziel", numEscorts: "Anzahl Begleiter", escorts: "Begleiter", escort: "Begleiter", hours: "Stunden", baseCost: "Begleiterkosten (€)", fuelSurcharge: "Kraftstoffzuschlag (€)", extraCosts: "Zusatzkosten (€)", totalCost: "Gesamtkosten (€)", status: "Status", estCost: "Geschätzte Kosten (€)", actualCost: "Tatsächliche Kosten (€)", notes: "Anmerkungen" },
 
   dash: {
     clientKicker: "Auftraggeber", escortKicker: "Begleiter", myRides: "Meine Fahrten", myAssignments: "Meine Aufträge",
@@ -360,6 +360,7 @@ const de: Dict = {
     intro: "Laden Sie Fahrer ein, unter Ihrem Unternehmen Fahrten auszuführen. Sie bleiben verantwortlich für Annahme, Stundengenehmigung und Abrechnung.",
     company: "Unternehmen",
     seatsUsedLabel: "Fahrer-Plätze genutzt:",
+    unlimitedDrivers: "Unbegrenzt viele Fahrer inklusive",
     seatsFree: "({{n}} frei)",
     seatsLimitReached: "— Limit erreicht",
     manageSeats: "Plätze verwalten",
@@ -873,6 +874,15 @@ const de: Dict = {
       escortF3: "Google Kalender-Anbindung",
       escortF4: "Automatische wöchentliche Rechnungsstellung",
       escortF5: "Voller Zugriff auf die Plattform",
+      vlootTitle: "Begleitunternehmen (Flotte)",
+      vlootPrice: "€99,00",
+      vlootPeriod: "pro Monat · zzgl. USt.",
+      vlootDescription: "Vollständiger Überblick über die eigene Flotte und externe Chartern in einem zentralen Dashboard.",
+      vlootF1: "30 Tage kostenlos testen — während der Testphase kündbar",
+      vlootF2: "Alle Funktionen von Planner & ZZP",
+      vlootF3: "Mehrere Planer-Konten",
+      vlootF4: "Zentralisierte Rechnungsläufe",
+      vlootF5: "Erweiterte Unternehmensberichte",
     },
   },
   security: {
