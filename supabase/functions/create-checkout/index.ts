@@ -63,26 +63,19 @@ Deno.serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
-    // Bedrijfsabonnement: planner-basis (€10) + per-seat (€1,50 × N) op één factuur.
-    const extraLineItems: Array<{ price: string; quantity: number }> = [];
-    if (priceId === "begeleider_company_seat_v2_monthly") {
-      const baseLookup = await stripe.prices.list({ lookup_keys: ["begeleider_company_base_monthly"] });
-      if (!baseLookup.data.length) throw new Error("Base price not found");
-      extraLineItems.push({ price: baseLookup.data[0].id, quantity: 1 });
-    }
 
     const customerId = await resolveOrCreateCustomer(stripe, { email: safeEmail, userId });
 
-    // Begeleider én opdrachtgever krijgen 30 dagen gratis proefperiode.
-    // Opdrachtgever-abo is €0/maand: dient enkel om een betaalkaart vast
-    // te leggen voor de 2-wekelijkse platformfactuur.
+    // Alle drie de abonnementen starten met 30 dagen gratis proefperiode.
     const SUBSCRIPTION_TRIALS: Record<string, number> = {
       begeleider_monthly: 30,
       opdrachtgever_monthly: 30,
+      vloot_monthly: 30,
     };
     const trialDays = isRecurring ? SUBSCRIPTION_TRIALS[priceId] : undefined;
 
-    // €0-abo's vereisen forceren van kaart-inname tijdens checkout.
+    // Een proefperiode moet al een betaalmethode vastleggen, anders kan de
+    // platformfactuur na de proefperiode niet worden afgeschreven.
     const isZeroAmount = (stripePrice.unit_amount ?? 0) === 0;
 
     const subscriptionData = isRecurring
@@ -95,14 +88,13 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         { price: stripePrice.id, quantity: quantity || 1 },
-        ...extraLineItems,
       ],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded_page",
       return_url: returnUrl,
       payment_method_types: ["card", "ideal"],
       customer: customerId,
-      ...(isRecurring && isZeroAmount && { payment_method_collection: "always" }),
+      ...(isRecurring && (isZeroAmount || !!trialDays) && { payment_method_collection: "always" }),
       ...(subscriptionData && { subscription_data: subscriptionData }),
       metadata: { userId },
     });

@@ -71,13 +71,12 @@ export function RequireSubscription({ children, action = "deze functie" }: Props
           <p className="text-sm text-brass-deep/80">
             {isClient ? (
               <>
-                <strong>30 dagen gratis</strong> — daarna €50/maand,
-                gefactureerd als €25 per halve maand op de platformfactuur,
-                plus het verbruik (€2,50 per geboekte begeleider). De eerste
-                6 maanden 50% korting. We leggen alleen je betaalkaart vast.
+                <strong>30 dagen gratis</strong> — daarna €49 per maand,
+                gefactureerd als €24,50 per halve maand op de platformfactuur.
+                We leggen tijdens activering alleen je betaalkaart vast.
               </>
             ) : (
-              <><strong>30 dagen gratis proberen</strong> — maandelijks opzegbaar.</>
+              <><strong>30 dagen gratis proberen</strong> — daarna €19 per maand, maandelijks opzegbaar.</>
             )}
           </p>
           <Link
