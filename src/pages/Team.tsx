@@ -70,9 +70,6 @@ const TeamInner = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviting, setInviting] = useState(false);
-  const [seatsOpen, setSeatsOpen] = useState(false);
-  const [seatQty, setSeatQty] = useState(1);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const load = async () => {
@@ -146,9 +143,6 @@ const TeamInner = () => {
   };
 
   const driverMembers = members.filter((m) => m.role === "driver");
-  const seatsUsed = driverMembers.length + invitations.length;
-  const seatsAvailable = (company?.seat_limit ?? 1) - 1;
-  const seatsLeft = Math.max(0, seatsAvailable - seatsUsed);
 
   const filteredDrivers = driverMembers.filter((m) => {
     const q = search.toLowerCase();
@@ -181,55 +175,12 @@ const TeamInner = () => {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-brass-deep/80">{t("team.company")}</p>
               <p className="text-xl text-brass-deep font-semibold">{company?.name ?? "—"}</p>
-              <p className="text-xs text-brass-deep/80 mt-1">
-                {t("team.seatsUsedLabel")} <strong>{seatsUsed}</strong> / {seatsAvailable}
-                {seatsLeft > 0 ? ` ${t("team.seatsFree", { n: seatsLeft })}` : ` ${t("team.seatsLimitReached")}`}
-              </p>
+              <p className="text-xs text-brass-deep/80 mt-1">{t("team.unlimitedDrivers")}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Dialog open={seatsOpen} onOpenChange={(v) => { setSeatsOpen(v); if (v) setSeatQty(Math.max(1, seatsAvailable || 1)); }}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <CreditCard className="size-4" /> {t("team.manageSeats")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>{t("team.seatsDialogTitle")}</DialogTitle></DialogHeader>
-                  <div className="space-y-4 pt-2">
-                    <p className="text-sm text-brass-deep/70">{t("team.seatsBody")}</p>
-                    <div className="flex items-center justify-center gap-4">
-                      <Button variant="outline" size="icon" onClick={() => setSeatQty((q) => Math.max(1, q - 1))} disabled={seatQty <= 1}>
-                        <Minus className="size-4" />
-                      </Button>
-                      <div className="text-3xl font-display text-brass-deep w-16 text-center">{seatQty}</div>
-                      <Button variant="outline" size="icon" onClick={() => setSeatQty((q) => Math.min(50, q + 1))} disabled={seatQty >= 50}>
-                        <Plus className="size-4" />
-                      </Button>
-                    </div>
-                    <div className="text-center text-sm text-brass-deep/70 space-y-1">
-                      <p dangerouslySetInnerHTML={{ __html: t("team.plannerBase") }} />
-                      <p dangerouslySetInnerHTML={{ __html: t("team.driversLine", { q: seatQty, sum: (1.5 * seatQty).toFixed(2) }) }} />
-                      <p className="pt-1 border-t border-brass-deep/10" dangerouslySetInnerHTML={{ __html: t("team.totalLine", { sum: (10 + 1.5 * seatQty).toFixed(2) }) }} />
-                    </div>
-
-                    {seatsUsed > seatQty && (
-                      <p className="text-xs text-red-600 text-center">
-                        {t("team.cannotLower", { used: seatsUsed, q: seatQty })}
-                      </p>
-                    )}
-                    <Button
-                      className="w-full"
-                      disabled={seatsUsed > seatQty}
-                      onClick={() => { setSeatsOpen(false); setCheckoutOpen(true); }}
-                    >
-                      {t("team.confirmPay")}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
               <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={seatsLeft <= 0} className="gap-2">
+                  <Button className="gap-2">
                     <UserPlus className="size-4" /> {t("team.inviteDriver")}
                   </Button>
                 </DialogTrigger>
@@ -254,22 +205,6 @@ const TeamInner = () => {
           </div>
         </section>
 
-        <CheckoutDialog
-          open={checkoutOpen}
-          onOpenChange={setCheckoutOpen}
-          title={t("team.seatsTitle", { q: seatQty }) as string}
-          priceId="begeleider_company_seat_v2_monthly"
-          quantity={seatQty}
-          customerEmail={user?.email ?? undefined}
-          userId={user?.id}
-          returnUrl={`${window.location.origin}/team?checkout=success&session_id={CHECKOUT_SESSION_ID}`}
-        />
-
-        {seatsLeft <= 0 && seatsAvailable === 0 && (
-          <div className="mb-6 p-4 border border-brass-gold/40 bg-brass-gold/10 text-sm text-brass-deep">
-            {t("team.noSeatPlan")}
-          </div>
-        )}
 
         <div className="mb-6">
           <Input
