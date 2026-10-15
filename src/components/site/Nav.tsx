@@ -4,7 +4,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RoleSwitch } from "@/components/site/RoleSwitch";
-import { LanguageSwitcher } from "@/components/site/LanguageSwitcher";
 import { NotificationBell } from "@/components/site/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
@@ -115,9 +114,6 @@ export const Nav = () => {
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
           
           {user && <NotificationBell />}
-          <div className="hidden md:block">
-            <LanguageSwitcher />
-          </div>
 
           {user ? (
             <DropdownMenu>
@@ -257,11 +253,6 @@ export const Nav = () => {
                 {l.label}
               </Link>
             ))}
-
-            <div className="pt-2 mt-2 border-t border-border">
-              <LanguageSwitcher />
-            </div>
-          </div>
         </div>
       )}
     </nav>
