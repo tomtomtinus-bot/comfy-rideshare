@@ -82,10 +82,10 @@ const Index = () => {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/auth">Start als Planner / Transporteur</Link>
+              <Link to="/auth?package=planner">Start als Planner / Transporteur</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/auth">Start als Begeleider</Link>
+              <Link to="/auth?package=zzp">Start als Begeleider</Link>
             </Button>
           </div>
           <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
@@ -161,7 +161,7 @@ const Index = () => {
                   ))}
                 </ul>
                 <Button asChild className="mt-6 w-full">
-                  <Link to="/auth">Start als planner / transporteur</Link>
+                  <Link to="/auth?package=planner">Start als planner / transporteur</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -181,7 +181,7 @@ const Index = () => {
                   ))}
                 </ul>
                 <Button asChild variant="outline" className="mt-6 w-full">
-                  <Link to="/auth">Aanmelden als begeleider</Link>
+                  <Link to="/auth?package=zzp">Aanmelden als begeleider</Link>
                 </Button>
               </CardContent>
             </Card>

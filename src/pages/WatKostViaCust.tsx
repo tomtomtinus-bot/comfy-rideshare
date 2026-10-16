@@ -39,7 +39,7 @@ const plans: Plan[] = [
       "100% vrij van rit-commissies",
     ],
     cta: "Start als Begeleider",
-    to: "/auth?role=escort",
+    to: "/auth?package=zzp",
     icon: <UserRound className="size-4 text-primary" />,
   },
   {
@@ -54,7 +54,7 @@ const plans: Plan[] = [
       "1-klik export voor de boekhouding",
     ],
     cta: "Start als Planner",
-    to: "/auth?role=client",
+    to: "/auth?package=planner",
     icon: <ClipboardList className="size-4 text-primary" />,
   },
   {
@@ -69,7 +69,7 @@ const plans: Plan[] = [
       "Uitgebreide bedrijfsrapportages",
     ],
     cta: "Start met je Vloot",
-    to: "/auth?role=escort",
+    to: "/auth?package=vloot",
     icon: <Building2 className="size-4 text-primary" />,
   },
 ];
