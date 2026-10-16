@@ -5,11 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
+import { pendingPackage, roleForPackage, saveAccountPackage } from "@/lib/accountPackage";
 
 const RolePicker = () => {
   const { user, roles, loading, refreshApproval } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState<"opdrachtgever" | "begeleider">("opdrachtgever");
+  const [role, setRole] = useState<"opdrachtgever" | "begeleider">(() => {
+    const p = pendingPackage();
+    return p ? roleForPackage(p) : "opdrachtgever";
+  });
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -44,6 +48,9 @@ const RolePicker = () => {
     try {
       const { error: roleErr } = await supabase.rpc("claim_initial_role", { _role: role });
       if (roleErr) throw roleErr;
+
+      const chosen = pendingPackage();
+      if (chosen) await saveAccountPackage(chosen, "signup");
 
       const { error: profErr } = await supabase
         .from("profiles")

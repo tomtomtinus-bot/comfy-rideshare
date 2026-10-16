@@ -22,6 +22,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import {
+  fetchAccountPackage,
+  saveAccountPackage,
+  type AccountPackage,
+} from "@/lib/accountPackage";
 
 const SubscriptionInner = () => {
   const { t, i18n } = useTranslation();
@@ -30,6 +35,7 @@ const SubscriptionInner = () => {
   const [openCheckout, setOpenCheckout] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [isFleet, setIsFleet] = useState(false);
+  const [pkg, setPkg] = useState<AccountPackage | null>(null);
 
   // Een begeleider met een eigen bedrijf met meerdere actieve leden valt onder
   // het abonnement voor begeleidingsbedrijven (Vloot).
@@ -53,6 +59,21 @@ const SubscriptionInner = () => {
       cancelled = true;
     };
   }, [user, role]);
+
+  // De vastgelegde pakketkeuze leidt de keuze van het abonnement op deze pagina.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) {
+      setPkg(null);
+      return;
+    }
+    fetchAccountPackage().then((p) => {
+      if (!cancelled) setPkg(p);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const PLANS = {
     opdrachtgever: {
