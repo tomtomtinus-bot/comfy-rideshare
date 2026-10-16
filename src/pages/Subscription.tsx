@@ -138,8 +138,15 @@ const SubscriptionInner = () => {
     );
   }
 
+  // Eerst de vastgelegde pakketkeuze; is die er nog niet dan tellen rol en ledental.
   const plan =
-    role === "begeleider"
+    pkg === "vloot"
+      ? PLANS.vloot
+      : pkg === "planner"
+      ? PLANS.opdrachtgever
+      : pkg === "zzp"
+      ? PLANS.begeleider
+      : role === "begeleider"
       ? isFleet
         ? PLANS.vloot
         : PLANS.begeleider
@@ -282,7 +289,18 @@ const SubscriptionInner = () => {
                     </div>
                   )}
                   <Button
-                    onClick={() => setOpenCheckout(true)}
+                    onClick={() => {
+                      // Het abonnement dat hier wordt gestart bepaalt het pakket
+                      // dat op de platformfactuur komt.
+                      const chosen: AccountPackage =
+                        plan.priceId === "vloot_monthly"
+                          ? "vloot"
+                          : plan.priceId === "begeleider_monthly"
+                          ? "zzp"
+                          : "planner";
+                      saveAccountPackage(chosen, "checkout");
+                      setOpenCheckout(true);
+                    }}
                     disabled={!canStart}
                     className="w-full"
                   >
