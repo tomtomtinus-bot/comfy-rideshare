@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_packages: {
+        Row: {
+          created_at: string
+          package: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          package: string
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          package?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_excluded_escorts: {
         Row: {
           client_id: string
@@ -2046,6 +2070,7 @@ export type Database = {
         Args: { _assignment_id: string }
         Returns: undefined
       }
+      account_package_of: { Args: { _user_id: string }; Returns: string }
       add_relation: { Args: { _query: string }; Returns: string }
       add_ride_escort: {
         Args: { _escort_id: string; _ride_id: string; _role: string }
@@ -2507,6 +2532,10 @@ export type Database = {
           lat: number
           lng: number
         }[]
+      }
+      set_account_package: {
+        Args: { _package: string; _source?: string }
+        Returns: undefined
       }
       set_relation_rates: {
         Args: {
