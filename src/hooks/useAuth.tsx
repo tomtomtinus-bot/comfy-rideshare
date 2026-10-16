@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { Session, User } from "@supabase/supabase-js";
 import i18n from "@/i18n";
 import { supabase } from "@/integrations/supabase/client";
+import { flushPendingPackage } from "@/lib/accountPackage";
 
 export type AppRole = "opdrachtgever" | "begeleider" | "admin";
 export type ApprovalStatus = "pending" | "approved" | "rejected";
@@ -77,6 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loadUserData = useCallback(async (uid: string) => {
     await Promise.all([fetchRole(uid), fetchApproval(uid)]);
+    // Een pakketkeuze van de Tarievenpagina wordt pas opgeslagen zodra er een
+    // sessie staat (bij aanmelden met e-mail pas na de bevestigingslink).
+    flushPendingPackage();
   }, [fetchApproval, fetchRole]);
 
   useEffect(() => {
