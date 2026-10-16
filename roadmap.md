@@ -19,6 +19,9 @@
 - [ ] Controleren dat een vlootbedrijf met €99-abo ook daadwerkelijk een platformfactuur krijgt (pas mogelijk zodra een bedrijf 2+ leden heeft)
 
 ## Upload: backend-model voor 3 abonnementen (user-uploads://Implementeer_de_backend-logica_Supabase_pasted.md)
-- [ ] Pakketkeuze vanaf Tarieven/Homepage meenemen in de aanmeldflow en opslaan bij het profiel
-- [ ] Controleren of de drie dashboardroutes en de ritstatusstroom overeenkomen met wat er al staat
-- [ ] RLS-check per pakket (planner eigen ritten, begeleider toegewezen ritten)
+- [x] Pakketkeuze vanaf Tarieven/Homepage meenemen in de aanmeldflow (bewaard tot de aanmelding klaar is)
+- [x] Pakket wordt opgeslagen in aparte tabel account_packages — rollen blijven uitsluitend in user_roles
+- [x] Facturatie volgt het gekozen pakket: generate_platform_invoices leest account_package_of()
+- [x] Dashboardroutes: begeleider ziet eigen ritten zonder knop "Nieuwe rit toevoegen", planner ziet rittenoverzicht
+- [x] RLS: planner alleen eigen ritten, begeleider alleen toegewezen ritten, pakketkeuze alleen eigen rij zichtbaar
+- [ ] Vloot-aanmelding (bij pakket vloot wordt automatisch een bedrijf aangemaakt) nog niet met een echte testaccount doorlopen

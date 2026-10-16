@@ -99,6 +99,13 @@
       "when": 1792070396164,
       "tag": "0013_platform_invoices_fixed_subscription_prices",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792132510916,
+      "tag": "0014_account_packages_package_aware_billing",
+      "breakpoints": true
     }
   ]
 }

@@ -17,6 +17,13 @@ import {
   isNative,
 } from "@/lib/biometric";
 import { isNativeApp, signInWithGoogleNative } from "@/lib/nativeGoogleAuth";
+import {
+  packageFromParams,
+  pendingPackage,
+  rememberPackage,
+  roleForPackage,
+  saveAccountPackage,
+} from "@/lib/accountPackage";
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -45,6 +52,16 @@ const Auth = () => {
       setBioReady(ok);
     })();
   }, []);
+
+  // Een knop op de homepage of Tarievenpagina geeft het gekozen pakket mee
+  // (?package=zzp|planner|vloot). Die keuze wordt bewaard tot het account er is.
+  useEffect(() => {
+    const p = packageFromParams(searchParams);
+    if (!p) return;
+    rememberPackage(p);
+    setRole(roleForPackage(p));
+    setMode("signup");
+  }, [searchParams]);
 
   // If a session already exists on mount (e.g. returning from OAuth redirect),
   // verify MFA before allowing the auto-redirect to fire.
@@ -279,6 +296,8 @@ const Auth = () => {
     }
 
     if (data.session) {
+      const chosen = pendingPackage();
+      if (chosen) await saveAccountPackage(chosen, "signup");
       toast.success(t("auth.accountCreated"));
       navigate("/dashboard");
     } else {
